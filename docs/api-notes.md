@@ -434,3 +434,18 @@ UNVERIFIED:
   touch INSTALLATION_COMPLETE DEPENDENCIES_VALIDATED
   ```
 - `ldd` showed every shared library present (Debian 13), so no system packages were needed. On a machine where the normal installer works, use `pnpm --filter @vashistha/web exec playwright install chromium`.
+
+## 15. Live-verified on 2026-10-04 (deployed Railway service + real ElevenLabs agents)
+Source: `docs/evidence/preflight-2026-10-03T21-51-17.182Z.json` (preflight GREEN, 8/8). The following §4 UNVERIFIED items are now **VERIFIED**:
+- **Custom-LLM URL:** ElevenLabs POSTs to `custom_llm.url` + `/chat/completions` (`/api/llm/chat/completions`).
+- **Auth header:** the `api_key` workspace secret arrives as `Authorization: Bearer <secret>`.
+- **Streamed `skip_turn`:** our streamed `tool_calls` shape is accepted. The client sees an `agent_tool_response` (`skip_turn`, `system`, `success`), and **no** `agent_response` or `audio` arrives during an 8 s quiet window.
+- **`pre_tool_speech: "off"`:** no audio or agent text around `skip_turn`.
+- **Control messages:** `user_message` text sent by the client (our control message) is **not** echoed back as `user_transcript`. Control messages therefore never return to the browser as expert speech; client-side filtering stays as defence in depth.
+- **Authorised turn latency:** authorised control message → first `audio` 619 ms; `agent_response` (full text, exactly the authorised question) at 1378 ms. Expressive v3 did not alter the text.
+- **Custom-LLM endpoint over the public internet:** speech first chunk 265 ms; `skip_turn` 413 ms. These are handler + network times from this machine.
+- **Model latencies:**
+  - Haiku 4.5 structured output: 1.7 s warm, 5.5 s on the first call (schema compile).
+  - Sonnet 5.5: 1.5 s for a short completion.
+  - Opus 5.5: 1.8 s for a short completion.
+- **Docker image:** builds and runs on Railway. The healthcheck passes, and DB, `/data` and Z3 are healthy behind the volume, so the `setpriv` drop to `node` works on the root-owned volume.

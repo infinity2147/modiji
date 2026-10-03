@@ -1,0 +1,51 @@
+{
+  "tool": "vashistha-preflight",
+  "startedAt": "2026-10-03T21:49:50.687Z",
+  "finishedAt": "2026-10-03T21:50:06.589Z",
+  "target": "https://vashistha-production.up.railway.app",
+  "options": {
+    "only": [
+      "agents"
+    ],
+    "quietWindowMs": 8000,
+    "speechTimeoutMs": 20000
+  },
+  "exitCode": 0,
+  "summary": {
+    "pass": 1,
+    "fail": 0,
+    "skip": 0,
+    "info": 0
+  },
+  "results": [
+    {
+      "id": "agents",
+      "title": "ElevenLabs agents match spec and invariants",
+      "status": "pass",
+      "ms": 15899,
+      "detail": "interviewer (vashistha-interviewer-v1), tutor (vashistha-tutor-v1): invariants hold, spec matches, secret reference current",
+      "facts": {
+        "interviewer": {
+          "agentId": "agent_2601m41v7r80eh79v5f00x874765",
+          "specVersion": 1,
+          "modelId": "vashistha-interviewer-v1",
+          "secretReferenced": true
+        },
+        "tutor": {
+          "agentId": "agent_2401m41v7v1jfr295ekx74gh81hp",
+          "specVersion": 1,
+          "modelId": "vashistha-tutor-v1",
+          "secretReferenced": true
+        }
+      }
+    }
+  ],
+  "checklist": [
+    "Use Chrome (latest stable) on the demo machine; open the app on its HTTPS origin (PUBLIC_BASE_URL), never http or a LAN IP.",
+    "Site settings for that origin: Microphone = Allow; pick the demo headset as the input device.",
+    "Screen share via getDisplayMedia: choose \"Entire screen\" or the CaseDesk \"Window\"; leave \"Also share tab audio\" OFF.",
+    "macOS: System Settings → Privacy & Security → Screen Recording and Microphone both enabled for Chrome (restart Chrome after granting).",
+    "Close notification sources (Do Not Disturb on, Slack/Mail quit) and every other tab or window with personal data or PII.",
+    "Test the headset: confirm the input level moves when you speak (OS sound settings) and that agent speech plays in the headset only, not the room."
+  ]
+}

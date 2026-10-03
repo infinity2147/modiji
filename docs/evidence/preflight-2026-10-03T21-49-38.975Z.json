@@ -1,0 +1,72 @@
+{
+  "tool": "vashistha-preflight",
+  "startedAt": "2026-10-03T21:49:38.975Z",
+  "finishedAt": "2026-10-03T21:49:44.510Z",
+  "target": "https://vashistha-production.up.railway.app",
+  "options": {
+    "only": [
+      "anthropic"
+    ],
+    "quietWindowMs": 8000,
+    "speechTimeoutMs": 20000
+  },
+  "exitCode": 0,
+  "summary": {
+    "pass": 1,
+    "fail": 0,
+    "skip": 0,
+    "info": 0
+  },
+  "results": [
+    {
+      "id": "anthropic",
+      "title": "Anthropic structured output + routed models",
+      "status": "pass",
+      "ms": 5531,
+      "detail": "structured claude-haiku-4-5-20251001 5524 ms (in 303/out 16, cache r0/w0) → reason=not_visible; claude-sonnet-5-5 1602 ms (in 28/out 4, cache r0/w0); claude-opus-5-5 1855 ms (in 28/out 4, cache r0/w0)",
+      "facts": {
+        "structured": {
+          "model": "claude-haiku-4-5-20251001",
+          "latencyMs": 5524,
+          "stopReason": "end_turn",
+          "output": {
+            "unknown": true,
+            "reason": "not_visible"
+          },
+          "usage": {
+            "inputTokens": 303,
+            "outputTokens": 16,
+            "cacheCreationInputTokens": 0,
+            "cacheReadInputTokens": 0
+          }
+        },
+        "claude-sonnet-5-5": {
+          "latencyMs": 1602,
+          "usage": {
+            "inputTokens": 28,
+            "outputTokens": 4,
+            "cacheCreationInputTokens": 0,
+            "cacheReadInputTokens": 0
+          }
+        },
+        "claude-opus-5-5": {
+          "latencyMs": 1855,
+          "usage": {
+            "inputTokens": 28,
+            "outputTokens": 4,
+            "cacheCreationInputTokens": 0,
+            "cacheReadInputTokens": 0
+          }
+        }
+      }
+    }
+  ],
+  "checklist": [
+    "Use Chrome (latest stable) on the demo machine; open the app on its HTTPS origin (PUBLIC_BASE_URL), never http or a LAN IP.",
+    "Site settings for that origin: Microphone = Allow; pick the demo headset as the input device.",
+    "Screen share via getDisplayMedia: choose \"Entire screen\" or the CaseDesk \"Window\"; leave \"Also share tab audio\" OFF.",
+    "macOS: System Settings → Privacy & Security → Screen Recording and Microphone both enabled for Chrome (restart Chrome after granting).",
+    "Close notification sources (Do Not Disturb on, Slack/Mail quit) and every other tab or window with personal data or PII.",
+    "Test the headset: confirm the input level moves when you speak (OS sound settings) and that agent speech plays in the headset only, not the room."
+  ]
+}

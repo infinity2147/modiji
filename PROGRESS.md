@@ -106,7 +106,9 @@ API facts come from `docs/api-notes.md`, not `plan.md` §15.
 
 ### P0b results (2026-10-04)
 
-**Status: code complete and green locally. Acceptance NOT yet met.** `pnpm preflight` against the deployed URL needs `ANTHROPIC_API_KEY`, `ELEVENLABS_API_KEY` and Railway access, and none exist on this machine. Nothing below was moved to make it pass.
+**Status: acceptance MET** — see the live preflight update after the open issues below. The text immediately below is the earlier, pre-credentials state.
+
+**Earlier state: code complete and green locally. Acceptance NOT yet met.** `pnpm preflight` against the deployed URL needs `ANTHROPIC_API_KEY`, `ELEVENLABS_API_KEY` and Railway access, and none exist on this machine. Nothing below was moved to make it pass.
 
 **Measured.**
 - `pnpm check`: exit 0 in 34 s; log in `docs/evidence/p0b-check.log`.
@@ -154,6 +156,26 @@ API facts come from `docs/api-notes.md`, not `plan.md` §15.
 5. **Unverified until a real build runs:** the Docker image (no Docker here), and the `setpriv` drop to the `node` user on a root-owned Railway volume.
 6. **Haiku 4.5 retirement:** not sooner than 15 Oct 2026 (carried from P0a).
 7. **`CHANGES.md` is still missing.**
+
+**Live preflight update (after credentials were provided).**
+- `pnpm preflight` against `https://vashistha-production.up.railway.app` is **GREEN, 8/8** (`docs/evidence/preflight-2026-10-03T21-51-17.182Z.json`):
+
+  | Check | Result |
+  |---|---|
+  | env | pass |
+  | anthropic | Haiku structured 1.7 s; Sonnet 1.5 s; Opus 1.8 s |
+  | agents | invariants hold, spec matches, secret current |
+  | token | API 0.46 s; public endpoint 0.75 s |
+  | public-llm | 401 ×2, `skip_turn`, exact text, replay refused |
+  | **voice-skip-turn** | **silent for 8 s on an unauthorised turn; authorised text spoken, first audio 619 ms** |
+  | server-deep | db, dataDir and Z3 ok |
+  | sandbox | 200 |
+
+- **What was deployed.** Branch `deploy/p0b`: commit `dd93502` (P0b + P1 + core packages) plus removal of the Railway CLI dependency. An earlier failed deploy had uploaded a working tree with in-progress files.
+  - **Rule:** deploy only from a clean, committed snapshot that builds.
+- **Open issues resolved.**
+  - Issue 2's live unknowns are resolved; see `docs/api-notes.md` §15.
+  - Issue 5: the Docker build, run, and `setpriv` drop on the root-owned volume are verified on Railway.
 
 ---
 
