@@ -11,5 +11,8 @@
   "dependencies": {
     "@vashistha/core": "workspace:*",
     "z3-solver": "^5.2.0"
+  },
+  "devDependencies": {
+    "server-only": "0.0.1"
   }
 }

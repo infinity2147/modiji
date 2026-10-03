@@ -5,7 +5,8 @@ import type { ComparisonOp, Operand, Predicate } from "../schemas/predicate";
 export type PredicateNode =
   | { key: ComparisonOp; args: [Operand, Operand] }
   | { key: "in"; args: [Operand, [Value, ...Value[]]] }
-  | { key: "and" | "or"; args: [Predicate, ...Predicate[]] }
+  | { key: "and"; args: [Predicate, ...Predicate[]] }
+  | { key: "or"; args: [Predicate, ...Predicate[]] }
   | { key: "!"; args: [Predicate] };
 
 export function predicateNode(p: Predicate): PredicateNode {
