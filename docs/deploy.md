@@ -6,30 +6,29 @@ allow replicas on a service with a volume.
 
 Service settings live in **`.railway/railway.ts`** (Railway Infrastructure as Code). There is no
 `railway.json`: Config as Code is deprecated, new services cannot opt in, and existing files stop being
-read on 2026-12-01 (docs.railway.com/infrastructure-as-code). The Railway CLI and the IaC SDK are root
-dev dependencies, so every command below is `pnpm exec railway …` and needs no global install.
+read on 2026-12-01 (docs.railway.com/infrastructure-as-code). The IaC SDK (`railway`) is a root dev dependency; the Railway **CLI** is installed separately (`npm i -g @railway/cli`, or the release binary on PATH as `railway`). It is not a repo dependency: its postinstall downloads a binary from GitHub on every install, which would add a failure point to the Docker build.
 
 ## Steps
 
 1. **Create and link the project.**
    ```sh
-   pnpm exec railway login
-   pnpm exec railway init --name vashistha
+   railway login
+   railway init --name vashistha
    ```
 
 2. **Apply the infrastructure** (service `vashistha`, volume `vashistha-data` at `/data`, Dockerfile
    builder, healthcheck `/api/health` with a 120 s timeout, restart On Failure, 1 replica, and
    `NODE_ENV`, `DATA_DIR` and `RAILWAY_DEPLOYMENT_DRAINING_SECONDS=15`):
    ```sh
-   pnpm exec railway config plan     # review
-   pnpm exec railway config apply
-   pnpm exec railway link            # pick service "vashistha"
+   railway config plan     # review
+   railway config apply
+   railway link            # pick service "vashistha"
    ```
    The volume is mounted as root. The image's entrypoint hands `/data` to the unprivileged `node`
    user before starting the server, so do **not** set `RAILWAY_RUN_UID`. The draining time matters
    because Railway's default is 0 s (SIGKILL right after SIGTERM), while the server drains for up to 10 s.
 
-3. **Create the public domain.** Run `pnpm exec railway domain` and note the `https://…up.railway.app` URL.
+3. **Create the public domain.** Run `railway domain` and note the `https://…up.railway.app` URL.
 
 4. **Set the secrets and URL from `.env.example`.** `.railway/railway.ts` marks them `preserve()`, so they are
    never written to the repo.
@@ -38,13 +37,13 @@ dev dependencies, so every command below is `pnpm exec railway …` and needs no
    - Pass secrets on stdin so they stay out of shell history.
 
    ```sh
-   pnpm exec railway variable set PUBLIC_BASE_URL=https://<domain>
-   pnpm exec railway variable set ANTHROPIC_API_KEY --stdin    # paste, then Ctrl-D
-   pnpm exec railway variable set ELEVENLABS_API_KEY --stdin
-   openssl rand -base64 48 | pnpm exec railway variable set CUSTOM_LLM_SECRET --stdin
+   railway variable set PUBLIC_BASE_URL=https://<domain>
+   railway variable set ANTHROPIC_API_KEY --stdin    # paste, then Ctrl-D
+   railway variable set ELEVENLABS_API_KEY --stdin
+   openssl rand -base64 48 | railway variable set CUSTOM_LLM_SECRET --stdin
    ```
 
-5. **Deploy.** Run `pnpm exec railway up` (builds the root `Dockerfile`). Wait until `/api/health` is
+5. **Deploy.** Run `railway up` (builds the root `Dockerfile`). Wait until `/api/health` is
    healthy.
 
 6. **Sync the ElevenLabs agents.** Run this locally, with a `.env` that has the same
@@ -53,7 +52,7 @@ dev dependencies, so every command below is `pnpm exec railway …` and needs no
    pnpm agents:sync
    ```
    Set the agent ids it prints as `ELEVENLABS_INTERVIEWER_AGENT_ID` and `ELEVENLABS_TUTOR_AGENT_ID`
-   with `pnpm exec railway variable set`. Each `set` triggers a redeploy.
+   with `railway variable set`. Each `set` triggers a redeploy.
 
 7. **Run preflight** against the public URL:
    ```sh

@@ -3,6 +3,7 @@ packages:
   - packages/*
   - bench
 allowBuilds:
-  '@railway/cli': true
   better-sqlite3: true
   esbuild: true
+  # Only an OpenCollective banner (`opencollective-postinstall`); denied so pnpm 12 does not fail the install.
+  tesseract.js: false
