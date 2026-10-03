@@ -1,0 +1,54 @@
+$ pnpm --filter @vashistha/web build && pnpm --filter @vashistha/web exec playwright test
+$ next build
+▲ Next.js 16.3.8 (Turbopack)
+✓ Running next.config.ts took 727ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 939ms
+  Running TypeScript ...
+  Finished TypeScript in 9.2s ...
+  Collecting page data using 16 workers ...
+  Generating static pages using 16 workers (0/4) ...
+  Generating static pages using 16 workers (1/4) 
+  Generating static pages using 16 workers (2/4) 
+  Generating static pages using 16 workers (3/4) 
+✓ Generating static pages using 16 workers (4/4) in 1089ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /api/cases
+├ ƒ /api/health
+├ ƒ /api/health/deep
+├ ƒ /api/interlock/check
+├ ƒ /api/llm/chat/completions
+├ ƒ /api/preflight/authorize
+├ ƒ /api/sessions
+├ ƒ /api/sessions/[sessionId]/decisions
+├ ƒ /api/sessions/[sessionId]/events
+├ ƒ /api/sessions/[sessionId]/ledger
+├ ƒ /api/voice/token
+└ ○ /sandbox
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+[WebServer] ✓ Running next.config.ts took 76ms
+[WebServer] > production server ready on http://0.0.0.0:4391
+
+Running 5 tests using 1 worker
+
+[WebServer] > Z3 ready (1691 ms)
+  ✓  1 [chromium] › e2e/casedesk.spec.ts:92:1 › P1 acceptance: an expert processes the three training cases by hand (6.1s)
+  ✓  2 [chromium] › e2e/casedesk.spec.ts:168:1 › a forbid from the interlock blocks the commit and shows the expert's quote (2.2s)
+  ✓  3 [chromium] › e2e/casedesk.spec.ts:203:1 › needs_approval requires a note; acknowledging commits through the real server (2.2s)
+  ✓  4 [chromium] › e2e/casedesk.spec.ts:238:1 › insufficient_information lists the missing features by their domain labels and can be escalated (1.7s)
+  ✓  5 [chromium] › e2e/casedesk.spec.ts:261:1 › reloading the session URL resumes it with decided cases still marked (2.9s)
+
+  5 passed (20.0s)
+
+real	0m41.491s
+user	0m37.689s
+sys	0m5.836s

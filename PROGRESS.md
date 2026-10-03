@@ -182,3 +182,35 @@ API facts come from `docs/api-notes.md`, not `plan.md` §15.
 Also required:
 - The oracle-not-in-bundle test now covers a real oracle.
 - The oracle marker is wired into the model-prompt guard.
+
+### P1 results (2026-10-04)
+
+**Status: acceptance met.**
+
+- **Three cases processed by hand:** Playwright drives an Expert/Training session through all 3 training cases: open, rate risk, choose outcome, Save, marked Decided. It then asserts the ledger:
+  - one `session.started`;
+  - `dom` `screen.event`s for navigate, open_case, field_change and action, with frameSeq strictly increasing from 1 and critical field changes flagged;
+  - 3 `interlock.check` and 3 `case.decision` entries, each decision's parent being its own check.
+- **`pnpm test:e2e`:** **5/5 passed** against the production server in 20 s (log in `docs/evidence/p1-e2e.log`). The other specs cover:
+  - interlock forbid;
+  - needs_approval with an acknowledgement note;
+  - insufficient_information with Escalate;
+  - resume after reload.
+- **Screenshots** in `docs/evidence/p1/`: `case-1..3.png`, `queue-start.png`, `review-form.png`, `queue-finished.png`, `interlock-forbid.png`, `interlock-needs-approval.png`, `resume-after-reload.png`.
+  - The forbid and needs-approval screenshots use **route-intercepted test responses** with fixture quotes, because the confirmed rulebook stays empty until P5. They show the UI states, not a real confirmed rule.
+- **Unit and integration tests:** web 241/241, core 397/397 plus 2 exception-scope regression tests.
+- **Domain:** `NSRP-1` hidden policy (server/bench only) with 11 rules: threshold, conjunction, exception (priority 50 with an override edge), escalation, missing-data and guardrail rules.
+  - Demo sets: training ×3, held-out ×2, practice ×6, plus a stratified bench generator. Every rule fires on ≥4% of bench cases, and no equal-priority disagreement occurs across 2400 cases.
+- **Interlock:** `checkAction` uses Kleene override semantics: an unknown overrider gives `insufficient_information`, never `allow`.
+  - Property-tested: filling in unknowns never changes a `forbid`, and supplying the reported missing features settles every `insufficient_information`.
+- **Oracle isolation:** the marker `oracle:kycNorthstar:…` has **0 hits** in `.next/static` and `.next/server`. The bundle test now covers a real oracle module.
+  - `runtime.claude` is created with the marker as a forbidden prompt string, which closes P0a open issue 3.
+
+**How to see it.**
+- `pnpm test:e2e`
+- Or run the server and open `/sandbox`, choose Expert + Training, and process the 3 cases.
+
+**Open issues.**
+1. Novice mode looks identical to expert mode until the tutor UI lands (P6).
+2. Only 1440×900 is verified by screenshot.
+3. CaseDesk endpoints are unauthenticated; the session UUID acts as a capability (no enterprise auth, by design).
