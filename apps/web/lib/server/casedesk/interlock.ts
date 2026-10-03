@@ -12,6 +12,7 @@ import {
   ActionIdSchema,
   GuardrailResultSchema,
   checkAction,
+  ledgerPayloadSchema,
   unknown,
   validateFeatureValue,
   type ActionId,
@@ -96,7 +97,7 @@ export function handleInterlockCheck(request: Request, deps: CaseDeskDeps): Prom
       parentIds: [loaded.info.startedEntryId],
       schemaVersion: CASEDESK_SCHEMA_VERSION,
       privacyEpoch: loaded.session.privacyEpoch,
-      payload: { caseId, action: proposedAction, edits, result } satisfies z.input<typeof InterlockCheckPayloadSchema>,
+      payload: ledgerPayloadSchema("interlock.check").parse({ caseId, action: proposedAction, edits, result }),
     });
     const body: z.infer<typeof InterlockCheckResponseSchema> = { result, checkId: entry.id };
     return json(body);
@@ -147,19 +148,21 @@ export function handleCommitDecision(request: Request, sessionId: string, deps: 
     // allow commits as is; forbid never commits; the rest commit only when acknowledged or escalated.
     const commits = result.decision === "allow" || (result.decision !== "forbid" && override !== undefined);
     const usedOverride = result.decision !== "allow" && override !== undefined ? { override } : {};
+    const kind = commits ? "case.decision" : "interlock.blocked";
     const entry = deps.ledger.append({
       sessionId: session.id,
       // A committed decision is an observed reviewer action (capture, so the privacy epoch applies);
       // a refusal is the engine's.
       source: commits ? "dom" : "engine",
-      kind: commits ? "case.decision" : "interlock.blocked",
+      kind,
       occurredAt: deps.now(),
       traceId: check.traceId,
       parentIds: [check.id],
       schemaVersion: CASEDESK_SCHEMA_VERSION,
       privacyEpoch: session.privacyEpoch,
-      payload: { caseId, action, edits, ...usedOverride, result },
+      payload: ledgerPayloadSchema(kind).parse({ caseId, action, edits, ...usedOverride, result }),
     });
+    if (commits) deps.interview.decisionCommitted(entry, loaded);
     const body: CommitDecisionResponse = commits
       ? { status: "committed", decisionId: entry.id, result }
       : { status: "blocked", result };

@@ -1,6 +1,7 @@
 /** `POST /api/sessions` and `GET /api/cases?set=`. */
 import { randomUUID } from "node:crypto";
 import type { z } from "zod";
+import { ledgerPayloadSchema } from "@vashistha/core";
 import { KYC_DOMAIN, kycCases } from "@vashistha/core/domains/kyc";
 import {
   CreateSessionRequestSchema,
@@ -26,7 +27,12 @@ export function handleCreateSession(request: Request, deps: CaseDeskDeps): Promi
       parentIds: [],
       schemaVersion: CASEDESK_SCHEMA_VERSION,
       privacyEpoch: session.privacyEpoch,
-      payload: { mode, caseSet, domainId: KYC_DOMAIN.id, schemaVersion: CASEDESK_SCHEMA_VERSION },
+      payload: ledgerPayloadSchema("session.started").parse({
+        mode,
+        caseSet,
+        domainId: KYC_DOMAIN.id,
+        schemaVersion: CASEDESK_SCHEMA_VERSION,
+      }),
     });
     deps.store.sessions.set(session.id, { mode, caseSet, startedEntryId: started.id });
     const body: z.infer<typeof CreateSessionResponseSchema> = {

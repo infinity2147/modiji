@@ -6,7 +6,7 @@
  */
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
-import { validateFeatureValue, type NewLedgerEntry, type ScreenEvent, type Value } from "@vashistha/core";
+import { ledgerPayloadSchema, validateFeatureValue, type NewLedgerEntry, type ScreenEvent, type Value } from "@vashistha/core";
 import { KYC_DOMAIN, findKycCase } from "@vashistha/core/domains/kyc";
 import { PostEventsRequestSchema, type PostEventsResponseSchema } from "../../contracts/casedesk";
 import { ApiFailure, json, readJson, respond } from "./http";
@@ -22,6 +22,8 @@ import {
 
 const ACTION_IDS: ReadonlySet<string> = new Set(KYC_DOMAIN.actions.map((a) => a.id));
 const CRITICAL_FIELDS: ReadonlySet<string> = new Set(KYC_DOMAIN.criticalFields);
+/** Events that change what the reviewer is looking at, and with it the session's context version. */
+const SCREEN_CHANGES: ReadonlySet<ScreenEvent["kind"]> = new Set(["open_case", "field_change"]);
 
 /** Which optional ScreenEvent members each kind carries; any other member is refused, not dropped. */
 const ALLOWED_MEMBERS: Record<ScreenEvent["kind"], ReadonlySet<string>> = {
@@ -140,13 +142,14 @@ export function handlePostEvents(request: Request, sessionId: string, deps: Case
         parentIds: [info.startedEntryId],
         schemaVersion: CASEDESK_SCHEMA_VERSION,
         privacyEpoch: event.sessionEpoch,
-        payload: event,
+        payload: ledgerPayloadSchema("screen.event").parse(event),
       }),
     );
     // The ledger re-checks epoch and off-record atomically, so a concurrent transition still wins (409).
     const appended = deps.ledger.appendMany(entries);
     const lastEvent = normalised.at(-1);
     if (lastEvent) deps.store.lastFrameSeq.set(session.id, lastEvent.frameSeq);
+    if (normalised.some((event) => SCREEN_CHANGES.has(event.kind))) deps.interview.screenChanged(session.id);
     const body: z.infer<typeof PostEventsResponseSchema> = { ledgerIds: appended.map((entry) => entry.id) };
     return json(body);
   });

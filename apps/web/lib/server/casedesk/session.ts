@@ -6,7 +6,7 @@
  */
 import "server-only";
 import { z } from "zod";
-import { IdSchema, type ActionId, type ConfirmedRule, type FeatureId } from "@vashistha/core";
+import { IdSchema, type ActionId, type ConfirmedRule, type FeatureId, type LedgerEntry } from "@vashistha/core";
 import type { Ledger, Session } from "@vashistha/core/server";
 import { CaseSetSchema, KYC_DOMAIN, type CaseSet } from "@vashistha/core/domains/kyc";
 import { ReviewEditsSchema, SessionModeSchema, type SessionMode } from "../../contracts/casedesk";
@@ -49,12 +49,21 @@ export function createCaseDeskStore(): CaseDeskStore {
   return { sessions: new Map(), lastFrameSeq: new Map() };
 }
 
+/** The interview engine's hooks (lib/server/interview), called after a CaseDesk write has succeeded. */
+export type InterviewHooks = {
+  /** A `case.decision` was committed: bumps the context version; in an expert session, schedules the engine step. */
+  decisionCommitted: (decision: LedgerEntry, loaded: LoadedSession) => void;
+  /** The reviewer opened a case or changed a field: bumps the context version. */
+  screenChanged: (sessionId: string) => void;
+};
+
 /** What every CaseDesk handler needs; built from the runtime by `caseDeskDeps()`. */
 export type CaseDeskDeps = {
   ledger: Ledger;
   store: CaseDeskStore;
   /** The confirmed rulebook in force now (empty until P5). */
   rulebook: () => readonly ConfirmedRule[];
+  interview: InterviewHooks;
   now: () => number;
   log: Pick<Console, "error">;
 };
