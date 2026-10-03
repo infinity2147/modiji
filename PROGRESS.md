@@ -214,3 +214,47 @@ Also required:
 1. Novice mode looks identical to expert mode until the tutor UI lands (P6).
 2. Only 1440×900 is verified by screenshot.
 3. CaseDesk endpoints are unauthenticated; the session UUID acts as a capability (no enterprise auth, by design).
+
+---
+
+## P9 — Apprentice-Bench
+
+**Started and finished:** 2026-10-04. It ran in parallel with P2–P5 because it depends only on the oracle, engine and solver.
+
+**Goal.** A deterministic hidden-policy oracle, 4 strategies, metrics and a chart.
+
+**Files.** `bench/**`, root script `pnpm bench`, outputs in `docs/evidence/bench/`.
+
+**Acceptance.** `pnpm bench` is reproducible and generates the chart.
+
+### P9 results
+
+**Status: acceptance met.**
+
+- `pnpm bench` runs in 10.5 s on 24 worker threads. Two runs gave **byte-identical** `results.json` (sha256 `9d8e2584…`).
+- `pnpm bench --quick` runs in about 7 s.
+- 20/20 bench tests pass.
+- Artefacts: `unsafe-vs-questions.svg` (the money chart), `fidelity-vs-questions.svg`, `report.md` (method, metric definitions, simulation disclaimer, caveats) and `results.json`.
+- **Setup.** 5 seeds; budgets 0–24; 24 observed decisions, then 500 held-out cases. The expert is **simulated** and answers only through the question channel, from the oracle.
+  - Every strategy shares the same learner (engine, then solver `effectiveDecision`, then `checkAction`).
+  - A test fails if the learner or any strategy imports the oracle.
+- **Headline numbers** (mean over 5 seeds):
+
+  | Strategy | Questions | Fidelity | Unsafe FN rate | Notes |
+  |---|---|---|---|---|
+  | A record-only | 0 | 0.633 | 14.9% | — |
+  | D (ours) | 8 | **0.990** | **1.2%** | about 13 questions and 8 interruptions at its plateau |
+  | B generic-why | 16–24 | 0.949 | **0.0%** | 16–24 questions and interruptions |
+  | C ACTA | 12+ | 0.940 | 4.1% | — |
+
+- **Honest losses.**
+  - B is safer than D at budgets ≥12 (0% vs 1.2%). On one seed, D never learns the adverse-media rule, because that rule only ever co-fires with the high-risk-country rule. This is the schema-relative limit stated in plan §0.
+  - With 2 questions, guardrail recall drops below record-only (94.1% vs 98.3%), because a stated exception outranks guardrails that haven't been stated yet.
+  - One post-hoc change to D (debrief questions must also have EIG ≥ θ) is disclosed in `report.md`.
+
+**How to see it.** `pnpm bench`, then open `docs/evidence/bench/report.md` and the SVGs.
+
+**Open issues.**
+1. The "why" answers are rich (exact rules at vagueness 0), which upper-bounds real verbalisation and favours B. This is disclosed.
+2. There is a single synthetic policy.
+3. Human-tester usability (n=2–3) is still to be run with the live system and reported as an internal demonstration only.
