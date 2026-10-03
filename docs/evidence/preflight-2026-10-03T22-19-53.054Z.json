@@ -1,0 +1,142 @@
+{
+  "tool": "vashistha-preflight",
+  "startedAt": "2026-10-03T22:19:53.054Z",
+  "finishedAt": "2026-10-03T22:20:47.143Z",
+  "target": "https://vashistha-production.up.railway.app",
+  "options": {
+    "only": [
+      "agents",
+      "public-llm",
+      "voice-skip-turn"
+    ],
+    "quietWindowMs": 8000,
+    "speechTimeoutMs": 20000
+  },
+  "exitCode": 0,
+  "summary": {
+    "pass": 3,
+    "fail": 0,
+    "skip": 0,
+    "info": 0
+  },
+  "results": [
+    {
+      "id": "agents",
+      "title": "ElevenLabs agents match spec and invariants",
+      "status": "pass",
+      "ms": 1165,
+      "detail": "interviewer (vashistha-interviewer-v2), tutor (vashistha-tutor-v2): invariants hold, spec matches, client tools match, secret reference current",
+      "facts": {
+        "interviewer": {
+          "agentId": "agent_2601m41v7r80eh79v5f00x874765",
+          "specVersion": 2,
+          "modelId": "vashistha-interviewer-v2",
+          "secretReferenced": true,
+          "clientTools": [
+            "set_off_record=tool_0601m41xkp4se5kta44gyzp4f9s2"
+          ]
+        },
+        "tutor": {
+          "agentId": "agent_2401m41v7v1jfr295ekx74gh81hp",
+          "specVersion": 2,
+          "modelId": "vashistha-tutor-v2",
+          "secretReferenced": true,
+          "clientTools": [
+            "set_off_record=tool_0601m41xkp4se5kta44gyzp4f9s2"
+          ]
+        }
+      }
+    },
+    {
+      "id": "public-llm",
+      "title": "Custom-LLM endpoint over the public internet",
+      "status": "pass",
+      "ms": 33178,
+      "detail": "401 without/with wrong bearer; unauthorised → skip_turn (5577 ms); authorised → exact text (first chunk 5580 ms); replay → skip_turn (already_used)",
+      "facts": {
+        "path": "/api/llm/chat/completions",
+        "model": "vashistha-interviewer-v2",
+        "sessionId": "preflight-e57ee43c-f524-4351-8a69-83d500f84b96",
+        "skipTurn": {
+          "ok": true,
+          "reason": "not_control_message",
+          "firstChunkMs": 5576,
+          "totalMs": 5577
+        },
+        "speech": {
+          "ok": true,
+          "firstChunkMs": 5580,
+          "totalMs": 5581
+        },
+        "replay": {
+          "ok": true,
+          "reason": "already_used",
+          "totalMs": 5564
+        }
+      }
+    },
+    {
+      "id": "voice-skip-turn",
+      "title": "skip_turn honoured end to end through ElevenLabs + TTS",
+      "status": "pass",
+      "ms": 20868,
+      "detail": "conversation conv_0301m41xnq76f1rrwsfh5rrnr526: silent for 8000 ms on an unauthorised turn; authorised text after 1143 ms, first audio after 580 ms",
+      "facts": {
+        "quietWindowMs": 8000,
+        "speechTimeoutMs": 20000,
+        "connectMs": 5876,
+        "phaseA": {
+          "events": {
+            "agent_tool_response": 1,
+            "ping": 4
+          },
+          "agentResponses": [],
+          "toolResponses": [
+            {
+              "toolName": "skip_turn",
+              "toolType": "system",
+              "status": "success",
+              "isError": false,
+              "isCalled": true
+            }
+          ],
+          "userTranscriptEchoed": false
+        },
+        "phaseB": {
+          "reconnected": false,
+          "events": {
+            "audio": 5,
+            "ping": 1,
+            "agent_response": 1
+          },
+          "firstAudioMs": 580,
+          "agentResponseMs": 1143,
+          "audioEvents": 5,
+          "toolResponses": [],
+          "userTranscriptEchoed": false
+        },
+        "unexpectedEventTypes": [],
+        "pongs": 5,
+        "pings": 5,
+        "protocolErrors": [],
+        "conversationIds": [
+          "conv_0301m41xnq76f1rrwsfh5rrnr526"
+        ],
+        "observed": {
+          "bearerAuth": "verified: ElevenLabs reached the custom LLM with Authorization: Bearer [redacted] (the endpoint speaks only for that header)",
+          "streamedSkipTurn": "accepted: no speech for 8000 ms after an unauthorised turn; agent_tool_response skip_turn observed",
+          "preToolSpeech": "none: no audio or agent text around skip_turn",
+          "userTranscriptForUserMessage": "not echoed as user_transcript"
+        }
+      }
+    }
+  ],
+  "checklist": [
+    "Use Chrome (latest stable) on the demo machine; open the app on its HTTPS origin (PUBLIC_BASE_URL), never http or a LAN IP.",
+    "Site settings for that origin: Microphone = Allow; pick the demo headset as the input device.",
+    "Screen share via getDisplayMedia: choose \"Entire screen\" or the CaseDesk \"Window\"; leave \"Also share tab audio\" OFF.",
+    "macOS: System Settings → Privacy & Security → Screen Recording and Microphone both enabled for Chrome (restart Chrome after granting).",
+    "Close notification sources (Do Not Disturb on, Slack/Mail quit) and every other tab or window with personal data or PII.",
+    "Test the headset: confirm the input level moves when you speak (OS sound settings) and that agent speech plays in the headset only, not the room."
+  ]
+}

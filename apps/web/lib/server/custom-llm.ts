@@ -8,7 +8,10 @@
  * A turn speaks only when the last message is a user turn that is exactly a control message whose
  * nonce the authorization store accepts for this agent, session and context version. Everything
  * else — expert speech, re-engagement turns, tool-result follow-ups, replays, malformed bodies —
- * gets the `skip_turn` tool-call stream. Authenticated requests never get an error status or an
+ * gets the `skip_turn` tool-call stream, with one exception that silences rather than speaks: an
+ * expert turn that is an off-record phrase (plan §7.8) gets the `set_off_record` client tool call
+ * and no content, without any authorization. The browser mutes the microphone on that call (and on
+ * the phrase itself); the ledger keeps only a `system_control` marker, never the utterance. Authenticated requests never get an error status or an
  * empty completion: ElevenLabs retries the same custom LLM on errors, timeouts and empty responses.
  * A speech stream that aborts before it is fully written hands its nonce back, so that retry can
  * still speak the authorised text exactly once.
@@ -16,7 +19,15 @@
 import "server-only";
 import { randomBytes } from "node:crypto";
 import { z } from "zod";
-import { IdSchema, parseControlMessage, type LedgerEntry } from "@vashistha/core";
+import {
+  IdSchema,
+  SET_OFF_RECORD_TOOL,
+  isOffRecordPhrase,
+  ledgerPayloadSchema,
+  parseControlMessage,
+  type LedgerEntry,
+  type OffRecordPhraseMatcher,
+} from "@vashistha/core";
 import { parseAgentModelId, type AgentRole } from "@vashistha/core";
 import type { Ledger } from "@vashistha/core/server";
 import { nonceDigest, type AuthorizationLease, type AuthorizationStore, type ConsumeFailureReason } from "./authorizations";
@@ -38,6 +49,8 @@ export type CustomLlmDeps = {
   /** Wall clock (epoch ms) for expiry and ledger timestamps. */
   now: () => number;
   log: Pick<Console, "info" | "warn" | "error">;
+  /** Which expert turns are off-record commands; defaults to the shared phrase list. */
+  offRecordPhrase?: OffRecordPhraseMatcher;
 };
 
 /** Schema version of the `gate.*` and `llm.*` payloads written here. */
@@ -68,7 +81,8 @@ const ExtraBodySessionSchema = z.object({ elevenlabs_extra_body: z.object({ sess
 /** `nonce` is the control message's nonce when the last turn carried one (recorded as a digest only). */
 type Turn =
   | { decision: "speak"; agent: AgentRole; questionId: string; text: string; nonce: string; lease: AuthorizationLease }
-  | { decision: "skip_turn"; agent: AgentRole | null; reason: SkipReason; nonce: string | null };
+  | { decision: "skip_turn"; agent: AgentRole | null; reason: SkipReason; nonce: string | null }
+  | { decision: "set_off_record"; agent: AgentRole };
 
 /** Plain text of a message, or null when it has non-text parts (which can never be a control message). */
 function textOf(content: ChatCompletionRequest["messages"][number]["content"]): string | null {
@@ -91,7 +105,11 @@ function decide(request: ChatCompletionRequest, sessionId: string | null, deps: 
 
   if (agent === null) return skip("unknown_model");
   if (last?.role !== "user") return skip("not_user_turn");
-  if (nonce === null) return skip("not_control_message");
+  if (nonce === null) {
+    const isPhrase = deps.offRecordPhrase ?? isOffRecordPhrase;
+    // Silencing needs no authorization: the reply carries a tool call and never any content.
+    return lastText !== null && isPhrase(lastText) ? { decision: "set_off_record", agent } : skip("not_control_message");
+  }
   if (sessionId === null) return skip("missing_session");
   const result = deps.authorizations.consume(nonce, {
     sessionId,
@@ -144,13 +162,13 @@ function speechEvents(meta: ChunkMeta, text: string): string[] {
   ];
 }
 
-/** The streamed OpenAI tool call for ElevenLabs' `skip_turn` system tool (api-notes §4.2). */
-function skipEvents(meta: ChunkMeta, reason: SkipReason): string[] {
+/** One streamed OpenAI tool call and no content (the shape ElevenLabs accepts, api-notes §4.2 and §15). */
+function toolCallEvents(meta: ChunkMeta, idPrefix: string, name: string, args: Record<string, unknown>): string[] {
   const toolCall = {
     index: 0,
-    id: `call_skip_${randomBytes(9).toString("base64url")}`,
+    id: `${idPrefix}${randomBytes(9).toString("base64url")}`,
     type: "function",
-    function: { name: "skip_turn", arguments: JSON.stringify({ reason }) },
+    function: { name, arguments: JSON.stringify(args) },
   };
   return [
     chunk(meta, { role: "assistant", content: null, tool_calls: [toolCall] }, null),
@@ -158,6 +176,13 @@ function skipEvents(meta: ChunkMeta, reason: SkipReason): string[] {
     DONE,
   ];
 }
+
+/** ElevenLabs' `skip_turn` system tool: the agent stays silent this turn. */
+const skipEvents = (meta: ChunkMeta, reason: SkipReason): string[] => toolCallEvents(meta, "call_skip_", "skip_turn", { reason });
+
+/** Our `set_off_record` client tool: the browser mutes the microphone and stops capture. Resuming is by button only. */
+const offRecordEvents = (meta: ChunkMeta): string[] =>
+  toolCallEvents(meta, "call_off_record_", SET_OFF_RECORD_TOOL, { offRecord: true });
 
 const SSE_HEADERS = {
   "Content-Type": "text/event-stream; charset=utf-8",
@@ -209,9 +234,13 @@ function sseResponse(events: readonly string[], signal: AbortSignal, onSettled?:
   return new Response(body, { status: 200, headers: SSE_HEADERS });
 }
 
+type SpeakOrSkip = Exclude<Turn, { decision: "set_off_record" }>;
+
 type Recorder = {
   /** Appends the control message (if any) and the decision; null, writing nothing, if the session is not in the ledger. */
-  decision: (turn: Turn, payload: Record<string, unknown>) => LedgerEntry | null;
+  decision: (turn: SpeakOrSkip, payload: Record<string, unknown>) => LedgerEntry | null;
+  /** The off-record phrase marker: `system_control`, nothing of the utterance. False if the session is not in the ledger. */
+  phraseDetected: (agent: AgentRole) => boolean;
   aborted: (decision: LedgerEntry, questionId: string) => void;
 };
 
@@ -248,6 +277,18 @@ function recorder(deps: CustomLlmDeps, sessionId: string, traceId: string): Reco
         payload,
       });
     },
+    phraseDetected(agent) {
+      const session = deps.ledger.getSession(sessionId);
+      if (!session) return false;
+      deps.ledger.append({
+        ...base(session.privacyEpoch),
+        source: "system_control",
+        kind: "privacy.phrase_detected",
+        parentIds: [],
+        payload: ledgerPayloadSchema("privacy.phrase_detected").parse({ agent, tool: SET_OFF_RECORD_TOOL }),
+      });
+      return true;
+    },
     aborted(decision, questionId) {
       const session = deps.ledger.getSession(sessionId);
       if (!session) return;
@@ -279,7 +320,7 @@ export async function handleChatCompletion(request: Request, deps: CustomLlmDeps
   const sessionId = ExtraBodySessionSchema.safeParse(raw).data?.elevenlabs_extra_body.sessionId ?? null;
   const parsed = ChatCompletionRequestSchema.safeParse(raw);
   const model = parsed.success ? parsed.data.model : null;
-  let turn: Turn = parsed.success
+  const decided: Turn = parsed.success
     ? decide(parsed.data, sessionId, deps)
     : { decision: "skip_turn", agent: null, reason: "malformed_request", nonce: null };
 
@@ -290,6 +331,29 @@ export async function handleChatCompletion(request: Request, deps: CustomLlmDeps
   };
   const handlerLatencyMs = Math.round((performance.now() - receivedAt) * 100) / 100;
   const record = sessionId === null ? null : recorder(deps, sessionId, meta.id);
+
+  if (decided.decision === "set_off_record") {
+    let recorded = false;
+    try {
+      recorded = record?.phraseDetected(decided.agent) ?? false;
+    } catch (error) {
+      // Still silence: going off the record must not depend on the ledger being healthy.
+      deps.log.error(`[custom-llm] ledger write failed: ${describeError(error)}`);
+    }
+    deps.log.info(
+      JSON.stringify({
+        event: "llm.turn_decision",
+        completionId: meta.id,
+        decision: decided.decision,
+        agent: decided.agent,
+        model: model?.slice(0, MAX_LOGGED_MODEL_CHARS),
+        recorded,
+        handlerLatencyMs,
+      }),
+    );
+    return sseResponse(offRecordEvents(meta), request.signal);
+  }
+  let turn: SpeakOrSkip = decided;
 
   let decisionEntry: LedgerEntry | null = null;
   try {

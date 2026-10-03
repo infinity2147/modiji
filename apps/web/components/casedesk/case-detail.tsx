@@ -5,6 +5,7 @@ import { formatEur, formatIsoDate, formatPct, formatRelationshipAge } from "@/li
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import { featureTargets } from "@/lib/client/voice/question-cues";
 import { DOCUMENT_STATUS_LABELS, ENTITY_LABELS, SOURCE_OF_FUNDS_LABELS } from "./labels";
 import { FlagPill, Pill, RiskPill, type Tone } from "./pills";
 
@@ -13,16 +14,25 @@ function Section({
   title,
   icon: Icon,
   className,
+  features = [],
   children,
 }: {
   id: string;
   title: string;
   icon: LucideIcon;
   className?: string;
+  /** Domain features this whole section shows (target of a spoken question's highlight cue). */
+  features?: readonly string[];
   children: ReactNode;
 }) {
   return (
-    <Card size="sm" className={cn("gap-0 py-0 shadow-xs", className)} aria-labelledby={id} role="region">
+    <Card
+      size="sm"
+      className={cn("gap-0 py-0 shadow-xs", className)}
+      aria-labelledby={id}
+      role="region"
+      {...(features.length > 0 && featureTargets(...features))}
+    >
       <CardHeader className="border-b py-2.5!">
         <h3 id={id} className="font-heading leading-snug flex items-center gap-2 text-[13px] font-semibold">
             <Icon aria-hidden className="size-3.5 text-muted-foreground" />
@@ -38,11 +48,14 @@ function Fields({ children }: { children: ReactNode }) {
   return <dl className="grid grid-cols-[minmax(0,10rem)_1fr] gap-x-4 gap-y-2 text-[13px]">{children}</dl>;
 }
 
-function Field({ label, children }: { label: string; children: ReactNode }) {
+/** `feature`: the domain feature this field shows (target of a spoken question's highlight cue). */
+function Field({ label, feature, children }: { label: string; feature?: string; children: ReactNode }) {
   return (
     <>
       <dt className="text-muted-foreground">{label}</dt>
-      <dd className="min-w-0 font-medium">{children}</dd>
+      <dd className="min-w-0 rounded-sm font-medium" {...(feature !== undefined && featureTargets(feature))}>
+        {children}
+      </dd>
     </>
   );
 }
@@ -80,11 +93,11 @@ export function CaseDetail({ kycCase }: { kycCase: KycCase }) {
         <Section id="sec-customer" title="Customer" icon={Building2}>
           <Fields>
             <Field label="Name">{customer.name}</Field>
-            <Field label="Entity type">{ENTITY_LABELS[customer.entityType]}</Field>
+            <Field label="Entity type" feature="entityType">{ENTITY_LABELS[customer.entityType]}</Field>
             <Field label="Registration no.">
               <span className="font-mono text-xs">{customer.registrationNo}</span>
             </Field>
-            <Field label="Country">
+            <Field label="Country" feature="jurisdictionRisk">
               <span className="flex flex-wrap items-center gap-2">
                 {customer.country}
                 <RiskPill tier={tier} />
@@ -98,12 +111,12 @@ export function CaseDetail({ kycCase }: { kycCase: KycCase }) {
 
         <Section id="sec-relationship" title="Relationship" icon={Handshake}>
           <Fields>
-            <Field label="Customer status">
+            <Field label="Customer status" feature="customerStatus">
               <Pill tone={relationship.status === "new" ? "info" : "neutral"}>
                 {relationship.status === "new" ? "New customer" : "Existing customer"}
               </Pill>
             </Field>
-            <Field label="Relationship age">
+            <Field label="Relationship age" feature="accountAgeMonths">
               <span className="tabular-nums">{formatRelationshipAge(relationship.accountAgeMonths)}</span>
             </Field>
             <Field label="Relationship manager">{relationship.relationshipManager}</Field>
@@ -111,7 +124,7 @@ export function CaseDetail({ kycCase }: { kycCase: KycCase }) {
         </Section>
       </div>
 
-      <Section id="sec-owners" title="Beneficial owners" icon={Users}>
+      <Section id="sec-owners" title="Beneficial owners" icon={Users} features={["uboOwnershipPct", "uboVerified", "pep"]}>
         <Table className="text-[13px]">
           <TableHeader>
             <TableRow className="hover:bg-transparent">
@@ -143,7 +156,7 @@ export function CaseDetail({ kycCase }: { kycCase: KycCase }) {
       <div className="grid gap-3 xl:grid-cols-2">
         <Section id="sec-screening" title="Screening" icon={ShieldAlert}>
           <Fields>
-            <Field label="Sanctions">
+            <Field label="Sanctions" feature="sanctionsHit">
               <span className="grid justify-items-start gap-1">
                 <Pill tone={screening.sanctions.status === "match" ? "danger" : "success"}>
                   {screening.sanctions.status === "match" ? "Match" : "Clear"}
@@ -153,7 +166,7 @@ export function CaseDetail({ kycCase }: { kycCase: KycCase }) {
                 )}
               </span>
             </Field>
-            <Field label="Adverse media">
+            <Field label="Adverse media" feature="adverseMedia">
               <span className="grid justify-items-start gap-1">
                 <Pill tone={screening.adverseMedia.status === "found" ? "danger" : "success"}>
                   {screening.adverseMedia.status === "found" ? "Found" : "None"}
@@ -168,13 +181,13 @@ export function CaseDetail({ kycCase }: { kycCase: KycCase }) {
 
         <Section id="sec-funds" title="Source of funds" icon={Landmark}>
           <Fields>
-            <Field label="Status">
+            <Field label="Status" feature="sourceOfFunds">
               <Pill tone={SOF_TONE[funds.sourceOfFunds]}>{SOURCE_OF_FUNDS_LABELS[funds.sourceOfFunds]}</Pill>
             </Field>
             <Field label="Description">
               <span className="font-normal">{funds.description || "—"}</span>
             </Field>
-            <Field label="Expected monthly volume">
+            <Field label="Expected monthly volume" feature="expectedMonthlyVolume">
               <span className="tabular-nums">{formatEur(funds.expectedMonthlyVolumeEur)}</span>
             </Field>
           </Fields>

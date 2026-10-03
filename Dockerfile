@@ -17,6 +17,9 @@ RUN pnpm fetch
 COPY . .
 # pnpm-workspace.yaml `allowBuilds` decides which dependency build scripts run (esbuild, better-sqlite3).
 RUN pnpm install --offline --frozen-lockfile
+# Tesseract.js worker, LSTM cores and the English model, served from our origin under /tesseract/ for the
+# in-browser PII blur. Generated here (not committed, ~13 MiB): the model download is SHA-256 pinned.
+RUN pnpm --filter @vashistha/web exec tsx ../../packages/perception/scripts/vendor-tesseract.ts public/tesseract
 RUN pnpm --filter @vashistha/web build
 # Reinstall production dependencies only (typescript, eslint, vitest, tailwind, drizzle-kit, ... gone;
 # ~610 MB -> ~460 MB, most of the rest is next + its SWC binary) and drop Next's build cache.

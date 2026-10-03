@@ -1,0 +1,3233 @@
+{
+  "mode": "live",
+  "seed": null,
+  "fixture": "/home/24b4530/modiji/packages/perception/test/fixtures/casedesk-recorded",
+  "report": {
+    "counts": {
+      "dom": {
+        "critical_field": 52,
+        "critical_action": 42,
+        "non_critical": 51
+      },
+      "vision": {
+        "critical_field": 26,
+        "critical_action": 11,
+        "non_critical": 45
+      }
+    },
+    "criticalFieldChangeRecall": {
+      "numerator": 10,
+      "denominator": 52,
+      "value": 0.19230769230769232
+    },
+    "criticalActionRecall": {
+      "numerator": 11,
+      "denominator": 42,
+      "value": 0.2619047619047619
+    },
+    "falseCriticalRate": {
+      "numerator": 16,
+      "denominator": 37,
+      "value": 0.43243243243243246
+    },
+    "nonCritical": {
+      "precision": {
+        "numerator": 38,
+        "denominator": 45,
+        "value": 0.8444444444444444
+      },
+      "recall": {
+        "numerator": 38,
+        "denominator": 51,
+        "value": 0.7450980392156863
+      },
+      "f1": 0.7916666666666666
+    },
+    "latency": {
+      "frameToEventMs": {
+        "n": 57,
+        "p50": 6220.91845703125,
+        "p95": 8882.003662109375
+      },
+      "changeToEventMs": {
+        "n": 59,
+        "p50": 8300.08984375,
+        "p95": 12764.924560546875
+      }
+    },
+    "missedCritical": [
+      {
+        "id": "4ba6725d-0b0d-4bc3-a493-6e9c7386654a",
+        "frameSeq": 3,
+        "captureTime": 1791065954331,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0301",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "cddd5d78-a1ea-42b6-bdc0-f4d1e3883faa",
+        "frameSeq": 4,
+        "captureTime": 1791065957131,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0301",
+        "action": "enhancedReview",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "a21d4f13-d7f8-48bc-8bc4-028a6e5e4a54",
+        "frameSeq": 6,
+        "captureTime": 1791065960264,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0302",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "706352ed-e989-4aeb-a5a3-ed0c07b094d5",
+        "frameSeq": 7,
+        "captureTime": 1791065962982,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0302",
+        "action": "approve",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "ebe95a82-62c0-4f23-a414-0f44ab9ac30e",
+        "frameSeq": 9,
+        "captureTime": 1791065966495,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0303",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "3baa9697-58ab-417c-bedc-c9592105e3db",
+        "frameSeq": 10,
+        "captureTime": 1791065969639,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0303",
+        "action": "reject",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "0fc4526c-4031-41df-97c4-afa7721bd7e6",
+        "frameSeq": 12,
+        "captureTime": 1791065972528,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0304",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "490f60bb-37fe-47a5-abce-65b066debe59",
+        "frameSeq": 14,
+        "captureTime": 1791065976766,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0304",
+        "action": "requestDocuments",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "a4f6f971-1037-41fe-9974-4b152a3f52d2",
+        "frameSeq": 16,
+        "captureTime": 1791065980030,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0305",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "135f6b76-d712-4e36-82a0-96538bdb061c",
+        "frameSeq": 17,
+        "captureTime": 1791065983255,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0305",
+        "action": "requestDocuments",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "ffbb729d-afba-419c-a33d-24fd3cf7c2fa",
+        "frameSeq": 19,
+        "captureTime": 1791065986629,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0306",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "89e092b3-1669-4bd9-ab58-2262238478ea",
+        "frameSeq": 3,
+        "captureTime": 1791065998377,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0101",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "221c76c8-e7ce-43af-b75c-f7cd71f21231",
+        "frameSeq": 4,
+        "captureTime": 1791066001465,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0101",
+        "action": "requestDocuments",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "b69d6fd1-0fd5-4fe3-aed9-4c83df95d25d",
+        "frameSeq": 6,
+        "captureTime": 1791066004210,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "fd1d4a56-ffbe-4d53-9ccb-e5ed2e43ad95",
+        "frameSeq": 7,
+        "captureTime": 1791066004714,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "low",
+        "to": "high",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "456de567-6a8f-49c2-b5b4-d2811681aed6",
+        "frameSeq": 8,
+        "captureTime": 1791066007322,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0102",
+        "action": "approve",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "5225d2be-7190-4541-a6fc-f2b876c0bf23",
+        "frameSeq": 11,
+        "captureTime": 1791066013946,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0103",
+        "action": "enhancedReview",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "9633f175-9e24-49d4-b3ca-6daa00a757af",
+        "frameSeq": 3,
+        "captureTime": 1791066020758,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0301",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "d062a5b8-1a67-4cd8-960b-0420478b2f8e",
+        "frameSeq": 4,
+        "captureTime": 1791066023151,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0301",
+        "action": "enhancedReview",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "9b53b2f2-a2a9-4fd7-aeb1-14dc81f16335",
+        "frameSeq": 6,
+        "captureTime": 1791066025775,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0302",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "b6ff1682-d99c-4d76-a536-16109e671db4",
+        "frameSeq": 7,
+        "captureTime": 1791066028489,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0302",
+        "action": "approve",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "a195d873-5ffe-4c6b-b85d-63f18698dd20",
+        "frameSeq": 9,
+        "captureTime": 1791066031926,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0303",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "07050559-ce1a-45e9-9938-dc9edc430128",
+        "frameSeq": 10,
+        "captureTime": 1791066032409,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0303",
+        "field": "riskRating",
+        "from": "low",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "ae6033ba-57cf-4f98-8665-8baeac8d551e",
+        "frameSeq": 11,
+        "captureTime": 1791066034771,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0303",
+        "action": "reject",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "d89021a4-37f2-4cbb-aada-f37b856b7599",
+        "frameSeq": 13,
+        "captureTime": 1791066038560,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0304",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "99537770-27d8-41a8-8b28-1de0a249566c",
+        "frameSeq": 14,
+        "captureTime": 1791066041934,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0304",
+        "action": "reject",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "d438406e-0d13-494b-9ab1-c47e460f71dc",
+        "frameSeq": 16,
+        "captureTime": 1791066045559,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0305",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "62374561-a41e-4653-8f6d-2bd53da05b48",
+        "frameSeq": 17,
+        "captureTime": 1791066049016,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0305",
+        "action": "escalateCompliance",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "08caa986-79a7-44c6-aa3b-0003fc51748d",
+        "frameSeq": 19,
+        "captureTime": 1791066052243,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0306",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "25db514a-8d7c-49ee-a0c7-7df81f2006ed",
+        "frameSeq": 20,
+        "captureTime": 1791066056752,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0306",
+        "action": "enhancedReview",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "4b45a58f-607a-4e47-b003-544124ab12eb",
+        "frameSeq": 3,
+        "captureTime": 1791066064592,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0101",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "7cd61e02-34b5-4d9c-b5b4-f2fcbd3bed20",
+        "frameSeq": 4,
+        "captureTime": 1791066065041,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0101",
+        "field": "riskRating",
+        "from": "medium",
+        "to": "low",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "2cf18770-5a89-4b12-a1af-1e636e2bf261",
+        "frameSeq": 5,
+        "captureTime": 1791066067865,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0101",
+        "action": "escalateCompliance",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "beb99eab-249c-4503-8da2-825fe4e50acf",
+        "frameSeq": 8,
+        "captureTime": 1791066072866,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0102",
+        "action": "requestDocuments",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "a01cb084-1a79-42c3-a80b-6aaf0bd1c885",
+        "frameSeq": 10,
+        "captureTime": 1791066076207,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0103",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "0edb6b61-ceb8-4a43-a6cb-21b5ef718eb5",
+        "frameSeq": 3,
+        "captureTime": 1791066086806,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0301",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "1b5f40e2-dd79-4a7f-bb1f-60362dfdcf03",
+        "frameSeq": 4,
+        "captureTime": 1791066089914,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0301",
+        "action": "requestDocuments",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "48797a19-08a9-44d3-b5cc-bb78da7888dd",
+        "frameSeq": 6,
+        "captureTime": 1791066092392,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0302",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "a95101c1-2f61-4e3f-a940-248a81a22ff3",
+        "frameSeq": 7,
+        "captureTime": 1791066092775,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0302",
+        "field": "riskRating",
+        "from": "medium",
+        "to": "low",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "33e659bc-18e6-4870-9337-875164b1f823",
+        "frameSeq": 8,
+        "captureTime": 1791066096135,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0302",
+        "action": "requestDocuments",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "549ad539-880f-4c47-8a8d-546e6c8e02f2",
+        "frameSeq": 10,
+        "captureTime": 1791066099239,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0303",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "high",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "d5a97086-e6ba-4a63-b5ee-f1fcc87b910d",
+        "frameSeq": 11,
+        "captureTime": 1791066101760,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0303",
+        "action": "requestDocuments",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "b1354f80-3742-48b0-b8e2-8f9c778f5955",
+        "frameSeq": 16,
+        "captureTime": 1791066111273,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0305",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "d29e11d3-ff79-4193-8f0b-34f636459955",
+        "frameSeq": 17,
+        "captureTime": 1791066114123,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0305",
+        "action": "requestDocuments",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "dd6eb7dd-5eec-4899-ab23-7b1633adbb76",
+        "frameSeq": 19,
+        "captureTime": 1791066117124,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0306",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "d1ca30b2-3691-4916-9519-fc40d78600a5",
+        "frameSeq": 3,
+        "captureTime": 1791066127923,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0101",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "292df167-fa8b-4ffb-bb51-5ce65fdd0046",
+        "frameSeq": 4,
+        "captureTime": 1791066130372,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0101",
+        "action": "escalateCompliance",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "129bb982-c8cf-4cee-bdfb-559dfc7b59ea",
+        "frameSeq": 6,
+        "captureTime": 1791066133071,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "bdc37614-a11f-44cf-a639-a85df28bf6ae",
+        "frameSeq": 7,
+        "captureTime": 1791066136444,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0102",
+        "action": "escalateCompliance",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "e0a6fa9d-b6ff-4f90-bc6c-79604835a7eb",
+        "frameSeq": 10,
+        "captureTime": 1791066142073,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0103",
+        "action": "enhancedReview",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "3820457c-4e9f-4be6-92fa-8cbcc977ef3b",
+        "frameSeq": 3,
+        "captureTime": 1791066149237,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0301",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "40db7782-bd1d-48c3-9d0e-e20ff4ca39bc",
+        "frameSeq": 7,
+        "captureTime": 1791066155938,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0302",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "high",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "748c727a-6527-4694-9aa6-5b51777e5c79",
+        "frameSeq": 8,
+        "captureTime": 1791066158620,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0302",
+        "action": "escalateCompliance",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "0d79f27f-cdfc-4bec-8178-2cbfa6c1db08",
+        "frameSeq": 10,
+        "captureTime": 1791066161986,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0303",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "high",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "55842af0-3b8a-4bb3-8a8b-1ecde1c755ec",
+        "frameSeq": 11,
+        "captureTime": 1791066164579,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0303",
+        "action": "requestDocuments",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "30b02239-1994-4f4e-8a76-546bf3449df9",
+        "frameSeq": 13,
+        "captureTime": 1791066167941,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0304",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "587e1c6c-5e85-42dd-8012-2997669f6e80",
+        "frameSeq": 14,
+        "captureTime": 1791066171727,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0304",
+        "action": "escalateCompliance",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "43ced156-747e-4034-b724-d53ace0f33d1",
+        "frameSeq": 16,
+        "captureTime": 1791066175639,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0305",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "e7f2647d-0eed-4ad4-9329-d2983317639a",
+        "frameSeq": 20,
+        "captureTime": 1791066182769,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0306",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "3aab0ee9-1dd1-4630-9027-3158055773c6",
+        "frameSeq": 21,
+        "captureTime": 1791066185615,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0306",
+        "action": "approve",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "05cb425c-46e7-4e4b-83d6-effecbbb9bd8",
+        "frameSeq": 3,
+        "captureTime": 1791066193988,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0101",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "8302ccf2-6b5d-45d7-9536-8b5e455c824c",
+        "frameSeq": 4,
+        "captureTime": 1791066196576,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0101",
+        "action": "approve",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "aedeebae-3b72-4c34-91fa-713f91416195",
+        "frameSeq": 6,
+        "captureTime": 1791066200386,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "81dfc2bf-c509-4624-99d4-c4d6873265b9",
+        "frameSeq": 7,
+        "captureTime": 1791066203252,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0102",
+        "action": "escalateCompliance",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "2d82abf5-1279-4764-8a2c-71b3257192f4",
+        "frameSeq": 9,
+        "captureTime": 1791066206903,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0103",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "2397a58f-c429-4a38-b7e1-0845a578c3e4",
+        "frameSeq": 11,
+        "captureTime": 1791066210288,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0103",
+        "action": "escalateCompliance",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "5622db7d-f734-4e59-ad54-3df500a7ce0d",
+        "frameSeq": 4,
+        "captureTime": 1791066220753,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0301",
+        "action": "approve",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "1ce8957d-6928-4000-ab0c-f799e861c253",
+        "frameSeq": 6,
+        "captureTime": 1791066224921,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0302",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "64786f52-ca6d-407f-b897-806be46119cc",
+        "frameSeq": 9,
+        "captureTime": 1791066230821,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0303",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "c8688c0b-51af-4ed8-b01a-4aed1158ccdb",
+        "frameSeq": 12,
+        "captureTime": 1791066237486,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0304",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "6e439c0b-5fc5-4902-a400-5de157c9be84",
+        "frameSeq": 13,
+        "captureTime": 1791066237919,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0304",
+        "field": "riskRating",
+        "from": "low",
+        "to": "high",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "c6ecc658-920d-4220-a37f-8330f18cf444",
+        "frameSeq": 16,
+        "captureTime": 1791066243452,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0305",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "643d7a35-0b1c-41d3-a835-9538c123f4e0",
+        "frameSeq": 19,
+        "captureTime": 1791066250214,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0306",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "high",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      }
+    ],
+    "falseCritical": [
+      {
+        "id": "vision-0-18-1",
+        "frameSeq": 18,
+        "captureTime": 1791065965099,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0303",
+        "confidence": 0.99,
+        "source": "vision",
+        "critical": true,
+        "from": "existing",
+        "field": "customerStatus",
+        "to": "new"
+      },
+      {
+        "id": "vision-0-18-2",
+        "frameSeq": 18,
+        "captureTime": 1791065965099,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0303",
+        "confidence": 0.99,
+        "source": "vision",
+        "critical": true,
+        "from": "low",
+        "field": "jurisdictionRisk",
+        "to": "medium"
+      },
+      {
+        "id": "vision-0-18-3",
+        "frameSeq": 18,
+        "captureTime": 1791065965099,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0303",
+        "confidence": 0.99,
+        "source": "vision",
+        "critical": true,
+        "from": "not_provided",
+        "field": "sourceOfFunds",
+        "to": "verified"
+      },
+      {
+        "id": "vision-0-92-1",
+        "frameSeq": 92,
+        "captureTime": 1791066035099,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0303",
+        "confidence": 0.95,
+        "source": "vision",
+        "critical": true,
+        "from": "existing",
+        "field": "customerStatus",
+        "to": "new"
+      },
+      {
+        "id": "vision-0-92-2",
+        "frameSeq": 92,
+        "captureTime": 1791066035099,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0303",
+        "confidence": 0.95,
+        "source": "vision",
+        "critical": true,
+        "from": "low",
+        "field": "jurisdictionRisk",
+        "to": "medium"
+      },
+      {
+        "id": "vision-0-92-3",
+        "frameSeq": 92,
+        "captureTime": 1791066035099,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0303",
+        "confidence": 0.95,
+        "source": "vision",
+        "critical": true,
+        "from": "not_provided",
+        "field": "sourceOfFunds",
+        "to": "verified"
+      },
+      {
+        "id": "vision-0-99-1",
+        "frameSeq": 99,
+        "captureTime": 1791066042100,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0304",
+        "confidence": 1,
+        "source": "vision",
+        "critical": true,
+        "from": "company",
+        "field": "entityType",
+        "to": "trust"
+      },
+      {
+        "id": "vision-0-99-2",
+        "frameSeq": 99,
+        "captureTime": 1791066042100,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0304",
+        "confidence": 1,
+        "source": "vision",
+        "critical": true,
+        "from": "medium",
+        "field": "jurisdictionRisk",
+        "to": "low"
+      },
+      {
+        "id": "vision-0-99-3",
+        "frameSeq": 99,
+        "captureTime": 1791066042100,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0304",
+        "confidence": 1,
+        "source": "vision",
+        "critical": true,
+        "from": "verified",
+        "field": "sourceOfFunds",
+        "to": "unverified"
+      },
+      {
+        "id": "vision-0-99-4",
+        "frameSeq": 99,
+        "captureTime": 1791066042100,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0304",
+        "confidence": 1,
+        "source": "vision",
+        "critical": true,
+        "field": "expectedMonthlyVolume",
+        "to": 649000
+      },
+      {
+        "id": "vision-0-115-0",
+        "frameSeq": 115,
+        "captureTime": 1791066057099,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0306",
+        "confidence": 0.95,
+        "source": "vision",
+        "critical": true,
+        "field": "accountAgeMonths",
+        "to": 36
+      },
+      {
+        "id": "vision-0-166-1",
+        "frameSeq": 166,
+        "captureTime": 1791066108599,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0304",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true,
+        "field": "uboOwnershipPct",
+        "to": 40
+      },
+      {
+        "id": "vision-0-166-2",
+        "frameSeq": 166,
+        "captureTime": 1791066108599,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0304",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true,
+        "field": "uboVerified",
+        "to": false
+      },
+      {
+        "id": "vision-0-182-0",
+        "frameSeq": 182,
+        "captureTime": 1791066121599,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0306",
+        "confidence": 0.95,
+        "source": "vision",
+        "critical": true,
+        "field": "accountAgeMonths",
+        "to": 39
+      },
+      {
+        "id": "vision-0-214-0",
+        "frameSeq": 214,
+        "captureTime": 1791066153099,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0301",
+        "confidence": 0.95,
+        "source": "vision",
+        "critical": true,
+        "field": "accountAgeMonths",
+        "to": 91
+      },
+      {
+        "id": "vision-0-243-0",
+        "frameSeq": 243,
+        "captureTime": 1791066180099,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0305",
+        "confidence": 0.95,
+        "source": "vision",
+        "critical": true,
+        "field": "uboOwnershipPct",
+        "to": 25
+      }
+    ],
+    "checks": [
+      {
+        "metric": "critical field-change recall",
+        "value": 0.19230769230769232,
+        "comparator": ">=",
+        "threshold": 0.95,
+        "pass": false
+      },
+      {
+        "metric": "critical action recall",
+        "value": 0.2619047619047619,
+        "comparator": ">=",
+        "threshold": 0.95,
+        "pass": false
+      },
+      {
+        "metric": "false critical rate",
+        "value": 0.43243243243243246,
+        "comparator": "<=",
+        "threshold": 0.05,
+        "pass": false
+      },
+      {
+        "metric": "p95 frame→event (ms)",
+        "value": 8882.003662109375,
+        "comparator": "<=",
+        "threshold": 3000,
+        "pass": false
+      }
+    ],
+    "pass": false
+  },
+  "pipeline": {
+    "frames": {
+      "total": 617,
+      "changed": 311
+    },
+    "queue": {
+      "submitted": 311,
+      "sent": 57,
+      "coalesced": 254,
+      "applied": 57,
+      "staleDropped": 0,
+      "cancelled": 0,
+      "epochRejected": 0,
+      "failed": 0,
+      "inFlight": 0,
+      "pendingFrameSeq": null,
+      "frameToApplyMs": [
+        7718.563232421875,
+        5757.292236328125,
+        5832.25244140625,
+        6220.91845703125,
+        6211.689208984375,
+        5688.83447265625,
+        5385.829345703125,
+        6740.128173828125,
+        8218.173583984375,
+        5428.2470703125,
+        6766.464599609375,
+        7297.722900390625,
+        8992.629150390625,
+        6401.09130859375,
+        6189.94384765625,
+        7199.329345703125,
+        5849.353759765625,
+        5807.936279296875,
+        5955.185791015625,
+        5860.133056640625,
+        3169.564208984375,
+        6706.105712890625,
+        8400.929443359375,
+        5929.37744140625,
+        2707.94775390625,
+        7324.6640625,
+        6444.318603515625,
+        6201.927490234375,
+        6318.953125,
+        8187.69091796875,
+        5876.144287109375,
+        5995.841796875,
+        6732.8935546875,
+        6312.911865234375,
+        4730.43359375,
+        5240.091796875,
+        5913.12890625,
+        5792.868408203125,
+        4195.562744140625,
+        6685.5771484375,
+        6332.14794921875,
+        7285.34912109375,
+        8752.944091796875,
+        8882.003662109375,
+        5999.201171875,
+        8395.547607421875,
+        6298.238037109375,
+        4704.15185546875,
+        1935.157958984375,
+        4679.905517578125,
+        6204.8154296875,
+        7865.2548828125,
+        7209.85986328125,
+        6988.23681640625,
+        6814.622802734375,
+        5549.466796875,
+        10787.725341796875
+      ],
+      "requestMs": [
+        7539.4384765625,
+        5538.56396484375,
+        4574.82373046875,
+        4888.53125,
+        5990.64208984375,
+        5477.99072265625,
+        5195.866455078125,
+        5855.171630859375,
+        5476.9140625,
+        4709.946044921875,
+        5838.092041015625,
+        6531.122314453125,
+        7194.744873046875,
+        5907.313720703125,
+        5789.720947265625,
+        7009.247802734375,
+        5650.8837890625,
+        4958.42626953125,
+        5646.120361328125,
+        4404.818115234375,
+        1809.392333984375,
+        6536.419677734375,
+        7694.68701171875,
+        5528.317138671875,
+        1779.531982421875,
+        6115.59765625,
+        5619.52783203125,
+        5757.47021484375,
+        6116.89990234375,
+        6868.6064453125,
+        5189.320068359375,
+        5618.557373046875,
+        5236.91943359375,
+        5580.88623046875,
+        4416.39208984375,
+        5010.5263671875,
+        5671.906982421875,
+        5379.60498046875,
+        3902.54052734375,
+        6489.876953125,
+        5646.439697265625,
+        6454.070556640625,
+        7466.458984375,
+        6128.923095703125,
+        5617.065185546875,
+        6396.2080078125,
+        4902.54833984375,
+        3404.742919921875,
+        1731.9658203125,
+        4244.611083984375,
+        6024.76416015625,
+        7661.289306640625,
+        6343.414794921875,
+        6779.235595703125,
+        6325.246337890625,
+        5234.705322265625,
+        5738.2216796875
+      ]
+    },
+    "dropped": {
+      "value:invalid_field": 2,
+      "concept:known_concept": 1
+    },
+    "concepts": [
+      {
+        "name": "documentStatus",
+        "description": "Documents section present but content not fully visible",
+        "observedValue": "Documents section present",
+        "frameSeq": 7,
+        "captureTime": 1791065956099
+      },
+      {
+        "name": "interviewStatus",
+        "description": "Interview capability and transcript tracking",
+        "observedValue": "No turns yet",
+        "frameSeq": 7,
+        "captureTime": 1791065956099
+      },
+      {
+        "name": "beneficialOwnersVerified",
+        "description": "Status of beneficial owner identity verification",
+        "observedValue": "Verified",
+        "frameSeq": 12,
+        "captureTime": 1791065960599
+      },
+      {
+        "name": "pepScreening",
+        "description": "Politically exposed person screening result",
+        "observedValue": "No matches",
+        "frameSeq": 12,
+        "captureTime": 1791065960599
+      },
+      {
+        "name": "relationshipManager",
+        "description": "Assigned relationship manager name",
+        "observedValue": "Kwame Ashby-Rourke",
+        "frameSeq": 12,
+        "captureTime": 1791065960599
+      },
+      {
+        "name": "relationshipAge",
+        "description": "Relationship age",
+        "observedValue": "New relationship",
+        "frameSeq": 18,
+        "captureTime": 1791065965099
+      },
+      {
+        "name": "relationshipManager",
+        "description": "Relationship manager",
+        "observedValue": "Rafael Moreno-Teague",
+        "frameSeq": 18,
+        "captureTime": 1791065965099
+      },
+      {
+        "name": "largestBeneficialOwner",
+        "description": "Largest beneficial owner",
+        "observedValue": "Zofia Mbatha-Sorensen with 80% share",
+        "frameSeq": 18,
+        "captureTime": 1791065965099
+      },
+      {
+        "name": "sourceOfFundsDescription",
+        "description": "Source of funds description",
+        "observedValue": "Trading venue; audited 2025",
+        "frameSeq": 18,
+        "captureTime": 1791065965099
+      },
+      {
+        "name": "sourceOfFundsDescription",
+        "description": "Detailed explanation of source of funds status",
+        "observedValue": "Customer states the settlor's investment income; evidence not yet reviewed.",
+        "frameSeq": 24,
+        "captureTime": 1791065971099
+      },
+      {
+        "name": "beneficialOwnersData",
+        "description": "Beneficial owners information with verification status",
+        "observedValue": "Chiara Jurado-Pike (40%, Not verified, No PEP), Bastian Dunleavy (18%, Verified, No PEP), Hiroshi Drummore (39%, Verified, No PEP)",
+        "frameSeq": 24,
+        "captureTime": 1791065971099
+      },
+      {
+        "name": "decisionCommitted",
+        "description": "A decision has been committed for this case",
+        "observedValue": "Request documents",
+        "frameSeq": 31,
+        "captureTime": 1791065977100
+      },
+      {
+        "name": "beneficialOwnersVerificationStatus",
+        "description": "Verification status of beneficial owners",
+        "observedValue": "Chiara Jurado-Pike (Not verified, 40%), Bastian Dunleavy (Verified, 18%), Hiroshi Drummore (Verified, 39%)",
+        "frameSeq": 31,
+        "captureTime": 1791065977100
+      },
+      {
+        "name": "submissionDate",
+        "description": "Date case was submitted",
+        "observedValue": "23 Sept 2026",
+        "frameSeq": 31,
+        "captureTime": 1791065977100
+      },
+      {
+        "name": "checkingInterlockStatus",
+        "description": "System is checking interlock against confirmed rulebook",
+        "observedValue": "Checking interlock...",
+        "frameSeq": 38,
+        "captureTime": 1791065982599
+      },
+      {
+        "name": "relationshipAgeMonths",
+        "description": "Relationship duration in months and years",
+        "observedValue": "2 yr 6 mo",
+        "frameSeq": 38,
+        "captureTime": 1791065982599
+      },
+      {
+        "name": "relationshipManager",
+        "description": "Name of the relationship manager",
+        "observedValue": "Ade Fairweather",
+        "frameSeq": 38,
+        "captureTime": 1791065982599
+      },
+      {
+        "name": "countryRisk",
+        "description": "Country jurisdiction risk level",
+        "observedValue": "High risk",
+        "frameSeq": 38,
+        "captureTime": 1791065982599
+      },
+      {
+        "name": "beneficialOwnersVerificationStatus",
+        "description": "Status of beneficial owners identity verification",
+        "observedValue": "All verified",
+        "frameSeq": 38,
+        "captureTime": 1791065982599
+      },
+      {
+        "name": "sanctionsScreeningStatus",
+        "description": "Result of sanctions screening check",
+        "observedValue": "Clear",
+        "frameSeq": 38,
+        "captureTime": 1791065982599
+      },
+      {
+        "name": "adverseMediaStatus",
+        "description": "Result of adverse media screening",
+        "observedValue": "None",
+        "frameSeq": 38,
+        "captureTime": 1791065982599
+      },
+      {
+        "name": "sourceOfFundsDescription",
+        "description": "Details about source of funds",
+        "observedValue": "Trading revenue; audited 2025 accounts and bank statements reviewed",
+        "frameSeq": 38,
+        "captureTime": 1791065982599
+      },
+      {
+        "name": "screenCaptureStatus",
+        "description": "Status of screen capture for vision functionality",
+        "observedValue": "Not sharing",
+        "frameSeq": 43,
+        "captureTime": 1791065987100
+      },
+      {
+        "name": "relationshipAge",
+        "description": "Relationship age displayed in human-readable format",
+        "observedValue": "8 yr 3 mo",
+        "frameSeq": 43,
+        "captureTime": 1791065987100
+      },
+      {
+        "name": "relationshipManager",
+        "description": "Assigned relationship manager",
+        "observedValue": "Kwame Ashby-Rourke",
+        "frameSeq": 43,
+        "captureTime": 1791065987100
+      },
+      {
+        "name": "decisionCommitted",
+        "description": "Whether a final decision has been committed for this case",
+        "observedValue": "Yes - Escalate to compliance officer",
+        "frameSeq": 46,
+        "captureTime": 1791065991099
+      },
+      {
+        "name": "relationshipAgeDisplay",
+        "description": "The relationship age displayed on screen",
+        "observedValue": "8 yr 3 mo",
+        "frameSeq": 46,
+        "captureTime": 1791065991099
+      },
+      {
+        "name": "expectedMonthlyVolumeDisplay",
+        "description": "The expected monthly volume displayed on screen",
+        "observedValue": "€12,000",
+        "frameSeq": 46,
+        "captureTime": 1791065991099
+      },
+      {
+        "name": "beneficialOwnersTable",
+        "description": "Table of beneficial owners with their shares and verification status",
+        "observedValue": "3 owners listed: Ingrid Halvorsen (35%, not verified), Tomasz Okonkwo-Hale (30%, verified), Wanjiru Castellane (20%, verified)",
+        "frameSeq": 51,
+        "captureTime": 1791065998599
+      },
+      {
+        "name": "largestBeneficialOwnerShare",
+        "description": "Share of the largest beneficial owner",
+        "observedValue": "35%",
+        "frameSeq": 51,
+        "captureTime": 1791065998599
+      },
+      {
+        "name": "largestBeneficialOwnerVerified",
+        "description": "Verification status of the largest beneficial owner",
+        "observedValue": "Not verified",
+        "frameSeq": 51,
+        "captureTime": 1791065998599
+      },
+      {
+        "name": "voiceInterviewerConnectionStatus",
+        "description": "Status of voice interviewer agent connection",
+        "observedValue": "Not connected",
+        "frameSeq": 51,
+        "captureTime": 1791065998599
+      },
+      {
+        "name": "transcriptStatus",
+        "description": "Status of interview transcript",
+        "observedValue": "No turns yet",
+        "frameSeq": 51,
+        "captureTime": 1791065998599
+      },
+      {
+        "name": "relationshipAgeYears",
+        "description": "Customer relationship duration",
+        "observedValue": "3 yr",
+        "frameSeq": 57,
+        "captureTime": 1791066003099
+      },
+      {
+        "name": "relationshipManager",
+        "description": "Assigned relationship manager",
+        "observedValue": "Kwame Ashby-Rourke",
+        "frameSeq": 57,
+        "captureTime": 1791066003099
+      },
+      {
+        "name": "largestBeneficialOwnerName",
+        "description": "Name of largest beneficial owner",
+        "observedValue": "Farid Quillfeather",
+        "frameSeq": 57,
+        "captureTime": 1791066003099
+      },
+      {
+        "name": "sourceOfFundsDescription",
+        "description": "Details about source of funds",
+        "observedValue": "Grain export revenue; audited 2025 accounts and three years of bank statements reviewed.",
+        "frameSeq": 57,
+        "captureTime": 1791066003099
+      },
+      {
+        "name": "allDomEventsDelivered",
+        "description": "All DOM events delivery status",
+        "observedValue": "All DOM events delivered",
+        "frameSeq": 57,
+        "captureTime": 1791066003099
+      },
+      {
+        "name": "pepStatus",
+        "description": "Politically exposed person flag",
+        "observedValue": "Yes",
+        "frameSeq": 64,
+        "captureTime": 1791066009099
+      },
+      {
+        "name": "sanctionsScreeningStatus",
+        "description": "Sanctions screening result",
+        "observedValue": "Clear",
+        "frameSeq": 64,
+        "captureTime": 1791066009099
+      },
+      {
+        "name": "adverseMediaStatus",
+        "description": "Adverse media screening result",
+        "observedValue": "None",
+        "frameSeq": 64,
+        "captureTime": 1791066009099
+      },
+      {
+        "name": "sourceOfFundsDescription",
+        "description": "Description of source of funds",
+        "observedValue": "Salary as deputy minister of transport (fictional) and savings; payslips and bank statements reviewed.",
+        "frameSeq": 64,
+        "captureTime": 1791066009099
+      },
+      {
+        "name": "decisionStatus",
+        "description": "Status of the case decision",
+        "observedValue": "Decision committed",
+        "frameSeq": 69,
+        "captureTime": 1791066014599
+      },
+      {
+        "name": "reviewOutcome",
+        "description": "The outcome of the review decision",
+        "observedValue": "Send to enhanced review",
+        "frameSeq": 69,
+        "captureTime": 1791066014599
+      },
+      {
+        "name": "interlockStatus",
+        "description": "Interlock rule status",
+        "observedValue": "Allowed — no confirmed rule objected",
+        "frameSeq": 69,
+        "captureTime": 1791066014599
+      },
+      {
+        "name": "relationshipAgeMonths",
+        "description": "Relationship age shown as years and months format",
+        "observedValue": "8 yr 7 mo",
+        "frameSeq": 77,
+        "captureTime": 1791066023098
+      },
+      {
+        "name": "relationshipManager",
+        "description": "Name of the relationship manager assigned to this account",
+        "observedValue": "Rafael Moreno-Teague",
+        "frameSeq": 77,
+        "captureTime": 1791066023098
+      },
+      {
+        "name": "registrationNumber",
+        "description": "Registration or identification number for the customer",
+        "observedValue": "ALD-P143649",
+        "frameSeq": 77,
+        "captureTime": 1791066023098
+      },
+      {
+        "name": "documentStatus",
+        "description": "Documents section status",
+        "observedValue": "Documents",
+        "frameSeq": 77,
+        "captureTime": 1791066023098
+      },
+      {
+        "name": "interlockStatus",
+        "description": "Interlock checking status",
+        "observedValue": "Checking interlock...",
+        "frameSeq": 77,
+        "captureTime": 1791066023098
+      },
+      {
+        "name": "relationshipAgeYears",
+        "description": "Relationship age in years",
+        "observedValue": "6 yr",
+        "frameSeq": 84,
+        "captureTime": 1791066029099
+      },
+      {
+        "name": "relationshipManager",
+        "description": "Name of relationship manager",
+        "observedValue": "Kwame Ashby-Rourke",
+        "frameSeq": 84,
+        "captureTime": 1791066029099
+      },
+      {
+        "name": "registrationNumber",
+        "description": "Company registration number",
+        "observedValue": "CAL-C726553",
+        "frameSeq": 84,
+        "captureTime": 1791066029099
+      },
+      {
+        "name": "address",
+        "description": "Company address",
+        "observedValue": "178 Tannery Close, Vey Harbour, Calderon",
+        "frameSeq": 84,
+        "captureTime": 1791066029099
+      },
+      {
+        "name": "largestBeneficialOwner",
+        "description": "Name and role of largest beneficial owner",
+        "observedValue": "Dmitri Whitlock, Director & shareholder",
+        "frameSeq": 84,
+        "captureTime": 1791066029099
+      },
+      {
+        "name": "decisionCommitted",
+        "description": "Decision has been committed",
+        "observedValue": "Approve onboarding",
+        "frameSeq": 84,
+        "captureTime": 1791066029099
+      },
+      {
+        "name": "interlockStatus",
+        "description": "Interlock status",
+        "observedValue": "Allowed — no confirmed rule objected",
+        "frameSeq": 84,
+        "captureTime": 1791066029099
+      },
+      {
+        "name": "decision",
+        "description": "The reviewer decision for this case",
+        "observedValue": "Reject",
+        "frameSeq": 92,
+        "captureTime": 1791066035099
+      },
+      {
+        "name": "largestBeneficialOwner",
+        "description": "Details of the largest beneficial owner",
+        "observedValue": "Zofia Mbatha-Sorensen, Director & majority shareholder, 80% share, Verified",
+        "frameSeq": 92,
+        "captureTime": 1791066035099
+      },
+      {
+        "name": "country",
+        "description": "Country of incorporation or residence",
+        "observedValue": "Estonia",
+        "frameSeq": 92,
+        "captureTime": 1791066035099
+      },
+      {
+        "name": "relationshipAge",
+        "description": "Duration of relationship with the bank",
+        "observedValue": "New relationship",
+        "frameSeq": 92,
+        "captureTime": 1791066035099
+      },
+      {
+        "name": "interlock",
+        "description": "Interlock rule status",
+        "observedValue": "Allowed — no confirmed rule objected",
+        "frameSeq": 92,
+        "captureTime": 1791066035099
+      },
+      {
+        "name": "ledgerEntry",
+        "description": "Ledger entry identifier",
+        "observedValue": "1fc4c479",
+        "frameSeq": 92,
+        "captureTime": 1791066035099
+      },
+      {
+        "name": "decisionCommitted",
+        "description": "A decision has been committed to this case",
+        "observedValue": "Reject",
+        "frameSeq": 99,
+        "captureTime": 1791066042100
+      },
+      {
+        "name": "beneficialOwnersVerificationStatus",
+        "description": "Verification status of beneficial owners",
+        "observedValue": "Mixed - one not verified (Chiara Jurado-Pike), two verified (Bastian Dunleavy, Hiroshi Drummore)",
+        "frameSeq": 99,
+        "captureTime": 1791066042100
+      },
+      {
+        "name": "largestBeneficialOwnerShare",
+        "description": "Share of largest beneficial owner",
+        "observedValue": "40%",
+        "frameSeq": 99,
+        "captureTime": 1791066042100
+      },
+      {
+        "name": "relationshipManager",
+        "description": "Name of relationship manager assigned",
+        "observedValue": "Odile Brannock",
+        "frameSeq": 99,
+        "captureTime": 1791066042100
+      },
+      {
+        "name": "relationshipAgeMonths",
+        "description": "Relationship age (months)",
+        "observedValue": "2 yr 6 mo",
+        "frameSeq": 105,
+        "captureTime": 1791066047100
+      },
+      {
+        "name": "relationshipManager",
+        "description": "Relationship manager",
+        "observedValue": "Ade Fairweather",
+        "frameSeq": 105,
+        "captureTime": 1791066047100
+      },
+      {
+        "name": "largestBeneficialOwnerShare",
+        "description": "Largest beneficial owner share",
+        "observedValue": "25%",
+        "frameSeq": 105,
+        "captureTime": 1791066047100
+      },
+      {
+        "name": "sourceOfFundsDescription",
+        "description": "Source of funds description",
+        "observedValue": "Trading revenue; audited 2025 accounts and bank statements reviewed.",
+        "frameSeq": 105,
+        "captureTime": 1791066047100
+      },
+      {
+        "name": "registrationNumber",
+        "description": "Registration number",
+        "observedValue": "HAR-C223414",
+        "frameSeq": 105,
+        "captureTime": 1791066047100
+      },
+      {
+        "name": "country",
+        "description": "Country",
+        "observedValue": "Harrow Bay",
+        "frameSeq": 105,
+        "captureTime": 1791066047100
+      },
+      {
+        "name": "relationshipAgeMonths",
+        "description": "Relationship age displayed as 8 yr 3 mo",
+        "observedValue": "8 yr 3 mo",
+        "frameSeq": 112,
+        "captureTime": 1791066052599
+      },
+      {
+        "name": "relationshipManager",
+        "description": "Assigned relationship manager",
+        "observedValue": "Kwame Ashby-Rourke",
+        "frameSeq": 112,
+        "captureTime": 1791066052599
+      },
+      {
+        "name": "countryRisk",
+        "description": "Country risk indicator for Estonia",
+        "observedValue": "Medium risk",
+        "frameSeq": 112,
+        "captureTime": 1791066052599
+      },
+      {
+        "name": "submittedDate",
+        "description": "Case submission date",
+        "observedValue": "Submitted 26 Sept 2026",
+        "frameSeq": 112,
+        "captureTime": 1791066052599
+      },
+      {
+        "name": "decisionCommitted",
+        "description": "Decision committed on this case",
+        "observedValue": "Send to enhanced review",
+        "frameSeq": 115,
+        "captureTime": 1791066057099
+      },
+      {
+        "name": "interlock",
+        "description": "Interlock status on the decision",
+        "observedValue": "Allowed — no confirmed rule objected",
+        "frameSeq": 115,
+        "captureTime": 1791066057099
+      },
+      {
+        "name": "ledgerEntry",
+        "description": "Ledger entry identifier",
+        "observedValue": "a4c4946ce",
+        "frameSeq": 115,
+        "captureTime": 1791066057099
+      },
+      {
+        "name": "largestBeneficialOwner",
+        "description": "Name of the largest beneficial owner by share",
+        "observedValue": "Ingrid Halvorsen",
+        "frameSeq": 120,
+        "captureTime": 1791066064599
+      },
+      {
+        "name": "largestOwnerRole",
+        "description": "Role of the largest beneficial owner",
+        "observedValue": "Director & shareholder",
+        "frameSeq": 120,
+        "captureTime": 1791066064599
+      },
+      {
+        "name": "relationshipAge",
+        "description": "Customer relationship status",
+        "observedValue": "New relationship",
+        "frameSeq": 120,
+        "captureTime": 1791066064599
+      },
+      {
+        "name": "relationshipManager",
+        "description": "Name of the relationship manager",
+        "observedValue": "Odile Brannock",
+        "frameSeq": 120,
+        "captureTime": 1791066064599
+      },
+      {
+        "name": "registrationNumber",
+        "description": "Company registration number",
+        "observedValue": "EST-C482913",
+        "frameSeq": 120,
+        "captureTime": 1791066064599
+      },
+      {
+        "name": "address",
+        "description": "Customer address",
+        "observedValue": "14 Quayside Row, Valmont, Estonia",
+        "frameSeq": 120,
+        "captureTime": 1791066064599
+      },
+      {
+        "name": "sourceOfFundsDescription",
+        "description": "Description of source of funds",
+        "observedValue": "Freight revenue; audited 2025 accounts and bank statements reviewed.",
+        "frameSeq": 120,
+        "captureTime": 1791066064599
+      },
+      {
+        "name": "relationshipAgeYears",
+        "description": "Relationship age in years",
+        "observedValue": "3 yr",
+        "frameSeq": 128,
+        "captureTime": 1791066070599
+      },
+      {
+        "name": "relationshipManager",
+        "description": "Relationship manager name",
+        "observedValue": "Kwame Ashby-Rourke",
+        "frameSeq": 128,
+        "captureTime": 1791066070599
+      },
+      {
+        "name": "registrationNumber",
+        "description": "Company registration number",
+        "observedValue": "GAL-C207754",
+        "frameSeq": 128,
+        "captureTime": 1791066070599
+      },
+      {
+        "name": "address",
+        "description": "Company address",
+        "observedValue": "3 Foundry Road, Brask, Galvania",
+        "frameSeq": 128,
+        "captureTime": 1791066070599
+      },
+      {
+        "name": "sourceOfFundsDescription",
+        "description": "Source of funds description",
+        "observedValue": "Grain export revenue; audited 2025 accounts and three years of bank statements reviewed.",
+        "frameSeq": 128,
+        "captureTime": 1791066070599
+      },
+      {
+        "name": "largestBeneficialOwner",
+        "description": "Name of the largest beneficial owner by share",
+        "observedValue": "Farid Quillfeather",
+        "frameSeq": 128,
+        "captureTime": 1791066070599
+      },
+      {
+        "name": "largestBeneficialOwnerShare",
+        "description": "Share held by largest beneficial owner",
+        "observedValue": "20 %",
+        "frameSeq": 128,
+        "captureTime": 1791066070599
+      },
+      {
+        "name": "submissionDate",
+        "description": "Case submission date",
+        "observedValue": "15 Sept 2026",
+        "frameSeq": 128,
+        "captureTime": 1791066070599
+      },
+      {
+        "name": "allDOMEventsDelivered",
+        "description": "All DOM events delivered indicator",
+        "observedValue": "All DOM events delivered",
+        "frameSeq": 128,
+        "captureTime": 1791066070599
+      },
+      {
+        "name": "relationshipManager",
+        "description": "Relationship manager name",
+        "observedValue": "Signe Valcourt",
+        "frameSeq": 136,
+        "captureTime": 1791066078599
+      },
+      {
+        "name": "submissionDate",
+        "description": "Case submission date",
+        "observedValue": "16 Sept 2026",
+        "frameSeq": 136,
+        "captureTime": 1791066078599
+      },
+      {
+        "name": "country",
+        "description": "Customer country",
+        "observedValue": "Aldermere",
+        "frameSeq": 136,
+        "captureTime": 1791066078599
+      },
+      {
+        "name": "registrationNumber",
+        "description": "Registration number",
+        "observedValue": "ALD-P615042",
+        "frameSeq": 136,
+        "captureTime": 1791066078599
+      },
+      {
+        "name": "address",
+        "description": "Customer address",
+        "observedValue": "27 Cedar Court, Port Elsby, Aldermere",
+        "frameSeq": 136,
+        "captureTime": 1791066078599
+      },
+      {
+        "name": "beneficialOwnerRole",
+        "description": "Beneficial owner role",
+        "observedValue": "Account holder",
+        "frameSeq": 136,
+        "captureTime": 1791066078599
+      },
+      {
+        "name": "sourceOfFundsDescription",
+        "description": "Source of funds description",
+        "observedValue": "Salary as deputy minister of transport (fictional) and savings; payslips and bank statements reviewed.",
+        "frameSeq": 136,
+        "captureTime": 1791066078599
+      },
+      {
+        "name": "relationshipAge",
+        "description": "Customer relationship age displayed as years and months",
+        "observedValue": "8 yr 7 mo",
+        "frameSeq": 142,
+        "captureTime": 1791066085099
+      },
+      {
+        "name": "relationshipManager",
+        "description": "Name of the relationship manager assigned to the customer",
+        "observedValue": "Rafael Moreno-Teague",
+        "frameSeq": 142,
+        "captureTime": 1791066085099
+      },
+      {
+        "name": "beneficialOwnerIdVerificationStatus",
+        "description": "Whether the beneficial owner's identity has been verified",
+        "observedValue": "Not verified",
+        "frameSeq": 142,
+        "captureTime": 1791066085099
+      },
+      {
+        "name": "sanctionsScreeningResult",
+        "description": "Result of sanctions screening against Northstar Synthetic Sanctions List",
+        "observedValue": "Clear - No match on the Northstar Synthetic Sanctions List",
+        "frameSeq": 142,
+        "captureTime": 1791066085099
+      },
+      {
+        "name": "adverseMediaScreeningResult",
+        "description": "Result of adverse media screening",
+        "observedValue": "None - No relevant adverse media found",
+        "frameSeq": 142,
+        "captureTime": 1791066085099
+      },
+      {
+        "name": "jurisdictionCountry",
+        "description": "Country of registration/location",
+        "observedValue": "Calderon",
+        "frameSeq": 149,
+        "captureTime": 1791066091599
+      },
+      {
+        "name": "beneficialOwnersVerified",
+        "description": "Beneficial owner identity verification status",
+        "observedValue": "Verified",
+        "frameSeq": 149,
+        "captureTime": 1791066091599
+      },
+      {
+        "name": "beneficialOwnersCount",
+        "description": "Number of identified beneficial owners",
+        "observedValue": "2",
+        "frameSeq": 149,
+        "captureTime": 1791066091599
+      },
+      {
+        "name": "largestBeneficialOwnerShare",
+        "description": "Share held by largest beneficial owner",
+        "observedValue": "42%",
+        "frameSeq": 149,
+        "captureTime": 1791066091599
+      },
+      {
+        "name": "screeningStatus",
+        "description": "Overall screening result status",
+        "observedValue": "Clear",
+        "frameSeq": 149,
+        "captureTime": 1791066091599
+      },
+      {
+        "name": "sourceOfFundsStatus",
+        "description": "Source of funds verification status",
+        "observedValue": "Not provided",
+        "frameSeq": 149,
+        "captureTime": 1791066091599
+      },
+      {
+        "name": "sourceOfFundsDescription",
+        "description": "Details about the source of funds",
+        "observedValue": "Trading revenue; audited 2025",
+        "frameSeq": 155,
+        "captureTime": 1791066097599
+      },
+      {
+        "name": "relationshipAge",
+        "description": "Relationship age status",
+        "observedValue": "New relationship",
+        "frameSeq": 155,
+        "captureTime": 1791066097599
+      },
+      {
+        "name": "relationshipManager",
+        "description": "Manager assigned to the relationship",
+        "observedValue": "Rafael Moreno-Teague",
+        "frameSeq": 155,
+        "captureTime": 1791066097599
+      },
+      {
+        "name": "registrationNumber",
+        "description": "Company registration number",
+        "observedValue": "EST-C381884",
+        "frameSeq": 155,
+        "captureTime": 1791066097599
+      },
+      {
+        "name": "country",
+        "description": "Country of operation",
+        "observedValue": "Estonia",
+        "frameSeq": 155,
+        "captureTime": 1791066097599
+      },
+      {
+        "name": "beneficialOwnersTable",
+        "description": "Table of beneficial owners with their roles, ownership shares, verification status, and PEP designation",
+        "observedValue": "Three beneficial owners listed: Chiara Jurado-Pike (40%, not verified), Bastian Dunleavy (18%, verified), Hiroshi Drummore (39%, verified); all marked as not PEP",
+        "frameSeq": 160,
+        "captureTime": 1791066103599
+      },
+      {
+        "name": "sourceOfFundsDescription",
+        "description": "Description of the source of funds provided by customer",
+        "observedValue": "Customer states the settlor's investment income; evidence not yet reviewed.",
+        "frameSeq": 160,
+        "captureTime": 1791066103599
+      },
+      {
+        "name": "screenCaptureStatus",
+        "description": "Status of screen capture for vision/frame uploading",
+        "observedValue": "Vision: no frame uploaded yet",
+        "frameSeq": 160,
+        "captureTime": 1791066103599
+      },
+      {
+        "name": "relationshipManager",
+        "description": "Name of the relationship manager",
+        "observedValue": "Odile Brannock",
+        "frameSeq": 160,
+        "captureTime": 1791066103599
+      },
+      {
+        "name": "registrationNumber",
+        "description": "Registration number for the entity",
+        "observedValue": "CAL-T435540",
+        "frameSeq": 160,
+        "captureTime": 1791066103599
+      },
+      {
+        "name": "submittedDate",
+        "description": "Date case was submitted",
+        "observedValue": "23 Sept 2026",
+        "frameSeq": 160,
+        "captureTime": 1791066103599
+      },
+      {
+        "name": "decisionCommitted",
+        "description": "Decision has been committed as shown in Review panel",
+        "observedValue": "Decision committed",
+        "frameSeq": 166,
+        "captureTime": 1791066108599
+      },
+      {
+        "name": "outcome",
+        "description": "The outcome recorded for this case",
+        "observedValue": "Escalate to compliance officer",
+        "frameSeq": 166,
+        "captureTime": 1791066108599
+      },
+      {
+        "name": "largestBeneficialOwner",
+        "description": "The beneficial owner with the largest share",
+        "observedValue": "Chiara Jurado-Pike with 40% share, not verified",
+        "frameSeq": 166,
+        "captureTime": 1791066108599
+      },
+      {
+        "name": "screenCaptureStatus",
+        "description": "Status of screen capture for DOM events",
+        "observedValue": "Not sharing",
+        "frameSeq": 166,
+        "captureTime": 1791066108599
+      },
+      {
+        "name": "relationshipManager",
+        "description": "Assigned relationship manager",
+        "observedValue": "Kwame Ashby-Rourke",
+        "frameSeq": 174,
+        "captureTime": 1791066116100
+      },
+      {
+        "name": "sourceOfFundsDescription",
+        "description": "Details on source of funds",
+        "observedValue": "Customer states savings from employment; no documents reviewed yet.",
+        "frameSeq": 174,
+        "captureTime": 1791066116100
+      },
+      {
+        "name": "sanctionsScreeningStatus",
+        "description": "Sanctions screening result",
+        "observedValue": "Clear - No match on the Northstar Synthetic Sanctions List",
+        "frameSeq": 174,
+        "captureTime": 1791066116100
+      },
+      {
+        "name": "adverseMediaScreeningStatus",
+        "description": "Adverse media screening result",
+        "observedValue": "None - No relevant adverse media found",
+        "frameSeq": 174,
+        "captureTime": 1791066116100
+      },
+      {
+        "name": "decisionCommitted",
+        "description": "A decision has been committed to the case",
+        "observedValue": "Reject",
+        "frameSeq": 182,
+        "captureTime": 1791066121599
+      },
+      {
+        "name": "relationshipAgeDisplay",
+        "description": "Relationship age shown in years and months format",
+        "observedValue": "8 yr 3 mo",
+        "frameSeq": 182,
+        "captureTime": 1791066121599
+      },
+      {
+        "name": "relationshipManager",
+        "description": "Name of the relationship manager assigned to the case",
+        "observedValue": "Kwame Ashby-Rourke",
+        "frameSeq": 182,
+        "captureTime": 1791066121599
+      },
+      {
+        "name": "ledgerEntry",
+        "description": "Ledger entry identifier for the case",
+        "observedValue": "eea42042",
+        "frameSeq": 182,
+        "captureTime": 1791066121599
+      },
+      {
+        "name": "interlockStatus",
+        "description": "Interlock status for the decision",
+        "observedValue": "Allowed — no confirmed rule objected",
+        "frameSeq": 182,
+        "captureTime": 1791066121599
+      },
+      {
+        "name": "relationshipAge",
+        "description": "Relationship age",
+        "observedValue": "New relationship",
+        "frameSeq": 187,
+        "captureTime": 1791066126099
+      },
+      {
+        "name": "relationshipManager",
+        "description": "Assigned relationship manager",
+        "observedValue": "Odie Brannock",
+        "frameSeq": 187,
+        "captureTime": 1791066126099
+      },
+      {
+        "name": "largestBeneficialOwner",
+        "description": "Largest beneficial owner by share",
+        "observedValue": "Ingrid Halvorsen (35%)",
+        "frameSeq": 187,
+        "captureTime": 1791066126099
+      },
+      {
+        "name": "submittedDate",
+        "description": "Date case was submitted",
+        "observedValue": "14 Sept 2026",
+        "frameSeq": 187,
+        "captureTime": 1791066126099
+      },
+      {
+        "name": "relationshipAgeYears",
+        "description": "Relationship age shown in years",
+        "observedValue": "3 yr",
+        "frameSeq": 193,
+        "captureTime": 1791066132100
+      },
+      {
+        "name": "relationshipManager",
+        "description": "Name of relationship manager",
+        "observedValue": "Kwame Ashby-Rourke",
+        "frameSeq": 193,
+        "captureTime": 1791066132100
+      },
+      {
+        "name": "registrationNumber",
+        "description": "Company registration number",
+        "observedValue": "GAL-C207754",
+        "frameSeq": 193,
+        "captureTime": 1791066132100
+      },
+      {
+        "name": "country",
+        "description": "Country of operation",
+        "observedValue": "Galvania",
+        "frameSeq": 193,
+        "captureTime": 1791066132100
+      },
+      {
+        "name": "address",
+        "description": "Business address",
+        "observedValue": "3 Foundry Road, Brask, Galvania",
+        "frameSeq": 193,
+        "captureTime": 1791066132100
+      },
+      {
+        "name": "sourceOfFundsDescription",
+        "description": "Detailed description of source of funds",
+        "observedValue": "Grain export revenue; audited 2025 accounts and three years of bank statements reviewed.",
+        "frameSeq": 193,
+        "captureTime": 1791066132100
+      },
+      {
+        "name": "allDOMEventsDelivered",
+        "description": "Status of DOM events delivery",
+        "observedValue": "All DOM events delivered",
+        "frameSeq": 193,
+        "captureTime": 1791066132100
+      },
+      {
+        "name": "relationshipManager",
+        "description": "Relationship manager name",
+        "observedValue": "Signe Valcourt",
+        "frameSeq": 199,
+        "captureTime": 1791066138099
+      },
+      {
+        "name": "submissionDate",
+        "description": "Case submission date",
+        "observedValue": "16 Sept 2026",
+        "frameSeq": 199,
+        "captureTime": 1791066138099
+      },
+      {
+        "name": "country",
+        "description": "Customer country",
+        "observedValue": "Aldermere",
+        "frameSeq": 199,
+        "captureTime": 1791066138099
+      },
+      {
+        "name": "decisionCommitted",
+        "description": "A decision has been committed for this case",
+        "observedValue": "Send to enhanced review",
+        "frameSeq": 204,
+        "captureTime": 1791066142600
+      },
+      {
+        "name": "outcomeStatus",
+        "description": "The outcome status of the case review",
+        "observedValue": "Decision committed",
+        "frameSeq": 204,
+        "captureTime": 1791066142600
+      },
+      {
+        "name": "accountAgeMonthsDisplay",
+        "description": "Relationship age displayed as years and months",
+        "observedValue": "8 yr 7 mo",
+        "frameSeq": 209,
+        "captureTime": 1791066147599
+      },
+      {
+        "name": "relationshipManager",
+        "description": "Name of the relationship manager",
+        "observedValue": "Rafael Moreno-Teague",
+        "frameSeq": 209,
+        "captureTime": 1791066147599
+      },
+      {
+        "name": "submittedDate",
+        "description": "Date when the case was submitted",
+        "observedValue": "18 Sept 2026",
+        "frameSeq": 209,
+        "captureTime": 1791066147599
+      },
+      {
+        "name": "uboVerificationStatus",
+        "description": "ID verification status for beneficial owner",
+        "observedValue": "Not verified",
+        "frameSeq": 209,
+        "captureTime": 1791066147599
+      },
+      {
+        "name": "sanctionsScreeningStatus",
+        "description": "Sanctions screening result",
+        "observedValue": "Clear",
+        "frameSeq": 209,
+        "captureTime": 1791066147599
+      },
+      {
+        "name": "decisionStatus",
+        "description": "Whether a decision has been committed on the case",
+        "observedValue": "Decision committed",
+        "frameSeq": 214,
+        "captureTime": 1791066153099
+      },
+      {
+        "name": "outcome",
+        "description": "The committed decision outcome",
+        "observedValue": "Request documents",
+        "frameSeq": 214,
+        "captureTime": 1791066153099
+      },
+      {
+        "name": "interlock",
+        "description": "Compliance interlock status",
+        "observedValue": "Allowed — no confirmed rule objected",
+        "frameSeq": 214,
+        "captureTime": 1791066153099
+      },
+      {
+        "name": "ledgerEntry",
+        "description": "Ledger entry identifier",
+        "observedValue": "7f2c343f",
+        "frameSeq": 214,
+        "captureTime": 1791066153099
+      },
+      {
+        "name": "checkingInterlockStatus",
+        "description": "System status showing interlock checking in progress",
+        "observedValue": "Checking interlock...",
+        "frameSeq": 219,
+        "captureTime": 1791066158599
+      },
+      {
+        "name": "relationshipAge",
+        "description": "Relationship age",
+        "observedValue": "New relationship",
+        "frameSeq": 224,
+        "captureTime": 1791066162599
+      },
+      {
+        "name": "relationshipManager",
+        "description": "Relationship manager name",
+        "observedValue": "Rafael Moreno-Teague",
+        "frameSeq": 224,
+        "captureTime": 1791066162599
+      },
+      {
+        "name": "registrationNumber",
+        "description": "Registration number",
+        "observedValue": "EST-C381884",
+        "frameSeq": 224,
+        "captureTime": 1791066162599
+      },
+      {
+        "name": "country",
+        "description": "Country of registration",
+        "observedValue": "Estonia",
+        "frameSeq": 224,
+        "captureTime": 1791066162599
+      },
+      {
+        "name": "address",
+        "description": "Address",
+        "observedValue": "42 Market Wynd, Valmont, Estonia",
+        "frameSeq": 224,
+        "captureTime": 1791066162599
+      },
+      {
+        "name": "largestOwnerName",
+        "description": "Name of largest beneficial owner",
+        "observedValue": "Zofia Mbatha-Sorensen",
+        "frameSeq": 224,
+        "captureTime": 1791066162599
+      },
+      {
+        "name": "sanctionsStatus",
+        "description": "Sanctions screening result",
+        "observedValue": "Clear - No match on the Northstar list",
+        "frameSeq": 224,
+        "captureTime": 1791066162599
+      },
+      {
+        "name": "sourceOfFundsDescription",
+        "description": "Source of funds description",
+        "observedValue": "Trading revenue; audited 2025",
+        "frameSeq": 224,
+        "captureTime": 1791066162599
+      },
+      {
+        "name": "relationshipAge",
+        "description": "Relationship age indicator",
+        "observedValue": "New relationship",
+        "frameSeq": 231,
+        "captureTime": 1791066168599
+      },
+      {
+        "name": "relationshipManager",
+        "description": "Manager assigned to the relationship",
+        "observedValue": "Odile Brannock",
+        "frameSeq": 231,
+        "captureTime": 1791066168599
+      },
+      {
+        "name": "beneficialOwnersData",
+        "description": "Information about beneficial owners and their verification status",
+        "observedValue": "3 beneficial owners listed: Chiara Jurado-Pike (40%, not verified), Bastian Dunleavy (18%, verified), Hiroshi Drummore (39%, verified)",
+        "frameSeq": 231,
+        "captureTime": 1791066168599
+      },
+      {
+        "name": "sourceOfFundsDescription",
+        "description": "Description of source of funds",
+        "observedValue": "Customer states the settlor's investment income; evidence not yet reviewed",
+        "frameSeq": 231,
+        "captureTime": 1791066168599
+      },
+      {
+        "name": "screenCaptureStatus",
+        "description": "Screen capture upload status",
+        "observedValue": "Vision: no frame uploaded yet",
+        "frameSeq": 231,
+        "captureTime": 1791066168599
+      },
+      {
+        "name": "domEventsDelivery",
+        "description": "DOM events delivery status",
+        "observedValue": "All DOM events delivered",
+        "frameSeq": 231,
+        "captureTime": 1791066168599
+      },
+      {
+        "name": "relationshipAgeMonths",
+        "description": "Relationship age in months",
+        "observedValue": "24",
+        "frameSeq": 236,
+        "captureTime": 1791066174100
+      },
+      {
+        "name": "relationshipManager",
+        "description": "Assigned relationship manager",
+        "observedValue": "Ade Fairweather",
+        "frameSeq": 236,
+        "captureTime": 1791066174100
+      },
+      {
+        "name": "registrationNumber",
+        "description": "Company registration number",
+        "observedValue": "HAR-C223414",
+        "frameSeq": 236,
+        "captureTime": 1791066174100
+      },
+      {
+        "name": "country",
+        "description": "Country of operation",
+        "observedValue": "Harrow Bay",
+        "frameSeq": 236,
+        "captureTime": 1791066174100
+      },
+      {
+        "name": "countryRiskFlag",
+        "description": "High risk flag on country",
+        "observedValue": "High risk",
+        "frameSeq": 236,
+        "captureTime": 1791066174100
+      },
+      {
+        "name": "sourceOfFundsDescription",
+        "description": "Detailed description of source of funds",
+        "observedValue": "Trading revenue; audited 2025 accounts and bank statements reviewed.",
+        "frameSeq": 236,
+        "captureTime": 1791066174100
+      },
+      {
+        "name": "dominantBeneficialOwner",
+        "description": "Largest beneficial owner",
+        "observedValue": "Elif Brightmoor (25%)",
+        "frameSeq": 236,
+        "captureTime": 1791066174100
+      },
+      {
+        "name": "allDOMEventsDelivered",
+        "description": "Status of DOM events delivery",
+        "observedValue": "All DOM events delivered",
+        "frameSeq": 236,
+        "captureTime": 1791066174100
+      },
+      {
+        "name": "relationshipAgeMonths",
+        "description": "Relationship age shown as years and months",
+        "observedValue": "2 yr 6 mo",
+        "frameSeq": 243,
+        "captureTime": 1791066180099
+      },
+      {
+        "name": "relationshipManager",
+        "description": "Name of the relationship manager",
+        "observedValue": "Ade Fairweather",
+        "frameSeq": 243,
+        "captureTime": 1791066180099
+      },
+      {
+        "name": "largestBeneficialOwner",
+        "description": "Name of the largest beneficial owner",
+        "observedValue": "Elif Brightmoor",
+        "frameSeq": 243,
+        "captureTime": 1791066180099
+      },
+      {
+        "name": "sourceOfFundsDescription",
+        "description": "Description of the source of funds",
+        "observedValue": "Trading revenue; audited 2025 accounts and bank statements reviewed.",
+        "frameSeq": 243,
+        "captureTime": 1791066180099
+      },
+      {
+        "name": "decisionCommitted",
+        "description": "Whether the decision has been committed",
+        "observedValue": "Decision committed",
+        "frameSeq": 243,
+        "captureTime": 1791066180099
+      },
+      {
+        "name": "interlockStatus",
+        "description": "Interlock status",
+        "observedValue": "Allowed — no confirmed rule objected",
+        "frameSeq": 243,
+        "captureTime": 1791066180099
+      },
+      {
+        "name": "decisionCommitted",
+        "description": "A decision has been committed for this case",
+        "observedValue": "Approve onboarding",
+        "frameSeq": 249,
+        "captureTime": 1791066186099
+      },
+      {
+        "name": "relationshipManager",
+        "description": "The relationship manager assigned to this customer",
+        "observedValue": "Kwame Ashby-Rourke",
+        "frameSeq": 249,
+        "captureTime": 1791066186099
+      },
+      {
+        "name": "submissionDate",
+        "description": "Date the case was submitted for review",
+        "observedValue": "26 Sept 2026",
+        "frameSeq": 249,
+        "captureTime": 1791066186099
+      },
+      {
+        "name": "ledgerEntry",
+        "description": "Ledger entry reference number",
+        "observedValue": "547b2550",
+        "frameSeq": 249,
+        "captureTime": 1791066186099
+      },
+      {
+        "name": "interlockStatus",
+        "description": "Interlock status indicating rule objection",
+        "observedValue": "Allowed — no confirmed rule objected",
+        "frameSeq": 249,
+        "captureTime": 1791066186099
+      },
+      {
+        "name": "beneficialOwners",
+        "description": "List of beneficial owners with ownership shares and verification status",
+        "observedValue": "Ingrid Halvorsen (35%, Not verified), Tomasz Okonkwo-Hale (30%, Verified), Wanjiru Castellane (20%, Verified)",
+        "frameSeq": 253,
+        "captureTime": 1791066194599
+      },
+      {
+        "name": "largestUboShare",
+        "description": "Largest beneficial owner share percentage",
+        "observedValue": "35",
+        "frameSeq": 253,
+        "captureTime": 1791066194599
+      },
+      {
+        "name": "largestUboVerified",
+        "description": "Whether the largest beneficial owner is verified",
+        "observedValue": "Not verified",
+        "frameSeq": 253,
+        "captureTime": 1791066194599
+      },
+      {
+        "name": "relationshipAge",
+        "description": "Relationship age status",
+        "observedValue": "New relationship",
+        "frameSeq": 253,
+        "captureTime": 1791066194599
+      },
+      {
+        "name": "relationshipManager",
+        "description": "Assigned relationship manager",
+        "observedValue": "Odile Brannock",
+        "frameSeq": 253,
+        "captureTime": 1791066194599
+      },
+      {
+        "name": "relationshipAgeYears",
+        "description": "Relationship age displayed as years",
+        "observedValue": "3 yr",
+        "frameSeq": 258,
+        "captureTime": 1791066198599
+      },
+      {
+        "name": "relationshipManager",
+        "description": "Name of the relationship manager",
+        "observedValue": "Kwame Ashby-Rourke",
+        "frameSeq": 258,
+        "captureTime": 1791066198599
+      },
+      {
+        "name": "registrationNumber",
+        "description": "Company registration number",
+        "observedValue": "GAL-C207754",
+        "frameSeq": 258,
+        "captureTime": 1791066198599
+      },
+      {
+        "name": "sourceOfFundsDescription",
+        "description": "Details about the source of funds",
+        "observedValue": "Grain export revenue; audited 2025 accounts and three years of bank statements reviewed.",
+        "frameSeq": 258,
+        "captureTime": 1791066198599
+      },
+      {
+        "name": "submissionDate",
+        "description": "Date case was submitted",
+        "observedValue": "15 Sept 2026",
+        "frameSeq": 258,
+        "captureTime": 1791066198599
+      },
+      {
+        "name": "largestBeneficialOwner",
+        "description": "Name of the largest beneficial owner",
+        "observedValue": "Farid Quillfeather with 20% share",
+        "frameSeq": 258,
+        "captureTime": 1791066198599
+      },
+      {
+        "name": "submittedDate",
+        "description": "Date the case was submitted",
+        "observedValue": "16 Sept 2026",
+        "frameSeq": 263,
+        "captureTime": 1791066205599
+      },
+      {
+        "name": "relationshipAge",
+        "description": "Relationship age status",
+        "observedValue": "New relationship",
+        "frameSeq": 263,
+        "captureTime": 1791066205599
+      },
+      {
+        "name": "relationshipManager",
+        "description": "Assigned relationship manager",
+        "observedValue": "Signe Valcourt",
+        "frameSeq": 263,
+        "captureTime": 1791066205599
+      },
+      {
+        "name": "sourceOfFundsDescription",
+        "description": "Details of source of funds",
+        "observedValue": "Salary as deputy minister of transport (fictional) and savings; payslips and bank statements reviewed.",
+        "frameSeq": 263,
+        "captureTime": 1791066205599
+      },
+      {
+        "name": "relationshipManager",
+        "description": "Name of the relationship manager assigned to this customer",
+        "observedValue": "Rafael Moreno-Teague",
+        "frameSeq": 272,
+        "captureTime": 1791066216599
+      },
+      {
+        "name": "idVerificationStatus",
+        "description": "Status of ID verification for the beneficial owner",
+        "observedValue": "Not verified",
+        "frameSeq": 272,
+        "captureTime": 1791066216599
+      },
+      {
+        "name": "submissionDate",
+        "description": "Date when the case was submitted",
+        "observedValue": "18 Sept 2026",
+        "frameSeq": 272,
+        "captureTime": 1791066216599
+      },
+      {
+        "name": "decisionCommitted",
+        "description": "The case shows a decision has been committed",
+        "observedValue": "Decision committed",
+        "frameSeq": 276,
+        "captureTime": 1791066221099
+      },
+      {
+        "name": "outcome",
+        "description": "The decision outcome recorded",
+        "observedValue": "Approve onboarding",
+        "frameSeq": 276,
+        "captureTime": 1791066221099
+      },
+      {
+        "name": "riskRatingDisplay",
+        "description": "Risk rating shown in the review panel",
+        "observedValue": "High",
+        "frameSeq": 276,
+        "captureTime": 1791066221099
+      },
+      {
+        "name": "interlock",
+        "description": "Interlock status",
+        "observedValue": "Allowed — no confirmed rule objected",
+        "frameSeq": 276,
+        "captureTime": 1791066221099
+      },
+      {
+        "name": "ledgerEntry",
+        "description": "Ledger entry identifier",
+        "observedValue": "1ad90f19",
+        "frameSeq": 276,
+        "captureTime": 1791066221099
+      },
+      {
+        "name": "relationshipAge",
+        "description": "Relationship age shown as 6 yr",
+        "observedValue": "6 yr",
+        "frameSeq": 280,
+        "captureTime": 1791066227100
+      },
+      {
+        "name": "relationshipManager",
+        "description": "Relationship manager name",
+        "observedValue": "Kwame Ashby-Rourke",
+        "frameSeq": 280,
+        "captureTime": 1791066227100
+      },
+      {
+        "name": "registrationNumber",
+        "description": "Company registration number",
+        "observedValue": "CAL-C726553",
+        "frameSeq": 280,
+        "captureTime": 1791066227100
+      },
+      {
+        "name": "beneficialOwner1",
+        "description": "First beneficial owner Dmitri Whitlock with 42% share, verified identity, no PEP",
+        "observedValue": "Dmitri Whitlock, 42%, Verified, No PEP",
+        "frameSeq": 280,
+        "captureTime": 1791066227100
+      },
+      {
+        "name": "beneficialOwner2",
+        "description": "Second beneficial owner Nikolai Brannock with 30% share, verified identity, no PEP",
+        "observedValue": "Nikolai Brannock, 30%, Verified, No PEP",
+        "frameSeq": 280,
+        "captureTime": 1791066227100
+      },
+      {
+        "name": "sanctionsStatus",
+        "description": "Sanctions screening result",
+        "observedValue": "Clear - No match on the Northstar Synthetic Sanctions List",
+        "frameSeq": 280,
+        "captureTime": 1791066227100
+      },
+      {
+        "name": "adverseMediaStatus",
+        "description": "Adverse media screening result",
+        "observedValue": "None - No relevant adverse media found",
+        "frameSeq": 280,
+        "captureTime": 1791066227100
+      },
+      {
+        "name": "sourceOfFundsStatus",
+        "description": "Source of funds documentation status",
+        "observedValue": "Not provided - No source-of-funds information provided",
+        "frameSeq": 280,
+        "captureTime": 1791066227100
+      },
+      {
+        "name": "relationshipAge",
+        "description": "Relationship age",
+        "observedValue": "New relationship",
+        "frameSeq": 288,
+        "captureTime": 1791066234099
+      },
+      {
+        "name": "relationshipManager",
+        "description": "Relationship manager",
+        "observedValue": "Rafael Moreno-Teague",
+        "frameSeq": 288,
+        "captureTime": 1791066234099
+      },
+      {
+        "name": "largestBeneficialOwner",
+        "description": "Largest beneficial owner",
+        "observedValue": "Zofia Mbatha-Sorensen (80%, Director & majority shareholder, Verified)",
+        "frameSeq": 288,
+        "captureTime": 1791066234099
+      },
+      {
+        "name": "sanctionsScreeningStatus",
+        "description": "Sanctions screening result",
+        "observedValue": "Clear - No match on the Northstar list",
+        "frameSeq": 288,
+        "captureTime": 1791066234099
+      },
+      {
+        "name": "sourceOfFundsDescription",
+        "description": "Source of funds description",
+        "observedValue": "Trading revenue; audited 2025",
+        "frameSeq": 288,
+        "captureTime": 1791066234099
+      },
+      {
+        "name": "interlock",
+        "description": "Interlock status",
+        "observedValue": "Allowed — no confirmed rule objected",
+        "frameSeq": 288,
+        "captureTime": 1791066234099
+      },
+      {
+        "name": "ledgerEntry",
+        "description": "Ledger entry reference",
+        "observedValue": "6a6a9f57",
+        "frameSeq": 288,
+        "captureTime": 1791066234099
+      },
+      {
+        "name": "decisionCommitted",
+        "description": "Decision has been committed",
+        "observedValue": "Decision committed",
+        "frameSeq": 288,
+        "captureTime": 1791066234099
+      },
+      {
+        "name": "decisionCommitted",
+        "description": "A final decision has been recorded for this case",
+        "observedValue": "Approve onboarding",
+        "frameSeq": 295,
+        "captureTime": 1791066241100
+      },
+      {
+        "name": "interlockStatus",
+        "description": "Interlock status on the decision",
+        "observedValue": "Allowed — no confirmed rule objected",
+        "frameSeq": 295,
+        "captureTime": 1791066241100
+      },
+      {
+        "name": "ledgerEntry",
+        "description": "Ledger entry identifier",
+        "observedValue": "5873ed7b",
+        "frameSeq": 295,
+        "captureTime": 1791066241100
+      },
+      {
+        "name": "beneficialOwnersTable",
+        "description": "List of beneficial owners with shares and verification status",
+        "observedValue": "Chiara Jurado-Pike (40%, Not verified), Bastian Dunleavy (18%, Verified), Hiroshi Drummore (39%, Verified)",
+        "frameSeq": 295,
+        "captureTime": 1791066241100
+      },
+      {
+        "name": "screenCaptureStatus",
+        "description": "Screen capture capability and status",
+        "observedValue": "Not sharing",
+        "frameSeq": 295,
+        "captureTime": 1791066241100
+      },
+      {
+        "name": "relationshipAge",
+        "description": "Relationship age",
+        "observedValue": "2 yr 6 mo",
+        "frameSeq": 302,
+        "captureTime": 1791066247599
+      },
+      {
+        "name": "relationshipManager",
+        "description": "Relationship manager",
+        "observedValue": "Ade Fairweather",
+        "frameSeq": 302,
+        "captureTime": 1791066247599
+      },
+      {
+        "name": "registrationNumber",
+        "description": "Registration number",
+        "observedValue": "HAR-C223414",
+        "frameSeq": 302,
+        "captureTime": 1791066247599
+      },
+      {
+        "name": "country",
+        "description": "Country",
+        "observedValue": "Harrow Bay",
+        "frameSeq": 302,
+        "captureTime": 1791066247599
+      },
+      {
+        "name": "address",
+        "description": "Address",
+        "observedValue": "22 Foundry Road, Gullhaven, Harrow Bay",
+        "frameSeq": 302,
+        "captureTime": 1791066247599
+      },
+      {
+        "name": "largestBeneficialOwner",
+        "description": "Largest beneficial owner by share",
+        "observedValue": "Elif Brightmoor (25%)",
+        "frameSeq": 302,
+        "captureTime": 1791066247599
+      },
+      {
+        "name": "sourceOfFundsDescription",
+        "description": "Source of funds description",
+        "observedValue": "Trading revenue; audited 2025 accounts and bank statements reviewed.",
+        "frameSeq": 302,
+        "captureTime": 1791066247599
+      },
+      {
+        "name": "interlock",
+        "description": "Interlock status",
+        "observedValue": "Allowed — no confirmed rule objected",
+        "frameSeq": 302,
+        "captureTime": 1791066247599
+      },
+      {
+        "name": "ledgerEntry",
+        "description": "Ledger entry",
+        "observedValue": "3fbd0c24",
+        "frameSeq": 302,
+        "captureTime": 1791066247599
+      },
+      {
+        "name": "relationshipManager",
+        "description": "Relationship manager name",
+        "observedValue": "Kwame Ashby-Rourke",
+        "frameSeq": 310,
+        "captureTime": 1791066254099
+      },
+      {
+        "name": "submittedDate",
+        "description": "Date case was submitted",
+        "observedValue": "26 Sept 2026",
+        "frameSeq": 310,
+        "captureTime": 1791066254099
+      },
+      {
+        "name": "decisionStatus",
+        "description": "Current decision status on the case",
+        "observedValue": "Decision committed",
+        "frameSeq": 310,
+        "captureTime": 1791066254099
+      },
+      {
+        "name": "sourceOfFundsDescription",
+        "description": "Description of source of funds",
+        "observedValue": "Customer states savings from employment; no documents reviewed yet",
+        "frameSeq": 310,
+        "captureTime": 1791066254099
+      },
+      {
+        "name": "screenCaptureStatus",
+        "description": "Status of screen capture for interview",
+        "observedValue": "Not sharing",
+        "frameSeq": 310,
+        "captureTime": 1791066254099
+      },
+      {
+        "name": "decisionCommitted",
+        "description": "Decision has been committed as shown in the Review panel",
+        "observedValue": "Decision committed",
+        "frameSeq": 311,
+        "captureTime": 1791066254599
+      },
+      {
+        "name": "outcome",
+        "description": "Case outcome decision",
+        "observedValue": "Reject",
+        "frameSeq": 311,
+        "captureTime": 1791066254599
+      },
+      {
+        "name": "riskRatingDisplay",
+        "description": "Risk rating shown in decision panel",
+        "observedValue": "High",
+        "frameSeq": 311,
+        "captureTime": 1791066254599
+      },
+      {
+        "name": "interlockStatus",
+        "description": "Interlock status",
+        "observedValue": "Allowed — no confirmed rule objected",
+        "frameSeq": 311,
+        "captureTime": 1791066254599
+      }
+    ],
+    "errors": []
+  },
+  "usage": {
+    "requests": 57,
+    "inputTokens": 249420,
+    "outputTokens": 21226,
+    "cacheReadTokens": 0
+  }
+}

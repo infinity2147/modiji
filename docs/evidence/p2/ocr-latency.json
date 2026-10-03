@@ -1,0 +1,579 @@
+{
+  "host": "headless Chromium (Playwright 1.63) on the development machine; single run",
+  "fixture": "packages/perception/test/fixtures/casedesk-recorded",
+  "frameSize": "1440×900 at 1× (OCR upscales the read region 2×)",
+  "changedFramesTimed": 80,
+  "firstFullFrameMs": 1508,
+  "allChangedFrames": {
+    "p50": 381,
+    "p95": 3394,
+    "max": 3692
+  },
+  "afterFirstFrame": {
+    "p50": 381,
+    "p95": 3438
+  },
+  "meanRegionShare": 0.323,
+  "timings": [
+    {
+      "frameSeq": 1,
+      "ms": 1508,
+      "reason": "first",
+      "region": 1296000,
+      "boxes": 0
+    },
+    {
+      "frameSeq": 2,
+      "ms": 1643,
+      "reason": "cells",
+      "region": 1031040,
+      "boxes": 0
+    },
+    {
+      "frameSeq": 4,
+      "ms": 1937,
+      "reason": "cells",
+      "region": 1026744,
+      "boxes": 5
+    },
+    {
+      "frameSeq": 5,
+      "ms": 274,
+      "reason": "cells",
+      "region": 55146,
+      "boxes": 5
+    },
+    {
+      "frameSeq": 8,
+      "ms": 3316,
+      "reason": "cells",
+      "region": 977988,
+      "boxes": 14
+    },
+    {
+      "frameSeq": 13,
+      "ms": 47,
+      "reason": "cells",
+      "region": 4389,
+      "boxes": 14
+    },
+    {
+      "frameSeq": 16,
+      "ms": 80,
+      "reason": "cells",
+      "region": 24846,
+      "boxes": 14
+    },
+    {
+      "frameSeq": 18,
+      "ms": 694,
+      "reason": "cells",
+      "region": 221650,
+      "boxes": 14
+    },
+    {
+      "frameSeq": 19,
+      "ms": 3024,
+      "reason": "cells",
+      "region": 942138,
+      "boxes": 14
+    },
+    {
+      "frameSeq": 21,
+      "ms": 3208,
+      "reason": "cells",
+      "region": 977988,
+      "boxes": 12
+    },
+    {
+      "frameSeq": 22,
+      "ms": 1212,
+      "reason": "cells",
+      "region": 551232,
+      "boxes": 12
+    },
+    {
+      "frameSeq": 25,
+      "ms": 16,
+      "reason": "cells",
+      "region": 4389,
+      "boxes": 12
+    },
+    {
+      "frameSeq": 28,
+      "ms": 115,
+      "reason": "cells",
+      "region": 85446,
+      "boxes": 12
+    },
+    {
+      "frameSeq": 29,
+      "ms": 225,
+      "reason": "cells",
+      "region": 93021,
+      "boxes": 12
+    },
+    {
+      "frameSeq": 30,
+      "ms": 2323,
+      "reason": "cells",
+      "region": 1013838,
+      "boxes": 12
+    },
+    {
+      "frameSeq": 31,
+      "ms": 1925,
+      "reason": "cells",
+      "region": 569568,
+      "boxes": 12
+    },
+    {
+      "frameSeq": 33,
+      "ms": 3386,
+      "reason": "cells",
+      "region": 1013838,
+      "boxes": 18
+    },
+    {
+      "frameSeq": 34,
+      "ms": 1450,
+      "reason": "cells",
+      "region": 408320,
+      "boxes": 18
+    },
+    {
+      "frameSeq": 37,
+      "ms": 54,
+      "reason": "cells",
+      "region": 3135,
+      "boxes": 18
+    },
+    {
+      "frameSeq": 38,
+      "ms": 429,
+      "reason": "cells",
+      "region": 115746,
+      "boxes": 18
+    },
+    {
+      "frameSeq": 41,
+      "ms": 360,
+      "reason": "cells",
+      "region": 93021,
+      "boxes": 18
+    },
+    {
+      "frameSeq": 43,
+      "ms": 381,
+      "reason": "cells",
+      "region": 115746,
+      "boxes": 18
+    },
+    {
+      "frameSeq": 44,
+      "ms": 3344,
+      "reason": "cells",
+      "region": 1013838,
+      "boxes": 18
+    },
+    {
+      "frameSeq": 46,
+      "ms": 3493,
+      "reason": "cells",
+      "region": 1013838,
+      "boxes": 14
+    },
+    {
+      "frameSeq": 47,
+      "ms": 58,
+      "reason": "cells",
+      "region": 3135,
+      "boxes": 14
+    },
+    {
+      "frameSeq": 49,
+      "ms": 53,
+      "reason": "cells",
+      "region": 3135,
+      "boxes": 14
+    },
+    {
+      "frameSeq": 50,
+      "ms": 18,
+      "reason": "cells",
+      "region": 4389,
+      "boxes": 14
+    },
+    {
+      "frameSeq": 51,
+      "ms": 55,
+      "reason": "cells",
+      "region": 3135,
+      "boxes": 14
+    },
+    {
+      "frameSeq": 54,
+      "ms": 417,
+      "reason": "cells",
+      "region": 70296,
+      "boxes": 14
+    },
+    {
+      "frameSeq": 57,
+      "ms": 363,
+      "reason": "cells",
+      "region": 115746,
+      "boxes": 14
+    },
+    {
+      "frameSeq": 58,
+      "ms": 3447,
+      "reason": "cells",
+      "region": 1013838,
+      "boxes": 12
+    },
+    {
+      "frameSeq": 61,
+      "ms": 3338,
+      "reason": "cells",
+      "region": 1013838,
+      "boxes": 12
+    },
+    {
+      "frameSeq": 62,
+      "ms": 59,
+      "reason": "cells",
+      "region": 3135,
+      "boxes": 12
+    },
+    {
+      "frameSeq": 64,
+      "ms": 51,
+      "reason": "cells",
+      "region": 3135,
+      "boxes": 12
+    },
+    {
+      "frameSeq": 65,
+      "ms": 430,
+      "reason": "cells",
+      "region": 115746,
+      "boxes": 12
+    },
+    {
+      "frameSeq": 67,
+      "ms": 353,
+      "reason": "cells",
+      "region": 93021,
+      "boxes": 12
+    },
+    {
+      "frameSeq": 68,
+      "ms": 395,
+      "reason": "cells",
+      "region": 115746,
+      "boxes": 12
+    },
+    {
+      "frameSeq": 69,
+      "ms": 70,
+      "reason": "cells",
+      "region": 17271,
+      "boxes": 12
+    },
+    {
+      "frameSeq": 71,
+      "ms": 3394,
+      "reason": "cells",
+      "region": 1013838,
+      "boxes": 12
+    },
+    {
+      "frameSeq": 74,
+      "ms": 3692,
+      "reason": "cells",
+      "region": 1013838,
+      "boxes": 12
+    },
+    {
+      "frameSeq": 75,
+      "ms": 60,
+      "reason": "cells",
+      "region": 3135,
+      "boxes": 12
+    },
+    {
+      "frameSeq": 77,
+      "ms": 102,
+      "reason": "cells",
+      "region": 47571,
+      "boxes": 12
+    },
+    {
+      "frameSeq": 78,
+      "ms": 117,
+      "reason": "cells",
+      "region": 55146,
+      "boxes": 12
+    },
+    {
+      "frameSeq": 80,
+      "ms": 249,
+      "reason": "cells",
+      "region": 55146,
+      "boxes": 12
+    },
+    {
+      "frameSeq": 83,
+      "ms": 342,
+      "reason": "cells",
+      "region": 115746,
+      "boxes": 12
+    },
+    {
+      "frameSeq": 86,
+      "ms": 3288,
+      "reason": "cells",
+      "region": 973896,
+      "boxes": 12
+    },
+    {
+      "frameSeq": 93,
+      "ms": 1393,
+      "reason": "cells",
+      "region": 1026744,
+      "boxes": 0
+    },
+    {
+      "frameSeq": 95,
+      "ms": 1630,
+      "reason": "cells",
+      "region": 1026744,
+      "boxes": 4
+    },
+    {
+      "frameSeq": 96,
+      "ms": 21,
+      "reason": "cells",
+      "region": 3135,
+      "boxes": 4
+    },
+    {
+      "frameSeq": 98,
+      "ms": 3049,
+      "reason": "cells",
+      "region": 977988,
+      "boxes": 15
+    },
+    {
+      "frameSeq": 101,
+      "ms": 119,
+      "reason": "cells",
+      "region": 21074,
+      "boxes": 15
+    },
+    {
+      "frameSeq": 104,
+      "ms": 52,
+      "reason": "cells",
+      "region": 10830,
+      "boxes": 15
+    },
+    {
+      "frameSeq": 105,
+      "ms": 130,
+      "reason": "cells",
+      "region": 47571,
+      "boxes": 15
+    },
+    {
+      "frameSeq": 107,
+      "ms": 2913,
+      "reason": "cells",
+      "region": 1013838,
+      "boxes": 15
+    },
+    {
+      "frameSeq": 108,
+      "ms": 22,
+      "reason": "cells",
+      "region": 4446,
+      "boxes": 15
+    },
+    {
+      "frameSeq": 109,
+      "ms": 2946,
+      "reason": "cells",
+      "region": 1013838,
+      "boxes": 15
+    },
+    {
+      "frameSeq": 110,
+      "ms": 56,
+      "reason": "cells",
+      "region": 3135,
+      "boxes": 15
+    },
+    {
+      "frameSeq": 112,
+      "ms": 101,
+      "reason": "cells",
+      "region": 47571,
+      "boxes": 15
+    },
+    {
+      "frameSeq": 113,
+      "ms": 67,
+      "reason": "cells",
+      "region": 39996,
+      "boxes": 15
+    },
+    {
+      "frameSeq": 114,
+      "ms": 109,
+      "reason": "cells",
+      "region": 55146,
+      "boxes": 15
+    },
+    {
+      "frameSeq": 117,
+      "ms": 344,
+      "reason": "cells",
+      "region": 93021,
+      "boxes": 15
+    },
+    {
+      "frameSeq": 119,
+      "ms": 2748,
+      "reason": "cells",
+      "region": 906288,
+      "boxes": 15
+    },
+    {
+      "frameSeq": 121,
+      "ms": 2902,
+      "reason": "cells",
+      "region": 1013838,
+      "boxes": 13
+    },
+    {
+      "frameSeq": 122,
+      "ms": 1499,
+      "reason": "cells",
+      "region": 440220,
+      "boxes": 11
+    },
+    {
+      "frameSeq": 125,
+      "ms": 105,
+      "reason": "cells",
+      "region": 47571,
+      "boxes": 11
+    },
+    {
+      "frameSeq": 126,
+      "ms": 113,
+      "reason": "cells",
+      "region": 55146,
+      "boxes": 11
+    },
+    {
+      "frameSeq": 130,
+      "ms": 324,
+      "reason": "cells",
+      "region": 77871,
+      "boxes": 11
+    },
+    {
+      "frameSeq": 132,
+      "ms": 2078,
+      "reason": "cells",
+      "region": 691188,
+      "boxes": 13
+    },
+    {
+      "frameSeq": 133,
+      "ms": 1411,
+      "reason": "cells",
+      "region": 508184,
+      "boxes": 13
+    },
+    {
+      "frameSeq": 138,
+      "ms": 1329,
+      "reason": "cells",
+      "region": 1026744,
+      "boxes": 0
+    },
+    {
+      "frameSeq": 139,
+      "ms": 219,
+      "reason": "cells",
+      "region": 95090,
+      "boxes": 0
+    },
+    {
+      "frameSeq": 140,
+      "ms": 1845,
+      "reason": "cells",
+      "region": 1026744,
+      "boxes": 5
+    },
+    {
+      "frameSeq": 141,
+      "ms": 21,
+      "reason": "cells",
+      "region": 3135,
+      "boxes": 5
+    },
+    {
+      "frameSeq": 142,
+      "ms": 3095,
+      "reason": "cells",
+      "region": 977988,
+      "boxes": 14
+    },
+    {
+      "frameSeq": 146,
+      "ms": 34,
+      "reason": "cells",
+      "region": 4389,
+      "boxes": 14
+    },
+    {
+      "frameSeq": 149,
+      "ms": 79,
+      "reason": "cells",
+      "region": 24846,
+      "boxes": 14
+    },
+    {
+      "frameSeq": 150,
+      "ms": 632,
+      "reason": "cells",
+      "region": 221650,
+      "boxes": 14
+    },
+    {
+      "frameSeq": 151,
+      "ms": 2869,
+      "reason": "cells",
+      "region": 942138,
+      "boxes": 14
+    },
+    {
+      "frameSeq": 153,
+      "ms": 3438,
+      "reason": "cells",
+      "region": 977988,
+      "boxes": 13
+    },
+    {
+      "frameSeq": 154,
+      "ms": 1912,
+      "reason": "cells",
+      "region": 551232,
+      "boxes": 12
+    }
+  ]
+}

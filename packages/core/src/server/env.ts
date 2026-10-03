@@ -10,6 +10,7 @@ const ENV_KEYS = [
   "ELEVENLABS_INTERVIEWER_AGENT_ID",
   "ELEVENLABS_TUTOR_AGENT_ID",
   "CUSTOM_LLM_SECRET",
+  "MCP_BEARER_TOKEN",
 ] as const;
 type EnvKey = (typeof ENV_KEYS)[number];
 
@@ -26,6 +27,7 @@ const HINTS: Record<EnvKey, string> = {
   ELEVENLABS_INTERVIEWER_AGENT_ID: "written by the agent-sync script",
   ELEVENLABS_TUTOR_AGENT_ID: "written by the agent-sync script",
   CUSTOM_LLM_SECRET: "at least 32 characters; required in production",
+  MCP_BEARER_TOKEN: "at least 32 characters; /mcp refuses every request in production while unset",
 };
 
 const optional = z.string().optional();
@@ -53,6 +55,8 @@ const ServerEnvSchema = z.strictObject({
   ELEVENLABS_TUTOR_AGENT_ID: optional,
   /** Bearer secret ElevenLabs sends to our custom-LLM endpoint. */
   CUSTOM_LLM_SECRET: z.string().min(32).optional(),
+  /** Bearer token MCP clients send to `/mcp` (plan §7.9). Unset: open in development, refused in production. */
+  MCP_BEARER_TOKEN: z.string().min(32).optional(),
 });
 export type ServerEnv = z.infer<typeof ServerEnvSchema>;
 

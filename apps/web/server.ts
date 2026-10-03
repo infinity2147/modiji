@@ -31,6 +31,7 @@ registerHooks({
 
 async function main(): Promise<void> {
   const { createRuntime } = await import("./lib/server/runtime-init");
+  const { MCP_PATH, createMcpEndpoint } = await import("./lib/server/debrief/mcp");
   // Variables already set in the environment win over the file (process.loadEnvFile never overrides).
   if (process.env.NODE_ENV !== "production" && existsSync(ROOT_ENV_FILE)) process.loadEnvFile(ROOT_ENV_FILE);
   const { runtime, close: closeRuntime } = createRuntime(process.env);
@@ -41,6 +42,8 @@ async function main(): Promise<void> {
   const app = next({ dev, dir: import.meta.dirname, hostname: HOSTNAME, port, httpServer });
   await app.prepare();
   const handle = app.getRequestHandler();
+  // Agents' guardrail endpoint (plan §7.9), served beside Next: `check_action` over the confirmed rulebook.
+  const mcp = createMcpEndpoint(runtime);
 
   // Tracked so shutdown can drop connections that never end on their own: idle keep-alives and
   // upgraded sockets (HMR WebSockets), which `closeAllConnections()` does not cover.
@@ -61,7 +64,8 @@ async function main(): Promise<void> {
       inFlightRequests -= 1;
       if (shuttingDown && inFlightRequests === 0) destroySockets();
     });
-    handle(req, res).catch((error: unknown) => {
+    const isMcp = new URL(req.url ?? "/", "http://localhost").pathname === MCP_PATH;
+    (isMcp ? mcp(req, res) : handle(req, res)).catch((error: unknown) => {
       console.error("Unhandled request error", req.method, req.url, error);
       if (!res.headersSent) res.statusCode = 500;
       res.end();

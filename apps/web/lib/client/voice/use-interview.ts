@@ -11,7 +11,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useConversation, useConversationClientTool } from "@elevenlabs/react";
 import { z } from "zod";
-import { DEFAULT_GATE_CONFIG, systemClock, type AgentRole } from "@vashistha/core";
+import { DEFAULT_GATE_CONFIG, SET_OFF_RECORD_TOOL, systemClock, type AgentRole } from "@vashistha/core";
 import type { SessionMode } from "../../contracts/casedesk";
 import { describeError, type FetchFn } from "../api";
 import { createGateSession, type GateSession, type GateSnapshot } from "../gate/gate-session";
@@ -19,6 +19,7 @@ import { createLedgerTail, type LedgerTail, type LedgerTailState } from "../judg
 import { fetchVoiceToken } from "./api";
 import { createConversationBridge, type ConversationBridge, type TranscriptTurn, type UploadStatus } from "./bridge";
 import { createPrivacyController, privacyServer, type PrivacyBase, type PrivacyController, type PrivacyState } from "./privacy";
+import { browserCueDom, createCueScheduler, type CueResult } from "./question-cues";
 
 const browserFetch: FetchFn = (input, init) => fetch(input, init);
 
@@ -62,16 +63,17 @@ export type InterviewLoop = {
   privacy: PrivacyController | null;
   privacyState: PrivacyState | null;
   ledger: LedgerTailState;
+  /** The UI cue for the last question spoken (field highlighted, gap shown), if it had one. */
+  cue: CueResult | null;
 };
 
 /**
- * `set_off_record` client tool parameters. The voice-phrase path works only once the agent JSON in
- * /agents declares the tool (a later `agents:sync`), e.g. `{ type: "client", name: "set_off_record",
- * expects_response: true, parameters: { type: "object", properties: { offRecord: { type: "boolean" } } } }`.
- * Until then the button and Alt+Shift+O are the only paths. Resuming by voice is impossible by design:
- * the microphone is muted while off the record.
+ * `set_off_record` client tool parameters (agents/*.json `clientTools`). The custom LLM calls it, with
+ * `{offRecord: true}` and no speech, when the expert says an off-record phrase; the bridge has usually
+ * gone off the record on the transcript already (going off is idempotent). Resuming by voice is
+ * impossible by design — the microphone is muted while off the record — so `offRecord: false` is refused.
  */
-const SetOffRecordParamsSchema = z.object({ offRecord: z.boolean().default(true) });
+const SetOffRecordParamsSchema = z.object({ offRecord: z.boolean() });
 
 const EMPTY_TRANSCRIPT: readonly TranscriptTurn[] = [];
 const NO_UPLOADS: UploadStatus = { pending: 0, failed: 0, lastError: undefined };
@@ -110,6 +112,8 @@ export function useInterviewLoop(options: {
   const [loop, setLoop] = useState<Loop | null>(null);
   const [privacy, setPrivacy] = useState<PrivacyController | null>(null);
   const [voice, setVoice] = useState<VoiceStatus>({ state: "idle" });
+  const [cue, setCue] = useState<CueResult | null>(null);
+  const [cues] = useState(() => createCueScheduler({ dom: browserCueDom, now: systemClock.now, onCue: setCue }));
   const loopRef = useRef<Loop | null>(null);
   const privacyRef = useRef<PrivacyController | null>(null);
   const captureRef = useRef(options.capture);
@@ -122,6 +126,7 @@ export function useInterviewLoop(options: {
       setVoice({ state: "connected", conversationId });
     },
     onDisconnect: (details) => {
+      cues.reset();
       loopRef.current?.bridge.disconnected();
       setVoice(
         details.reason === "error"
@@ -132,7 +137,10 @@ export function useInterviewLoop(options: {
     onError: (message) => setVoice({ state: "error", message }),
     onMessage: (message) => loopRef.current?.bridge.message(message),
     onVadScore: ({ vadScore }) => loopRef.current?.bridge.vad(vadScore),
-    onModeChange: ({ mode: agentMode }) => loopRef.current?.bridge.mode(agentMode),
+    onModeChange: ({ mode: agentMode }) => {
+      loopRef.current?.bridge.mode(agentMode);
+      cues.agentMode(agentMode);
+    },
   });
   const conversationRef = useRef(conversation);
   useEffect(() => {
@@ -168,6 +176,7 @@ export function useInterviewLoop(options: {
       },
       privacy: () => privacyRef.current?.state() ?? { offRecord: true, epoch: -1 },
       vadThreshold: DEFAULT_GATE_CONFIG.vadSpeakingThreshold,
+      onOffRecordPhrase: () => void privacyRef.current?.goOffRecord(),
     });
     const gate = createGateSession({
       sessionId,
@@ -176,7 +185,10 @@ export function useInterviewLoop(options: {
       clock: systemClock,
       sendControlMessage: (text) => conversationRef.current.sendUserMessage(text),
       holdAgent: () => conversationRef.current.sendUserActivity(),
-      onAsked: ({ questionId }) => bridge.asked(questionId),
+      onAsked: (asked) => {
+        bridge.asked(asked.questionId);
+        cues.armed(asked);
+      },
     });
     const tail = createLedgerTail({ sessionId, fetch: browserFetch, setTimer: systemClock.setTimer });
     const next = { gate, bridge, tail };
@@ -192,7 +204,7 @@ export function useInterviewLoop(options: {
         // Already ended.
       }
     };
-  }, [sessionId, agent, loaded]);
+  }, [sessionId, agent, loaded, cues]);
 
   // The privacy controller exists once the session's privacy state is known.
   const offRecordAtLoad = privacyInit?.offRecord;
@@ -226,17 +238,14 @@ export function useInterviewLoop(options: {
     return privacy.subscribe(apply);
   }, [privacy, loop]);
 
-  useConversationClientTool("set_off_record", (params: Record<string, unknown>) => {
+  useConversationClientTool(SET_OFF_RECORD_TOOL, (params: Record<string, unknown>) => {
     const parsed = SetOffRecordParamsSchema.safeParse(params);
-    if (!parsed.success) throw new Error("set_off_record expects { offRecord: boolean }");
+    if (!parsed.success) throw new Error(`${SET_OFF_RECORD_TOOL} expects { offRecord: boolean }`);
+    if (!parsed.data.offRecord) return "Not resumed: going back on the record is only possible with the on-screen button.";
     const controller = privacyRef.current;
     if (!controller) throw new Error("the session is still loading");
-    if (parsed.data.offRecord) {
-      void controller.goOffRecord();
-      return "Off the record: the microphone is muted and capture has stopped.";
-    }
-    void controller.resume();
-    return "Resuming the record.";
+    void controller.goOffRecord();
+    return "Off the record: the microphone is muted and capture has stopped.";
   });
 
   const privacyState = useOptionalStore(privacy && { subscribe: privacy.subscribe, read: privacy.state }, null);
@@ -307,6 +316,7 @@ export function useInterviewLoop(options: {
     privacy,
     privacyState,
     ledger,
+    cue,
   };
 }
 

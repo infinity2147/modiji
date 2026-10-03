@@ -13,3 +13,6 @@ data/
 test-results/
 playwright-report/
 *.tsbuildinfo
+
+# Recorded perception fixture frames (55 MiB): kept out of git; verified by frames.sha256 (see FIXTURES.md)
+packages/perception/test/fixtures/casedesk-recorded/frames/

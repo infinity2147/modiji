@@ -1,0 +1,87 @@
+{
+  "tool": "vashistha-preflight",
+  "startedAt": "2026-10-03T22:20:55.272Z",
+  "finishedAt": "2026-10-03T22:21:06.607Z",
+  "target": "https://vashistha-production.up.railway.app",
+  "options": {
+    "only": [
+      "public-llm",
+      "voice-off-record"
+    ],
+    "quietWindowMs": 8000,
+    "speechTimeoutMs": 20000
+  },
+  "exitCode": 1,
+  "summary": {
+    "pass": 1,
+    "fail": 1,
+    "skip": 0,
+    "info": 0
+  },
+  "results": [
+    {
+      "id": "public-llm",
+      "title": "Custom-LLM endpoint over the public internet",
+      "status": "pass",
+      "ms": 2079,
+      "detail": "401 without/with wrong bearer; unauthorised → skip_turn (260 ms); authorised → exact text (first chunk 261 ms); replay → skip_turn (already_used)",
+      "facts": {
+        "path": "/api/llm/chat/completions",
+        "model": "vashistha-interviewer-v2",
+        "sessionId": "preflight-145c9cd6-7bc3-4471-9eed-44386f9c2a74",
+        "skipTurn": {
+          "ok": true,
+          "reason": "not_control_message",
+          "firstChunkMs": 259,
+          "totalMs": 260
+        },
+        "speech": {
+          "ok": true,
+          "firstChunkMs": 261,
+          "totalMs": 261
+        },
+        "replay": {
+          "ok": true,
+          "reason": "already_used",
+          "totalMs": 263
+        }
+      }
+    },
+    {
+      "id": "voice-off-record",
+      "title": "Off-record phrase → set_off_record client tool, no speech",
+      "status": "fail",
+      "ms": 9252,
+      "detail": "expected exactly one client_tool_call, got 0",
+      "facts": {
+        "quietWindowMs": 8000,
+        "conversationId": "conv_9801m41xpbbhf79a6jqxxn6awrmx",
+        "events": {
+          "agent_tool_response": 1,
+          "ping": 4
+        },
+        "toolCallMs": null,
+        "clientToolCalls": [],
+        "toolResponses": [
+          {
+            "toolName": "skip_turn",
+            "toolType": "system",
+            "status": "success",
+            "isError": false,
+            "isCalled": true
+          }
+        ],
+        "userTranscriptEchoed": false,
+        "unexpectedEventTypes": []
+      }
+    }
+  ],
+  "checklist": [
+    "Use Chrome (latest stable) on the demo machine; open the app on its HTTPS origin (PUBLIC_BASE_URL), never http or a LAN IP.",
+    "Site settings for that origin: Microphone = Allow; pick the demo headset as the input device.",
+    "Screen share via getDisplayMedia: choose \"Entire screen\" or the CaseDesk \"Window\"; leave \"Also share tab audio\" OFF.",
+    "macOS: System Settings → Privacy & Security → Screen Recording and Microphone both enabled for Chrome (restart Chrome after granting).",
+    "Close notification sources (Do Not Disturb on, Slack/Mail quit) and every other tab or window with personal data or PII.",
+    "Test the headset: confirm the input level moves when you speak (OS sound settings) and that agent speech plays in the headset only, not the room."
+  ]
+}

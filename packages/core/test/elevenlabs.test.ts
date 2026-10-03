@@ -133,6 +133,50 @@ describe("createElevenLabsClient requests", () => {
     expect(err.kind).toBe("invalid_response");
   });
 
+  it("lists client tools across pages, filtered by type and name prefix", async () => {
+    const tool = (id: string, name: string) => ({
+      id,
+      tool_config: { type: "client", name, description: "d", expects_response: false },
+      access_info: {},
+      usage_stats: {},
+    });
+    const pages: Record<string, unknown> = {
+      "": { tools: [tool("t1", "set_off_record")], has_more: true, next_cursor: "c2" },
+      c2: { tools: [tool("t2", "set_off_record_v0")], has_more: false, next_cursor: null },
+    };
+    const { client, calls } = clientWith((call) => json(pages[call.url.searchParams.get("cursor") ?? ""]));
+    const tools = await client.listClientTools({ search: "set_off_record" });
+    expect(tools.map((t) => [t.toolId, t.name, t.type])).toEqual([
+      ["t1", "set_off_record", "client"],
+      ["t2", "set_off_record_v0", "client"],
+    ]);
+    expect(tools[0]?.toolConfig).toMatchObject({ expects_response: false });
+    expect(calls.map((c) => `${c.method} ${c.url.pathname}${c.url.search}`)).toEqual([
+      "GET /v1/convai/tools?types=client&page_size=100&search=set_off_record",
+      "GET /v1/convai/tools?types=client&page_size=100&search=set_off_record&cursor=c2",
+    ]);
+  });
+
+  it("creates, updates and gets a tool with a tool_config body", async () => {
+    const config = { type: "client", name: "set_off_record", description: "d" };
+    const { client, calls } = clientWith(() => json({ id: "tool_1", tool_config: config, access_info: {}, usage_stats: {} }));
+    await expect(client.createTool(config)).resolves.toMatchObject({ toolId: "tool_1", name: "set_off_record" });
+    await expect(client.updateTool("tool_1", config)).resolves.toMatchObject({ toolId: "tool_1" });
+    await expect(client.getTool("tool_1")).resolves.toMatchObject({ toolId: "tool_1", toolConfig: config });
+    expect(calls.map((c) => `${c.method} ${c.url.pathname}`)).toEqual([
+      "POST /v1/convai/tools",
+      "PATCH /v1/convai/tools/tool_1",
+      "GET /v1/convai/tools/tool_1",
+    ]);
+    expect(calls[0]?.body).toEqual({ tool_config: config });
+    expect(calls[1]?.body).toEqual({ tool_config: config });
+  });
+
+  it("rejects a tool response without a tool_config name", async () => {
+    const { client } = clientWith(() => json({ id: "tool_1", tool_config: { type: "client" } }));
+    expect((await apiError(client.getTool("tool_1"))).kind).toBe("invalid_response");
+  });
+
   it("creates a secret with type new", async () => {
     const { client, calls } = clientWith(() => json({ type: "stored", secret_id: "sec_1", name: "n" }));
     await expect(client.createSecret("n", "value")).resolves.toEqual({ secretId: "sec_1" });

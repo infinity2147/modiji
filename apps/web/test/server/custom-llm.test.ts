@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { formatControlMessage } from "@vashistha/core";
+import { createOffRecordPhraseMatcher, formatControlMessage } from "@vashistha/core";
 import type { Ledger } from "@vashistha/core/server";
 import { nonceDigest } from "../../lib/server/authorizations";
 import { handleChatCompletion } from "../../lib/server/custom-llm";
@@ -258,6 +258,120 @@ describe("skip_turn", () => {
       ),
     );
     expect(await readTurn(await h.call(body))).toMatchObject({ kind: "skip", reason: "already_used" });
+  });
+});
+
+describe("off-record phrase (silences without authorization)", () => {
+  const PHRASE = "Okay, let's go off the record for a moment.";
+  const phraseTurn = (opts: { model?: string; sessionId?: string | null; text?: string } = {}) =>
+    chatBody({
+      ...(opts.model ? { model: opts.model } : {}),
+      messages: [
+        { role: "assistant", content: QUESTION },
+        { role: "user", content: opts.text ?? PHRASE },
+      ],
+      ...(opts.sessionId === null ? {} : { extraBody: { sessionId: opts.sessionId ?? "s1" } }),
+    });
+
+  it("emits the byte-exact set_off_record tool-call stream with no content", async () => {
+    const turn = await readTurn(await h.call(phraseTurn()));
+    expect(turn.kind).toBe("off_record");
+    const id = turn.chunks[0]?.id;
+    const callId = (turn.chunks[0]?.choices[0].delta["tool_calls"] as Array<{ id: string }>)[0]?.id;
+    expect(callId).toMatch(/^call_off_record_/);
+    const created = Math.floor(T0 / 1000);
+    const head = `{"id":"${id}","object":"chat.completion.chunk","created":${created},"model":"vashistha-interviewer-v1","choices":[{"index":0,"delta":`;
+    expect(turn.raw).toBe(
+      `data: ${head}{"role":"assistant","content":null,"tool_calls":[{"index":0,"id":"${callId}","type":"function","function":{"name":"set_off_record","arguments":"{\\"offRecord\\":true}"}}]},"finish_reason":null}]}\n\n` +
+        `data: ${head}{},"finish_reason":"tool_calls"}]}\n\n` +
+        "data: [DONE]\n\n",
+    );
+  });
+
+  it.each([
+    ["the tutor", () => phraseTurn({ model: "vashistha-tutor-v2" })],
+    ["a request without a session", () => phraseTurn({ sessionId: null })],
+    ["a session unknown to the ledger", () => phraseTurn({ sessionId: "ghost" })],
+    ["Hindi", () => phraseTurn({ text: "रिकॉर्डिंग बंद करो।" })],
+    ["text parts", () =>
+      chatBody({ messages: [{ role: "user", content: [{ type: "text", text: "Pause recording." }] }], extraBody: { sessionId: "s1" } })],
+  ] as const)("needs no authorization (%s)", async (_name, body) => {
+    expect((await readTurn(await h.call(body()))).kind).toBe("off_record");
+  });
+
+  it.each([
+    ["an unknown model", "unknown_model", () => phraseTurn({ model: "gpt-4o" })],
+    ["the phrase followed by a tool result", "not_user_turn", () =>
+      chatBody({ messages: [{ role: "user", content: PHRASE }, { role: "tool", content: "ok" }], extraBody: { sessionId: "s1" } })],
+    ["the phrase followed by an assistant turn", "not_user_turn", () =>
+      chatBody({ messages: [{ role: "user", content: PHRASE }, { role: "assistant", content: "" }], extraBody: { sessionId: "s1" } })],
+    ["a long answer that mentions it", "not_control_message", () =>
+      phraseTurn({ text: "Honestly I would never say anything off the record about a customer in this queue." })],
+  ] as const)("skips %s (%s)", async (_name, reason, body) => {
+    expect(await readTurn(await h.call(body()))).toMatchObject({ kind: "skip", reason });
+  });
+
+  it("lets a valid control message speak even if a matcher would accept it", async () => {
+    const turn = await handleChatCompletion(
+      chatRequest(controlTurn(issue().nonce), { authorization: `Bearer ${SECRET}` }),
+      { ...h.deps, offRecordPhrase: () => true },
+      performance.now(),
+    );
+    expect(await readTurn(turn)).toMatchObject({ kind: "speech", text: QUESTION });
+  });
+
+  it("uses the configured phrase list", async () => {
+    const deps = { ...h.deps, offRecordPhrase: createOffRecordPhraseMatcher(["privacy please"]) };
+    const call = async (text: string) =>
+      readTurn(await handleChatCompletion(chatRequest(phraseTurn({ text }), { authorization: `Bearer ${SECRET}` }), deps, performance.now()));
+    expect((await call("Privacy, please!")).kind).toBe("off_record");
+    expect(await call("off the record")).toMatchObject({ kind: "skip", reason: "not_control_message" });
+  });
+
+  it("records only a system_control marker, with nothing of the utterance, and no evidence", async () => {
+    await h.call(phraseTurn());
+    const entries = h.ledger.list("s1");
+    expect(entries).toHaveLength(1);
+    expect(entries[0]).toMatchObject({
+      source: "system_control",
+      kind: "privacy.phrase_detected",
+      parentIds: [],
+      privacyEpoch: 0,
+      payload: { agent: "interviewer", tool: "set_off_record" },
+    });
+    expect(entries[0]?.traceId).toMatch(/^chatcmpl-/);
+    expect(h.ledger.evidence("s1")).toEqual([]);
+    const stored = JSON.stringify(entries).toLowerCase();
+    const logged = h.logs.join("\n").toLowerCase();
+    for (const text of [stored, logged]) {
+      expect(text).not.toContain("off the record");
+      expect(text).not.toContain("moment");
+    }
+    expect(h.logs.at(-1)).toContain('"decision":"set_off_record"');
+    expect(h.logs.at(-1)).toContain('"recorded":true');
+  });
+
+  it("still silences when the ledger cannot record the marker", async () => {
+    const failing: Pick<Ledger, "getSession" | "append"> = {
+      getSession: (id) => h.ledger.getSession(id),
+      append: () => {
+        throw new Error("disk full");
+      },
+    };
+    const response = await handleChatCompletion(
+      chatRequest(phraseTurn(), { authorization: `Bearer ${SECRET}` }),
+      { ...h.deps, ledger: failing },
+      performance.now(),
+    );
+    expect((await readTurn(response)).kind).toBe("off_record");
+    expect(h.logs.some((line) => line.includes("ledger write failed: Error: disk full"))).toBe(true);
+  });
+
+  it("is idempotent: a retry of the same request silences again and adds one more marker", async () => {
+    const body = phraseTurn();
+    expect((await readTurn(await h.call(body))).kind).toBe("off_record");
+    expect((await readTurn(await h.call(body))).kind).toBe("off_record");
+    expect(h.ledger.list("s1", { kinds: ["privacy.phrase_detected"] })).toHaveLength(2);
   });
 });
 

@@ -4,10 +4,12 @@ import {
   AGENT_ID_ENV,
   agentModelId,
   checkAgentInvariants,
+  checkClientToolInvariants,
   diffDesiredVsActual,
   renderAgentBody,
   type AgentRole,
   type AgentSpec,
+  type ClientToolSpec,
 } from "./elevenlabs-agents";
 
 /**
@@ -17,6 +19,30 @@ import {
 
 /** Stands in for the workspace secret id in `dry-run` mode, which makes no API calls. */
 export const DRY_RUN_SECRET_ID = "dry-run-secret-id";
+
+/** Stands in for a workspace tool id in `dry-run` mode. */
+export function dryRunToolId(name: string): string {
+  return `dry-run-tool-${name}`;
+}
+
+const sameDefinition = (a: ClientToolSpec, b: ClientToolSpec): boolean =>
+  diffDesiredVsActual(a, b).length === 0 && diffDesiredVsActual(b, a).length === 0;
+
+/**
+ * Every client tool the specs use, once. Tools are workspace-wide and matched by name (the name is what the custom
+ * LLM emits and the browser registers), so one name must have one definition across all specs.
+ */
+export function collectClientTools(specs: readonly AgentSpec[]): ClientToolSpec[] {
+  const byName = new Map<string, ClientToolSpec>();
+  for (const spec of specs) {
+    for (const tool of spec.clientTools) {
+      const seen = byName.get(tool.name);
+      if (seen === undefined) byName.set(tool.name, tool);
+      else if (!sameDefinition(seen, tool)) throw new Error(`client tool ${tool.name} is defined differently in two agent specs`);
+    }
+  }
+  return [...byName.values()];
+}
 
 /**
  * Name of the workspace secret holding CUSTOM_LLM_SECRET: derived from the value, so a re-run finds it without ever
@@ -29,7 +55,16 @@ export function customLlmSecretName(secret: string): string {
 
 export type SyncClient = Pick<
   ElevenLabsClient,
-  "listSecrets" | "createSecret" | "getVoice" | "createAgent" | "updateAgent" | "getAgent"
+  | "listSecrets"
+  | "createSecret"
+  | "getVoice"
+  | "createAgent"
+  | "updateAgent"
+  | "getAgent"
+  | "listClientTools"
+  | "getTool"
+  | "createTool"
+  | "updateTool"
 >;
 
 export type SyncAgentsInput = {
@@ -50,9 +85,18 @@ export type SyncedAgent = {
   body: AgentRequestBody;
 };
 
+export type SyncedTool = {
+  name: string;
+  action: "dry-run" | "created" | "updated" | "unchanged";
+  /** Null when the tool could not be synced. */
+  toolId: string | null;
+};
+
 export type SyncReport = {
   /** Null when the run stopped before the secret step. */
   secret: { name: string; id: string; action: "dry-run" | "reused" | "created" } | null;
+  /** Workspace client tools, created or updated (idempotently, by name) before any agent. */
+  tools: SyncedTool[];
   agents: SyncedAgent[];
   /** Empty means every agent was synced and read back with the desired, safe configuration. */
   problems: string[];
@@ -74,7 +118,8 @@ export async function syncAgents(input: SyncAgentsInput): Promise<SyncReport> {
   if (new Set(roles).size !== roles.length) throw new Error(`duplicate agent roles: ${roles.join(", ")}`);
 
   const secretName = customLlmSecretName(customLlmSecret);
-  const render = (secretId: string): SyncedAgent[] =>
+  const toolSpecs = collectClientTools(specs);
+  const render = (secretId: string, toolIds: Readonly<Record<string, string>>): SyncedAgent[] =>
     specs.map((spec) => {
       const agentId = agentIds[spec.role] ?? null;
       return {
@@ -83,15 +128,17 @@ export async function syncAgents(input: SyncAgentsInput): Promise<SyncReport> {
         envVar: AGENT_ID_ENV[spec.role],
         action: agentId === null ? "create" : "update",
         agentId,
-        body: renderAgentBody(spec, { publicBaseUrl, customLlmSecretId: secretId }),
+        body: renderAgentBody(spec, { publicBaseUrl, customLlmSecretId: secretId, toolIds }),
       };
     });
 
   // Rendering first validates every spec before anything in the workspace is touched.
-  const planned = render(DRY_RUN_SECRET_ID);
+  const dryRunToolIds = Object.fromEntries(toolSpecs.map((t) => [t.name, dryRunToolId(t.name)]));
+  const planned = render(DRY_RUN_SECRET_ID, dryRunToolIds);
   if (input.mode === "dry-run") {
     return {
       secret: { name: secretName, id: DRY_RUN_SECRET_ID, action: "dry-run" },
+      tools: toolSpecs.map((t) => ({ name: t.name, action: "dry-run", toolId: dryRunToolIds[t.name] ?? null })),
       agents: planned,
       problems: [],
     };
@@ -108,7 +155,7 @@ export async function syncAgents(input: SyncAgentsInput): Promise<SyncReport> {
     }
   }
   if (problems.length > 0) {
-    return { secret: null, agents: [], problems };
+    return { secret: null, tools: [], agents: [], problems };
   }
 
   const existing = (await client.listSecrets({ search: secretName })).find((s) => s.name === secretName);
@@ -116,7 +163,22 @@ export async function syncAgents(input: SyncAgentsInput): Promise<SyncReport> {
     ? { name: secretName, id: existing.secretId, action: "reused" as const }
     : { name: secretName, id: (await client.createSecret(secretName, customLlmSecret)).secretId, action: "created" as const };
 
-  const agents = render(secret.id);
+  const tools: SyncedTool[] = [];
+  for (const spec of toolSpecs) {
+    try {
+      const synced = await syncTool(client, spec);
+      tools.push(synced.tool);
+      problems.push(...synced.problems);
+    } catch (err) {
+      tools.push({ name: spec.name, action: "unchanged", toolId: null });
+      problems.push(`tool ${spec.name}: ${errorMessage(err)}`);
+    }
+  }
+  // An agent must never reference a tool that is missing or unsafe: stop before touching any agent.
+  if (problems.length > 0) return { secret, tools, agents: [], problems };
+
+  const toolIds = Object.fromEntries(tools.flatMap((t) => (t.toolId === null ? [] : [[t.name, t.toolId] as const])));
+  const agents = render(secret.id, toolIds);
   for (const agent of agents) {
     try {
       if (agent.agentId === null) {
@@ -138,5 +200,35 @@ export async function syncAgents(input: SyncAgentsInput): Promise<SyncReport> {
       problems.push(`${agent.role}: ${errorMessage(err)}`);
     }
   }
-  return { secret, agents, problems };
+  return { secret, tools, agents, problems };
+}
+
+/** Creates the tool, or updates the one workspace tool with its name if it differs, then reads it back. */
+async function syncTool(client: SyncClient, spec: ClientToolSpec): Promise<{ tool: SyncedTool; problems: string[] }> {
+  const matches = (await client.listClientTools({ search: spec.name })).filter((t) => t.name === spec.name);
+  if (matches.length > 1) {
+    const ids = matches.map((t) => t.toolId).join(", ");
+    return {
+      tool: { name: spec.name, action: "unchanged", toolId: null },
+      problems: [`tool ${spec.name}: ${matches.length} workspace client tools have this name (${ids}); delete all but one`],
+    };
+  }
+  const [existing] = matches;
+  let action: SyncedTool["action"];
+  let toolId: string;
+  if (existing === undefined) {
+    action = "created";
+    toolId = (await client.createTool(spec)).toolId;
+  } else {
+    toolId = existing.toolId;
+    action = diffDesiredVsActual(spec, existing.toolConfig).length > 0 ? "updated" : "unchanged";
+    if (action === "updated") await client.updateTool(toolId, spec);
+  }
+  const tool: SyncedTool = { name: spec.name, action, toolId };
+  const actual = await client.getTool(toolId);
+  const problems = [
+    ...diffDesiredVsActual(spec, actual.toolConfig).map((p) => `tool ${spec.name}: ${p}`),
+    ...checkClientToolInvariants(actual.toolConfig, spec.name),
+  ];
+  return { tool, problems };
 }

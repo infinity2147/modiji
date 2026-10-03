@@ -1,3 +1,4 @@
+import { SET_OFF_RECORD_TOOL } from "../../../packages/core/src/voice/off-record";
 import { authorizePreflight, CheckFailure, describeError, requireVars, type PreflightAuthorization } from "../http";
 import { elevenLabsReachableTarget } from "../target";
 import type { CheckOutcome, Facts, FactValue, PreflightContext, PreflightElevenLabs } from "../types";
@@ -10,6 +11,9 @@ type Ctx = Pick<
 
 /** An ordinary, unauthorised user turn: the agent must stay silent. */
 export const PHASE_A_TEXT = "Hello, is anyone there?";
+
+/** An off-record phrase as the expert would say it: the custom LLM must answer with `set_off_record` and no speech. */
+export const OFF_RECORD_PROBE_TEXT = "Let's go off the record for a moment.";
 
 /** Events that mean the agent produced speech (text for TTS, or audio). */
 const SPEECH_TYPES = new Set(["agent_response", "audio", "agent_chat_response_part", "internal_tentative_agent_response"]);
@@ -29,6 +33,7 @@ const EXPECTED_TYPES = new Set([
   "internal_tentative_agent_response",
   "vad_score",
   "context_usage",
+  "client_tool_call",
 ]);
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -70,6 +75,43 @@ function clientErrors(events: readonly ServerEvent[]): string[] {
 
 const truncate = (text: string, n = 120): string => (text.length > n ? `${text.slice(0, n)}…` : text);
 
+type ClientToolCall = { toolName: string | null; parameters: Record<string, unknown> | null; at: number };
+
+/** `client_tool_call` events (`{client_tool_call: {tool_name, tool_call_id, parameters}}`). */
+function clientToolCalls(events: readonly ServerEvent[]): ClientToolCall[] {
+  return events.flatMap((e) => {
+    if (e.type !== "client_tool_call") return [];
+    const call = isRecord(e.body.client_tool_call) ? e.body.client_tool_call : {};
+    return [
+      {
+        toolName: typeof call.tool_name === "string" ? call.tool_name : null,
+        parameters: isRecord(call.parameters) ? call.parameters : null,
+        at: e.at,
+      },
+    ];
+  });
+}
+
+function describeSpeech(speech: readonly ServerEvent[]): string {
+  return Object.entries(countByType(speech))
+    .map(([t, n]) => `${n} ${t}`)
+    .join(", ");
+}
+
+/** A WebSocket conversation with the interviewer whose custom-LLM calls name `sessionId` (a preflight ledger session). */
+async function openConversation(ctx: Ctx, client: PreflightElevenLabs, agentId: string, sessionId: string): Promise<VoiceSession> {
+  const url = await getSignedUrl(client, agentId);
+  ctx.secrets.add(url);
+  return VoiceSession.connect({
+    factory: ctx.WebSocket,
+    url,
+    // The custom LLM finds the ledger session (and so the authorization) through `elevenlabs_extra_body`.
+    initiation: { custom_llm_extra_body: { sessionId } },
+    timeoutMs: ctx.options.connectTimeoutMs,
+    now: ctx.now,
+  });
+}
+
 /**
  * The end-to-end proof that `skip_turn` is honoured on the live path (plan §12), through ElevenLabs:
  *   A. an ordinary user message ⇒ no agent text and no audio for the whole quiet window;
@@ -81,23 +123,14 @@ export async function checkVoiceSkipTurn(ctx: Ctx): Promise<CheckOutcome> {
   if (!target.ok) return { status: "fail", detail: target.error };
   const vars = requireVars(ctx.env, ["ELEVENLABS_API_KEY", "ELEVENLABS_INTERVIEWER_AGENT_ID", "CUSTOM_LLM_SECRET"]);
   const client = ctx.createElevenLabs(vars.ELEVENLABS_API_KEY);
-  const { quietWindowMs, speechTimeoutMs, connectTimeoutMs, minAuthorizationRemainingMs } = ctx.options;
+  const { quietWindowMs, speechTimeoutMs, minAuthorizationRemainingMs } = ctx.options;
 
   const problems: string[] = [];
   const facts: Facts = { quietWindowMs, speechTimeoutMs };
   const conversations: string[] = [];
 
   const connect = async (auth: PreflightAuthorization): Promise<VoiceSession> => {
-    const url = await getSignedUrl(client, vars.ELEVENLABS_INTERVIEWER_AGENT_ID);
-    ctx.secrets.add(url);
-    const session = await VoiceSession.connect({
-      factory: ctx.WebSocket,
-      url,
-      // The custom LLM finds the ledger session (and so the authorization) through `elevenlabs_extra_body`.
-      initiation: { custom_llm_extra_body: { sessionId: auth.sessionId } },
-      timeoutMs: connectTimeoutMs,
-      now: ctx.now,
-    });
+    const session = await openConversation(ctx, client, vars.ELEVENLABS_INTERVIEWER_AGENT_ID, auth.sessionId);
     if (session.conversationId !== null) conversations.push(session.conversationId);
     return session;
   };
@@ -117,13 +150,7 @@ export async function checkVoiceSkipTurn(ctx: Ctx): Promise<CheckOutcome> {
     const aEvents = session.events.slice(aFrom);
     const aSpeech = aEvents.filter((e) => SPEECH_TYPES.has(e.type));
     const aTexts = aEvents.flatMap((e) => agentResponseText(e) ?? []);
-    if (aSpeech.length > 0) {
-      problems.push(
-        `phase A: agent spoke without authorization (${Object.entries(countByType(aSpeech))
-          .map(([t, n]) => `${n} ${t}`)
-          .join(", ")})`,
-      );
-    }
+    if (aSpeech.length > 0) problems.push(`phase A: agent spoke without authorization (${describeSpeech(aSpeech)})`);
     if (session.closed !== null) problems.push(`phase A: conversation ended during the quiet window${session.closeSuffix()}`);
     const aTools = toolResponses(aEvents);
     const aEchoed = aEvents.some((e) => e.type === "user_transcript");
@@ -213,6 +240,67 @@ export async function checkVoiceSkipTurn(ctx: Ctx): Promise<CheckOutcome> {
     };
   } finally {
     await Promise.all(sessions.map((s) => s.close()));
+  }
+}
+
+/**
+ * Off the record by voice, end to end through ElevenLabs (plan §7.8): the expert's off-record phrase reaches our custom
+ * LLM as an ordinary, unauthorised user turn, which must produce exactly one `client_tool_call` to `set_off_record`
+ * with `{offRecord: true}`, no agent text and no audio for the whole quiet window (and no repeated call, which would
+ * mean ElevenLabs re-invoked the LLM with the same turn).
+ */
+export async function checkVoiceOffRecord(ctx: Ctx): Promise<CheckOutcome> {
+  const target = elevenLabsReachableTarget(ctx.target, ctx.env.PUBLIC_BASE_URL);
+  if (!target.ok) return { status: "fail", detail: target.error };
+  const vars = requireVars(ctx.env, ["ELEVENLABS_API_KEY", "ELEVENLABS_INTERVIEWER_AGENT_ID", "CUSTOM_LLM_SECRET"]);
+  const client = ctx.createElevenLabs(vars.ELEVENLABS_API_KEY);
+  const { quietWindowMs } = ctx.options;
+
+  // Only for its ledger session: the custom LLM records the phrase marker there. The authorization is never used.
+  const auth = await authorizePreflight(ctx, target.baseUrl, vars.CUSTOM_LLM_SECRET);
+  const session = await openConversation(ctx, client, vars.ELEVENLABS_INTERVIEWER_AGENT_ID, auth.sessionId);
+  try {
+    const from = session.events.length;
+    const sentAt = ctx.now();
+    session.send({ type: "user_message", text: OFF_RECORD_PROBE_TEXT });
+    await session.waitFor(() => session.closed !== null, quietWindowMs);
+    const events = session.events.slice(from);
+    const speech = events.filter((e) => SPEECH_TYPES.has(e.type));
+    const calls = clientToolCalls(events);
+    const [call] = calls;
+
+    const problems: string[] = [];
+    if (speech.length > 0) problems.push(`agent spoke on the off-record phrase (${describeSpeech(speech)})`);
+    if (calls.length !== 1) {
+      problems.push(`expected exactly one client_tool_call, got ${calls.length}${calls.length > 0 ? ` (${calls.map((c) => String(c.toolName)).join(", ")})` : ""}`);
+    }
+    if (call !== undefined && (call.toolName !== SET_OFF_RECORD_TOOL || call.parameters?.offRecord !== true)) {
+      problems.push(`client_tool_call was ${String(call.toolName)} ${JSON.stringify(call.parameters)}; expected ${SET_OFF_RECORD_TOOL} {"offRecord":true}`);
+    }
+    if (session.closed !== null) problems.push(`conversation ended during the quiet window${session.closeSuffix()}`);
+    problems.push(...clientErrors(session.events), ...session.errors);
+    const unexpected = [...new Set(session.events.map((e) => e.type).filter((t) => !EXPECTED_TYPES.has(t)))];
+
+    const toolCallMs = call === undefined ? null : Math.round(call.at - sentAt);
+    const facts: Facts = {
+      quietWindowMs,
+      conversationId: session.conversationId,
+      events: countByType(events),
+      toolCallMs,
+      clientToolCalls: calls.map((c) => ({ toolName: c.toolName, offRecord: c.parameters?.offRecord === true })),
+      toolResponses: toolResponses(events),
+      userTranscriptEchoed: events.some((e) => e.type === "user_transcript"),
+      unexpectedEventTypes: unexpected,
+    };
+    const unexpectedNote = unexpected.length > 0 ? `; unexpected events: ${unexpected.join(", ")}` : "";
+    if (problems.length > 0) return { status: "fail", detail: `${problems.join("; ")}${unexpectedNote}`, facts };
+    return {
+      status: "pass",
+      detail: `conversation ${String(session.conversationId)}: ${SET_OFF_RECORD_TOOL} client tool call after ${String(toolCallMs)} ms, no speech for ${quietWindowMs} ms${unexpectedNote}`,
+      facts,
+    };
+  } finally {
+    await session.close();
   }
 }
 

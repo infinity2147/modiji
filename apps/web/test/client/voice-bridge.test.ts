@@ -10,6 +10,7 @@ function setup(fetchFn = scriptedFetch(() => jsonResponse({ utteranceId: "u-1" }
   let now = 1_700_000_000_000;
   const privacy: PrivacyBase = { offRecord: false, epoch: 2 };
   const gateCalls: string[] = [];
+  const offRecordPhrases: number[] = [];
   const bridge = createConversationBridge({
     sessionId: "s-1",
     fetch: fetchFn,
@@ -21,8 +22,9 @@ function setup(fetchFn = scriptedFetch(() => jsonResponse({ utteranceId: "u-1" }
     },
     privacy: () => privacy,
     vadThreshold: 0.4,
+    onOffRecordPhrase: () => offRecordPhrases.push(now),
   });
-  return { bridge, privacy, gateCalls, advance: (ms: number) => (now += ms) };
+  return { bridge, privacy, gateCalls, offRecordPhrases, advance: (ms: number) => (now += ms) };
 }
 
 describe("control-message filtering", () => {
@@ -137,5 +139,30 @@ describe("conversation bridge", () => {
     await tick();
     expect(bridge.uploads()).toMatchObject({ pending: 0, failed: 1 });
     expect(bridge.uploads().lastError).toContain("stale_epoch");
+  });
+});
+
+describe("off-record phrase", () => {
+  it("never shows or posts the expert's off-record phrase, and goes off the record at once", async () => {
+    const net = scriptedFetch(() => jsonResponse({ utteranceId: "u-1" }));
+    const { bridge, offRecordPhrases } = setup(net.fetch);
+    bridge.connected("conv-1");
+    bridge.message({ role: "user", message: "Okay, let's go off the record for a moment." });
+    bridge.message({ role: "user", message: "रिकॉर्डिंग बंद करो।" });
+    await tick();
+    expect(offRecordPhrases).toHaveLength(2);
+    expect(bridge.transcript()).toEqual([]);
+    expect(net.requests).toEqual([]);
+  });
+
+  it("records ordinary answers, and agent turns even if they mention the phrase", async () => {
+    const net = scriptedFetch(() => jsonResponse({ utteranceId: "u-1" }));
+    const { bridge, offRecordPhrases } = setup(net.fetch);
+    bridge.connected("conv-1");
+    bridge.message({ role: "agent", message: "Off the record?" });
+    bridge.message({ role: "user", message: "The record shows the owner is verified." });
+    await tick();
+    expect(offRecordPhrases).toEqual([]);
+    expect(bridge.transcript().map((t) => t.role)).toEqual(["agent", "user"]);
   });
 });

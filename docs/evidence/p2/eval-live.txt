@@ -1,0 +1,25 @@
+MODE: live — Claude Haiku 4.5 structured extraction, real-time replay.
+fixture: /home/24b4530/modiji/packages/perception/test/fixtures/casedesk-recorded — 617 frames, 145 DOM events
+
+metric                        value          threshold   result
+----------------------------  -------------  ----------  ------
+critical field-change recall  0.192 (10/52)  >= 0.95     FAIL
+critical action recall        0.262 (11/42)  >= 0.95     FAIL
+false critical rate           0.432 (16/37)  <= 0.05     FAIL
+p95 frame→event (ms)          8882           <= 3000     FAIL
+non-critical precision        0.844 (38/45)  (reported)
+non-critical recall           0.745 (38/51)  (reported)
+non-critical F1               0.792          (reported)
+p50 frame→event (ms)          6221           (n=57)
+p50 change→event (ms)         8300           (reported)
+p95 change→event (ms)         12765          (reported)
+
+DOM events: 52 critical field changes, 42 critical actions, 51 non-critical
+Vision events: 26 critical field changes, 11 critical actions, 45 non-critical
+OVERALL: FAIL
+
+pipeline: 311/617 frames changed · queue sent 57, coalesced 254, applied 57, stale dropped 0, failed 0
+dropped by validation: {"value:invalid_field":2,"concept:known_concept":1} · proposed concepts: 259
+usage: 57 requests, 249420 input tokens (0 cache reads), 21226 output tokens
+
+JSON report: /home/24b4530/modiji/docs/evidence/p2/eval-live.json

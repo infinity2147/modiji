@@ -38,7 +38,8 @@ export type QueueStatus =
   | { state: "ok"; at: number }
   | { state: "error"; at: number; message: string };
 
-export type AskedQuestion = { questionId: string; text: string; at: number };
+/** What the gate had asked; `kind` and `target` drive the browser's UI cue for it (voice/question-cues.ts). */
+export type AskedQuestion = Pick<Question, "kind" | "target" | "text"> & { questionId: string; at: number };
 
 export type GateSnapshot = {
   hud: HudModel;
@@ -152,7 +153,7 @@ export function createGateSession(options: GateSessionOptions): GateSession {
         return;
       }
       options.sendControlMessage(controlMessage);
-      options.onAsked({ questionId: question.id, text: question.text, at: clock.now() });
+      options.onAsked({ questionId: question.id, text: question.text, kind: question.kind, target: question.target, at: clock.now() });
       refreshQueue();
     },
     onHudUpdate: (hud, evaluation) => {

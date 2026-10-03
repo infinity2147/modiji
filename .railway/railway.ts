@@ -9,7 +9,8 @@
 import { defineRailway, preserve, project, service, volume } from "railway/iac";
 
 export default defineRailway(() => {
-  const data = volume("vashistha-data", { sizeMB: 5120 });
+  // 500 MB is the cap on Railway's Trial/Free plan; raise after upgrading to Hobby (5 GB).
+  const data = volume("vashistha-data", { sizeMB: 500 });
 
   const web = service("vashistha", {
     build: { builder: "DOCKERFILE", dockerfilePath: "Dockerfile" },
@@ -30,6 +31,7 @@ export default defineRailway(() => {
       ELEVENLABS_INTERVIEWER_AGENT_ID: preserve(),
       ELEVENLABS_TUTOR_AGENT_ID: preserve(),
       CUSTOM_LLM_SECRET: preserve(),
+      MCP_BEARER_TOKEN: preserve(),
     },
   });
 

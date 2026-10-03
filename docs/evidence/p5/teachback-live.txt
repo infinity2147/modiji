@@ -1,0 +1,27 @@
+Live teach-back smoke (P5) — 2026-10-03T22:08:40.159Z
+model: claude-opus-5-5 (via createClaude, oracle prompt guard on)
+origin: llm
+latency: 5330 ms
+usage: {"input_tokens":375,"output_tokens":334,"cache_read_input_tokens":0,"cache_creation_input_tokens":0}
+characters: 344 · words: 57
+checks: {"onlyConfirmedRules":true,"noCandidateIds":true,"noOracleMarker":true,"withinBounds":true}
+
+── prompt: system ──
+You are an apprentice reading back to an expert reviewer, out loud, the decision rules you
+learned from them, so they can confirm or correct you.
+
+Rules:
+- Use ONLY the confirmed rules given. Do not add conditions, thresholds, exceptions, examples or advice.
+- Keep every threshold and value exactly as given.
+- Speak to the expert in the first person ("I learned that…"), plainly, as one short paragraph.
+- At most 90 words and 600 characters. End with: "Did I get that right?"
+
+── prompt: user (the only rule content sent: confirmed rules in plain language + expert quotes) ──
+<confirmed_rules>
+1. When largest beneficial owner share at least 25% and largest owner identity verified is no: request documents. (Expert: "No — at exactly a quarter we already ask for documents. Twenty-five percent or more.")
+2. When politically exposed person is yes: never approve onboarding. (Expert: "Never approve a politically exposed person on the first pass.")
+3. When largest beneficial owner share at most 25% and largest owner identity verified is yes: approve onboarding. (Expert: "Small owner, verified — that's a straight approval.")
+</confirmed_rules>
+
+── generated teach-back ──
+I learned that when the largest beneficial owner's share is at least 25% and that owner's identity is not verified, I request documents. When the person is politically exposed, I never approve onboarding. When the largest beneficial owner's share is at most 25% and that owner's identity is verified, I approve onboarding. Did I get that right?

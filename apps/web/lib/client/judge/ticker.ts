@@ -120,6 +120,9 @@ function describe(entry: LedgerEntry, ctx: TickerContext): { text: string; tone:
     case "privacy.on_record":
       parseLedgerPayload(entry, "privacy.on_record");
       return { text: "Back on the record — new privacy epoch", tone: "privacy" };
+    case "privacy.phrase_detected":
+      parseLedgerPayload(entry, "privacy.phrase_detected");
+      return { text: "Off-record phrase heard — agent silenced, mic muting", tone: "privacy" };
     case "frame.received": {
       const p = parseLedgerPayload(entry, "frame.received");
       return evidence(`Frame #${p.frameSeq} received · ${p.redactedRegions} region(s) redacted`);
@@ -211,6 +214,14 @@ function describe(entry: LedgerEntry, ctx: TickerContext): { text: string; tone:
     case "mastery.updated": {
       const p = parseLedgerPayload(entry, "mastery.updated");
       return evidence(`Mastery · ${p.ruleId.slice(0, 8)}: ${sentence(p.from)}→${sentence(p.to)}`);
+    }
+    case "tutor.intent": {
+      const p = parseLedgerPayload(entry, "tutor.intent");
+      return evidence(`Outcome selected (not saved): ${actionLabel(p.proposedAction)} · ${p.caseId}`);
+    }
+    case "case.generated": {
+      const p = parseLedgerPayload(entry, "case.generated");
+      return system(`${p.origin.kind === "judge" ? "Judge-entered case" : "Practice case at a rule boundary"} · ${p.case.id}`);
     }
   }
 }

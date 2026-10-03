@@ -2,7 +2,8 @@
  * `pnpm agents:sync [--dry-run] [--only interviewer|tutor]`
  *
  * Creates or updates the ElevenLabs agents from the versioned specs in /agents (the only place agents are changed),
- * ensures the workspace secret holding CUSTOM_LLM_SECRET, then reads every agent back and fails on any dropped key or
+ * ensures the workspace secret holding CUSTOM_LLM_SECRET and the specs' client tools (workspace tools, idempotent by
+ * name, referenced through `prompt.tool_ids`), then reads every tool and agent back and fails on any dropped key or
  * unsafe setting. Reads .env from the repo root if present (real env vars win).
  *
  * PUBLIC_BASE_URL must be the public https URL of the deployed service: ElevenLabs calls
@@ -47,6 +48,7 @@ async function main(): Promise<number> {
       });
 
   if (report.secret) console.info(`custom-LLM secret ${report.secret.name}: ${report.secret.action} (id ${report.secret.id})`);
+  for (const tool of report.tools) console.info(`client tool ${tool.name}: ${tool.action} (id ${tool.toolId ?? "none"})`);
   for (const agent of report.agents) {
     if (values["dry-run"]) {
       console.info(`\n# ${agent.role}: would ${agent.action}${agent.agentId ? ` ${agent.agentId}` : ""}`);

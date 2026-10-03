@@ -1,9 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { checkVoiceSkipTurn, PHASE_A_TEXT } from "../preflight/checks/voice";
-import { fakeAgentSockets, fakeElevenLabs, fakeServer, makeContext, SECRET, type SocketScript } from "./support/fakes";
+import { checkVoiceOffRecord, checkVoiceSkipTurn, OFF_RECORD_PROBE_TEXT, PHASE_A_TEXT } from "../preflight/checks/voice";
+import {
+  fakeAgentSockets,
+  fakeElevenLabs,
+  fakeServer,
+  makeContext,
+  SECRET,
+  type FakeServerBehaviour,
+  type SocketScript,
+} from "./support/fakes";
 
-function setup(script: SocketScript = {}, overrides: Parameters<typeof makeContext>[0] = {}) {
-  const server = fakeServer();
+function setup(script: SocketScript = {}, overrides: Parameters<typeof makeContext>[0] = {}, behaviour: FakeServerBehaviour = {}) {
+  const server = fakeServer(behaviour);
   const sockets = fakeAgentSockets(server, script);
   const eleven = fakeElevenLabs();
   const ctx = makeContext({ fetch: server.fetch, WebSocket: sockets.factory, createElevenLabs: () => eleven, ...overrides });
@@ -109,5 +117,52 @@ describe("voice-skip-turn", () => {
     for (const url of eleven.signedUrls) expect(out).not.toContain(url.split("conversation_signature=")[1]);
     expect(out).not.toContain(SECRET);
     expect(out).toContain("conv_1");
+  });
+});
+
+describe("voice-off-record", () => {
+  it("passes: exactly one set_off_record client tool call and no speech", async () => {
+    const { ctx, sockets, server } = setup();
+    const r = await checkVoiceOffRecord(ctx);
+    expect(r.detail).toMatch(/^conversation conv_1: set_off_record client tool call after \d+ ms, no speech for 40 ms$/);
+    expect(r.status).toBe("pass");
+    const sent = sockets.sockets[0]?.sent ?? [];
+    expect(sent[0]).toEqual({ type: "conversation_initiation_client_data", custom_llm_extra_body: { sessionId: "preflight-1" } });
+    expect(sent.filter((m) => m.type === "user_message").map((m) => m.text)).toEqual([OFF_RECORD_PROBE_TEXT]);
+    expect(server.authorizeCount).toBe(1);
+    expect(sockets.sockets[0]?.closedByClient).toEqual({ code: 1000, reason: "preflight done" });
+    expect(r.facts).toMatchObject({
+      clientToolCalls: [{ toolName: "set_off_record", offRecord: true }],
+      toolCallMs: expect.any(Number),
+      unexpectedEventTypes: [],
+    });
+  });
+
+  it("fails against a server without the off-record branch (skip_turn only)", async () => {
+    const { ctx } = setup({}, {}, { ignoreOffRecordPhrase: true });
+    const r = await checkVoiceOffRecord(ctx);
+    expect(r.status).toBe("fail");
+    expect(r.detail).toBe("expected exactly one client_tool_call, got 0");
+  });
+
+  it("fails when the agent speaks", async () => {
+    const { ctx } = setup({ speakOnAnyMessage: true });
+    const r = await checkVoiceOffRecord(ctx);
+    expect(r.status).toBe("fail");
+    expect(r.detail).toMatch(/agent spoke on the off-record phrase \(2 audio, 1 agent_response\)/);
+  });
+
+  it("fails when the tool call repeats (the LLM was re-invoked with the same turn)", async () => {
+    const { ctx } = setup({ repeatClientToolCall: true });
+    const r = await checkVoiceOffRecord(ctx);
+    expect(r.status).toBe("fail");
+    expect(r.detail).toBe("expected exactly one client_tool_call, got 2 (set_off_record, set_off_record)");
+  });
+
+  it("refuses a localhost target without opening a conversation", async () => {
+    const { ctx, sockets } = setup({}, { cliTarget: "http://127.0.0.1:3000" });
+    const r = await checkVoiceOffRecord(ctx);
+    expect(r.status).toBe("fail");
+    expect(sockets.sockets).toEqual([]);
   });
 });

@@ -4,6 +4,7 @@ import {
   AgentSpecSchema,
   agentModelId,
   checkAgentInvariants,
+  checkClientToolInvariants,
   diffDesiredVsActual,
   loadAgentSpec,
   parseAgentModelId,
@@ -21,7 +22,8 @@ const specs = Object.fromEntries(
   await Promise.all(AGENT_ROLES.map(async (role) => [role, await loadAgentSpec(specUrl(role))] as const)),
 ) as Record<AgentRole, AgentSpec>;
 
-const render = (spec: AgentSpec) => renderAgentBody(spec, { publicBaseUrl: BASE, customLlmSecretId: SECRET_ID });
+const TOOL_IDS = { set_off_record: "tool_off_record_1" };
+const render = (spec: AgentSpec) => renderAgentBody(spec, { publicBaseUrl: BASE, customLlmSecretId: SECRET_ID, toolIds: TOOL_IDS });
 
 /** The rendered desired body shaped as a GET agent response. */
 const asGetResponse = (body: AgentRequestBody): Record<string, unknown> => ({
@@ -62,6 +64,12 @@ describe("agent specs in /agents", () => {
       api_key: { secret_id: SECRET_ID },
       api_type: "chat_completions",
     });
+    expect(prompt.tool_ids).toEqual(["tool_off_record_1"]);
+  });
+
+  it.each(AGENT_ROLES)("%s defines exactly the set_off_record client tool, silent and non-blocking", (role) => {
+    expect(specs[role].clientTools.map((t) => t.name)).toEqual(["set_off_record"]);
+    for (const tool of specs[role].clientTools) expect(checkClientToolInvariants(tool, tool.name)).toEqual([]);
   });
 
   it.each(AGENT_ROLES)("%s rendered body passes the invariants when read back unchanged", (role) => {
@@ -87,11 +95,26 @@ describe("AgentSpecSchema", () => {
   });
 
   it("rejects a model id out of step with name and version", () => {
-    const r = AgentSpecSchema.safeParse({ ...raw(), version: 2 });
+    const r = AgentSpecSchema.safeParse({ ...raw(), version: 3 });
     expect(r.success).toBe(false);
     expect(r.error?.issues.map((i) => i.path.join("."))).toContain(
       "body.conversation_config.agent.prompt.custom_llm.model_id",
     );
+  });
+
+  it("rejects inline tool_ids (they are rendered from clientTools)", () => {
+    const spec = raw();
+    setPath(spec, "body.conversation_config.agent.prompt.tool_ids", []);
+    const r = AgentSpecSchema.safeParse(spec);
+    expect(r.error?.issues.map((i) => i.path.join("."))).toEqual(["body.conversation_config.agent.prompt.tool_ids"]);
+  });
+
+  it("rejects duplicate tool names and tools that could speak or block", () => {
+    const tool = specs.interviewer.clientTools[0];
+    expect(AgentSpecSchema.safeParse({ ...raw(), clientTools: [tool, tool] }).success).toBe(false);
+    for (const change of [{ pre_tool_speech: "auto" }, { expects_response: true }, { type: "webhook" }, { name: "Set Off" }]) {
+      expect(AgentSpecSchema.safeParse({ ...raw(), clientTools: [{ ...tool, ...change }] }).success).toBe(false);
+    }
   });
 
   it("rejects unknown keys and a non-positive version", () => {
@@ -124,19 +147,54 @@ describe("renderAgentBody", () => {
   it.each(["http://vashistha.example.com", `${BASE}/`, `${BASE}?a=1`, "not a url"])(
     "rejects public base URL %s",
     (publicBaseUrl) => {
-      expect(() => renderAgentBody(specs.interviewer, { publicBaseUrl, customLlmSecretId: SECRET_ID })).toThrow(/https/);
+      expect(() => renderAgentBody(specs.interviewer, { publicBaseUrl, customLlmSecretId: SECRET_ID, toolIds: TOOL_IDS })).toThrow(
+        /https/,
+      );
     },
   );
 
   it("rejects a malformed secret id", () => {
     for (const customLlmSecretId of ["", "{{CUSTOM_LLM_SECRET_ID}}", "a b"]) {
-      expect(() => renderAgentBody(specs.interviewer, { publicBaseUrl: BASE, customLlmSecretId })).toThrow(/secret id/);
+      expect(() => renderAgentBody(specs.interviewer, { publicBaseUrl: BASE, customLlmSecretId, toolIds: TOOL_IDS })).toThrow(
+        /secret id/,
+      );
+    }
+  });
+
+  it("throws when a client tool has no (valid) id", () => {
+    for (const toolIds of [{}, { set_off_record: "" }, { set_off_record: "a b" }]) {
+      expect(() => renderAgentBody(specs.interviewer, { publicBaseUrl: BASE, customLlmSecretId: SECRET_ID, toolIds })).toThrow(
+        /no valid tool id for set_off_record/,
+      );
     }
   });
 });
 
+describe("checkClientToolInvariants", () => {
+  const tool = () => structuredClone(specs.interviewer.clientTools[0]) as unknown as Record<string, unknown>;
+
+  it("accepts the spec'd tool as read back with extra API keys", () => {
+    expect(checkClientToolInvariants({ ...tool(), interruption_mode: "allow", tool_call_sound: null }, "set_off_record")).toEqual([]);
+  });
+
+  it.each([
+    ["pre_tool_speech", "auto"],
+    ["expects_response", true],
+    ["type", "webhook"],
+    ["name", "other"],
+  ])("reports %s = %j", (key, value) => {
+    const problems = checkClientToolInvariants({ ...tool(), [key]: value }, "set_off_record");
+    expect(problems).toHaveLength(1);
+    expect(problems[0]).toContain(`tool set_off_record: ${key} is`);
+  });
+
+  it("reports a missing tool config", () => {
+    expect(checkClientToolInvariants(undefined, "set_off_record")).toHaveLength(4);
+  });
+});
+
 describe("checkAgentInvariants", () => {
-  const options = { publicBaseUrl: BASE, role: "interviewer" as const, expectedModelId: "vashistha-interviewer-v1" };
+  const options = { publicBaseUrl: BASE, role: "interviewer" as const, expectedModelId: agentModelId(specs.interviewer) };
   const p = "conversation_config.agent.prompt";
   const o = "platform_settings.overrides";
 
@@ -144,7 +202,7 @@ describe("checkAgentInvariants", () => {
     ["name", "someone-else"],
     [`${p}.llm`, "gpt-4o"],
     [`${p}.custom_llm.url`, "https://attacker.example/api/llm"],
-    [`${p}.custom_llm.model_id`, "vashistha-interviewer-v2"],
+    [`${p}.custom_llm.model_id`, "vashistha-interviewer-v9"],
     [`${p}.backup_llm_config.preference`, "default"],
     ["conversation_config.agent.first_message", "Hello!"],
     ["conversation_config.agent.first_message", undefined],

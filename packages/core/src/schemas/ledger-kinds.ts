@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { AGENT_ROLES } from "../agents";
+import { SET_OFF_RECORD_TOOL } from "../voice/off-record";
 import { ActionIdSchema, EpochMsSchema, FeatureIdSchema, IdSchema, SchemaVersionSchema, SymbolIdSchema, ValueSchema } from "./primitives";
 import { ParsedAnswerSchema, ProposedConceptSchema, QuestionSchema, WitnessResolutionSchema, WitnessSchema, MasteryLevelSchema } from "./engine";
 import { GuardrailResultSchema } from "./guardrail";
@@ -45,6 +47,14 @@ const kinds = {
   // ── Privacy (P0b/P7) ──
   "privacy.off_record": { sources: ["system_control"], payload: z.looseObject({ privacyEpoch: z.int().nonnegative() }) },
   "privacy.on_record": { sources: ["system_control"], payload: z.looseObject({ privacyEpoch: z.int().nonnegative() }) },
+  /**
+   * The custom LLM heard an off-record phrase and answered with the `set_off_record` client tool call (no
+   * speech). Deliberately carries nothing of the utterance: not its text, not which phrase matched.
+   */
+  "privacy.phrase_detected": {
+    sources: ["system_control"],
+    payload: z.strictObject({ agent: z.enum(AGENT_ROLES), tool: z.literal(SET_OFF_RECORD_TOOL) }),
+  },
 
   // ── Perception (P2) ──
   "frame.received": {
@@ -128,9 +138,34 @@ const kinds = {
   // ── Debrief (P5) ──
   "witness.found": { sources: ["solver"], payload: WitnessSchema },
   "witness.resolved": { sources: ["engine"], payload: WitnessResolutionSchema },
+  /**
+   * An explicit expert action typed in the debrief UI when voice is not used. `text` is the expert's
+   * own words: it becomes evidence (`human_text`) exactly like an utterance; derived entries
+   * (`rule.*`, `witness.resolved`, `teachback.confirmed`) cite it as their parent.
+   */
+  "expert.statement": {
+    sources: ["expert"],
+    payload: z.strictObject({
+      text: z.string().trim().min(1).max(1000),
+      intent: z.enum(["confirm_candidate", "add_rule_for_witness", "revise_rule", "acknowledge_witness", "confirm_boundary", "confirm_teachback"]),
+      target: z.strictObject({
+        ruleId: IdSchema.optional(),
+        witnessId: IdSchema.optional(),
+        candidateId: IdSchema.optional(),
+        teachBackId: IdSchema.optional(),
+        action: ActionIdSchema.optional(),
+      }),
+    }),
+  },
   "teachback.generated": {
     sources: ["engine"],
-    payload: z.strictObject({ text: z.string().min(1), ruleIds: z.array(IdSchema), rulebookRevision: z.int().nonnegative() }),
+    payload: z.strictObject({
+      text: z.string().min(1),
+      ruleIds: z.array(IdSchema),
+      rulebookRevision: z.int().nonnegative(),
+      /** "llm": Opus prose (non-authoritative); "template": deterministic text from the rules, no model involved. */
+      origin: z.enum(["llm", "template"]),
+    }),
   },
   "teachback.confirmed": {
     sources: ["engine"],
@@ -138,7 +173,13 @@ const kinds = {
   },
   "workmap.generated": {
     sources: ["engine"],
-    payload: z.strictObject({ workMapId: IdSchema, rulebookRevision: z.int().nonnegative(), mediaPath: z.string().min(1) }),
+    payload: z.strictObject({
+      workMapId: IdSchema,
+      rulebookRevision: z.int().nonnegative(),
+      mediaPath: z.string().min(1),
+      /** Who wrote the step titles and summary (non-authoritative either way). */
+      proseOrigin: z.enum(["llm", "template"]),
+    }),
   },
 
   // ── Tutor (P6) ──
@@ -165,6 +206,37 @@ const kinds = {
   "mastery.updated": {
     sources: ["engine"],
     payload: z.strictObject({ ruleId: IdSchema, from: MasteryLevelSchema, to: MasteryLevelSchema }),
+  },
+  /**
+   * DOM channel: the novice selected a review outcome (not yet saved). The tutor's guardrail monitor
+   * evaluates every intent; an intervention cites it as its parent.
+   */
+  "tutor.intent": {
+    sources: ["dom"],
+    payload: z.strictObject({ caseId: z.string().min(1), proposedAction: ActionIdSchema, edits: ReviewEditsPayloadSchema }),
+  },
+  /**
+   * A synthetic case made available to one session: an unseen practice case built from a solver
+   * boundary witness (`engine`), or a case a judge entered by hand (`client`). `case` is the domain's
+   * case record; readers validate it with the domain's case schema.
+   */
+  "case.generated": {
+    sources: ["engine", "client"],
+    payload: z.strictObject({
+      domainId: SymbolIdSchema,
+      case: z.looseObject({ id: z.string().min(1) }),
+      origin: z.discriminatedUnion("kind", [
+        z.strictObject({
+          kind: z.literal("boundary_practice"),
+          witnessId: IdSchema,
+          ruleId: IdSchema,
+          feature: FeatureIdSchema,
+          threshold: z.number(),
+          side: z.enum(["at", "below", "above"]),
+        }),
+        z.strictObject({ kind: z.literal("judge") }),
+      ]),
+    }),
   },
 } as const satisfies Record<string, { sources: readonly LedgerSource[]; payload: z.ZodType }>;
 

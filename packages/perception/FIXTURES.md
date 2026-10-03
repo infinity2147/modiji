@@ -111,3 +111,12 @@ The exit code is 0 if every threshold passes, 1 if any fails, and 2 on a usage o
 
 `--fake` reads the DOM ground truth and adds seeded noise. It proves the harness and says nothing
 about Haiku's accuracy.
+
+## The recorded CaseDesk fixture (`test/fixtures/casedesk-recorded/`)
+- Committed: `fixture.json` (frame list + DOM ground truth) and `frames.sha256` (one line per frame file).
+- Not committed: `frames/` (55 MiB of PNGs). Before an eval, verify the frames with `cd frames && sha256sum -c ../frames.sha256`. Every published metric in `docs/evidence/p2/` was computed on frames that match this manifest.
+- To regenerate a fresh fixture (this produces a different recording):
+  ```sh
+  pnpm --filter @vashistha/web exec playwright test --grep @record
+  ```
+- This fixture spans 9 CaseDesk sessions under one privacy epoch, and case ids are reused across sessions.

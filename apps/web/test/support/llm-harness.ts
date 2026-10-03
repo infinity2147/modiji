@@ -92,26 +92,32 @@ const ChunkSchema = z.strictObject({
 });
 export type Chunk = z.infer<typeof ChunkSchema>;
 
-const SkipDeltaSchema = z.strictObject({
-  role: z.literal("assistant"),
-  content: z.null(),
-  tool_calls: z.tuple([
-    z.strictObject({
-      index: z.literal(0),
-      id: z.string().regex(/^call_skip_[A-Za-z0-9_-]+$/),
-      type: z.literal("function"),
-      function: z.strictObject({ name: z.literal("skip_turn"), arguments: z.string() }),
-    }),
-  ]),
-});
+/** A tool-call-only delta: `content` is null — no speech can come from it. */
+const toolCallDelta = (idPattern: RegExp, name: string) =>
+  z.strictObject({
+    role: z.literal("assistant"),
+    content: z.null(),
+    tool_calls: z.tuple([
+      z.strictObject({
+        index: z.literal(0),
+        id: z.string().regex(idPattern),
+        type: z.literal("function"),
+        function: z.strictObject({ name: z.literal(name), arguments: z.string() }),
+      }),
+    ]),
+  });
+const SkipDeltaSchema = toolCallDelta(/^call_skip_[A-Za-z0-9_-]+$/, "skip_turn");
+const OffRecordDeltaSchema = toolCallDelta(/^call_off_record_[A-Za-z0-9_-]+$/, "set_off_record");
 
 export type ParsedTurn =
   | { kind: "speech"; text: string; chunks: Chunk[]; raw: string }
-  | { kind: "skip"; reason: string; chunks: Chunk[]; raw: string };
+  | { kind: "skip"; reason: string; chunks: Chunk[]; raw: string }
+  | { kind: "off_record"; chunks: Chunk[]; raw: string };
 
 /**
- * Parses an SSE body and asserts it is exactly one of the two shapes the wrapper may emit:
- * speech (role chunk, content chunks, stop) or skip (one skip_turn tool call, tool_calls), then [DONE].
+ * Parses an SSE body and asserts it is exactly one of the three shapes the wrapper may emit, then [DONE]:
+ * speech (role chunk, content chunks, stop), skip (one skip_turn tool call, tool_calls) or off record
+ * (one set_off_record tool call with `{offRecord: true}`, tool_calls — and no content).
  */
 export async function readTurn(response: Response): Promise<ParsedTurn> {
   expect(response.status).toBe(200);
@@ -143,6 +149,12 @@ export async function readTurn(response: Response): Promise<ParsedTurn> {
 
   if (last.choices[0].finish_reason === "tool_calls") {
     expect(chunks).toHaveLength(2);
+    const name = (first.choices[0].delta["tool_calls"] as Array<{ function?: { name?: unknown } }> | undefined)?.[0]?.function?.name;
+    if (name === "set_off_record") {
+      const delta = OffRecordDeltaSchema.parse(first.choices[0].delta);
+      expect(JSON.parse(delta.tool_calls[0].function.arguments)).toStrictEqual({ offRecord: true });
+      return { kind: "off_record", chunks, raw };
+    }
     const delta = SkipDeltaSchema.parse(first.choices[0].delta);
     const args = z.strictObject({ reason: z.string() }).parse(JSON.parse(delta.tool_calls[0].function.arguments));
     return { kind: "skip", reason: args.reason, chunks, raw };

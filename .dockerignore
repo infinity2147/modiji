@@ -19,3 +19,6 @@ docs/evidence
 **/playwright-report
 Dockerfile
 .dockerignore
+**/public/tesseract
+packages/perception/test/fixtures
+**/.next-*

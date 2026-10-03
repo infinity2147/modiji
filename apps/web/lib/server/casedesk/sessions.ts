@@ -1,4 +1,4 @@
-/** `POST /api/sessions` and `GET /api/cases?set=`. */
+/** `POST /api/sessions` and `GET /api/cases?set=[&session=]`. */
 import { randomUUID } from "node:crypto";
 import type { z } from "zod";
 import { ledgerPayloadSchema } from "@vashistha/core";
@@ -9,7 +9,8 @@ import {
   type ListCasesResponseSchema,
 } from "../../contracts/casedesk";
 import { ApiFailure, json, parseOr400, readJson, respond } from "./http";
-import { CASEDESK_SCHEMA_VERSION, SERVED_CASE_SETS, type CaseDeskDeps } from "./session";
+import { sessionCases } from "./cases";
+import { CASEDESK_SCHEMA_VERSION, SERVED_CASE_SETS, loadSession, type CaseDeskDeps } from "./session";
 
 /** Creates a ledger session rooted in an `engine` / `session.started` entry. */
 export function handleCreateSession(request: Request, deps: CaseDeskDeps): Promise<Response> {
@@ -46,11 +47,22 @@ export function handleCreateSession(request: Request, deps: CaseDeskDeps): Promi
   });
 }
 
-/** Public case data of one served set; 400 for a missing, unknown or benchmark-only set. */
-export function handleListCases(request: Request, deps: Pick<CaseDeskDeps, "log">): Promise<Response> {
+/**
+ * Public case data of one served set; 400 for a missing, unknown or benchmark-only set. With
+ * `session=<id>` (a session working that set), the session's generated cases follow the set's.
+ */
+export function handleListCases(request: Request, deps: Pick<CaseDeskDeps, "log" | "ledger" | "store">): Promise<Response> {
   return respond(deps.log, () => {
-    const set = parseOr400(SERVED_CASE_SETS, new URL(request.url).searchParams.get("set"), "invalid_case_set");
-    const body: z.infer<typeof ListCasesResponseSchema> = { cases: kycCases(set) };
+    const params = new URL(request.url).searchParams;
+    const set = parseOr400(SERVED_CASE_SETS, params.get("set"), "invalid_case_set");
+    const sessionId = params.get("session");
+    let cases = kycCases(set);
+    if (sessionId !== null) {
+      const { info, session } = loadSession(deps, sessionId);
+      if (info.caseSet !== set) throw new ApiFailure(400, "invalid_case_set", `session ${session.id} works the ${info.caseSet} set`);
+      cases = sessionCases(deps.ledger, session.id, info);
+    }
+    const body: z.infer<typeof ListCasesResponseSchema> = { cases };
     return json(body);
   });
 }

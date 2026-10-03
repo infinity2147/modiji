@@ -1,0 +1,4878 @@
+{
+ "version": 1,
+ "domainId": "kycNorthstar",
+ "sessionEpoch": 0,
+ "frames": [
+  {
+   "frameSeq": 1,
+   "captureTime": 1791065948599,
+   "file": "frames/000001.png"
+  },
+  {
+   "frameSeq": 2,
+   "captureTime": 1791065949100,
+   "file": "frames/000002.png"
+  },
+  {
+   "frameSeq": 3,
+   "captureTime": 1791065949601,
+   "file": "frames/000002.png"
+  },
+  {
+   "frameSeq": 4,
+   "captureTime": 1791065950099,
+   "file": "frames/000003.png"
+  },
+  {
+   "frameSeq": 5,
+   "captureTime": 1791065950600,
+   "file": "frames/000004.png"
+  },
+  {
+   "frameSeq": 6,
+   "captureTime": 1791065951099,
+   "file": "frames/000004.png"
+  },
+  {
+   "frameSeq": 7,
+   "captureTime": 1791065951600,
+   "file": "frames/000004.png"
+  },
+  {
+   "frameSeq": 8,
+   "captureTime": 1791065952100,
+   "file": "frames/000005.png"
+  },
+  {
+   "frameSeq": 9,
+   "captureTime": 1791065952600,
+   "file": "frames/000006.png"
+  },
+  {
+   "frameSeq": 10,
+   "captureTime": 1791065953099,
+   "file": "frames/000006.png"
+  },
+  {
+   "frameSeq": 11,
+   "captureTime": 1791065953599,
+   "file": "frames/000006.png"
+  },
+  {
+   "frameSeq": 12,
+   "captureTime": 1791065954099,
+   "file": "frames/000006.png"
+  },
+  {
+   "frameSeq": 13,
+   "captureTime": 1791065954599,
+   "file": "frames/000007.png"
+  },
+  {
+   "frameSeq": 14,
+   "captureTime": 1791065955099,
+   "file": "frames/000007.png"
+  },
+  {
+   "frameSeq": 15,
+   "captureTime": 1791065955599,
+   "file": "frames/000007.png"
+  },
+  {
+   "frameSeq": 16,
+   "captureTime": 1791065956099,
+   "file": "frames/000008.png"
+  },
+  {
+   "frameSeq": 17,
+   "captureTime": 1791065956601,
+   "file": "frames/000008.png"
+  },
+  {
+   "frameSeq": 18,
+   "captureTime": 1791065957100,
+   "file": "frames/000009.png"
+  },
+  {
+   "frameSeq": 19,
+   "captureTime": 1791065957600,
+   "file": "frames/000010.png"
+  },
+  {
+   "frameSeq": 20,
+   "captureTime": 1791065958099,
+   "file": "frames/000010.png"
+  },
+  {
+   "frameSeq": 21,
+   "captureTime": 1791065958599,
+   "file": "frames/000011.png"
+  },
+  {
+   "frameSeq": 22,
+   "captureTime": 1791065959099,
+   "file": "frames/000012.png"
+  },
+  {
+   "frameSeq": 23,
+   "captureTime": 1791065959599,
+   "file": "frames/000012.png"
+  },
+  {
+   "frameSeq": 24,
+   "captureTime": 1791065960099,
+   "file": "frames/000012.png"
+  },
+  {
+   "frameSeq": 25,
+   "captureTime": 1791065960599,
+   "file": "frames/000013.png"
+  },
+  {
+   "frameSeq": 26,
+   "captureTime": 1791065961099,
+   "file": "frames/000013.png"
+  },
+  {
+   "frameSeq": 27,
+   "captureTime": 1791065961599,
+   "file": "frames/000013.png"
+  },
+  {
+   "frameSeq": 28,
+   "captureTime": 1791065962099,
+   "file": "frames/000014.png"
+  },
+  {
+   "frameSeq": 29,
+   "captureTime": 1791065962599,
+   "file": "frames/000015.png"
+  },
+  {
+   "frameSeq": 30,
+   "captureTime": 1791065963099,
+   "file": "frames/000016.png"
+  },
+  {
+   "frameSeq": 31,
+   "captureTime": 1791065963599,
+   "file": "frames/000017.png"
+  },
+  {
+   "frameSeq": 32,
+   "captureTime": 1791065964099,
+   "file": "frames/000017.png"
+  },
+  {
+   "frameSeq": 33,
+   "captureTime": 1791065964599,
+   "file": "frames/000018.png"
+  },
+  {
+   "frameSeq": 34,
+   "captureTime": 1791065965099,
+   "file": "frames/000019.png"
+  },
+  {
+   "frameSeq": 35,
+   "captureTime": 1791065965600,
+   "file": "frames/000019.png"
+  },
+  {
+   "frameSeq": 36,
+   "captureTime": 1791065966099,
+   "file": "frames/000019.png"
+  },
+  {
+   "frameSeq": 37,
+   "captureTime": 1791065966599,
+   "file": "frames/000020.png"
+  },
+  {
+   "frameSeq": 38,
+   "captureTime": 1791065967099,
+   "file": "frames/000021.png"
+  },
+  {
+   "frameSeq": 39,
+   "captureTime": 1791065967599,
+   "file": "frames/000021.png"
+  },
+  {
+   "frameSeq": 40,
+   "captureTime": 1791065968100,
+   "file": "frames/000021.png"
+  },
+  {
+   "frameSeq": 41,
+   "captureTime": 1791065968599,
+   "file": "frames/000022.png"
+  },
+  {
+   "frameSeq": 42,
+   "captureTime": 1791065969098,
+   "file": "frames/000022.png"
+  },
+  {
+   "frameSeq": 43,
+   "captureTime": 1791065969599,
+   "file": "frames/000023.png"
+  },
+  {
+   "frameSeq": 44,
+   "captureTime": 1791065970099,
+   "file": "frames/000024.png"
+  },
+  {
+   "frameSeq": 45,
+   "captureTime": 1791065970599,
+   "file": "frames/000024.png"
+  },
+  {
+   "frameSeq": 46,
+   "captureTime": 1791065971099,
+   "file": "frames/000025.png"
+  },
+  {
+   "frameSeq": 47,
+   "captureTime": 1791065971599,
+   "file": "frames/000026.png"
+  },
+  {
+   "frameSeq": 48,
+   "captureTime": 1791065972099,
+   "file": "frames/000026.png"
+  },
+  {
+   "frameSeq": 49,
+   "captureTime": 1791065972598,
+   "file": "frames/000027.png"
+  },
+  {
+   "frameSeq": 50,
+   "captureTime": 1791065973099,
+   "file": "frames/000028.png"
+  },
+  {
+   "frameSeq": 51,
+   "captureTime": 1791065973600,
+   "file": "frames/000029.png"
+  },
+  {
+   "frameSeq": 52,
+   "captureTime": 1791065974099,
+   "file": "frames/000029.png"
+  },
+  {
+   "frameSeq": 53,
+   "captureTime": 1791065974600,
+   "file": "frames/000029.png"
+  },
+  {
+   "frameSeq": 54,
+   "captureTime": 1791065975099,
+   "file": "frames/000030.png"
+  },
+  {
+   "frameSeq": 55,
+   "captureTime": 1791065975600,
+   "file": "frames/000031.png"
+  },
+  {
+   "frameSeq": 56,
+   "captureTime": 1791065976099,
+   "file": "frames/000031.png"
+  },
+  {
+   "frameSeq": 57,
+   "captureTime": 1791065976600,
+   "file": "frames/000032.png"
+  },
+  {
+   "frameSeq": 58,
+   "captureTime": 1791065977100,
+   "file": "frames/000033.png"
+  },
+  {
+   "frameSeq": 59,
+   "captureTime": 1791065977600,
+   "file": "frames/000033.png"
+  },
+  {
+   "frameSeq": 60,
+   "captureTime": 1791065978099,
+   "file": "frames/000033.png"
+  },
+  {
+   "frameSeq": 61,
+   "captureTime": 1791065978599,
+   "file": "frames/000034.png"
+  },
+  {
+   "frameSeq": 62,
+   "captureTime": 1791065979099,
+   "file": "frames/000035.png"
+  },
+  {
+   "frameSeq": 63,
+   "captureTime": 1791065979599,
+   "file": "frames/000035.png"
+  },
+  {
+   "frameSeq": 64,
+   "captureTime": 1791065980099,
+   "file": "frames/000036.png"
+  },
+  {
+   "frameSeq": 65,
+   "captureTime": 1791065980599,
+   "file": "frames/000037.png"
+  },
+  {
+   "frameSeq": 66,
+   "captureTime": 1791065981099,
+   "file": "frames/000037.png"
+  },
+  {
+   "frameSeq": 67,
+   "captureTime": 1791065981599,
+   "file": "frames/000038.png"
+  },
+  {
+   "frameSeq": 68,
+   "captureTime": 1791065982099,
+   "file": "frames/000039.png"
+  },
+  {
+   "frameSeq": 69,
+   "captureTime": 1791065982599,
+   "file": "frames/000040.png"
+  },
+  {
+   "frameSeq": 70,
+   "captureTime": 1791065983099,
+   "file": "frames/000041.png"
+  },
+  {
+   "frameSeq": 71,
+   "captureTime": 1791065983599,
+   "file": "frames/000042.png"
+  },
+  {
+   "frameSeq": 72,
+   "captureTime": 1791065984099,
+   "file": "frames/000042.png"
+  },
+  {
+   "frameSeq": 73,
+   "captureTime": 1791065984600,
+   "file": "frames/000042.png"
+  },
+  {
+   "frameSeq": 74,
+   "captureTime": 1791065985099,
+   "file": "frames/000043.png"
+  },
+  {
+   "frameSeq": 75,
+   "captureTime": 1791065985599,
+   "file": "frames/000044.png"
+  },
+  {
+   "frameSeq": 76,
+   "captureTime": 1791065986099,
+   "file": "frames/000044.png"
+  },
+  {
+   "frameSeq": 77,
+   "captureTime": 1791065986599,
+   "file": "frames/000045.png"
+  },
+  {
+   "frameSeq": 78,
+   "captureTime": 1791065987100,
+   "file": "frames/000046.png"
+  },
+  {
+   "frameSeq": 79,
+   "captureTime": 1791065987600,
+   "file": "frames/000046.png"
+  },
+  {
+   "frameSeq": 80,
+   "captureTime": 1791065988099,
+   "file": "frames/000047.png"
+  },
+  {
+   "frameSeq": 81,
+   "captureTime": 1791065988599,
+   "file": "frames/000047.png"
+  },
+  {
+   "frameSeq": 82,
+   "captureTime": 1791065989099,
+   "file": "frames/000047.png"
+  },
+  {
+   "frameSeq": 83,
+   "captureTime": 1791065989599,
+   "file": "frames/000048.png"
+  },
+  {
+   "frameSeq": 84,
+   "captureTime": 1791065990099,
+   "file": "frames/000049.png"
+  },
+  {
+   "frameSeq": 85,
+   "captureTime": 1791065990599,
+   "file": "frames/000050.png"
+  },
+  {
+   "frameSeq": 86,
+   "captureTime": 1791065991099,
+   "file": "frames/000051.png"
+  },
+  {
+   "frameSeq": 87,
+   "captureTime": 1791065991599,
+   "file": "frames/000051.png"
+  },
+  {
+   "frameSeq": 88,
+   "captureTime": 1791065992100,
+   "file": "frames/000051.png"
+  },
+  {
+   "frameSeq": 89,
+   "captureTime": 1791065992599,
+   "file": "frames/000051.png"
+  },
+  {
+   "frameSeq": 90,
+   "captureTime": 1791065993099,
+   "file": "frames/000051.png"
+  },
+  {
+   "frameSeq": 91,
+   "captureTime": 1791065993599,
+   "file": "frames/000051.png"
+  },
+  {
+   "frameSeq": 92,
+   "captureTime": 1791065994100,
+   "file": "frames/000051.png"
+  },
+  {
+   "frameSeq": 93,
+   "captureTime": 1791065994599,
+   "file": "frames/000052.png"
+  },
+  {
+   "frameSeq": 94,
+   "captureTime": 1791065995099,
+   "file": "frames/000053.png"
+  },
+  {
+   "frameSeq": 95,
+   "captureTime": 1791065995599,
+   "file": "frames/000054.png"
+  },
+  {
+   "frameSeq": 96,
+   "captureTime": 1791065996100,
+   "file": "frames/000055.png"
+  },
+  {
+   "frameSeq": 97,
+   "captureTime": 1791065996600,
+   "file": "frames/000055.png"
+  },
+  {
+   "frameSeq": 98,
+   "captureTime": 1791065997100,
+   "file": "frames/000056.png"
+  },
+  {
+   "frameSeq": 99,
+   "captureTime": 1791065997599,
+   "file": "frames/000056.png"
+  },
+  {
+   "frameSeq": 100,
+   "captureTime": 1791065998100,
+   "file": "frames/000056.png"
+  },
+  {
+   "frameSeq": 101,
+   "captureTime": 1791065998599,
+   "file": "frames/000057.png"
+  },
+  {
+   "frameSeq": 102,
+   "captureTime": 1791065999101,
+   "file": "frames/000058.png"
+  },
+  {
+   "frameSeq": 103,
+   "captureTime": 1791065999599,
+   "file": "frames/000058.png"
+  },
+  {
+   "frameSeq": 104,
+   "captureTime": 1791066000098,
+   "file": "frames/000059.png"
+  },
+  {
+   "frameSeq": 105,
+   "captureTime": 1791066000599,
+   "file": "frames/000060.png"
+  },
+  {
+   "frameSeq": 106,
+   "captureTime": 1791066001100,
+   "file": "frames/000060.png"
+  },
+  {
+   "frameSeq": 107,
+   "captureTime": 1791066001599,
+   "file": "frames/000061.png"
+  },
+  {
+   "frameSeq": 108,
+   "captureTime": 1791066002099,
+   "file": "frames/000062.png"
+  },
+  {
+   "frameSeq": 109,
+   "captureTime": 1791066002600,
+   "file": "frames/000063.png"
+  },
+  {
+   "frameSeq": 110,
+   "captureTime": 1791066003099,
+   "file": "frames/000064.png"
+  },
+  {
+   "frameSeq": 111,
+   "captureTime": 1791066003599,
+   "file": "frames/000064.png"
+  },
+  {
+   "frameSeq": 112,
+   "captureTime": 1791066004099,
+   "file": "frames/000065.png"
+  },
+  {
+   "frameSeq": 113,
+   "captureTime": 1791066004599,
+   "file": "frames/000066.png"
+  },
+  {
+   "frameSeq": 114,
+   "captureTime": 1791066005100,
+   "file": "frames/000067.png"
+  },
+  {
+   "frameSeq": 115,
+   "captureTime": 1791066005599,
+   "file": "frames/000067.png"
+  },
+  {
+   "frameSeq": 116,
+   "captureTime": 1791066006099,
+   "file": "frames/000067.png"
+  },
+  {
+   "frameSeq": 117,
+   "captureTime": 1791066006599,
+   "file": "frames/000068.png"
+  },
+  {
+   "frameSeq": 118,
+   "captureTime": 1791066007099,
+   "file": "frames/000068.png"
+  },
+  {
+   "frameSeq": 119,
+   "captureTime": 1791066007599,
+   "file": "frames/000069.png"
+  },
+  {
+   "frameSeq": 120,
+   "captureTime": 1791066008099,
+   "file": "frames/000070.png"
+  },
+  {
+   "frameSeq": 121,
+   "captureTime": 1791066008599,
+   "file": "frames/000071.png"
+  },
+  {
+   "frameSeq": 122,
+   "captureTime": 1791066009099,
+   "file": "frames/000072.png"
+  },
+  {
+   "frameSeq": 123,
+   "captureTime": 1791066009600,
+   "file": "frames/000072.png"
+  },
+  {
+   "frameSeq": 124,
+   "captureTime": 1791066010099,
+   "file": "frames/000072.png"
+  },
+  {
+   "frameSeq": 125,
+   "captureTime": 1791066010599,
+   "file": "frames/000073.png"
+  },
+  {
+   "frameSeq": 126,
+   "captureTime": 1791066011099,
+   "file": "frames/000074.png"
+  },
+  {
+   "frameSeq": 127,
+   "captureTime": 1791066011599,
+   "file": "frames/000074.png"
+  },
+  {
+   "frameSeq": 128,
+   "captureTime": 1791066012100,
+   "file": "frames/000074.png"
+  },
+  {
+   "frameSeq": 129,
+   "captureTime": 1791066012599,
+   "file": "frames/000074.png"
+  },
+  {
+   "frameSeq": 130,
+   "captureTime": 1791066013099,
+   "file": "frames/000075.png"
+  },
+  {
+   "frameSeq": 131,
+   "captureTime": 1791066013599,
+   "file": "frames/000075.png"
+  },
+  {
+   "frameSeq": 132,
+   "captureTime": 1791066014099,
+   "file": "frames/000076.png"
+  },
+  {
+   "frameSeq": 133,
+   "captureTime": 1791066014599,
+   "file": "frames/000077.png"
+  },
+  {
+   "frameSeq": 134,
+   "captureTime": 1791066015100,
+   "file": "frames/000077.png"
+  },
+  {
+   "frameSeq": 135,
+   "captureTime": 1791066015599,
+   "file": "frames/000077.png"
+  },
+  {
+   "frameSeq": 136,
+   "captureTime": 1791066016099,
+   "file": "frames/000077.png"
+  },
+  {
+   "frameSeq": 137,
+   "captureTime": 1791066016600,
+   "file": "frames/000077.png"
+  },
+  {
+   "frameSeq": 138,
+   "captureTime": 1791066017099,
+   "file": "frames/000078.png"
+  },
+  {
+   "frameSeq": 139,
+   "captureTime": 1791066017600,
+   "file": "frames/000002.png"
+  },
+  {
+   "frameSeq": 140,
+   "captureTime": 1791066018099,
+   "file": "frames/000079.png"
+  },
+  {
+   "frameSeq": 141,
+   "captureTime": 1791066018600,
+   "file": "frames/000080.png"
+  },
+  {
+   "frameSeq": 142,
+   "captureTime": 1791066019099,
+   "file": "frames/000081.png"
+  },
+  {
+   "frameSeq": 143,
+   "captureTime": 1791066019599,
+   "file": "frames/000082.png"
+  },
+  {
+   "frameSeq": 144,
+   "captureTime": 1791066020099,
+   "file": "frames/000082.png"
+  },
+  {
+   "frameSeq": 145,
+   "captureTime": 1791066020599,
+   "file": "frames/000083.png"
+  },
+  {
+   "frameSeq": 146,
+   "captureTime": 1791066021099,
+   "file": "frames/000084.png"
+  },
+  {
+   "frameSeq": 147,
+   "captureTime": 1791066021599,
+   "file": "frames/000084.png"
+  },
+  {
+   "frameSeq": 148,
+   "captureTime": 1791066022099,
+   "file": "frames/000084.png"
+  },
+  {
+   "frameSeq": 149,
+   "captureTime": 1791066022599,
+   "file": "frames/000085.png"
+  },
+  {
+   "frameSeq": 150,
+   "captureTime": 1791066023098,
+   "file": "frames/000086.png"
+  },
+  {
+   "frameSeq": 151,
+   "captureTime": 1791066023599,
+   "file": "frames/000087.png"
+  },
+  {
+   "frameSeq": 152,
+   "captureTime": 1791066024099,
+   "file": "frames/000087.png"
+  },
+  {
+   "frameSeq": 153,
+   "captureTime": 1791066024598,
+   "file": "frames/000088.png"
+  },
+  {
+   "frameSeq": 154,
+   "captureTime": 1791066025099,
+   "file": "frames/000089.png"
+  },
+  {
+   "frameSeq": 155,
+   "captureTime": 1791066025599,
+   "file": "frames/000089.png"
+  },
+  {
+   "frameSeq": 156,
+   "captureTime": 1791066026100,
+   "file": "frames/000090.png"
+  },
+  {
+   "frameSeq": 157,
+   "captureTime": 1791066026599,
+   "file": "frames/000090.png"
+  },
+  {
+   "frameSeq": 158,
+   "captureTime": 1791066027099,
+   "file": "frames/000090.png"
+  },
+  {
+   "frameSeq": 159,
+   "captureTime": 1791066027599,
+   "file": "frames/000091.png"
+  },
+  {
+   "frameSeq": 160,
+   "captureTime": 1791066028099,
+   "file": "frames/000091.png"
+  },
+  {
+   "frameSeq": 161,
+   "captureTime": 1791066028599,
+   "file": "frames/000092.png"
+  },
+  {
+   "frameSeq": 162,
+   "captureTime": 1791066029099,
+   "file": "frames/000093.png"
+  },
+  {
+   "frameSeq": 163,
+   "captureTime": 1791066029599,
+   "file": "frames/000093.png"
+  },
+  {
+   "frameSeq": 164,
+   "captureTime": 1791066030099,
+   "file": "frames/000094.png"
+  },
+  {
+   "frameSeq": 165,
+   "captureTime": 1791066030599,
+   "file": "frames/000095.png"
+  },
+  {
+   "frameSeq": 166,
+   "captureTime": 1791066031100,
+   "file": "frames/000095.png"
+  },
+  {
+   "frameSeq": 167,
+   "captureTime": 1791066031599,
+   "file": "frames/000095.png"
+  },
+  {
+   "frameSeq": 168,
+   "captureTime": 1791066032099,
+   "file": "frames/000096.png"
+  },
+  {
+   "frameSeq": 169,
+   "captureTime": 1791066032600,
+   "file": "frames/000097.png"
+  },
+  {
+   "frameSeq": 170,
+   "captureTime": 1791066033099,
+   "file": "frames/000098.png"
+  },
+  {
+   "frameSeq": 171,
+   "captureTime": 1791066033599,
+   "file": "frames/000098.png"
+  },
+  {
+   "frameSeq": 172,
+   "captureTime": 1791066034099,
+   "file": "frames/000099.png"
+  },
+  {
+   "frameSeq": 173,
+   "captureTime": 1791066034599,
+   "file": "frames/000100.png"
+  },
+  {
+   "frameSeq": 174,
+   "captureTime": 1791066035099,
+   "file": "frames/000101.png"
+  },
+  {
+   "frameSeq": 175,
+   "captureTime": 1791066035599,
+   "file": "frames/000102.png"
+  },
+  {
+   "frameSeq": 176,
+   "captureTime": 1791066036100,
+   "file": "frames/000102.png"
+  },
+  {
+   "frameSeq": 177,
+   "captureTime": 1791066036599,
+   "file": "frames/000103.png"
+  },
+  {
+   "frameSeq": 178,
+   "captureTime": 1791066037099,
+   "file": "frames/000104.png"
+  },
+  {
+   "frameSeq": 179,
+   "captureTime": 1791066037599,
+   "file": "frames/000104.png"
+  },
+  {
+   "frameSeq": 180,
+   "captureTime": 1791066038099,
+   "file": "frames/000104.png"
+  },
+  {
+   "frameSeq": 181,
+   "captureTime": 1791066038599,
+   "file": "frames/000105.png"
+  },
+  {
+   "frameSeq": 182,
+   "captureTime": 1791066039099,
+   "file": "frames/000106.png"
+  },
+  {
+   "frameSeq": 183,
+   "captureTime": 1791066039600,
+   "file": "frames/000106.png"
+  },
+  {
+   "frameSeq": 184,
+   "captureTime": 1791066040099,
+   "file": "frames/000106.png"
+  },
+  {
+   "frameSeq": 185,
+   "captureTime": 1791066040599,
+   "file": "frames/000107.png"
+  },
+  {
+   "frameSeq": 186,
+   "captureTime": 1791066041100,
+   "file": "frames/000107.png"
+  },
+  {
+   "frameSeq": 187,
+   "captureTime": 1791066041599,
+   "file": "frames/000108.png"
+  },
+  {
+   "frameSeq": 188,
+   "captureTime": 1791066042100,
+   "file": "frames/000109.png"
+  },
+  {
+   "frameSeq": 189,
+   "captureTime": 1791066042599,
+   "file": "frames/000110.png"
+  },
+  {
+   "frameSeq": 190,
+   "captureTime": 1791066043099,
+   "file": "frames/000110.png"
+  },
+  {
+   "frameSeq": 191,
+   "captureTime": 1791066043599,
+   "file": "frames/000110.png"
+  },
+  {
+   "frameSeq": 192,
+   "captureTime": 1791066044099,
+   "file": "frames/000111.png"
+  },
+  {
+   "frameSeq": 193,
+   "captureTime": 1791066044599,
+   "file": "frames/000112.png"
+  },
+  {
+   "frameSeq": 194,
+   "captureTime": 1791066045099,
+   "file": "frames/000112.png"
+  },
+  {
+   "frameSeq": 195,
+   "captureTime": 1791066045599,
+   "file": "frames/000113.png"
+  },
+  {
+   "frameSeq": 196,
+   "captureTime": 1791066046099,
+   "file": "frames/000114.png"
+  },
+  {
+   "frameSeq": 197,
+   "captureTime": 1791066046600,
+   "file": "frames/000114.png"
+  },
+  {
+   "frameSeq": 198,
+   "captureTime": 1791066047100,
+   "file": "frames/000115.png"
+  },
+  {
+   "frameSeq": 199,
+   "captureTime": 1791066047599,
+   "file": "frames/000115.png"
+  },
+  {
+   "frameSeq": 200,
+   "captureTime": 1791066048098,
+   "file": "frames/000116.png"
+  },
+  {
+   "frameSeq": 201,
+   "captureTime": 1791066048599,
+   "file": "frames/000117.png"
+  },
+  {
+   "frameSeq": 202,
+   "captureTime": 1791066049099,
+   "file": "frames/000118.png"
+  },
+  {
+   "frameSeq": 203,
+   "captureTime": 1791066049599,
+   "file": "frames/000119.png"
+  },
+  {
+   "frameSeq": 204,
+   "captureTime": 1791066050099,
+   "file": "frames/000120.png"
+  },
+  {
+   "frameSeq": 205,
+   "captureTime": 1791066050600,
+   "file": "frames/000121.png"
+  },
+  {
+   "frameSeq": 206,
+   "captureTime": 1791066051099,
+   "file": "frames/000121.png"
+  },
+  {
+   "frameSeq": 207,
+   "captureTime": 1791066051599,
+   "file": "frames/000121.png"
+  },
+  {
+   "frameSeq": 208,
+   "captureTime": 1791066052099,
+   "file": "frames/000122.png"
+  },
+  {
+   "frameSeq": 209,
+   "captureTime": 1791066052599,
+   "file": "frames/000123.png"
+  },
+  {
+   "frameSeq": 210,
+   "captureTime": 1791066053100,
+   "file": "frames/000123.png"
+  },
+  {
+   "frameSeq": 211,
+   "captureTime": 1791066053600,
+   "file": "frames/000123.png"
+  },
+  {
+   "frameSeq": 212,
+   "captureTime": 1791066054099,
+   "file": "frames/000123.png"
+  },
+  {
+   "frameSeq": 213,
+   "captureTime": 1791066054599,
+   "file": "frames/000124.png"
+  },
+  {
+   "frameSeq": 214,
+   "captureTime": 1791066055099,
+   "file": "frames/000124.png"
+  },
+  {
+   "frameSeq": 215,
+   "captureTime": 1791066055599,
+   "file": "frames/000125.png"
+  },
+  {
+   "frameSeq": 216,
+   "captureTime": 1791066056099,
+   "file": "frames/000126.png"
+  },
+  {
+   "frameSeq": 217,
+   "captureTime": 1791066056600,
+   "file": "frames/000127.png"
+  },
+  {
+   "frameSeq": 218,
+   "captureTime": 1791066057099,
+   "file": "frames/000128.png"
+  },
+  {
+   "frameSeq": 219,
+   "captureTime": 1791066057601,
+   "file": "frames/000128.png"
+  },
+  {
+   "frameSeq": 220,
+   "captureTime": 1791066058100,
+   "file": "frames/000128.png"
+  },
+  {
+   "frameSeq": 221,
+   "captureTime": 1791066058599,
+   "file": "frames/000128.png"
+  },
+  {
+   "frameSeq": 222,
+   "captureTime": 1791066059099,
+   "file": "frames/000128.png"
+  },
+  {
+   "frameSeq": 223,
+   "captureTime": 1791066059600,
+   "file": "frames/000128.png"
+  },
+  {
+   "frameSeq": 224,
+   "captureTime": 1791066060099,
+   "file": "frames/000129.png"
+  },
+  {
+   "frameSeq": 225,
+   "captureTime": 1791066060599,
+   "file": "frames/000053.png"
+  },
+  {
+   "frameSeq": 226,
+   "captureTime": 1791066061099,
+   "file": "frames/000053.png"
+  },
+  {
+   "frameSeq": 227,
+   "captureTime": 1791066061599,
+   "file": "frames/000130.png"
+  },
+  {
+   "frameSeq": 228,
+   "captureTime": 1791066062099,
+   "file": "frames/000130.png"
+  },
+  {
+   "frameSeq": 229,
+   "captureTime": 1791066062599,
+   "file": "frames/000130.png"
+  },
+  {
+   "frameSeq": 230,
+   "captureTime": 1791066063099,
+   "file": "frames/000131.png"
+  },
+  {
+   "frameSeq": 231,
+   "captureTime": 1791066063599,
+   "file": "frames/000132.png"
+  },
+  {
+   "frameSeq": 232,
+   "captureTime": 1791066064100,
+   "file": "frames/000132.png"
+  },
+  {
+   "frameSeq": 233,
+   "captureTime": 1791066064599,
+   "file": "frames/000133.png"
+  },
+  {
+   "frameSeq": 234,
+   "captureTime": 1791066065099,
+   "file": "frames/000134.png"
+  },
+  {
+   "frameSeq": 235,
+   "captureTime": 1791066065600,
+   "file": "frames/000135.png"
+  },
+  {
+   "frameSeq": 236,
+   "captureTime": 1791066066100,
+   "file": "frames/000135.png"
+  },
+  {
+   "frameSeq": 237,
+   "captureTime": 1791066066599,
+   "file": "frames/000135.png"
+  },
+  {
+   "frameSeq": 238,
+   "captureTime": 1791066067099,
+   "file": "frames/000136.png"
+  },
+  {
+   "frameSeq": 239,
+   "captureTime": 1791066067599,
+   "file": "frames/000137.png"
+  },
+  {
+   "frameSeq": 240,
+   "captureTime": 1791066068099,
+   "file": "frames/000138.png"
+  },
+  {
+   "frameSeq": 241,
+   "captureTime": 1791066068600,
+   "file": "frames/000139.png"
+  },
+  {
+   "frameSeq": 242,
+   "captureTime": 1791066069099,
+   "file": "frames/000140.png"
+  },
+  {
+   "frameSeq": 243,
+   "captureTime": 1791066069599,
+   "file": "frames/000141.png"
+  },
+  {
+   "frameSeq": 244,
+   "captureTime": 1791066070099,
+   "file": "frames/000142.png"
+  },
+  {
+   "frameSeq": 245,
+   "captureTime": 1791066070599,
+   "file": "frames/000143.png"
+  },
+  {
+   "frameSeq": 246,
+   "captureTime": 1791066071100,
+   "file": "frames/000143.png"
+  },
+  {
+   "frameSeq": 247,
+   "captureTime": 1791066071599,
+   "file": "frames/000143.png"
+  },
+  {
+   "frameSeq": 248,
+   "captureTime": 1791066072100,
+   "file": "frames/000144.png"
+  },
+  {
+   "frameSeq": 249,
+   "captureTime": 1791066072599,
+   "file": "frames/000144.png"
+  },
+  {
+   "frameSeq": 250,
+   "captureTime": 1791066073099,
+   "file": "frames/000145.png"
+  },
+  {
+   "frameSeq": 251,
+   "captureTime": 1791066073601,
+   "file": "frames/000146.png"
+  },
+  {
+   "frameSeq": 252,
+   "captureTime": 1791066074100,
+   "file": "frames/000147.png"
+  },
+  {
+   "frameSeq": 253,
+   "captureTime": 1791066074600,
+   "file": "frames/000148.png"
+  },
+  {
+   "frameSeq": 254,
+   "captureTime": 1791066075099,
+   "file": "frames/000148.png"
+  },
+  {
+   "frameSeq": 255,
+   "captureTime": 1791066075599,
+   "file": "frames/000148.png"
+  },
+  {
+   "frameSeq": 256,
+   "captureTime": 1791066076099,
+   "file": "frames/000149.png"
+  },
+  {
+   "frameSeq": 257,
+   "captureTime": 1791066076600,
+   "file": "frames/000150.png"
+  },
+  {
+   "frameSeq": 258,
+   "captureTime": 1791066077099,
+   "file": "frames/000150.png"
+  },
+  {
+   "frameSeq": 259,
+   "captureTime": 1791066077600,
+   "file": "frames/000150.png"
+  },
+  {
+   "frameSeq": 260,
+   "captureTime": 1791066078099,
+   "file": "frames/000150.png"
+  },
+  {
+   "frameSeq": 261,
+   "captureTime": 1791066078599,
+   "file": "frames/000151.png"
+  },
+  {
+   "frameSeq": 262,
+   "captureTime": 1791066079100,
+   "file": "frames/000151.png"
+  },
+  {
+   "frameSeq": 263,
+   "captureTime": 1791066079599,
+   "file": "frames/000152.png"
+  },
+  {
+   "frameSeq": 264,
+   "captureTime": 1791066080099,
+   "file": "frames/000153.png"
+  },
+  {
+   "frameSeq": 265,
+   "captureTime": 1791066080599,
+   "file": "frames/000153.png"
+  },
+  {
+   "frameSeq": 266,
+   "captureTime": 1791066081099,
+   "file": "frames/000153.png"
+  },
+  {
+   "frameSeq": 267,
+   "captureTime": 1791066081600,
+   "file": "frames/000153.png"
+  },
+  {
+   "frameSeq": 268,
+   "captureTime": 1791066082099,
+   "file": "frames/000129.png"
+  },
+  {
+   "frameSeq": 269,
+   "captureTime": 1791066082599,
+   "file": "frames/000002.png"
+  },
+  {
+   "frameSeq": 270,
+   "captureTime": 1791066083099,
+   "file": "frames/000002.png"
+  },
+  {
+   "frameSeq": 271,
+   "captureTime": 1791066083600,
+   "file": "frames/000154.png"
+  },
+  {
+   "frameSeq": 272,
+   "captureTime": 1791066084100,
+   "file": "frames/000154.png"
+  },
+  {
+   "frameSeq": 273,
+   "captureTime": 1791066084599,
+   "file": "frames/000154.png"
+  },
+  {
+   "frameSeq": 274,
+   "captureTime": 1791066085099,
+   "file": "frames/000155.png"
+  },
+  {
+   "frameSeq": 275,
+   "captureTime": 1791066085599,
+   "file": "frames/000155.png"
+  },
+  {
+   "frameSeq": 276,
+   "captureTime": 1791066086100,
+   "file": "frames/000155.png"
+  },
+  {
+   "frameSeq": 277,
+   "captureTime": 1791066086599,
+   "file": "frames/000156.png"
+  },
+  {
+   "frameSeq": 278,
+   "captureTime": 1791066087099,
+   "file": "frames/000157.png"
+  },
+  {
+   "frameSeq": 279,
+   "captureTime": 1791066087599,
+   "file": "frames/000157.png"
+  },
+  {
+   "frameSeq": 280,
+   "captureTime": 1791066088100,
+   "file": "frames/000157.png"
+  },
+  {
+   "frameSeq": 281,
+   "captureTime": 1791066088600,
+   "file": "frames/000157.png"
+  },
+  {
+   "frameSeq": 282,
+   "captureTime": 1791066089099,
+   "file": "frames/000158.png"
+  },
+  {
+   "frameSeq": 283,
+   "captureTime": 1791066089599,
+   "file": "frames/000158.png"
+  },
+  {
+   "frameSeq": 284,
+   "captureTime": 1791066090100,
+   "file": "frames/000159.png"
+  },
+  {
+   "frameSeq": 285,
+   "captureTime": 1791066090599,
+   "file": "frames/000160.png"
+  },
+  {
+   "frameSeq": 286,
+   "captureTime": 1791066091099,
+   "file": "frames/000161.png"
+  },
+  {
+   "frameSeq": 287,
+   "captureTime": 1791066091599,
+   "file": "frames/000162.png"
+  },
+  {
+   "frameSeq": 288,
+   "captureTime": 1791066092099,
+   "file": "frames/000162.png"
+  },
+  {
+   "frameSeq": 289,
+   "captureTime": 1791066092600,
+   "file": "frames/000163.png"
+  },
+  {
+   "frameSeq": 290,
+   "captureTime": 1791066093099,
+   "file": "frames/000164.png"
+  },
+  {
+   "frameSeq": 291,
+   "captureTime": 1791066093599,
+   "file": "frames/000164.png"
+  },
+  {
+   "frameSeq": 292,
+   "captureTime": 1791066094100,
+   "file": "frames/000164.png"
+  },
+  {
+   "frameSeq": 293,
+   "captureTime": 1791066094599,
+   "file": "frames/000164.png"
+  },
+  {
+   "frameSeq": 294,
+   "captureTime": 1791066095099,
+   "file": "frames/000165.png"
+  },
+  {
+   "frameSeq": 295,
+   "captureTime": 1791066095600,
+   "file": "frames/000165.png"
+  },
+  {
+   "frameSeq": 296,
+   "captureTime": 1791066096098,
+   "file": "frames/000166.png"
+  },
+  {
+   "frameSeq": 297,
+   "captureTime": 1791066096599,
+   "file": "frames/000167.png"
+  },
+  {
+   "frameSeq": 298,
+   "captureTime": 1791066097099,
+   "file": "frames/000167.png"
+  },
+  {
+   "frameSeq": 299,
+   "captureTime": 1791066097599,
+   "file": "frames/000168.png"
+  },
+  {
+   "frameSeq": 300,
+   "captureTime": 1791066098100,
+   "file": "frames/000168.png"
+  },
+  {
+   "frameSeq": 301,
+   "captureTime": 1791066098599,
+   "file": "frames/000168.png"
+  },
+  {
+   "frameSeq": 302,
+   "captureTime": 1791066099099,
+   "file": "frames/000169.png"
+  },
+  {
+   "frameSeq": 303,
+   "captureTime": 1791066099599,
+   "file": "frames/000170.png"
+  },
+  {
+   "frameSeq": 304,
+   "captureTime": 1791066100100,
+   "file": "frames/000170.png"
+  },
+  {
+   "frameSeq": 305,
+   "captureTime": 1791066100601,
+   "file": "frames/000170.png"
+  },
+  {
+   "frameSeq": 306,
+   "captureTime": 1791066101099,
+   "file": "frames/000171.png"
+  },
+  {
+   "frameSeq": 307,
+   "captureTime": 1791066101599,
+   "file": "frames/000172.png"
+  },
+  {
+   "frameSeq": 308,
+   "captureTime": 1791066102099,
+   "file": "frames/000173.png"
+  },
+  {
+   "frameSeq": 309,
+   "captureTime": 1791066102600,
+   "file": "frames/000173.png"
+  },
+  {
+   "frameSeq": 310,
+   "captureTime": 1791066103099,
+   "file": "frames/000173.png"
+  },
+  {
+   "frameSeq": 311,
+   "captureTime": 1791066103599,
+   "file": "frames/000174.png"
+  },
+  {
+   "frameSeq": 312,
+   "captureTime": 1791066104099,
+   "file": "frames/000174.png"
+  },
+  {
+   "frameSeq": 313,
+   "captureTime": 1791066104600,
+   "file": "frames/000174.png"
+  },
+  {
+   "frameSeq": 314,
+   "captureTime": 1791066105100,
+   "file": "frames/000174.png"
+  },
+  {
+   "frameSeq": 315,
+   "captureTime": 1791066105599,
+   "file": "frames/000175.png"
+  },
+  {
+   "frameSeq": 316,
+   "captureTime": 1791066106099,
+   "file": "frames/000176.png"
+  },
+  {
+   "frameSeq": 317,
+   "captureTime": 1791066106600,
+   "file": "frames/000176.png"
+  },
+  {
+   "frameSeq": 318,
+   "captureTime": 1791066107099,
+   "file": "frames/000177.png"
+  },
+  {
+   "frameSeq": 319,
+   "captureTime": 1791066107600,
+   "file": "frames/000178.png"
+  },
+  {
+   "frameSeq": 320,
+   "captureTime": 1791066108099,
+   "file": "frames/000179.png"
+  },
+  {
+   "frameSeq": 321,
+   "captureTime": 1791066108599,
+   "file": "frames/000180.png"
+  },
+  {
+   "frameSeq": 322,
+   "captureTime": 1791066109100,
+   "file": "frames/000180.png"
+  },
+  {
+   "frameSeq": 323,
+   "captureTime": 1791066109599,
+   "file": "frames/000180.png"
+  },
+  {
+   "frameSeq": 324,
+   "captureTime": 1791066110099,
+   "file": "frames/000181.png"
+  },
+  {
+   "frameSeq": 325,
+   "captureTime": 1791066110599,
+   "file": "frames/000181.png"
+  },
+  {
+   "frameSeq": 326,
+   "captureTime": 1791066111099,
+   "file": "frames/000182.png"
+  },
+  {
+   "frameSeq": 327,
+   "captureTime": 1791066111599,
+   "file": "frames/000183.png"
+  },
+  {
+   "frameSeq": 328,
+   "captureTime": 1791066112099,
+   "file": "frames/000183.png"
+  },
+  {
+   "frameSeq": 329,
+   "captureTime": 1791066112599,
+   "file": "frames/000183.png"
+  },
+  {
+   "frameSeq": 330,
+   "captureTime": 1791066113100,
+   "file": "frames/000184.png"
+  },
+  {
+   "frameSeq": 331,
+   "captureTime": 1791066113599,
+   "file": "frames/000184.png"
+  },
+  {
+   "frameSeq": 332,
+   "captureTime": 1791066114099,
+   "file": "frames/000185.png"
+  },
+  {
+   "frameSeq": 333,
+   "captureTime": 1791066114599,
+   "file": "frames/000186.png"
+  },
+  {
+   "frameSeq": 334,
+   "captureTime": 1791066115099,
+   "file": "frames/000186.png"
+  },
+  {
+   "frameSeq": 335,
+   "captureTime": 1791066115599,
+   "file": "frames/000187.png"
+  },
+  {
+   "frameSeq": 336,
+   "captureTime": 1791066116100,
+   "file": "frames/000188.png"
+  },
+  {
+   "frameSeq": 337,
+   "captureTime": 1791066116599,
+   "file": "frames/000188.png"
+  },
+  {
+   "frameSeq": 338,
+   "captureTime": 1791066117100,
+   "file": "frames/000189.png"
+  },
+  {
+   "frameSeq": 339,
+   "captureTime": 1791066117599,
+   "file": "frames/000190.png"
+  },
+  {
+   "frameSeq": 340,
+   "captureTime": 1791066118099,
+   "file": "frames/000191.png"
+  },
+  {
+   "frameSeq": 341,
+   "captureTime": 1791066118600,
+   "file": "frames/000191.png"
+  },
+  {
+   "frameSeq": 342,
+   "captureTime": 1791066119099,
+   "file": "frames/000191.png"
+  },
+  {
+   "frameSeq": 343,
+   "captureTime": 1791066119599,
+   "file": "frames/000192.png"
+  },
+  {
+   "frameSeq": 344,
+   "captureTime": 1791066120098,
+   "file": "frames/000193.png"
+  },
+  {
+   "frameSeq": 345,
+   "captureTime": 1791066120599,
+   "file": "frames/000194.png"
+  },
+  {
+   "frameSeq": 346,
+   "captureTime": 1791066121099,
+   "file": "frames/000195.png"
+  },
+  {
+   "frameSeq": 347,
+   "captureTime": 1791066121599,
+   "file": "frames/000196.png"
+  },
+  {
+   "frameSeq": 348,
+   "captureTime": 1791066122099,
+   "file": "frames/000196.png"
+  },
+  {
+   "frameSeq": 349,
+   "captureTime": 1791066122599,
+   "file": "frames/000196.png"
+  },
+  {
+   "frameSeq": 350,
+   "captureTime": 1791066123099,
+   "file": "frames/000196.png"
+  },
+  {
+   "frameSeq": 351,
+   "captureTime": 1791066123599,
+   "file": "frames/000129.png"
+  },
+  {
+   "frameSeq": 352,
+   "captureTime": 1791066124099,
+   "file": "frames/000053.png"
+  },
+  {
+   "frameSeq": 353,
+   "captureTime": 1791066124599,
+   "file": "frames/000197.png"
+  },
+  {
+   "frameSeq": 354,
+   "captureTime": 1791066125100,
+   "file": "frames/000198.png"
+  },
+  {
+   "frameSeq": 355,
+   "captureTime": 1791066125599,
+   "file": "frames/000198.png"
+  },
+  {
+   "frameSeq": 356,
+   "captureTime": 1791066126099,
+   "file": "frames/000199.png"
+  },
+  {
+   "frameSeq": 357,
+   "captureTime": 1791066126599,
+   "file": "frames/000199.png"
+  },
+  {
+   "frameSeq": 358,
+   "captureTime": 1791066127100,
+   "file": "frames/000199.png"
+  },
+  {
+   "frameSeq": 359,
+   "captureTime": 1791066127599,
+   "file": "frames/000199.png"
+  },
+  {
+   "frameSeq": 360,
+   "captureTime": 1791066128099,
+   "file": "frames/000200.png"
+  },
+  {
+   "frameSeq": 361,
+   "captureTime": 1791066128599,
+   "file": "frames/000201.png"
+  },
+  {
+   "frameSeq": 362,
+   "captureTime": 1791066129099,
+   "file": "frames/000201.png"
+  },
+  {
+   "frameSeq": 363,
+   "captureTime": 1791066129599,
+   "file": "frames/000202.png"
+  },
+  {
+   "frameSeq": 364,
+   "captureTime": 1791066130099,
+   "file": "frames/000202.png"
+  },
+  {
+   "frameSeq": 365,
+   "captureTime": 1791066130598,
+   "file": "frames/000203.png"
+  },
+  {
+   "frameSeq": 366,
+   "captureTime": 1791066131099,
+   "file": "frames/000204.png"
+  },
+  {
+   "frameSeq": 367,
+   "captureTime": 1791066131599,
+   "file": "frames/000205.png"
+  },
+  {
+   "frameSeq": 368,
+   "captureTime": 1791066132100,
+   "file": "frames/000206.png"
+  },
+  {
+   "frameSeq": 369,
+   "captureTime": 1791066132599,
+   "file": "frames/000206.png"
+  },
+  {
+   "frameSeq": 370,
+   "captureTime": 1791066133098,
+   "file": "frames/000207.png"
+  },
+  {
+   "frameSeq": 371,
+   "captureTime": 1791066133599,
+   "file": "frames/000208.png"
+  },
+  {
+   "frameSeq": 372,
+   "captureTime": 1791066134099,
+   "file": "frames/000208.png"
+  },
+  {
+   "frameSeq": 373,
+   "captureTime": 1791066134600,
+   "file": "frames/000208.png"
+  },
+  {
+   "frameSeq": 374,
+   "captureTime": 1791066135098,
+   "file": "frames/000209.png"
+  },
+  {
+   "frameSeq": 375,
+   "captureTime": 1791066135600,
+   "file": "frames/000209.png"
+  },
+  {
+   "frameSeq": 376,
+   "captureTime": 1791066136100,
+   "file": "frames/000209.png"
+  },
+  {
+   "frameSeq": 377,
+   "captureTime": 1791066136599,
+   "file": "frames/000210.png"
+  },
+  {
+   "frameSeq": 378,
+   "captureTime": 1791066137100,
+   "file": "frames/000211.png"
+  },
+  {
+   "frameSeq": 379,
+   "captureTime": 1791066137599,
+   "file": "frames/000211.png"
+  },
+  {
+   "frameSeq": 380,
+   "captureTime": 1791066138099,
+   "file": "frames/000212.png"
+  },
+  {
+   "frameSeq": 381,
+   "captureTime": 1791066138599,
+   "file": "frames/000212.png"
+  },
+  {
+   "frameSeq": 382,
+   "captureTime": 1791066139100,
+   "file": "frames/000212.png"
+  },
+  {
+   "frameSeq": 383,
+   "captureTime": 1791066139599,
+   "file": "frames/000213.png"
+  },
+  {
+   "frameSeq": 384,
+   "captureTime": 1791066140100,
+   "file": "frames/000214.png"
+  },
+  {
+   "frameSeq": 385,
+   "captureTime": 1791066140599,
+   "file": "frames/000214.png"
+  },
+  {
+   "frameSeq": 386,
+   "captureTime": 1791066141100,
+   "file": "frames/000214.png"
+  },
+  {
+   "frameSeq": 387,
+   "captureTime": 1791066141600,
+   "file": "frames/000215.png"
+  },
+  {
+   "frameSeq": 388,
+   "captureTime": 1791066142099,
+   "file": "frames/000216.png"
+  },
+  {
+   "frameSeq": 389,
+   "captureTime": 1791066142600,
+   "file": "frames/000217.png"
+  },
+  {
+   "frameSeq": 390,
+   "captureTime": 1791066143098,
+   "file": "frames/000217.png"
+  },
+  {
+   "frameSeq": 391,
+   "captureTime": 1791066143601,
+   "file": "frames/000217.png"
+  },
+  {
+   "frameSeq": 392,
+   "captureTime": 1791066144100,
+   "file": "frames/000217.png"
+  },
+  {
+   "frameSeq": 393,
+   "captureTime": 1791066144599,
+   "file": "frames/000217.png"
+  },
+  {
+   "frameSeq": 394,
+   "captureTime": 1791066145099,
+   "file": "frames/000129.png"
+  },
+  {
+   "frameSeq": 395,
+   "captureTime": 1791066145599,
+   "file": "frames/000002.png"
+  },
+  {
+   "frameSeq": 396,
+   "captureTime": 1791066146099,
+   "file": "frames/000218.png"
+  },
+  {
+   "frameSeq": 397,
+   "captureTime": 1791066146600,
+   "file": "frames/000219.png"
+  },
+  {
+   "frameSeq": 398,
+   "captureTime": 1791066147100,
+   "file": "frames/000219.png"
+  },
+  {
+   "frameSeq": 399,
+   "captureTime": 1791066147599,
+   "file": "frames/000220.png"
+  },
+  {
+   "frameSeq": 400,
+   "captureTime": 1791066148100,
+   "file": "frames/000220.png"
+  },
+  {
+   "frameSeq": 401,
+   "captureTime": 1791066148600,
+   "file": "frames/000220.png"
+  },
+  {
+   "frameSeq": 402,
+   "captureTime": 1791066149099,
+   "file": "frames/000221.png"
+  },
+  {
+   "frameSeq": 403,
+   "captureTime": 1791066149599,
+   "file": "frames/000222.png"
+  },
+  {
+   "frameSeq": 404,
+   "captureTime": 1791066150099,
+   "file": "frames/000223.png"
+  },
+  {
+   "frameSeq": 405,
+   "captureTime": 1791066150600,
+   "file": "frames/000223.png"
+  },
+  {
+   "frameSeq": 406,
+   "captureTime": 1791066151100,
+   "file": "frames/000223.png"
+  },
+  {
+   "frameSeq": 407,
+   "captureTime": 1791066151600,
+   "file": "frames/000224.png"
+  },
+  {
+   "frameSeq": 408,
+   "captureTime": 1791066152100,
+   "file": "frames/000224.png"
+  },
+  {
+   "frameSeq": 409,
+   "captureTime": 1791066152600,
+   "file": "frames/000224.png"
+  },
+  {
+   "frameSeq": 410,
+   "captureTime": 1791066153099,
+   "file": "frames/000225.png"
+  },
+  {
+   "frameSeq": 411,
+   "captureTime": 1791066153599,
+   "file": "frames/000226.png"
+  },
+  {
+   "frameSeq": 412,
+   "captureTime": 1791066154099,
+   "file": "frames/000226.png"
+  },
+  {
+   "frameSeq": 413,
+   "captureTime": 1791066154599,
+   "file": "frames/000227.png"
+  },
+  {
+   "frameSeq": 414,
+   "captureTime": 1791066155099,
+   "file": "frames/000227.png"
+  },
+  {
+   "frameSeq": 415,
+   "captureTime": 1791066155599,
+   "file": "frames/000227.png"
+  },
+  {
+   "frameSeq": 416,
+   "captureTime": 1791066156099,
+   "file": "frames/000228.png"
+  },
+  {
+   "frameSeq": 417,
+   "captureTime": 1791066156600,
+   "file": "frames/000229.png"
+  },
+  {
+   "frameSeq": 418,
+   "captureTime": 1791066157100,
+   "file": "frames/000229.png"
+  },
+  {
+   "frameSeq": 419,
+   "captureTime": 1791066157599,
+   "file": "frames/000230.png"
+  },
+  {
+   "frameSeq": 420,
+   "captureTime": 1791066158099,
+   "file": "frames/000230.png"
+  },
+  {
+   "frameSeq": 421,
+   "captureTime": 1791066158599,
+   "file": "frames/000231.png"
+  },
+  {
+   "frameSeq": 422,
+   "captureTime": 1791066159099,
+   "file": "frames/000232.png"
+  },
+  {
+   "frameSeq": 423,
+   "captureTime": 1791066159600,
+   "file": "frames/000232.png"
+  },
+  {
+   "frameSeq": 424,
+   "captureTime": 1791066160099,
+   "file": "frames/000233.png"
+  },
+  {
+   "frameSeq": 425,
+   "captureTime": 1791066160599,
+   "file": "frames/000234.png"
+  },
+  {
+   "frameSeq": 426,
+   "captureTime": 1791066161099,
+   "file": "frames/000234.png"
+  },
+  {
+   "frameSeq": 427,
+   "captureTime": 1791066161599,
+   "file": "frames/000234.png"
+  },
+  {
+   "frameSeq": 428,
+   "captureTime": 1791066162099,
+   "file": "frames/000235.png"
+  },
+  {
+   "frameSeq": 429,
+   "captureTime": 1791066162599,
+   "file": "frames/000236.png"
+  },
+  {
+   "frameSeq": 430,
+   "captureTime": 1791066163100,
+   "file": "frames/000236.png"
+  },
+  {
+   "frameSeq": 431,
+   "captureTime": 1791066163599,
+   "file": "frames/000236.png"
+  },
+  {
+   "frameSeq": 432,
+   "captureTime": 1791066164099,
+   "file": "frames/000237.png"
+  },
+  {
+   "frameSeq": 433,
+   "captureTime": 1791066164599,
+   "file": "frames/000238.png"
+  },
+  {
+   "frameSeq": 434,
+   "captureTime": 1791066165100,
+   "file": "frames/000239.png"
+  },
+  {
+   "frameSeq": 435,
+   "captureTime": 1791066165600,
+   "file": "frames/000239.png"
+  },
+  {
+   "frameSeq": 436,
+   "captureTime": 1791066166100,
+   "file": "frames/000239.png"
+  },
+  {
+   "frameSeq": 437,
+   "captureTime": 1791066166599,
+   "file": "frames/000240.png"
+  },
+  {
+   "frameSeq": 438,
+   "captureTime": 1791066167100,
+   "file": "frames/000241.png"
+  },
+  {
+   "frameSeq": 439,
+   "captureTime": 1791066167600,
+   "file": "frames/000241.png"
+  },
+  {
+   "frameSeq": 440,
+   "captureTime": 1791066168099,
+   "file": "frames/000242.png"
+  },
+  {
+   "frameSeq": 441,
+   "captureTime": 1791066168599,
+   "file": "frames/000243.png"
+  },
+  {
+   "frameSeq": 442,
+   "captureTime": 1791066169100,
+   "file": "frames/000243.png"
+  },
+  {
+   "frameSeq": 443,
+   "captureTime": 1791066169600,
+   "file": "frames/000243.png"
+  },
+  {
+   "frameSeq": 444,
+   "captureTime": 1791066170099,
+   "file": "frames/000243.png"
+  },
+  {
+   "frameSeq": 445,
+   "captureTime": 1791066170600,
+   "file": "frames/000244.png"
+  },
+  {
+   "frameSeq": 446,
+   "captureTime": 1791066171099,
+   "file": "frames/000244.png"
+  },
+  {
+   "frameSeq": 447,
+   "captureTime": 1791066171599,
+   "file": "frames/000245.png"
+  },
+  {
+   "frameSeq": 448,
+   "captureTime": 1791066172099,
+   "file": "frames/000246.png"
+  },
+  {
+   "frameSeq": 449,
+   "captureTime": 1791066172599,
+   "file": "frames/000246.png"
+  },
+  {
+   "frameSeq": 450,
+   "captureTime": 1791066173099,
+   "file": "frames/000246.png"
+  },
+  {
+   "frameSeq": 451,
+   "captureTime": 1791066173599,
+   "file": "frames/000247.png"
+  },
+  {
+   "frameSeq": 452,
+   "captureTime": 1791066174100,
+   "file": "frames/000248.png"
+  },
+  {
+   "frameSeq": 453,
+   "captureTime": 1791066174600,
+   "file": "frames/000248.png"
+  },
+  {
+   "frameSeq": 454,
+   "captureTime": 1791066175100,
+   "file": "frames/000248.png"
+  },
+  {
+   "frameSeq": 455,
+   "captureTime": 1791066175599,
+   "file": "frames/000249.png"
+  },
+  {
+   "frameSeq": 456,
+   "captureTime": 1791066176100,
+   "file": "frames/000250.png"
+  },
+  {
+   "frameSeq": 457,
+   "captureTime": 1791066176599,
+   "file": "frames/000251.png"
+  },
+  {
+   "frameSeq": 458,
+   "captureTime": 1791066177099,
+   "file": "frames/000251.png"
+  },
+  {
+   "frameSeq": 459,
+   "captureTime": 1791066177600,
+   "file": "frames/000251.png"
+  },
+  {
+   "frameSeq": 460,
+   "captureTime": 1791066178098,
+   "file": "frames/000252.png"
+  },
+  {
+   "frameSeq": 461,
+   "captureTime": 1791066178599,
+   "file": "frames/000253.png"
+  },
+  {
+   "frameSeq": 462,
+   "captureTime": 1791066179099,
+   "file": "frames/000253.png"
+  },
+  {
+   "frameSeq": 463,
+   "captureTime": 1791066179599,
+   "file": "frames/000254.png"
+  },
+  {
+   "frameSeq": 464,
+   "captureTime": 1791066180099,
+   "file": "frames/000255.png"
+  },
+  {
+   "frameSeq": 465,
+   "captureTime": 1791066180599,
+   "file": "frames/000255.png"
+  },
+  {
+   "frameSeq": 466,
+   "captureTime": 1791066181100,
+   "file": "frames/000255.png"
+  },
+  {
+   "frameSeq": 467,
+   "captureTime": 1791066181598,
+   "file": "frames/000256.png"
+  },
+  {
+   "frameSeq": 468,
+   "captureTime": 1791066182099,
+   "file": "frames/000256.png"
+  },
+  {
+   "frameSeq": 469,
+   "captureTime": 1791066182599,
+   "file": "frames/000257.png"
+  },
+  {
+   "frameSeq": 470,
+   "captureTime": 1791066183098,
+   "file": "frames/000258.png"
+  },
+  {
+   "frameSeq": 471,
+   "captureTime": 1791066183599,
+   "file": "frames/000258.png"
+  },
+  {
+   "frameSeq": 472,
+   "captureTime": 1791066184099,
+   "file": "frames/000258.png"
+  },
+  {
+   "frameSeq": 473,
+   "captureTime": 1791066184599,
+   "file": "frames/000259.png"
+  },
+  {
+   "frameSeq": 474,
+   "captureTime": 1791066185098,
+   "file": "frames/000260.png"
+  },
+  {
+   "frameSeq": 475,
+   "captureTime": 1791066185599,
+   "file": "frames/000261.png"
+  },
+  {
+   "frameSeq": 476,
+   "captureTime": 1791066186099,
+   "file": "frames/000262.png"
+  },
+  {
+   "frameSeq": 477,
+   "captureTime": 1791066186599,
+   "file": "frames/000262.png"
+  },
+  {
+   "frameSeq": 478,
+   "captureTime": 1791066187100,
+   "file": "frames/000262.png"
+  },
+  {
+   "frameSeq": 479,
+   "captureTime": 1791066187601,
+   "file": "frames/000262.png"
+  },
+  {
+   "frameSeq": 480,
+   "captureTime": 1791066188100,
+   "file": "frames/000262.png"
+  },
+  {
+   "frameSeq": 481,
+   "captureTime": 1791066188599,
+   "file": "frames/000262.png"
+  },
+  {
+   "frameSeq": 482,
+   "captureTime": 1791066189099,
+   "file": "frames/000263.png"
+  },
+  {
+   "frameSeq": 483,
+   "captureTime": 1791066189600,
+   "file": "frames/000053.png"
+  },
+  {
+   "frameSeq": 484,
+   "captureTime": 1791066190099,
+   "file": "frames/000264.png"
+  },
+  {
+   "frameSeq": 485,
+   "captureTime": 1791066190599,
+   "file": "frames/000264.png"
+  },
+  {
+   "frameSeq": 486,
+   "captureTime": 1791066191099,
+   "file": "frames/000264.png"
+  },
+  {
+   "frameSeq": 487,
+   "captureTime": 1791066191600,
+   "file": "frames/000264.png"
+  },
+  {
+   "frameSeq": 488,
+   "captureTime": 1791066192099,
+   "file": "frames/000265.png"
+  },
+  {
+   "frameSeq": 489,
+   "captureTime": 1791066192599,
+   "file": "frames/000265.png"
+  },
+  {
+   "frameSeq": 490,
+   "captureTime": 1791066193099,
+   "file": "frames/000265.png"
+  },
+  {
+   "frameSeq": 491,
+   "captureTime": 1791066193600,
+   "file": "frames/000265.png"
+  },
+  {
+   "frameSeq": 492,
+   "captureTime": 1791066194099,
+   "file": "frames/000266.png"
+  },
+  {
+   "frameSeq": 493,
+   "captureTime": 1791066194599,
+   "file": "frames/000267.png"
+  },
+  {
+   "frameSeq": 494,
+   "captureTime": 1791066195100,
+   "file": "frames/000267.png"
+  },
+  {
+   "frameSeq": 495,
+   "captureTime": 1791066195599,
+   "file": "frames/000268.png"
+  },
+  {
+   "frameSeq": 496,
+   "captureTime": 1791066196100,
+   "file": "frames/000268.png"
+  },
+  {
+   "frameSeq": 497,
+   "captureTime": 1791066196599,
+   "file": "frames/000269.png"
+  },
+  {
+   "frameSeq": 498,
+   "captureTime": 1791066197099,
+   "file": "frames/000270.png"
+  },
+  {
+   "frameSeq": 499,
+   "captureTime": 1791066197599,
+   "file": "frames/000270.png"
+  },
+  {
+   "frameSeq": 500,
+   "captureTime": 1791066198099,
+   "file": "frames/000271.png"
+  },
+  {
+   "frameSeq": 501,
+   "captureTime": 1791066198599,
+   "file": "frames/000272.png"
+  },
+  {
+   "frameSeq": 502,
+   "captureTime": 1791066199099,
+   "file": "frames/000272.png"
+  },
+  {
+   "frameSeq": 503,
+   "captureTime": 1791066199599,
+   "file": "frames/000272.png"
+  },
+  {
+   "frameSeq": 504,
+   "captureTime": 1791066200100,
+   "file": "frames/000272.png"
+  },
+  {
+   "frameSeq": 505,
+   "captureTime": 1791066200599,
+   "file": "frames/000273.png"
+  },
+  {
+   "frameSeq": 506,
+   "captureTime": 1791066201099,
+   "file": "frames/000274.png"
+  },
+  {
+   "frameSeq": 507,
+   "captureTime": 1791066201599,
+   "file": "frames/000274.png"
+  },
+  {
+   "frameSeq": 508,
+   "captureTime": 1791066202100,
+   "file": "frames/000274.png"
+  },
+  {
+   "frameSeq": 509,
+   "captureTime": 1791066202599,
+   "file": "frames/000275.png"
+  },
+  {
+   "frameSeq": 510,
+   "captureTime": 1791066203099,
+   "file": "frames/000275.png"
+  },
+  {
+   "frameSeq": 511,
+   "captureTime": 1791066203600,
+   "file": "frames/000276.png"
+  },
+  {
+   "frameSeq": 512,
+   "captureTime": 1791066204100,
+   "file": "frames/000276.png"
+  },
+  {
+   "frameSeq": 513,
+   "captureTime": 1791066204599,
+   "file": "frames/000276.png"
+  },
+  {
+   "frameSeq": 514,
+   "captureTime": 1791066205099,
+   "file": "frames/000276.png"
+  },
+  {
+   "frameSeq": 515,
+   "captureTime": 1791066205599,
+   "file": "frames/000277.png"
+  },
+  {
+   "frameSeq": 516,
+   "captureTime": 1791066206099,
+   "file": "frames/000277.png"
+  },
+  {
+   "frameSeq": 517,
+   "captureTime": 1791066206599,
+   "file": "frames/000277.png"
+  },
+  {
+   "frameSeq": 518,
+   "captureTime": 1791066207100,
+   "file": "frames/000278.png"
+  },
+  {
+   "frameSeq": 519,
+   "captureTime": 1791066207599,
+   "file": "frames/000279.png"
+  },
+  {
+   "frameSeq": 520,
+   "captureTime": 1791066208100,
+   "file": "frames/000279.png"
+  },
+  {
+   "frameSeq": 521,
+   "captureTime": 1791066208599,
+   "file": "frames/000279.png"
+  },
+  {
+   "frameSeq": 522,
+   "captureTime": 1791066209099,
+   "file": "frames/000279.png"
+  },
+  {
+   "frameSeq": 523,
+   "captureTime": 1791066209599,
+   "file": "frames/000280.png"
+  },
+  {
+   "frameSeq": 524,
+   "captureTime": 1791066210099,
+   "file": "frames/000280.png"
+  },
+  {
+   "frameSeq": 525,
+   "captureTime": 1791066210598,
+   "file": "frames/000281.png"
+  },
+  {
+   "frameSeq": 526,
+   "captureTime": 1791066211100,
+   "file": "frames/000282.png"
+  },
+  {
+   "frameSeq": 527,
+   "captureTime": 1791066211599,
+   "file": "frames/000282.png"
+  },
+  {
+   "frameSeq": 528,
+   "captureTime": 1791066212100,
+   "file": "frames/000282.png"
+  },
+  {
+   "frameSeq": 529,
+   "captureTime": 1791066212599,
+   "file": "frames/000282.png"
+  },
+  {
+   "frameSeq": 530,
+   "captureTime": 1791066213099,
+   "file": "frames/000282.png"
+  },
+  {
+   "frameSeq": 531,
+   "captureTime": 1791066213599,
+   "file": "frames/000129.png"
+  },
+  {
+   "frameSeq": 532,
+   "captureTime": 1791066214099,
+   "file": "frames/000002.png"
+  },
+  {
+   "frameSeq": 533,
+   "captureTime": 1791066214600,
+   "file": "frames/000002.png"
+  },
+  {
+   "frameSeq": 534,
+   "captureTime": 1791066215099,
+   "file": "frames/000283.png"
+  },
+  {
+   "frameSeq": 535,
+   "captureTime": 1791066215599,
+   "file": "frames/000283.png"
+  },
+  {
+   "frameSeq": 536,
+   "captureTime": 1791066216099,
+   "file": "frames/000284.png"
+  },
+  {
+   "frameSeq": 537,
+   "captureTime": 1791066216599,
+   "file": "frames/000285.png"
+  },
+  {
+   "frameSeq": 538,
+   "captureTime": 1791066217099,
+   "file": "frames/000285.png"
+  },
+  {
+   "frameSeq": 539,
+   "captureTime": 1791066217599,
+   "file": "frames/000286.png"
+  },
+  {
+   "frameSeq": 540,
+   "captureTime": 1791066218099,
+   "file": "frames/000287.png"
+  },
+  {
+   "frameSeq": 541,
+   "captureTime": 1791066218600,
+   "file": "frames/000287.png"
+  },
+  {
+   "frameSeq": 542,
+   "captureTime": 1791066219099,
+   "file": "frames/000287.png"
+  },
+  {
+   "frameSeq": 543,
+   "captureTime": 1791066219599,
+   "file": "frames/000287.png"
+  },
+  {
+   "frameSeq": 544,
+   "captureTime": 1791066220099,
+   "file": "frames/000288.png"
+  },
+  {
+   "frameSeq": 545,
+   "captureTime": 1791066220599,
+   "file": "frames/000288.png"
+  },
+  {
+   "frameSeq": 546,
+   "captureTime": 1791066221099,
+   "file": "frames/000289.png"
+  },
+  {
+   "frameSeq": 547,
+   "captureTime": 1791066221600,
+   "file": "frames/000289.png"
+  },
+  {
+   "frameSeq": 548,
+   "captureTime": 1791066222099,
+   "file": "frames/000289.png"
+  },
+  {
+   "frameSeq": 549,
+   "captureTime": 1791066222599,
+   "file": "frames/000289.png"
+  },
+  {
+   "frameSeq": 550,
+   "captureTime": 1791066223099,
+   "file": "frames/000290.png"
+  },
+  {
+   "frameSeq": 551,
+   "captureTime": 1791066223599,
+   "file": "frames/000290.png"
+  },
+  {
+   "frameSeq": 552,
+   "captureTime": 1791066224099,
+   "file": "frames/000290.png"
+  },
+  {
+   "frameSeq": 553,
+   "captureTime": 1791066224599,
+   "file": "frames/000290.png"
+  },
+  {
+   "frameSeq": 554,
+   "captureTime": 1791066225099,
+   "file": "frames/000291.png"
+  },
+  {
+   "frameSeq": 555,
+   "captureTime": 1791066225599,
+   "file": "frames/000292.png"
+  },
+  {
+   "frameSeq": 556,
+   "captureTime": 1791066226099,
+   "file": "frames/000292.png"
+  },
+  {
+   "frameSeq": 557,
+   "captureTime": 1791066226600,
+   "file": "frames/000292.png"
+  },
+  {
+   "frameSeq": 558,
+   "captureTime": 1791066227100,
+   "file": "frames/000293.png"
+  },
+  {
+   "frameSeq": 559,
+   "captureTime": 1791066227600,
+   "file": "frames/000293.png"
+  },
+  {
+   "frameSeq": 560,
+   "captureTime": 1791066228099,
+   "file": "frames/000294.png"
+  },
+  {
+   "frameSeq": 561,
+   "captureTime": 1791066228599,
+   "file": "frames/000295.png"
+  },
+  {
+   "frameSeq": 562,
+   "captureTime": 1791066229099,
+   "file": "frames/000295.png"
+  },
+  {
+   "frameSeq": 563,
+   "captureTime": 1791066229599,
+   "file": "frames/000296.png"
+  },
+  {
+   "frameSeq": 564,
+   "captureTime": 1791066230099,
+   "file": "frames/000297.png"
+  },
+  {
+   "frameSeq": 565,
+   "captureTime": 1791066230600,
+   "file": "frames/000297.png"
+  },
+  {
+   "frameSeq": 566,
+   "captureTime": 1791066231099,
+   "file": "frames/000298.png"
+  },
+  {
+   "frameSeq": 567,
+   "captureTime": 1791066231600,
+   "file": "frames/000298.png"
+  },
+  {
+   "frameSeq": 568,
+   "captureTime": 1791066232100,
+   "file": "frames/000298.png"
+  },
+  {
+   "frameSeq": 569,
+   "captureTime": 1791066232599,
+   "file": "frames/000298.png"
+  },
+  {
+   "frameSeq": 570,
+   "captureTime": 1791066233100,
+   "file": "frames/000299.png"
+  },
+  {
+   "frameSeq": 571,
+   "captureTime": 1791066233599,
+   "file": "frames/000300.png"
+  },
+  {
+   "frameSeq": 572,
+   "captureTime": 1791066234099,
+   "file": "frames/000301.png"
+  },
+  {
+   "frameSeq": 573,
+   "captureTime": 1791066234600,
+   "file": "frames/000301.png"
+  },
+  {
+   "frameSeq": 574,
+   "captureTime": 1791066235101,
+   "file": "frames/000301.png"
+  },
+  {
+   "frameSeq": 575,
+   "captureTime": 1791066235599,
+   "file": "frames/000302.png"
+  },
+  {
+   "frameSeq": 576,
+   "captureTime": 1791066236099,
+   "file": "frames/000302.png"
+  },
+  {
+   "frameSeq": 577,
+   "captureTime": 1791066236600,
+   "file": "frames/000302.png"
+  },
+  {
+   "frameSeq": 578,
+   "captureTime": 1791066237099,
+   "file": "frames/000302.png"
+  },
+  {
+   "frameSeq": 579,
+   "captureTime": 1791066237599,
+   "file": "frames/000303.png"
+  },
+  {
+   "frameSeq": 580,
+   "captureTime": 1791066238099,
+   "file": "frames/000304.png"
+  },
+  {
+   "frameSeq": 581,
+   "captureTime": 1791066238599,
+   "file": "frames/000305.png"
+  },
+  {
+   "frameSeq": 582,
+   "captureTime": 1791066239099,
+   "file": "frames/000305.png"
+  },
+  {
+   "frameSeq": 583,
+   "captureTime": 1791066239600,
+   "file": "frames/000305.png"
+  },
+  {
+   "frameSeq": 584,
+   "captureTime": 1791066240099,
+   "file": "frames/000306.png"
+  },
+  {
+   "frameSeq": 585,
+   "captureTime": 1791066240600,
+   "file": "frames/000307.png"
+  },
+  {
+   "frameSeq": 586,
+   "captureTime": 1791066241100,
+   "file": "frames/000308.png"
+  },
+  {
+   "frameSeq": 587,
+   "captureTime": 1791066241600,
+   "file": "frames/000309.png"
+  },
+  {
+   "frameSeq": 588,
+   "captureTime": 1791066242099,
+   "file": "frames/000309.png"
+  },
+  {
+   "frameSeq": 589,
+   "captureTime": 1791066242599,
+   "file": "frames/000310.png"
+  },
+  {
+   "frameSeq": 590,
+   "captureTime": 1791066243099,
+   "file": "frames/000310.png"
+  },
+  {
+   "frameSeq": 591,
+   "captureTime": 1791066243599,
+   "file": "frames/000311.png"
+  },
+  {
+   "frameSeq": 592,
+   "captureTime": 1791066244099,
+   "file": "frames/000312.png"
+  },
+  {
+   "frameSeq": 593,
+   "captureTime": 1791066244599,
+   "file": "frames/000312.png"
+  },
+  {
+   "frameSeq": 594,
+   "captureTime": 1791066245099,
+   "file": "frames/000312.png"
+  },
+  {
+   "frameSeq": 595,
+   "captureTime": 1791066245599,
+   "file": "frames/000313.png"
+  },
+  {
+   "frameSeq": 596,
+   "captureTime": 1791066246100,
+   "file": "frames/000313.png"
+  },
+  {
+   "frameSeq": 597,
+   "captureTime": 1791066246600,
+   "file": "frames/000313.png"
+  },
+  {
+   "frameSeq": 598,
+   "captureTime": 1791066247099,
+   "file": "frames/000314.png"
+  },
+  {
+   "frameSeq": 599,
+   "captureTime": 1791066247599,
+   "file": "frames/000315.png"
+  },
+  {
+   "frameSeq": 600,
+   "captureTime": 1791066248100,
+   "file": "frames/000316.png"
+  },
+  {
+   "frameSeq": 601,
+   "captureTime": 1791066248599,
+   "file": "frames/000316.png"
+  },
+  {
+   "frameSeq": 602,
+   "captureTime": 1791066249099,
+   "file": "frames/000317.png"
+  },
+  {
+   "frameSeq": 603,
+   "captureTime": 1791066249599,
+   "file": "frames/000317.png"
+  },
+  {
+   "frameSeq": 604,
+   "captureTime": 1791066250099,
+   "file": "frames/000318.png"
+  },
+  {
+   "frameSeq": 605,
+   "captureTime": 1791066250599,
+   "file": "frames/000319.png"
+  },
+  {
+   "frameSeq": 606,
+   "captureTime": 1791066251099,
+   "file": "frames/000319.png"
+  },
+  {
+   "frameSeq": 607,
+   "captureTime": 1791066251599,
+   "file": "frames/000319.png"
+  },
+  {
+   "frameSeq": 608,
+   "captureTime": 1791066252099,
+   "file": "frames/000320.png"
+  },
+  {
+   "frameSeq": 609,
+   "captureTime": 1791066252599,
+   "file": "frames/000321.png"
+  },
+  {
+   "frameSeq": 610,
+   "captureTime": 1791066253099,
+   "file": "frames/000321.png"
+  },
+  {
+   "frameSeq": 611,
+   "captureTime": 1791066253599,
+   "file": "frames/000322.png"
+  },
+  {
+   "frameSeq": 612,
+   "captureTime": 1791066254099,
+   "file": "frames/000323.png"
+  },
+  {
+   "frameSeq": 613,
+   "captureTime": 1791066254599,
+   "file": "frames/000324.png"
+  },
+  {
+   "frameSeq": 614,
+   "captureTime": 1791066255099,
+   "file": "frames/000324.png"
+  },
+  {
+   "frameSeq": 615,
+   "captureTime": 1791066255600,
+   "file": "frames/000324.png"
+  },
+  {
+   "frameSeq": 616,
+   "captureTime": 1791066256099,
+   "file": "frames/000324.png"
+  },
+  {
+   "frameSeq": 617,
+   "captureTime": 1791066256600,
+   "file": "frames/000324.png"
+  }
+ ],
+ "domEvents": [
+  {
+   "id": "ff8185a1-052d-4db5-b3a9-a487bf34ffab",
+   "frameSeq": 1,
+   "captureTime": 1791065949989,
+   "sessionEpoch": 0,
+   "kind": "navigate",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "6a00ecda-afd3-4e02-8bcd-d0f55a3a42b5",
+   "frameSeq": 2,
+   "captureTime": 1791065952030,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0301",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "4ba6725d-0b0d-4bc3-a493-6e9c7386654a",
+   "frameSeq": 3,
+   "captureTime": 1791065954331,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0301",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "low",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "cddd5d78-a1ea-42b6-bdc0-f4d1e3883faa",
+   "frameSeq": 4,
+   "captureTime": 1791065957131,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0301",
+   "action": "enhancedReview",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "bb718e66-9c9c-47d6-ab9f-56b791552109",
+   "frameSeq": 5,
+   "captureTime": 1791065958615,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0302",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "a21d4f13-d7f8-48bc-8bc4-028a6e5e4a54",
+   "frameSeq": 6,
+   "captureTime": 1791065960264,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0302",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "low",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "706352ed-e989-4aeb-a5a3-ed0c07b094d5",
+   "frameSeq": 7,
+   "captureTime": 1791065962982,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0302",
+   "action": "approve",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "566022d5-ad93-42fc-bb5c-bc9da1a0edd0",
+   "frameSeq": 8,
+   "captureTime": 1791065964594,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0303",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "ebe95a82-62c0-4f23-a414-0f44ab9ac30e",
+   "frameSeq": 9,
+   "captureTime": 1791065966495,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0303",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "medium",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "3baa9697-58ab-417c-bedc-c9592105e3db",
+   "frameSeq": 10,
+   "captureTime": 1791065969639,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0303",
+   "action": "reject",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "1b35ab09-dc06-4f06-b1fa-2ef820b9344f",
+   "frameSeq": 11,
+   "captureTime": 1791065970961,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0304",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "0fc4526c-4031-41df-97c4-afa7721bd7e6",
+   "frameSeq": 12,
+   "captureTime": 1791065972528,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0304",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "medium",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "96948b71-8167-40ab-9084-5616a63aa978",
+   "frameSeq": 13,
+   "captureTime": 1791065972931,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0304",
+   "field": "riskRating",
+   "from": "medium",
+   "to": "low",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "490f60bb-37fe-47a5-abce-65b066debe59",
+   "frameSeq": 14,
+   "captureTime": 1791065976766,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0304",
+   "action": "requestDocuments",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "f7d8a9f9-d19f-45da-a266-25528edb2a8e",
+   "frameSeq": 15,
+   "captureTime": 1791065978509,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0305",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "a4f6f971-1037-41fe-9974-4b152a3f52d2",
+   "frameSeq": 16,
+   "captureTime": 1791065980030,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0305",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "medium",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "135f6b76-d712-4e36-82a0-96538bdb061c",
+   "frameSeq": 17,
+   "captureTime": 1791065983255,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0305",
+   "action": "requestDocuments",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "812742a9-99d8-4cea-9005-a752cc7198fa",
+   "frameSeq": 18,
+   "captureTime": 1791065985011,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0306",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "ffbb729d-afba-419c-a33d-24fd3cf7c2fa",
+   "frameSeq": 19,
+   "captureTime": 1791065986629,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0306",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "low",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "167c00f7-2821-4221-8436-45096d7cba76",
+   "frameSeq": 20,
+   "captureTime": 1791065990685,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0306",
+   "action": "escalateCompliance",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "d97c765e-b56e-41a9-b69e-81bc423a6c06",
+   "frameSeq": 1,
+   "captureTime": 1791065995416,
+   "sessionEpoch": 0,
+   "kind": "navigate",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "42a29bdb-c6b5-4c63-92d0-9fd8a925befb",
+   "frameSeq": 2,
+   "captureTime": 1791065996742,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0101",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "89e092b3-1669-4bd9-ab58-2262238478ea",
+   "frameSeq": 3,
+   "captureTime": 1791065998377,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0101",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "medium",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "221c76c8-e7ce-43af-b75c-f7cd71f21231",
+   "frameSeq": 4,
+   "captureTime": 1791066001465,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0101",
+   "action": "requestDocuments",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "964d8694-cb48-451b-aedf-c90b4dd372a6",
+   "frameSeq": 5,
+   "captureTime": 1791066002459,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0102",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "b69d6fd1-0fd5-4fe3-aed9-4c83df95d25d",
+   "frameSeq": 6,
+   "captureTime": 1791066004210,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0102",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "low",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "fd1d4a56-ffbe-4d53-9ccb-e5ed2e43ad95",
+   "frameSeq": 7,
+   "captureTime": 1791066004714,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0102",
+   "field": "riskRating",
+   "from": "low",
+   "to": "high",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "456de567-6a8f-49c2-b5b4-d2811681aed6",
+   "frameSeq": 8,
+   "captureTime": 1791066007322,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0102",
+   "action": "approve",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "e1c4987d-3682-41f8-b7e6-19eb4c40634a",
+   "frameSeq": 9,
+   "captureTime": 1791066008614,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0103",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "823f536a-84e3-434a-abf7-63aa6c7e1bc3",
+   "frameSeq": 10,
+   "captureTime": 1791066010694,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0103",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "high",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "5225d2be-7190-4541-a6fc-f2b876c0bf23",
+   "frameSeq": 11,
+   "captureTime": 1791066013946,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0103",
+   "action": "enhancedReview",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "a6cfecc8-5474-44a7-8ae9-6450debb5d0b",
+   "frameSeq": 1,
+   "captureTime": 1791066017944,
+   "sessionEpoch": 0,
+   "kind": "navigate",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "6275a0fd-796d-4bd4-aaaa-1250552241fa",
+   "frameSeq": 2,
+   "captureTime": 1791066018995,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0301",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "9633f175-9e24-49d4-b3ca-6daa00a757af",
+   "frameSeq": 3,
+   "captureTime": 1791066020758,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0301",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "low",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "d062a5b8-1a67-4cd8-960b-0420478b2f8e",
+   "frameSeq": 4,
+   "captureTime": 1791066023151,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0301",
+   "action": "enhancedReview",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "ba84d80a-bd59-4ee2-a1ba-b6912656fc5f",
+   "frameSeq": 5,
+   "captureTime": 1791066024576,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0302",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "9b53b2f2-a2a9-4fd7-aeb1-14dc81f16335",
+   "frameSeq": 6,
+   "captureTime": 1791066025775,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0302",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "medium",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "b6ff1682-d99c-4d76-a536-16109e671db4",
+   "frameSeq": 7,
+   "captureTime": 1791066028489,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0302",
+   "action": "approve",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "79c1ff9e-064d-4856-aa66-e21dc48701fa",
+   "frameSeq": 8,
+   "captureTime": 1791066030007,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0303",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "a195d873-5ffe-4c6b-b85d-63f18698dd20",
+   "frameSeq": 9,
+   "captureTime": 1791066031926,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0303",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "low",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "07050559-ce1a-45e9-9938-dc9edc430128",
+   "frameSeq": 10,
+   "captureTime": 1791066032409,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0303",
+   "field": "riskRating",
+   "from": "low",
+   "to": "medium",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "ae6033ba-57cf-4f98-8665-8baeac8d551e",
+   "frameSeq": 11,
+   "captureTime": 1791066034771,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0303",
+   "action": "reject",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "1dc12dac-efcb-43b7-b1d8-ba04d692e76d",
+   "frameSeq": 12,
+   "captureTime": 1791066036408,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0304",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "d89021a4-37f2-4cbb-aada-f37b856b7599",
+   "frameSeq": 13,
+   "captureTime": 1791066038560,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0304",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "medium",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "99537770-27d8-41a8-8b28-1de0a249566c",
+   "frameSeq": 14,
+   "captureTime": 1791066041934,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0304",
+   "action": "reject",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "52df0bf5-e79b-49e6-8261-08b678e83ed0",
+   "frameSeq": 15,
+   "captureTime": 1791066044007,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0305",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "d438406e-0d13-494b-9ab1-c47e460f71dc",
+   "frameSeq": 16,
+   "captureTime": 1791066045559,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0305",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "low",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "62374561-a41e-4653-8f6d-2bd53da05b48",
+   "frameSeq": 17,
+   "captureTime": 1791066049016,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0305",
+   "action": "escalateCompliance",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "50202baa-5c5c-443e-8970-8ef61cb01cd8",
+   "frameSeq": 18,
+   "captureTime": 1791066050117,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0306",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "08caa986-79a7-44c6-aa3b-0003fc51748d",
+   "frameSeq": 19,
+   "captureTime": 1791066052243,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0306",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "medium",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "25db514a-8d7c-49ee-a0c7-7df81f2006ed",
+   "frameSeq": 20,
+   "captureTime": 1791066056752,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0306",
+   "action": "enhancedReview",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "ac8a5b40-95b6-4240-89c6-ef87071be41d",
+   "frameSeq": 1,
+   "captureTime": 1791066061247,
+   "sessionEpoch": 0,
+   "kind": "navigate",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "c646ca33-b187-4023-a7ff-e3fe607396dc",
+   "frameSeq": 2,
+   "captureTime": 1791066063005,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0101",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "4b45a58f-607a-4e47-b003-544124ab12eb",
+   "frameSeq": 3,
+   "captureTime": 1791066064592,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0101",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "medium",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "7cd61e02-34b5-4d9c-b5b4-f2fcbd3bed20",
+   "frameSeq": 4,
+   "captureTime": 1791066065041,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0101",
+   "field": "riskRating",
+   "from": "medium",
+   "to": "low",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "2cf18770-5a89-4b12-a1af-1e636e2bf261",
+   "frameSeq": 5,
+   "captureTime": 1791066067865,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0101",
+   "action": "escalateCompliance",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "cbb04cda-3347-4f1c-a8d2-94a6010817e7",
+   "frameSeq": 6,
+   "captureTime": 1791066069023,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0102",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "992e2fb7-c50c-4c9c-a5c3-5f36f85c2ad9",
+   "frameSeq": 7,
+   "captureTime": 1791066070223,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0102",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "low",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "beb99eab-249c-4503-8da2-825fe4e50acf",
+   "frameSeq": 8,
+   "captureTime": 1791066072866,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0102",
+   "action": "requestDocuments",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "55bee28e-3d8c-4406-8b8f-031199c32f05",
+   "frameSeq": 9,
+   "captureTime": 1791066073909,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0103",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "a01cb084-1a79-42c3-a80b-6aaf0bd1c885",
+   "frameSeq": 10,
+   "captureTime": 1791066076207,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0103",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "medium",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "2d8a3609-bcf0-46ba-88cb-156d88bf614f",
+   "frameSeq": 11,
+   "captureTime": 1791066079576,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0103",
+   "action": "escalateCompliance",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "0007ba50-e661-44f5-a23f-af2ca9d90a2b",
+   "frameSeq": 1,
+   "captureTime": 1791066083280,
+   "sessionEpoch": 0,
+   "kind": "navigate",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "a1c8b829-e811-407f-a4ea-913bf28f9afd",
+   "frameSeq": 2,
+   "captureTime": 1791066084687,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0301",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "0edb6b61-ceb8-4a43-a6cb-21b5ef718eb5",
+   "frameSeq": 3,
+   "captureTime": 1791066086806,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0301",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "low",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "1b5f40e2-dd79-4a7f-bb1f-60362dfdcf03",
+   "frameSeq": 4,
+   "captureTime": 1791066089914,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0301",
+   "action": "requestDocuments",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "f1a17e39-e70b-468f-a3cf-54b1a46d6019",
+   "frameSeq": 5,
+   "captureTime": 1791066090989,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0302",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "48797a19-08a9-44d3-b5cc-bb78da7888dd",
+   "frameSeq": 6,
+   "captureTime": 1791066092392,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0302",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "medium",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "a95101c1-2f61-4e3f-a940-248a81a22ff3",
+   "frameSeq": 7,
+   "captureTime": 1791066092775,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0302",
+   "field": "riskRating",
+   "from": "medium",
+   "to": "low",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "33e659bc-18e6-4870-9337-875164b1f823",
+   "frameSeq": 8,
+   "captureTime": 1791066096135,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0302",
+   "action": "requestDocuments",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "dba5a3d1-5258-4963-a440-dd1b1c68e4c0",
+   "frameSeq": 9,
+   "captureTime": 1791066097274,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0303",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "549ad539-880f-4c47-8a8d-546e6c8e02f2",
+   "frameSeq": 10,
+   "captureTime": 1791066099239,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0303",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "high",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "d5a97086-e6ba-4a63-b5ee-f1fcc87b910d",
+   "frameSeq": 11,
+   "captureTime": 1791066101760,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0303",
+   "action": "requestDocuments",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "8b6b4c38-e772-4033-8be9-f7dba137b5b4",
+   "frameSeq": 12,
+   "captureTime": 1791066103242,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0304",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "18cc5d41-44de-4bb9-b444-fe98df2ec9b4",
+   "frameSeq": 13,
+   "captureTime": 1791066105424,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0304",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "high",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "96b4c69d-ef86-423d-a82b-395cb986652e",
+   "frameSeq": 14,
+   "captureTime": 1791066108192,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0304",
+   "action": "escalateCompliance",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "2bb2325d-bc23-44a3-9bae-e281d5f3b451",
+   "frameSeq": 15,
+   "captureTime": 1791066109855,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0305",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "b1354f80-3742-48b0-b8e2-8f9c778f5955",
+   "frameSeq": 16,
+   "captureTime": 1791066111273,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0305",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "low",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "d29e11d3-ff79-4193-8f0b-34f636459955",
+   "frameSeq": 17,
+   "captureTime": 1791066114123,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0305",
+   "action": "requestDocuments",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "cc086161-5daa-4d6e-85b7-acf3c70229f2",
+   "frameSeq": 18,
+   "captureTime": 1791066115539,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0306",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "dd6eb7dd-5eec-4899-ab23-7b1633adbb76",
+   "frameSeq": 19,
+   "captureTime": 1791066117124,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0306",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "medium",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "3558c447-a4f1-4105-80e4-577ea8efd9fc",
+   "frameSeq": 20,
+   "captureTime": 1791066117514,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0306",
+   "field": "riskRating",
+   "from": "medium",
+   "to": "low",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "e1e17a44-aaeb-4c40-a83d-63aad06f2ec5",
+   "frameSeq": 21,
+   "captureTime": 1791066121010,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0306",
+   "action": "reject",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "2fd3cbac-d0ae-4e85-9e3b-14ab1edd8b51",
+   "frameSeq": 1,
+   "captureTime": 1791066124377,
+   "sessionEpoch": 0,
+   "kind": "navigate",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "55f01978-7581-4020-822a-6e494b2edfe4",
+   "frameSeq": 2,
+   "captureTime": 1791066125669,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0101",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "d1ca30b2-3691-4916-9519-fc40d78600a5",
+   "frameSeq": 3,
+   "captureTime": 1791066127923,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0101",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "medium",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "292df167-fa8b-4ffb-bb51-5ce65fdd0046",
+   "frameSeq": 4,
+   "captureTime": 1791066130372,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0101",
+   "action": "escalateCompliance",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "b0549d3e-93d9-4358-8139-fa1bad72d3dc",
+   "frameSeq": 5,
+   "captureTime": 1791066131486,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0102",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "129bb982-c8cf-4cee-bdfb-559dfc7b59ea",
+   "frameSeq": 6,
+   "captureTime": 1791066133071,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0102",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "low",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "bdc37614-a11f-44cf-a639-a85df28bf6ae",
+   "frameSeq": 7,
+   "captureTime": 1791066136444,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0102",
+   "action": "escalateCompliance",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "d5e02635-3b2b-4af6-a36d-8e951ab95f55",
+   "frameSeq": 8,
+   "captureTime": 1791066137738,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0103",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "ef4a156c-5235-4add-bb1f-2d900fc9f432",
+   "frameSeq": 9,
+   "captureTime": 1791066139406,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0103",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "medium",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "e0a6fa9d-b6ff-4f90-bc6c-79604835a7eb",
+   "frameSeq": 10,
+   "captureTime": 1791066142073,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0103",
+   "action": "enhancedReview",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "3340e36c-dbdf-4ad7-bac6-013d6f0647d6",
+   "frameSeq": 1,
+   "captureTime": 1791066146144,
+   "sessionEpoch": 0,
+   "kind": "navigate",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "78404106-b79d-46f2-a175-de18ab2a39d6",
+   "frameSeq": 2,
+   "captureTime": 1791066147418,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0301",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "3820457c-4e9f-4be6-92fa-8cbcc977ef3b",
+   "frameSeq": 3,
+   "captureTime": 1791066149237,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0301",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "low",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "07afe517-578b-4cc6-9d20-0bdbc4885806",
+   "frameSeq": 4,
+   "captureTime": 1791066149720,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0301",
+   "field": "riskRating",
+   "from": "low",
+   "to": "high",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "8c1b9bf5-94b1-472d-a1f0-18f82224ec18",
+   "frameSeq": 5,
+   "captureTime": 1791066152785,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0301",
+   "action": "requestDocuments",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "3c5976da-498d-486a-a237-74e0ff2c9316",
+   "frameSeq": 6,
+   "captureTime": 1791066154252,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0302",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "40db7782-bd1d-48c3-9d0e-e20ff4ca39bc",
+   "frameSeq": 7,
+   "captureTime": 1791066155938,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0302",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "high",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "748c727a-6527-4694-9aa6-5b51777e5c79",
+   "frameSeq": 8,
+   "captureTime": 1791066158620,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0302",
+   "action": "escalateCompliance",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "de7580b4-f585-4820-90c2-edbd46ace8c2",
+   "frameSeq": 9,
+   "captureTime": 1791066160018,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0303",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "0d79f27f-cdfc-4bec-8178-2cbfa6c1db08",
+   "frameSeq": 10,
+   "captureTime": 1791066161986,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0303",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "high",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "55842af0-3b8a-4bb3-8a8b-1ecde1c755ec",
+   "frameSeq": 11,
+   "captureTime": 1791066164579,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0303",
+   "action": "requestDocuments",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "b48973c2-5861-400e-bc40-60717579e1bf",
+   "frameSeq": 12,
+   "captureTime": 1791066166374,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0304",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "30b02239-1994-4f4e-8a76-546bf3449df9",
+   "frameSeq": 13,
+   "captureTime": 1791066167941,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0304",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "medium",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "587e1c6c-5e85-42dd-8012-2997669f6e80",
+   "frameSeq": 14,
+   "captureTime": 1791066171727,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0304",
+   "action": "escalateCompliance",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "76b0e286-ec7f-4ac5-9bbb-945166222fab",
+   "frameSeq": 15,
+   "captureTime": 1791066173407,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0305",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "43ced156-747e-4034-b724-d53ace0f33d1",
+   "frameSeq": 16,
+   "captureTime": 1791066175639,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0305",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "low",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "02025683-16db-425f-9959-131ff2d48d71",
+   "frameSeq": 17,
+   "captureTime": 1791066176087,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0305",
+   "field": "riskRating",
+   "from": "low",
+   "to": "high",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "4efd9a4b-edcc-4a0a-be08-5de133e41dbd",
+   "frameSeq": 18,
+   "captureTime": 1791066179686,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0305",
+   "action": "escalateCompliance",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "0f9b1d5a-2c2b-424d-b6fb-e793f5d4adce",
+   "frameSeq": 19,
+   "captureTime": 1791066181337,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0306",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "e7f2647d-0eed-4ad4-9329-d2983317639a",
+   "frameSeq": 20,
+   "captureTime": 1791066182769,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0306",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "medium",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "3aab0ee9-1dd1-4630-9027-3158055773c6",
+   "frameSeq": 21,
+   "captureTime": 1791066185615,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0306",
+   "action": "approve",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "d41d92de-d6ca-4e81-b860-8a5ce96ac027",
+   "frameSeq": 1,
+   "captureTime": 1791066189793,
+   "sessionEpoch": 0,
+   "kind": "navigate",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "85c2fe8b-908a-4b32-b6c1-45377d234945",
+   "frameSeq": 2,
+   "captureTime": 1791066191700,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0101",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "05cb425c-46e7-4e4b-83d6-effecbbb9bd8",
+   "frameSeq": 3,
+   "captureTime": 1791066193988,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0101",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "medium",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "8302ccf2-6b5d-45d7-9536-8b5e455c824c",
+   "frameSeq": 4,
+   "captureTime": 1791066196576,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0101",
+   "action": "approve",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "6a88eea9-0e1a-48d4-bd4c-e809cd65a1b6",
+   "frameSeq": 5,
+   "captureTime": 1791066198083,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0102",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "aedeebae-3b72-4c34-91fa-713f91416195",
+   "frameSeq": 6,
+   "captureTime": 1791066200386,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0102",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "medium",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "81dfc2bf-c509-4624-99d4-c4d6873265b9",
+   "frameSeq": 7,
+   "captureTime": 1791066203252,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0102",
+   "action": "escalateCompliance",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "2b7700eb-c78a-43f8-8c74-44057d28a92e",
+   "frameSeq": 8,
+   "captureTime": 1791066205268,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0103",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "2d82abf5-1279-4764-8a2c-71b3257192f4",
+   "frameSeq": 9,
+   "captureTime": 1791066206903,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0103",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "low",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "f5ba3951-39a1-4e2f-928c-f10a4f649072",
+   "frameSeq": 10,
+   "captureTime": 1791066207236,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0103",
+   "field": "riskRating",
+   "from": "low",
+   "to": "medium",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "2397a58f-c429-4a38-b7e1-0845a578c3e4",
+   "frameSeq": 11,
+   "captureTime": 1791066210288,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0103",
+   "action": "escalateCompliance",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "2c7672c5-ced1-48de-83c4-b70ed84379bd",
+   "frameSeq": 1,
+   "captureTime": 1791066214769,
+   "sessionEpoch": 0,
+   "kind": "navigate",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "6dce3bc7-1b27-4b6f-85c9-c49294936498",
+   "frameSeq": 2,
+   "captureTime": 1791066216049,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0301",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "d29ff43d-497b-4b95-98ae-a09e5fc57d8e",
+   "frameSeq": 3,
+   "captureTime": 1791066217704,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0301",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "high",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "5622db7d-f734-4e59-ad54-3df500a7ce0d",
+   "frameSeq": 4,
+   "captureTime": 1791066220753,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0301",
+   "action": "approve",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "5c74ea74-987c-4986-bb7e-78a99453d206",
+   "frameSeq": 5,
+   "captureTime": 1791066222717,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0302",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "1ce8957d-6928-4000-ab0c-f799e861c253",
+   "frameSeq": 6,
+   "captureTime": 1791066224921,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0302",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "medium",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "1b9fa485-d1d8-4dd2-9abf-3217ee0365c7",
+   "frameSeq": 7,
+   "captureTime": 1791066227909,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0302",
+   "action": "enhancedReview",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "3e4d69cb-30c9-4dea-87a8-687292cc305b",
+   "frameSeq": 8,
+   "captureTime": 1791066229567,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0303",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "64786f52-ca6d-407f-b897-806be46119cc",
+   "frameSeq": 9,
+   "captureTime": 1791066230821,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0303",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "low",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "c4e3d05c-0b4d-4234-9323-abfdec849eb6",
+   "frameSeq": 10,
+   "captureTime": 1791066233689,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0303",
+   "action": "approve",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "69c39886-311f-4e6a-9f4f-74b26e538a2f",
+   "frameSeq": 11,
+   "captureTime": 1791066235350,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0304",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "c8688c0b-51af-4ed8-b01a-4aed1158ccdb",
+   "frameSeq": 12,
+   "captureTime": 1791066237486,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0304",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "low",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "6e439c0b-5fc5-4902-a400-5de157c9be84",
+   "frameSeq": 13,
+   "captureTime": 1791066237919,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0304",
+   "field": "riskRating",
+   "from": "low",
+   "to": "high",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "6a536363-65e9-4fb4-9fff-604f6db591b9",
+   "frameSeq": 14,
+   "captureTime": 1791066240905,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0304",
+   "action": "approve",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "fb63779b-b024-466a-b7b3-aed5ade169e9",
+   "frameSeq": 15,
+   "captureTime": 1791066242232,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0305",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "c6ecc658-920d-4220-a37f-8330f18cf444",
+   "frameSeq": 16,
+   "captureTime": 1791066243452,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0305",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "low",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "f8c054c1-36f9-45b1-9f71-c19314ac941e",
+   "frameSeq": 17,
+   "captureTime": 1791066247394,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0305",
+   "action": "enhancedReview",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "9b482203-f797-4fb8-afc3-1ba600d17de6",
+   "frameSeq": 18,
+   "captureTime": 1791066248799,
+   "sessionEpoch": 0,
+   "kind": "open_case",
+   "caseId": "NS-2026-0306",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  },
+  {
+   "id": "643d7a35-0b1c-41d3-a835-9538c123f4e0",
+   "frameSeq": 19,
+   "captureTime": 1791066250214,
+   "sessionEpoch": 0,
+   "kind": "field_change",
+   "caseId": "NS-2026-0306",
+   "field": "riskRating",
+   "from": "unrated",
+   "to": "high",
+   "confidence": 1,
+   "source": "dom",
+   "critical": true
+  },
+  {
+   "id": "f1a1be2e-e087-4e42-8f15-0b8c6b282940",
+   "frameSeq": 20,
+   "captureTime": 1791066254073,
+   "sessionEpoch": 0,
+   "kind": "action",
+   "caseId": "NS-2026-0306",
+   "action": "reject",
+   "confidence": 1,
+   "source": "dom",
+   "critical": false
+  }
+ ]
+}

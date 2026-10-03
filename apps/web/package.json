@@ -7,11 +7,14 @@
     "dev": "tsx watch --clear-screen=false server.ts",
     "build": "next build",
     "start": "NODE_ENV=production tsx server.ts",
-    "typecheck": "next typegen && tsc -p tsconfig.json"
+    "typecheck": "next typegen && tsc -p tsconfig.json",
+    "vendor:tesseract": "tsx ../../packages/perception/scripts/vendor-tesseract.ts public/tesseract"
   },
   "dependencies": {
     "@elevenlabs/react": "^1.16.0",
     "@vashistha/core": "workspace:*",
+    "@vashistha/mcp-guardrails": "workspace:*",
+    "@vashistha/perception": "workspace:*",
     "@vashistha/solver": "workspace:*",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.4.0",

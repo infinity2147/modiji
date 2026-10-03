@@ -8,12 +8,14 @@ import { handleCommitDecision, handleInterlockCheck } from "../../lib/server/cas
 import { handleLedgerPage } from "../../lib/server/casedesk/ledger-page";
 import { handleCreateSession, handleListCases } from "../../lib/server/casedesk/sessions";
 import { handlePostEvents } from "../../lib/server/casedesk/events";
-import { createCaseDeskStore, type CaseDeskDeps, type InterviewHooks } from "../../lib/server/casedesk/session";
+import { createCaseDeskStore, type CaseDeskDeps, type InterviewHooks, type TutorHooks } from "../../lib/server/casedesk/session";
 
 export const T0 = 1_760_000_000_000;
 
 /** CaseDesk handler tests do not exercise the interview engine (interview*.test.ts do). */
 const NO_INTERVIEW: InterviewHooks = { decisionCommitted: () => undefined, screenChanged: () => undefined };
+/** Nor the tutor (tutor*.test.ts do). */
+export const NO_TUTOR: TutorHooks = { decisionCommitted: () => undefined, screenEvents: () => undefined };
 
 export type Reply = { status: number; body: unknown };
 
@@ -57,6 +59,7 @@ export function createCaseDeskHarness(): CaseDeskHarness {
     store: createCaseDeskStore(),
     rulebook: () => rules,
     interview: NO_INTERVIEW,
+    tutor: NO_TUTOR,
     now: () => T0,
     log: { error: (...args: unknown[]) => logs.push(args.map(String).join(" ")) },
   };

@@ -34,7 +34,7 @@ import {
   handleQuestionQueue,
 } from "../../lib/server/interview/handlers";
 import { interviewHooks, interviewIdle, type InterviewDeps } from "../../lib/server/interview/orchestrator";
-import { T0, domEvent, jsonRequest, type Reply } from "./casedesk-harness";
+import { NO_TUTOR, T0, domEvent, jsonRequest, type Reply } from "./casedesk-harness";
 import { SECRET, chatBody, chatRequest } from "./llm-harness";
 
 type Message = Awaited<ReturnType<ClaudeClient["messages"]["create"]>>;
@@ -171,6 +171,7 @@ export function createInterviewHarness(): InterviewHarness {
     store: deps.casedesk,
     rulebook: () => [],
     interview: interviewHooks(deps),
+    tutor: NO_TUTOR,
     now,
     log,
   };

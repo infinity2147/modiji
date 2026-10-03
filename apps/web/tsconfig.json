@@ -5,8 +5,10 @@
     "jsx": "react-jsx",
     "types": ["node"],
     "plugins": [{ "name": "next" }],
-    "paths": { "@/*": ["./*"] }
+    "paths": {
+      "@/*": ["./*"]
+    }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", ".next/dev/types/**/*.ts"],
-  "exclude": ["node_modules", ".next/static", ".next/server"]
+  "exclude": ["node_modules", ".next/static", ".next/server", ".next-*"]
 }

@@ -57,13 +57,22 @@ export type InterviewHooks = {
   screenChanged: (sessionId: string) => void;
 };
 
+/** The tutor's hooks (lib/server/tutor), called after a CaseDesk write has succeeded; they act in novice sessions only. */
+export type TutorHooks = {
+  /** A `case.decision` was committed: mastery outcomes, and queued interventions for the case are dropped. */
+  decisionCommitted: (decision: LedgerEntry, loaded: LoadedSession) => void;
+  /** DOM screen events were appended: the guardrail monitor re-checks the selected outcome after a field change. */
+  screenEvents: (events: readonly LedgerEntry[], loaded: LoadedSession) => void;
+};
+
 /** What every CaseDesk handler needs; built from the runtime by `caseDeskDeps()`. */
 export type CaseDeskDeps = {
   ledger: Ledger;
   store: CaseDeskStore;
-  /** The confirmed rulebook in force now (empty until P5). */
+  /** The confirmed rulebook in force now. */
   rulebook: () => readonly ConfirmedRule[];
   interview: InterviewHooks;
+  tutor: TutorHooks;
   now: () => number;
   log: Pick<Console, "error">;
 };

@@ -5,6 +5,7 @@ import { AlertCircle, CheckCircle2, Loader2, ShieldCheck } from "lucide-react";
 import type { ActionId } from "@vashistha/core";
 import type { KycCase } from "@vashistha/core/domains/kyc";
 import { REVIEW_OUTCOMES, RISK_RATINGS, actionLabel, riskRatingLabel } from "@/lib/client/domain";
+import { featureTargets } from "@/lib/client/voice/question-cues";
 import { shortId } from "@/lib/client/format";
 import type { DecisionRecord, RiskRating } from "@/lib/client/session-state";
 import { Alert, AlertAction, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -107,7 +108,7 @@ export function ReviewPanel({
           }}
         >
           <CardContent className="grid gap-5 py-4">
-            <div className="grid gap-2">
+            <div className="grid gap-2 rounded-md" {...featureTargets("riskRating")}>
               <Label htmlFor="risk-rating">Risk rating</Label>
               <Select
                 value={draft.riskRating}

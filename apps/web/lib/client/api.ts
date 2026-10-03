@@ -110,8 +110,11 @@ export function createSession(fetchFn: FetchFn, body: z.input<typeof CreateSessi
   return requestJson(fetchFn, "/api/sessions", CreateSessionResponseSchema, postJson(body));
 }
 
-export function listCases(fetchFn: FetchFn, set: CaseSet) {
-  return requestJson(fetchFn, `/api/cases?set=${encodeURIComponent(set)}`, ListCasesResponseSchema);
+/** The set's cases; with `sessionId`, followed by the cases generated for that session (tutor practice, judge-entered). */
+export function listCases(fetchFn: FetchFn, set: CaseSet, sessionId?: string) {
+  const query = new URLSearchParams({ set });
+  if (sessionId !== undefined) query.set("session", sessionId);
+  return requestJson(fetchFn, `/api/cases?${query.toString()}`, ListCasesResponseSchema);
 }
 
 export function postEvents(fetchFn: FetchFn, sessionId: string, body: z.input<typeof PostEventsRequestSchema>) {

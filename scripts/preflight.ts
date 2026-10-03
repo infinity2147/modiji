@@ -2,13 +2,13 @@
  * `pnpm preflight [--target <url>] [--only a,b] [--json] [--quiet-window-ms N]`
  *
  * Plan §12 go/no-go for the live demo, run against the deployed service (default target: PUBLIC_BASE_URL).
- * Checks: env, anthropic, agents, token, public-llm, voice-skip-turn (after public-llm passes), server-deep,
- * sandbox, plus the printed permissions checklist. Logic lives in scripts/preflight/; this is the thin CLI.
+ * Checks: env, anthropic, agents, token, public-llm, voice-skip-turn and voice-off-record (after public-llm passes),
+ * server-deep, sandbox, plus the printed permissions checklist. Logic lives in scripts/preflight/; this is the thin CLI.
  *
  * Reads .env from the repo root if present (real env vars win). Exit 0 only if every check passed. Always writes a
  * redacted JSON report to docs/evidence/preflight-<timestamp>.json. Never prints keys, tokens, signed URLs or nonces.
  * `--target http://127.0.0.1:<port>` is accepted for the HTTP checks against a local production server; the voice
- * check refuses it (ElevenLabs cannot call localhost).
+ * checks refuse it (ElevenLabs cannot call localhost).
  */
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";

@@ -3,11 +3,13 @@ import {
   AGENT_ROLES,
   agentModelId,
   checkAgentInvariants,
+  checkClientToolInvariants,
   diffDesiredVsActual,
   renderAgentBody,
   type AgentRole,
+  type AgentSpec,
 } from "../../../packages/core/src/server/elevenlabs-agents";
-import { customLlmSecretName, DRY_RUN_SECRET_ID } from "../../../packages/core/src/server/elevenlabs-sync";
+import { customLlmSecretName, DRY_RUN_SECRET_ID, dryRunToolId } from "../../../packages/core/src/server/elevenlabs-sync";
 import { describeError, requireVars } from "../http";
 import { normaliseBaseUrl } from "../target";
 import type { CheckOutcome, Facts, PreflightContext, PreflightElevenLabs } from "../types";
@@ -26,6 +28,46 @@ export function referencedSecretId(agent: unknown): string | null {
   return typeof value === "string" && value !== "" ? value : null;
 }
 
+/** `conversation_config.agent.prompt.tool_ids` as read back (non-string items are ignored here; the diff reports them). */
+function attachedToolIds(agent: unknown): string[] {
+  let value: unknown = agent;
+  for (const key of ["conversation_config", "agent", "prompt", "tool_ids"]) {
+    if (!isRecord(value)) return [];
+    value = value[key];
+  }
+  return Array.isArray(value) ? value.filter((id): id is string => typeof id === "string") : [];
+}
+
+/**
+ * The agent's client tools are exactly the spec's: each attached, matching its definition and safe (no pre-tool
+ * speech, non-blocking); nothing else attached. Returns the problems and the attached tool ids by name.
+ */
+async function checkClientTools(
+  client: PreflightElevenLabs,
+  spec: AgentSpec,
+  agent: unknown,
+): Promise<{ problems: string[]; toolIds: Record<string, string> }> {
+  const attached = await Promise.all(attachedToolIds(agent).map((id) => client.getTool(id)));
+  const problems: string[] = [];
+  const toolIds: Record<string, string> = {};
+  for (const tool of spec.clientTools) {
+    const actual = attached.find((t) => t.name === tool.name);
+    if (actual === undefined) {
+      problems.push(`client tool ${tool.name} is not attached (prompt.tool_ids); run pnpm agents:sync`);
+      continue;
+    }
+    toolIds[tool.name] = actual.toolId;
+    problems.push(
+      ...diffDesiredVsActual(tool, actual.toolConfig).map((p) => `tool ${tool.name}: ${p}`),
+      ...checkClientToolInvariants(actual.toolConfig, tool.name),
+    );
+  }
+  for (const extra of attached.filter((t) => !spec.clientTools.some((tool) => tool.name === t.name))) {
+    problems.push(`tool ${extra.name} (${extra.toolId}) is attached but not in the spec`);
+  }
+  return { problems, toolIds };
+}
+
 async function checkRole(
   ctx: Pick<PreflightContext, "loadAgentSpec">,
   client: PreflightElevenLabs,
@@ -38,12 +80,15 @@ async function checkRole(
   const expectedModelId = agentModelId(spec);
   const agent = await client.getAgent(agentId);
   const secretId = referencedSecretId(agent);
-  // The rendered spec is compared with the secret id the agent actually references; the reference itself is checked
-  // separately against the secret derived from CUSTOM_LLM_SECRET.
-  const desired = renderAgentBody(spec, { publicBaseUrl, customLlmSecretId: secretId ?? DRY_RUN_SECRET_ID });
+  const tools = await checkClientTools(client, spec, agent);
+  // The rendered spec is compared with the secret and tool ids the agent actually references; the references
+  // themselves are checked separately (secret against CUSTOM_LLM_SECRET, tools by name and definition).
+  const toolIds = Object.fromEntries(spec.clientTools.map((t) => [t.name, tools.toolIds[t.name] ?? dryRunToolId(t.name)]));
+  const desired = renderAgentBody(spec, { publicBaseUrl, customLlmSecretId: secretId ?? DRY_RUN_SECRET_ID, toolIds });
   const problems = [
     ...checkAgentInvariants(agent, { publicBaseUrl, role, expectedModelId }),
     ...diffDesiredVsActual(desired, agent),
+    ...tools.problems,
   ];
   if (expectedSecretIds !== null) {
     if (secretId === null) problems.push("custom_llm.api_key.secret_id is not returned by GET; cannot confirm it matches CUSTOM_LLM_SECRET");
@@ -55,13 +100,20 @@ async function checkRole(
   }
   return {
     problems,
-    facts: { agentId, specVersion: spec.version, modelId: expectedModelId, secretReferenced: secretId !== null },
+    facts: {
+      agentId,
+      specVersion: spec.version,
+      modelId: expectedModelId,
+      secretReferenced: secretId !== null,
+      clientTools: Object.entries(tools.toolIds).map(([name, id]) => `${name}=${id}`),
+    },
   };
 }
 
 /**
  * Both agents exist, carry every safety invariant, match their versioned spec exactly (no dropped or normalised
- * keys), and reference the workspace secret that holds the current CUSTOM_LLM_SECRET.
+ * keys), have exactly the spec's client tools (safe, as defined), and reference the workspace secret that holds the
+ * current CUSTOM_LLM_SECRET.
  */
 export async function checkAgents(
   ctx: Pick<PreflightContext, "env" | "createElevenLabs" | "loadAgentSpec">,
@@ -106,7 +158,7 @@ export async function checkAgents(
   }
   return {
     status: "pass",
-    detail: `${results.map((r) => `${r.role} (${String(r.facts.modelId)})`).join(", ")}: invariants hold, spec matches, secret reference current`,
+    detail: `${results.map((r) => `${r.role} (${String(r.facts.modelId)})`).join(", ")}: invariants hold, spec matches, client tools match, secret reference current`,
     facts,
   };
 }

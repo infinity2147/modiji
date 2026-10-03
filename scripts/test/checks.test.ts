@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { CLAUDE_MODELS } from "../../packages/core/src/server/claude";
 import { renderAgentBody, type AgentRole } from "../../packages/core/src/server/elevenlabs-agents";
+import type { WorkspaceTool } from "../../packages/core/src/server/elevenlabs";
 import { customLlmSecretName } from "../../packages/core/src/server/elevenlabs-sync";
 import { checkAgents } from "../preflight/checks/agents";
 import { checkAnthropic } from "../preflight/checks/anthropic";
@@ -77,31 +78,91 @@ describe("agents", () => {
   const ctx = makeContext();
   const secretName = customLlmSecretName(SECRET);
 
+  const TOOL_ID = "tool_off_record_1";
+
   async function actualAgent(role: AgentRole, mutate?: (agent: Record<string, unknown>) => void): Promise<Record<string, unknown>> {
     const spec = await ctx.loadAgentSpec(role);
-    const body = renderAgentBody(spec, { publicBaseUrl: BASE_URL, customLlmSecretId: "sec_current" });
+    const body = renderAgentBody(spec, {
+      publicBaseUrl: BASE_URL,
+      customLlmSecretId: "sec_current",
+      toolIds: { set_off_record: TOOL_ID },
+    });
     // GET returns everything we set plus server-side defaults.
     const agent: Record<string, unknown> = JSON.parse(JSON.stringify({ agent_id: `agent_${role}_1`, ...body, metadata: { created_at_unix_secs: 1 } }));
     mutate?.(agent);
     return agent;
   }
 
-  function client(mutate?: (agent: Record<string, unknown>) => void, secrets = [{ secretId: "sec_current", name: secretName }]): PreflightElevenLabs {
+  /** The workspace tools by id, as GET /v1/convai/tools/{id} returns them (the spec'd config plus API defaults). */
+  async function workspaceTools(mutate?: (config: Record<string, unknown>) => void): Promise<Map<string, WorkspaceTool>> {
+    const [tool] = (await ctx.loadAgentSpec("interviewer")).clientTools;
+    if (!tool) throw new Error("spec has no client tool");
+    const toolConfig: Record<string, unknown> = { ...structuredClone(tool), interruption_mode: "allow", tool_call_sound: null };
+    mutate?.(toolConfig);
+    const extra = { name: "show_banner", type: "client", pre_tool_speech: "off", expects_response: false };
+    return new Map([
+      [TOOL_ID, { toolId: TOOL_ID, name: tool.name, type: "client", toolConfig }],
+      ["tool_extra", { toolId: "tool_extra", name: "show_banner", type: "client", toolConfig: extra }],
+    ]);
+  }
+
+  function client(
+    mutate?: (agent: Record<string, unknown>) => void,
+    secrets = [{ secretId: "sec_current", name: secretName }],
+    mutateTool?: (config: Record<string, unknown>) => void,
+  ): PreflightElevenLabs {
     return fakeElevenLabs({
       getAgent: async (agentId) => {
         const agent = await actualAgent(agentId.includes("tutor") ? "tutor" : "interviewer", mutate);
         return { ...agent, agent_id: agentId };
       },
       listSecrets: async ({ search } = {}) => secrets.filter((s) => search === undefined || s.name.startsWith(search)),
+      getTool: async (toolId) => {
+        const tool = (await workspaceTools(mutateTool)).get(toolId);
+        if (!tool) throw new Error(`no tool ${toolId}`);
+        return tool;
+      },
     });
   }
+
+  const setToolIds = (ids: unknown[]) => (agent: Record<string, unknown>) => {
+    (agent.conversation_config as { agent: { prompt: Record<string, unknown> } }).agent.prompt.tool_ids = ids;
+  };
 
   it("passes when both agents match the spec, the invariants and the current secret", async () => {
     const r = await checkAgents({ ...ctx, createElevenLabs: () => client() });
     expect(r.detail).toBe(
-      "interviewer (vashistha-interviewer-v1), tutor (vashistha-tutor-v1): invariants hold, spec matches, secret reference current",
+      "interviewer (vashistha-interviewer-v2), tutor (vashistha-tutor-v2): invariants hold, spec matches, client tools match, secret reference current",
     );
     expect(r.status).toBe("pass");
+    expect(r.facts).toMatchObject({ interviewer: { clientTools: [`set_off_record=${TOOL_ID}`] } });
+  });
+
+  it("fails when the spec's client tool is not attached", async () => {
+    const r = await checkAgents({ ...ctx, createElevenLabs: () => client(setToolIds([])) });
+    expect(r.status).toBe("fail");
+    expect(r.detail).toMatch(/interviewer: client tool set_off_record is not attached \(prompt\.tool_ids\); run pnpm agents:sync/);
+    expect(r.detail).toMatch(/interviewer: conversation_config\.agent\.prompt\.tool_ids: missing \["dry-run-tool-set_off_record"\]/);
+  });
+
+  it("fails when a tool outside the spec is attached", async () => {
+    const r = await checkAgents({ ...ctx, createElevenLabs: () => client(setToolIds([TOOL_ID, "tool_extra"])) });
+    expect(r.status).toBe("fail");
+    expect(r.detail).toContain("interviewer: tool show_banner (tool_extra) is attached but not in the spec");
+  });
+
+  it("fails when the attached tool could speak before the call or block on a response", async () => {
+    const r = await checkAgents({
+      ...ctx,
+      createElevenLabs: () =>
+        client(undefined, undefined, (config) => {
+          config.pre_tool_speech = "auto";
+          config.expects_response = true;
+        }),
+    });
+    expect(r.status).toBe("fail");
+    expect(r.detail).toMatch(/interviewer: tool set_off_record: pre_tool_speech is "auto"; expected "off"/);
+    expect(r.detail).toMatch(/tutor: tool set_off_record: expects_response is true; expected false/);
   });
 
   it("fails listing every problem when a safety setting drifted", async () => {
@@ -182,7 +243,7 @@ describe("public-llm", () => {
     const r = await result;
     expect(r.detail).toMatch(/^401 without\/with wrong bearer; unauthorised → skip_turn/);
     expect(r.status).toBe("pass");
-    expect(r.facts).toMatchObject({ model: "vashistha-interviewer-v1", skipTurn: { ok: true, reason: "not_control_message" }, speech: { ok: true }, replay: { ok: true } });
+    expect(r.facts).toMatchObject({ model: "vashistha-interviewer-v2", skipTurn: { ok: true, reason: "not_control_message" }, speech: { ok: true }, replay: { ok: true } });
     const chat = server.requests.filter((q) => q.path === "/api/llm/chat/completions");
     expect(chat.map((q) => q.authorized)).toEqual([false, false, true, true, true]);
   });

@@ -20,7 +20,7 @@ import {
   type GuardrailResult,
   type LedgerEntry,
 } from "@vashistha/core";
-import { KYC_DOMAIN, caseFeatures, findKycCase, type KycCase } from "@vashistha/core/domains/kyc";
+import { KYC_DOMAIN, caseFeatures, type KycCase } from "@vashistha/core/domains/kyc";
 import {
   CommitDecisionRequestSchema,
   InterlockCheckRequestSchema,
@@ -28,6 +28,7 @@ import {
   type CommitDecisionResponseSchema,
   type InterlockCheckResponseSchema,
 } from "../../contracts/casedesk";
+import { findSessionCase } from "./cases";
 import { ApiFailure, json, readJson, respond } from "./http";
 import {
   CASEDESK_SCHEMA_VERSION,
@@ -51,20 +52,19 @@ const InterlockCheckPayloadSchema = z.strictObject({
 
 const DecisionPayloadSchema = z.object({ caseId: z.string() });
 
-function caseInSession(caseId: string, { info }: LoadedSession): KycCase {
-  const found = findKycCase(caseId);
-  if (found?.set !== info.caseSet)
-    throw new ApiFailure(400, "unknown_case", `case ${caseId} is not in this session's ${info.caseSet} set`);
+function caseInSession(deps: CaseDeskDeps, caseId: string, { info, session }: LoadedSession): KycCase {
+  const found = findSessionCase(deps.ledger, session.id, info, caseId);
+  if (found === undefined) throw new ApiFailure(400, "unknown_case", `case ${caseId} is not in this session's ${info.caseSet} set`);
   return found;
 }
 
-function requireReviewOutcome(action: ActionId): void {
+export function requireReviewOutcome(action: ActionId): void {
   if (!REVIEW_OUTCOME_ACTIONS.has(action))
     throw new ApiFailure(400, "invalid_action", `${action} is not a terminal review-outcome action`);
 }
 
 /** Each edit must be a valid value of its domain feature (the domain, not the contract, is authoritative). */
-function checkEdits(edits: ReviewEdits): void {
+export function checkEdits(edits: ReviewEdits): void {
   for (const [field, value] of Object.entries(edits)) {
     if (value === undefined) continue;
     const result = validateFeatureValue(KYC_DOMAIN, field, value);
@@ -87,7 +87,7 @@ export function handleInterlockCheck(request: Request, deps: CaseDeskDeps): Prom
     requireOnRecord(loaded.session);
     requireReviewOutcome(proposedAction);
     checkEdits(edits);
-    const result = evaluate(deps, caseInSession(caseId, loaded), edits, proposedAction);
+    const result = evaluate(deps, caseInSession(deps, caseId, loaded), edits, proposedAction);
     const entry = deps.ledger.append({
       sessionId: loaded.session.id,
       source: "engine",
@@ -144,7 +144,7 @@ export function handleCommitDecision(request: Request, sessionId: string, deps: 
     const check = citedCheck(deps, session.id, checkId, { caseId, action, edits });
     requireUndecided(deps, session.id, caseId);
 
-    const result = evaluate(deps, caseInSession(caseId, loaded), edits, action);
+    const result = evaluate(deps, caseInSession(deps, caseId, loaded), edits, action);
     // allow commits as is; forbid never commits; the rest commit only when acknowledged or escalated.
     const commits = result.decision === "allow" || (result.decision !== "forbid" && override !== undefined);
     const usedOverride = result.decision !== "allow" && override !== undefined ? { override } : {};
@@ -162,7 +162,10 @@ export function handleCommitDecision(request: Request, sessionId: string, deps: 
       privacyEpoch: session.privacyEpoch,
       payload: ledgerPayloadSchema(kind).parse({ caseId, action, edits, ...usedOverride, result }),
     });
-    if (commits) deps.interview.decisionCommitted(entry, loaded);
+    if (commits) {
+      deps.interview.decisionCommitted(entry, loaded);
+      deps.tutor.decisionCommitted(entry, loaded);
+    }
     const body: CommitDecisionResponse = commits
       ? { status: "committed", decisionId: entry.id, result }
       : { status: "blocked", result };

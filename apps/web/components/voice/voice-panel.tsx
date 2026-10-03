@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { AlertCircle, Loader2, Mic, MicOff, PhoneOff, Radio, Volume2 } from "lucide-react";
+import { AlertCircle, Highlighter, Loader2, Mic, MicOff, PhoneOff, Radio, Volume2 } from "lucide-react";
 import type { InterviewLoop, VoiceStatus } from "@/lib/client/voice/use-interview";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -120,6 +120,13 @@ export function VoicePanel({ loop }: { loop: InterviewLoop }) {
             {loop.agentSpeaking ? "Agent speaking" : "Agent silent"}
           </li>
         </ul>
+
+        {loop.cue !== null && (
+          <p role="status" data-testid="question-cue" className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+            <Highlighter aria-hidden className={loop.cue.shown ? "size-3 text-amber-600" : "size-3"} />
+            {loop.cue.message}
+          </p>
+        )}
 
         <section aria-labelledby="transcript-title" className="grid gap-1.5">
           <h3 id="transcript-title" className="text-xs font-medium">

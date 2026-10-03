@@ -14,11 +14,20 @@ const BASE_URL = `http://127.0.0.1:${PORT}`;
 // Workers re-load this file; they inherit the variable, so all share the one directory.
 process.env.E2E_DATA_DIR ??= mkdtempSync(join(tmpdir(), "vashistha-e2e-"));
 
+/**
+ * The perception fixture recorder (`@record`) and the OCR latency measurement (`@measure`) run only
+ * when asked for, e.g. `playwright test --grep @record`. The test list is built in this (runner)
+ * process, so only its command line matters.
+ */
+const ON_DEMAND = /@record|@measure/;
+const onDemand = process.argv.some((arg) => ON_DEMAND.test(arg));
+
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: false,
   workers: 1,
   forbidOnly: Boolean(process.env.CI),
+  ...(!onDemand && { grepInvert: ON_DEMAND }),
   retries: 0,
   reporter: [["list"]],
   outputDir: "./test-results",
@@ -43,6 +52,8 @@ export default defineConfig({
       CUSTOM_LLM_SECRET: "e2e-placeholder-secret-not-used-0123456789",
       ANTHROPIC_API_KEY: "e2e-placeholder-not-a-key",
       ELEVENLABS_API_KEY: "e2e-placeholder-not-a-key",
+      // Frames are stored and ledgered, but the placeholder key is never sent to Anthropic.
+      VISION_EXTRACTION: "off",
     },
   },
 });

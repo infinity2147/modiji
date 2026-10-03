@@ -16,6 +16,7 @@ export const CHECK_IDS = [
   "token",
   "public-llm",
   "voice-skip-turn",
+  "voice-off-record",
   "server-deep",
   "sandbox",
   "permissions",
@@ -48,7 +49,7 @@ export type CheckResult = {
 /** The ElevenLabs calls preflight makes (read-only: it never creates or updates agents). */
 export type PreflightElevenLabs = Pick<
   ElevenLabsClient,
-  "getAgent" | "getConversationToken" | "getSignedUrl" | "listSecrets"
+  "getAgent" | "getConversationToken" | "getSignedUrl" | "listSecrets" | "getTool"
 >;
 
 export type PreflightOptions = {

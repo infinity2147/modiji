@@ -7,8 +7,9 @@
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { ledgerPayloadSchema, validateFeatureValue, type NewLedgerEntry, type ScreenEvent, type Value } from "@vashistha/core";
-import { KYC_DOMAIN, findKycCase } from "@vashistha/core/domains/kyc";
+import { KYC_DOMAIN } from "@vashistha/core/domains/kyc";
 import { PostEventsRequestSchema, type PostEventsResponseSchema } from "../../contracts/casedesk";
+import { findSessionCase } from "./cases";
 import { ApiFailure, json, readJson, respond } from "./http";
 import {
   CASEDESK_SCHEMA_VERSION,
@@ -16,7 +17,6 @@ import {
   loadSession,
   requireOnRecord,
   type CaseDeskDeps,
-  type CaseDeskSessionInfo,
   type LoadedSession,
 } from "./session";
 
@@ -47,7 +47,8 @@ function checkedValue(index: number, field: string, value: Value, member: "from"
 }
 
 /** Validates one DOM event against the session and domain and returns it as the server records it. */
-function normaliseEvent(event: ScreenEvent, index: number, { info, session }: LoadedSession): ScreenEvent {
+function normaliseEvent(deps: CaseDeskDeps, event: ScreenEvent, index: number, loaded: LoadedSession): ScreenEvent {
+  const { session } = loaded;
   if (event.source !== "dom") throw invalidEvent(index, `source must be "dom" on this channel, got "${event.source}"`);
   if (event.sessionEpoch !== session.privacyEpoch)
     throw new ApiFailure(
@@ -59,7 +60,7 @@ function normaliseEvent(event: ScreenEvent, index: number, { info, session }: Lo
   const stray = OPTIONAL_MEMBERS.filter((m) => event[m] !== undefined && !allowed.has(m));
   if (stray.length > 0) throw invalidEvent(index, `${event.kind} must not carry ${stray.join(", ")}`);
   if (event.kind !== "navigate" && event.caseId === undefined) throw invalidEvent(index, `${event.kind} requires caseId`);
-  if (event.caseId !== undefined) requireCaseInSet(index, event.caseId, info);
+  if (event.caseId !== undefined) requireCaseInSession(deps, index, event.caseId, loaded);
 
   const normalised: ScreenEvent = {
     id: event.id,
@@ -90,8 +91,8 @@ function normaliseEvent(event: ScreenEvent, index: number, { info, session }: Lo
   return normalised;
 }
 
-function requireCaseInSet(index: number, caseId: string, info: CaseDeskSessionInfo): void {
-  if (findKycCase(caseId)?.set !== info.caseSet)
+function requireCaseInSession(deps: CaseDeskDeps, index: number, caseId: string, { info, session }: LoadedSession): void {
+  if (findSessionCase(deps.ledger, session.id, info, caseId) === undefined)
     throw invalidEvent(index, `case ${caseId} is not in this session's ${info.caseSet} set`);
 }
 
@@ -128,7 +129,7 @@ export function handlePostEvents(request: Request, sessionId: string, deps: Case
     const loaded = loadSession(deps, sessionId);
     const { session, info } = loaded;
     requireOnRecord(session);
-    const normalised = events.map((event, index) => normaliseEvent(event, index, loaded));
+    const normalised = events.map((event, index) => normaliseEvent(deps, event, index, loaded));
     checkFrameOrder(normalised, lastFrameSeq(deps, session.id));
 
     const traceId = randomUUID();
@@ -150,6 +151,7 @@ export function handlePostEvents(request: Request, sessionId: string, deps: Case
     const lastEvent = normalised.at(-1);
     if (lastEvent) deps.store.lastFrameSeq.set(session.id, lastEvent.frameSeq);
     if (normalised.some((event) => SCREEN_CHANGES.has(event.kind))) deps.interview.screenChanged(session.id);
+    deps.tutor.screenEvents(appended, loaded);
     const body: z.infer<typeof PostEventsResponseSchema> = { ledgerIds: appended.map((entry) => entry.id) };
     return json(body);
   });

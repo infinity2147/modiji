@@ -10,7 +10,7 @@ import { checkPermissions } from "./checks/permissions";
 import { checkPublicLlm } from "./checks/public-llm";
 import { checkSandbox, checkServerDeep } from "./checks/server";
 import { checkToken } from "./checks/token";
-import { checkVoiceSkipTurn } from "./checks/voice";
+import { checkVoiceOffRecord, checkVoiceSkipTurn } from "./checks/voice";
 import { describeError } from "./http";
 import { CHECK_IDS, type CheckId, type CheckOutcome, type CheckResult, type PreflightContext } from "./types";
 
@@ -38,6 +38,12 @@ export const CHECKS: readonly CheckDefinition[] = [
     title: "skip_turn honoured end to end through ElevenLabs + TTS",
     dependsOn: ["public-llm"],
     run: checkVoiceSkipTurn,
+  },
+  {
+    id: "voice-off-record",
+    title: "Off-record phrase → set_off_record client tool, no speech",
+    dependsOn: ["public-llm"],
+    run: checkVoiceOffRecord,
   },
   { id: "server-deep", title: "DB, DATA_DIR writable and Z3 initialised", run: checkServerDeep },
   { id: "sandbox", title: "CaseDesk sandbox route", run: checkSandbox },

@@ -15,6 +15,8 @@ export type AgentRequestBody = { name: string; conversation_config: JsonObject; 
 export type ElevenLabsAgent = { agent_id: string; [key: string]: unknown };
 
 export type WorkspaceSecret = { secretId: string; name: string };
+/** A workspace tool (`/v1/convai/tools`); `toolConfig` is checked by `diffDesiredVsActual` and the tool invariants. */
+export type WorkspaceTool = { toolId: string; name: string; type: string; toolConfig: Record<string, unknown> };
 export type ElevenLabsVoice = { voiceId: string; name: string | null; category: string | null };
 
 export type ElevenLabsErrorKind = "http" | "network" | "timeout" | "invalid_response";
@@ -61,6 +63,11 @@ export type ElevenLabsClient = {
   /** Workspace secrets, following pagination. `search` filters by name prefix server-side. */
   listSecrets(options?: { search?: string }): Promise<WorkspaceSecret[]>;
   createSecret(name: string, value: string): Promise<{ secretId: string }>;
+  /** Client tools in the workspace, following pagination. `search` filters by name prefix server-side. */
+  listClientTools(options?: { search?: string }): Promise<WorkspaceTool[]>;
+  getTool(toolId: string): Promise<WorkspaceTool>;
+  createTool(toolConfig: JsonObject): Promise<WorkspaceTool>;
+  updateTool(toolId: string, toolConfig: JsonObject): Promise<WorkspaceTool>;
   /** Throws `ElevenLabsApiError` (HTTP 4xx) when the voice does not exist or is not available to the account. */
   getVoice(voiceId: string): Promise<ElevenLabsVoice>;
 };
@@ -73,6 +80,21 @@ const AgentResponseSchema = z.looseObject({ agent_id: z.string().min(1) });
 const CreateAgentResponseSchema = z.object({ agent_id: z.string().min(1) });
 const SecretSchema = z.object({ secret_id: z.string().min(1), name: z.string() });
 const ListSecretsResponseSchema = z.object({ secrets: z.array(SecretSchema), next_cursor: z.string().min(1).nullish() });
+const ToolResponseSchema = z.looseObject({
+  id: z.string().min(1),
+  tool_config: z.looseObject({ name: z.string().min(1), type: z.string().min(1) }),
+});
+const ListToolsResponseSchema = z.looseObject({
+  tools: z.array(ToolResponseSchema),
+  has_more: z.boolean(),
+  next_cursor: z.string().min(1).nullish(),
+});
+const toWorkspaceTool = (r: z.infer<typeof ToolResponseSchema>): WorkspaceTool => ({
+  toolId: r.id,
+  name: r.tool_config.name,
+  type: r.tool_config.type,
+  toolConfig: r.tool_config,
+});
 const VoiceResponseSchema = z.object({
   voice_id: z.string().min(1),
   name: z.string().nullish(),
@@ -150,6 +172,35 @@ export function createElevenLabsClient(options: ElevenLabsClientOptions): Eleven
   }
 
   const agentPath = (agentId: string) => `/v1/convai/agents/${encodeURIComponent(agentId)}`;
+  const toolPath = (toolId: string) => `/v1/convai/tools/${encodeURIComponent(toolId)}`;
+
+  /** Follows `next_cursor` until it is absent; a repeated cursor is an invalid response (it would loop forever). */
+  async function paginate<P extends { next_cursor?: string | null | undefined }>(
+    path: string,
+    schema: z.ZodType<P>,
+    query: Readonly<Record<string, string>>,
+    take: (page: P) => void,
+  ): Promise<void> {
+    const seen = new Set<string>();
+    let cursor: string | undefined;
+    do {
+      const page = await request("GET", path, schema, { query: cursor === undefined ? query : { ...query, cursor } });
+      take(page);
+      cursor = page.next_cursor ?? undefined;
+      if (cursor !== undefined) {
+        if (seen.has(cursor)) {
+          throw new ElevenLabsApiError({
+            kind: "invalid_response",
+            status: 200,
+            method: "GET",
+            path,
+            detail: "pagination cursor repeated",
+          });
+        }
+        seen.add(cursor);
+      }
+    } while (cursor !== undefined);
+  }
 
   return {
     async getConversationToken(agentId) {
@@ -177,28 +228,9 @@ export function createElevenLabsClient(options: ElevenLabsClientOptions): Eleven
 
     async listSecrets({ search } = {}) {
       const secrets: WorkspaceSecret[] = [];
-      const seen = new Set<string>();
-      let cursor: string | undefined;
-      do {
-        const query: Record<string, string> = {};
-        if (search !== undefined) query.search = search;
-        if (cursor !== undefined) query.cursor = cursor;
-        const page = await request("GET", "/v1/convai/secrets", ListSecretsResponseSchema, { query });
+      await paginate("/v1/convai/secrets", ListSecretsResponseSchema, search === undefined ? {} : { search }, (page) => {
         for (const s of page.secrets) secrets.push({ secretId: s.secret_id, name: s.name });
-        cursor = page.next_cursor ?? undefined;
-        if (cursor !== undefined) {
-          if (seen.has(cursor)) {
-            throw new ElevenLabsApiError({
-              kind: "invalid_response",
-              status: 200,
-              method: "GET",
-              path: "/v1/convai/secrets",
-              detail: "pagination cursor repeated",
-            });
-          }
-          seen.add(cursor);
-        }
-      } while (cursor !== undefined);
+      });
       return secrets;
     },
 
@@ -210,6 +242,24 @@ export function createElevenLabsClient(options: ElevenLabsClientOptions): Eleven
       });
       return { secretId: r.secret_id };
     },
+
+    async listClientTools({ search } = {}) {
+      const tools: WorkspaceTool[] = [];
+      const query: Record<string, string> = { types: "client", page_size: "100" };
+      if (search !== undefined) query.search = search;
+      await paginate("/v1/convai/tools", ListToolsResponseSchema, query, (page) => {
+        tools.push(...page.tools.map(toWorkspaceTool));
+      });
+      return tools;
+    },
+
+    getTool: async (toolId) => toWorkspaceTool(await request("GET", toolPath(toolId), ToolResponseSchema)),
+
+    createTool: async (toolConfig) =>
+      toWorkspaceTool(await request("POST", "/v1/convai/tools", ToolResponseSchema, { body: { tool_config: toolConfig } })),
+
+    updateTool: async (toolId, toolConfig) =>
+      toWorkspaceTool(await request("PATCH", toolPath(toolId), ToolResponseSchema, { body: { tool_config: toolConfig } })),
 
     async getVoice(voiceId) {
       const r = await request("GET", `/v1/voices/${encodeURIComponent(voiceId)}`, VoiceResponseSchema);

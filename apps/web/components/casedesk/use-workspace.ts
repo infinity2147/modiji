@@ -57,6 +57,8 @@ export type Workspace = {
   channel: DomChannelStatus;
   /** Off-record hooks for the DOM channel (plan §7.8). */
   capture: CaptureControl;
+  /** Adds cases generated for this session (tutor practice, judge-entered) to the queue. */
+  addCases: (cases: readonly KycCase[]) => void;
 };
 
 /**
@@ -78,7 +80,7 @@ export function useWorkspace(ref: SessionRef, sensors: RefObject<GateSensors | n
   useEffect(() => {
     let cancelled = false;
     setLoad({ status: "loading" });
-    Promise.all([listCases(browserFetch, ref.caseSet), readLedger(browserFetch, ref.sessionId)]).then(
+    Promise.all([listCases(browserFetch, ref.caseSet, ref.sessionId), readLedger(browserFetch, ref.sessionId)]).then(
       ([{ cases }, entries]) => {
         if (cancelled) return;
         const session = summariseLedger(entries);
@@ -214,6 +216,14 @@ export function useWorkspace(ref: SessionRef, sensors: RefObject<GateSensors | n
     [apply, prompt],
   );
 
+  const addCases = useCallback((added: readonly KycCase[]) => {
+    setLoad((current) => {
+      if (current.status !== "ready") return current;
+      const known = new Set(current.cases.map((c) => c.id));
+      return { ...current, cases: [...current.cases, ...added.filter((c) => !known.has(c.id))] };
+    });
+  }, []);
+
   const dismissPrompt = useCallback(() => {
     setPrompt((current) => (current?.submitting ? current : undefined));
   }, []);
@@ -235,5 +245,6 @@ export function useWorkspace(ref: SessionRef, sensors: RefObject<GateSensors | n
     dismissPrompt,
     channel,
     capture,
+    addCases,
   };
 }

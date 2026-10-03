@@ -1,7 +1,25 @@
 {
-  "version": 1,
+  "version": 2,
   "name": "vashistha-interviewer",
   "role": "interviewer",
+  "clientTools": [
+    {
+      "type": "client",
+      "name": "set_off_record",
+      "description": "Takes the session off the record: the browser mutes the microphone at once, stops screen and frame capture and drops queued uploads. Called only by the server when the expert says an off-record phrase. Resuming is by the on-screen button only.",
+      "expects_response": false,
+      "pre_tool_speech": "off",
+      "execution_mode": "immediate",
+      "response_timeout_secs": 5,
+      "parameters": {
+        "type": "object",
+        "required": ["offRecord"],
+        "properties": {
+          "offRecord": { "type": "boolean", "description": "Always true: going off the record. Resuming is by button only." }
+        }
+      }
+    }
+  ],
   "body": {
     "conversation_config": {
       "agent": {
@@ -12,7 +30,7 @@
           "llm": "custom-llm",
           "custom_llm": {
             "url": "{{PUBLIC_BASE_URL}}/api/llm",
-            "model_id": "vashistha-interviewer-v1",
+            "model_id": "vashistha-interviewer-v2",
             "api_key": { "secret_id": "{{CUSTOM_LLM_SECRET_ID}}" },
             "api_type": "chat_completions"
           },
@@ -37,8 +55,7 @@
               "description": "",
               "params": { "system_tool_type": "language_detection" }
             }
-          },
-          "tool_ids": []
+          }
         }
       },
       "turn": {

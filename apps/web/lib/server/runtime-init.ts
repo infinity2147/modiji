@@ -6,7 +6,9 @@
 import { randomUUID } from "node:crypto";
 import { unlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { compileProcedure, exportWorkMapJson } from "@vashistha/mcp-guardrails";
 import {
+  CLAUDE_MODELS,
   createClaude,
   createElevenLabsClient,
   createLedger,
@@ -18,8 +20,14 @@ import { ORACLE_MARKER as KYC_ORACLE_MARKER } from "@vashistha/core/domains/kyc/
 import { z3SelfTest } from "@vashistha/solver";
 import { createAuthorizationStore } from "./authorizations";
 import { createCaseDeskStore } from "./casedesk/session";
+import { createDebriefStore } from "./debrief/deps";
+import { createLedgerRulebook } from "./debrief/rulebook-store";
+import { createWitnessSolver } from "./debrief/solver";
+import { createInterviewStore } from "./interview/engine-state";
+import { createPerception } from "./perception/init";
 import { createRateLimiter } from "./rate-limit";
 import { registerRuntime, type CheckResult, type Runtime } from "./runtime";
+import { createPracticeSolver } from "./tutor/solver";
 
 /** Markers of every hidden policy this process loads; the model wrapper refuses prompts containing any. */
 const ORACLE_MARKERS = [KYC_ORACLE_MARKER];
@@ -97,17 +105,29 @@ export function createRuntime(source: Readonly<Record<string, string | undefined
 } {
   const env = loadServerEnv(source);
   const opened = openDatabase({ dataDir: env.DATA_DIR });
+  const ledger = createLedger(opened.db);
+  const claude =
+    env.ANTHROPIC_API_KEY === undefined ? null : createClaude({ apiKey: env.ANTHROPIC_API_KEY, forbiddenMarkers: ORACLE_MARKERS });
+  const rulebookState = createLedgerRulebook(opened.sqlite);
   const runtime: Runtime = {
     env,
-    ledger: createLedger(opened.db),
+    ledger,
     authorizations: createAuthorizationStore(),
     elevenLabs: env.ELEVENLABS_API_KEY === undefined ? null : createElevenLabsClient({ apiKey: env.ELEVENLABS_API_KEY }),
-    claude:
-      env.ANTHROPIC_API_KEY === undefined
-        ? null
-        : createClaude({ apiKey: env.ANTHROPIC_API_KEY, forbiddenMarkers: ORACLE_MARKERS }),
-    rulebook: () => [],
+    claude,
+    rulebook: () => rulebookState().rules,
+    rulebookRevision: () => rulebookState().revision,
+    rulebookState,
     casedesk: createCaseDeskStore(),
+    perception: createPerception({ source, ledger, claude }),
+    interview: createInterviewStore(),
+    debrief: {
+      solver: createWitnessSolver(),
+      exports: { workMapJson: exportWorkMapJson, procedure: compileProcedure },
+      models: { prose: CLAUDE_MODELS.prose },
+      store: createDebriefStore(),
+    },
+    tutor: { practice: createPracticeSolver() },
     voiceTokenLimiter: createRateLimiter(VOICE_TOKEN_RATE_LIMIT),
     checks: { db: () => probeDatabase(opened), dataDir: () => probeDataDir(env.DATA_DIR), z3: probeZ3 },
   };

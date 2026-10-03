@@ -205,6 +205,9 @@ importers:
       '@vashistha/mcp-guardrails':
         specifier: workspace:*
         version: link:../../packages/mcp-guardrails
+      '@vashistha/perception':
+        specifier: workspace:*
+        version: link:../../packages/perception
       '@vashistha/solver':
         specifier: workspace:*
         version: link:../../packages/solver

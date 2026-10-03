@@ -6,9 +6,11 @@
  *   question the agent just asked and the privacy epoch they were captured in; agent turns are posted
  *   as agent utterances (never evidence);
  * - control messages (`⟦ctl:…⟧`, plan §7.2 provenance) are never posted and never shown;
+ * - an expert turn that is an off-record phrase (plan §7.8) is never posted or shown either: it goes off
+ *   the record at once (the server's `set_off_record` tool call follows; going off is idempotent);
  * - nothing is captured or posted while off the record, and queued uploads are dropped on going off.
  */
-import { parseControlMessage } from "@vashistha/core";
+import { isOffRecordPhrase, parseControlMessage } from "@vashistha/core";
 import { describeError, type FetchFn } from "../api";
 import { postAgentUtterance, postUtterance } from "./api";
 import type { PrivacyBase } from "./privacy";
@@ -46,6 +48,8 @@ export type BridgeOptions = {
   privacy: () => PrivacyBase;
   /** VAD score at or above which the expert counts as speaking (the gate's threshold). */
   vadThreshold: number;
+  /** The expert said an off-record phrase (its text is dropped, not recorded). */
+  onOffRecordPhrase: () => void;
 };
 
 export type ConversationBridge = {
@@ -155,6 +159,11 @@ export function createConversationBridge(options: BridgeOptions): ConversationBr
     message({ message, role }) {
       const text = message.trim();
       if (text === "" || isControlText(text) || conversation === undefined) return;
+      if (role === "user" && isOffRecordPhrase(text)) {
+        speechStartedAt = undefined;
+        options.onOffRecordPhrase();
+        return;
+      }
       const privacy = options.privacy();
       if (privacy.offRecord) return;
       const { id: conversationId, startedAt } = conversation;

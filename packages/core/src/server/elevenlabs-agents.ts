@@ -14,7 +14,28 @@ const PLACEHOLDER_RE = /\{\{[^{}]*\}\}/;
 
 const JsonObjectSchema: z.ZodType<JsonObject> = z.record(z.string(), z.json());
 
-const MODEL_ID_PATH = ["conversation_config", "agent", "prompt", "custom_llm", "model_id"] as const;
+const PROMPT_IN_CONFIG = ["agent", "prompt"] as const;
+const PROMPT_PATH = ["conversation_config", ...PROMPT_IN_CONFIG] as const;
+const MODEL_ID_PATH = [...PROMPT_PATH, "custom_llm", "model_id"] as const;
+
+/**
+ * A client tool (`POST /v1/convai/tools` `tool_config`, docs/api-notes.md §1.7). The settings that matter
+ * for the speech invariant are pinned by the schema:
+ * - `pre_tool_speech: "off"`: the default ("auto") may make the agent speak filler before a tool call;
+ * - `expects_response: false`: our custom LLM skips every tool-result follow-up, so a response would only
+ *   make the conversation wait (no tool needs one today).
+ */
+export const ClientToolSpecSchema = z.strictObject({
+  type: z.literal("client"),
+  name: z.string().regex(/^[a-z][a-z0-9_]{0,63}$/, "snake_case, at most 64 characters"),
+  description: z.string().min(1),
+  expects_response: z.literal(false),
+  pre_tool_speech: z.literal("off"),
+  execution_mode: z.literal("immediate"),
+  response_timeout_secs: z.int().min(1).max(120),
+  parameters: JsonObjectSchema,
+});
+export type ClientToolSpec = z.infer<typeof ClientToolSpecSchema>;
 
 export const AgentSpecSchema = z
   .strictObject({
@@ -22,9 +43,25 @@ export const AgentSpecSchema = z
     version: z.int().positive(),
     name: z.string(),
     role: z.enum(AGENT_ROLES),
+    /** Synced as workspace tools by `scripts/agents.ts`; their ids become `prompt.tool_ids` when rendering. */
+    clientTools: z.array(ClientToolSpecSchema),
     body: z.strictObject({ conversation_config: JsonObjectSchema, platform_settings: JsonObjectSchema }),
   })
   .superRefine((spec, ctx) => {
+    const names = spec.clientTools.map((t) => t.name);
+    if (new Set(names).size !== names.length) {
+      ctx.addIssue({ code: "custom", path: ["clientTools"], message: `duplicate tool names: ${names.join(", ")}` });
+    }
+    const prompt = valueAt(spec.body, PROMPT_PATH);
+    if (!isRecord(prompt)) {
+      ctx.addIssue({ code: "custom", path: ["body", ...PROMPT_PATH], message: "must be an object" });
+    } else if ("tool_ids" in prompt) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["body", ...PROMPT_PATH, "tool_ids"],
+        message: "must not be set: tool ids are rendered from clientTools",
+      });
+    }
     if (spec.name !== `vashistha-${spec.role}`) {
       ctx.addIssue({ code: "custom", path: ["name"], message: `must be "vashistha-${spec.role}" for role ${spec.role}` });
     }
@@ -54,20 +91,25 @@ export type RenderAgentOptions = {
   publicBaseUrl: string;
   /** Workspace secret id holding CUSTOM_LLM_SECRET (never the secret itself). */
   customLlmSecretId: string;
+  /** Workspace tool id for each of the spec's `clientTools`, by tool name. */
+  toolIds: Readonly<Record<string, string>>;
 };
 
 const HttpsBaseUrlSchema = z
   .url({ protocol: /^https$/ })
   .refine((value) => !value.endsWith("/") && !/[?#]/.test(value), "no trailing slash, query or fragment");
-const SecretIdSchema = z.string().regex(/^[A-Za-z0-9_-]+$/, "letters, digits, _ or -");
+const WorkspaceIdSchema = z.string().regex(/^[A-Za-z0-9_-]+$/, "letters, digits, _ or -");
 
-/** Substitutes `{{PUBLIC_BASE_URL}}` and `{{CUSTOM_LLM_SECRET_ID}}` in every string; throws if any `{{…}}` remains. */
+/**
+ * Substitutes `{{PUBLIC_BASE_URL}}` and `{{CUSTOM_LLM_SECRET_ID}}` in every string, and sets `prompt.tool_ids` to the
+ * ids of the spec's client tools (in spec order); throws if any `{{…}}` remains or a tool id is missing.
+ */
 export function renderAgentBody(spec: AgentSpec, options: RenderAgentOptions): AgentRequestBody {
   const baseUrl = HttpsBaseUrlSchema.safeParse(options.publicBaseUrl);
   if (!baseUrl.success) {
     throw new Error("publicBaseUrl must be a public https URL without a trailing slash (ElevenLabs calls it)");
   }
-  if (!SecretIdSchema.safeParse(options.customLlmSecretId).success) {
+  if (!WorkspaceIdSchema.safeParse(options.customLlmSecretId).success) {
     throw new Error("customLlmSecretId is not a valid secret id");
   }
   const vars: Readonly<Record<string, string>> = {
@@ -81,9 +123,18 @@ export function renderAgentBody(spec: AgentSpec, options: RenderAgentOptions): A
   };
   const substituteObject = (value: JsonObject): JsonObject =>
     Object.fromEntries(Object.entries(value).map(([k, v]) => [k, substitute(v)]));
+  const toolIds = spec.clientTools.map((tool) => {
+    const id = options.toolIds[tool.name];
+    if (id === undefined || !WorkspaceIdSchema.safeParse(id).success) throw new Error(`${spec.name}: no valid tool id for ${tool.name}`);
+    return id;
+  });
+  const conversationConfig = substituteObject(spec.body.conversation_config);
+  const prompt = valueAt(conversationConfig, PROMPT_IN_CONFIG);
+  if (!isRecord(prompt)) throw new Error(`${spec.name}: conversation_config.agent.prompt is not an object`);
+  prompt.tool_ids = toolIds;
   const body: AgentRequestBody = {
     name: spec.name,
-    conversation_config: substituteObject(spec.body.conversation_config),
+    conversation_config: conversationConfig,
     platform_settings: substituteObject(spec.body.platform_settings),
   };
   const leftovers: string[] = [];
@@ -174,6 +225,23 @@ export function checkAgentInvariants(agent: unknown, options: AgentInvariantOpti
   notTrue(`${clientOverride}.first_message`, "a client could make the agent speak");
   notTrue(`${clientOverride}.prompt.llm`, "a client could replace the custom LLM");
   equals("platform_settings.auth.enable_auth", true);
+  return problems;
+}
+
+/**
+ * Read-back checks for a client tool (`GET /v1/convai/tools/{id}` `tool_config`): the settings that could make the
+ * agent speak or wait around a tool call. Empty = OK.
+ */
+export function checkClientToolInvariants(toolConfig: unknown, name: string): string[] {
+  const problems: string[] = [];
+  const expect = (key: string, expected: unknown, why: string): void => {
+    const value = isRecord(toolConfig) ? toolConfig[key] : undefined;
+    if (value !== expected) problems.push(`tool ${name}: ${key} is ${show(value)}; expected ${JSON.stringify(expected)} (${why})`);
+  };
+  expect("name", name, "tools are matched by name");
+  expect("type", "client", "handled in the browser");
+  expect("pre_tool_speech", "off", "no filler speech before the tool call");
+  expect("expects_response", false, "the custom LLM never waits on a tool result");
   return problems;
 }
 

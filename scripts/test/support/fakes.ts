@@ -5,6 +5,7 @@
 import { randomBytes } from "node:crypto";
 import type { Claude, TextResult } from "../../../packages/core/src/server/claude";
 import { loadAgentSpec, type AgentRole } from "../../../packages/core/src/server/elevenlabs-agents";
+import { isOffRecordPhrase } from "../../../packages/core/src/voice/off-record";
 import { createSecretRegistry } from "../../preflight/redact";
 import { resolveTarget } from "../../preflight/target";
 import { DEFAULT_OPTIONS, type PreflightContext, type PreflightElevenLabs } from "../../preflight/types";
@@ -88,6 +89,11 @@ export function skipTurnEvents(): string[] {
   return [chunk({ role: "assistant", content: null, tool_calls: [call] }, null), chunk({}, "tool_calls"), "data: [DONE]\n\n"];
 }
 
+export function offRecordEvents(): string[] {
+  const call = { index: 0, id: "call_off_record_1", type: "function", function: { name: "set_off_record", arguments: '{"offRecord":true}' } };
+  return [chunk({ role: "assistant", content: null, tool_calls: [call] }, null), chunk({}, "tool_calls"), "data: [DONE]\n\n"];
+}
+
 export function speechEvents(text: string): string[] {
   const words = text.match(/\S+\s*/g) ?? [];
   return [
@@ -107,6 +113,8 @@ export type FakeServerBehaviour = {
   speakWithoutAuthorization?: boolean;
   /** Never mark nonces used, so a replay speaks again. */
   allowReplay?: boolean;
+  /** Behave like a server without the off-record branch: an off-record phrase gets skip_turn. */
+  ignoreOffRecordPhrase?: boolean;
   deep?: { db?: boolean; dataDir?: boolean; z3?: boolean };
   sandboxHtml?: string;
   voiceTokenStatus?: number;
@@ -175,24 +183,26 @@ export function fakeServer(behaviour: FakeServerBehaviour = {}, wallClock: () =>
       if (!behaviour.allowReplay) auth.used = true;
       return speechEvents(PREFLIGHT_TEXT);
     }
-    return behaviour.speakWithoutAuthorization ? speechEvents("Sure, I can help with that.") : skipTurnEvents();
+    if (behaviour.speakWithoutAuthorization) return speechEvents("Sure, I can help with that.");
+    return nonce === undefined && !behaviour.ignoreOffRecordPhrase && isOffRecordPhrase(text) ? offRecordEvents() : skipTurnEvents();
   }
 
-  /** What the custom LLM would do for this turn: the text to speak, or null for skip_turn. */
-  function speechFor(text: string, sessionId: string | undefined): string | null {
-    const events = decide(text, sessionId);
-    const content = events
-      .flatMap((e) => {
-        const data = e.slice("data: ".length).trim();
-        if (data === "[DONE]") return [];
-        const parsed = JSON.parse(data) as { choices: { delta: { content?: string | null } }[] };
-        return [parsed.choices[0]?.delta.content ?? ""];
-      })
-      .join("");
-    return content === "" ? null : content;
+  /** What the custom LLM would do for this turn: speak a text, or call a tool (skip_turn or a client tool). */
+  function turnFor(text: string, sessionId: string | undefined): { speech: string } | { tool: string; args: Record<string, unknown> } {
+    const deltas = decide(text, sessionId).flatMap((e) => {
+      const data = e.slice("data: ".length).trim();
+      if (data === "[DONE]") return [];
+      const parsed = JSON.parse(data) as {
+        choices: { delta: { content?: string | null; tool_calls?: { function: { name: string; arguments: string } }[] } }[];
+      };
+      return parsed.choices[0] ? [parsed.choices[0].delta] : [];
+    });
+    const call = deltas.find((d) => d.tool_calls)?.tool_calls?.[0];
+    if (call) return { tool: call.function.name, args: JSON.parse(call.function.arguments) as Record<string, unknown> };
+    return { speech: deltas.map((d) => d.content ?? "").join("") };
   }
 
-  return { fetch: fetchImpl, requests, authorizations, speechFor, get authorizeCount() { return authorizeCount; } };
+  return { fetch: fetchImpl, requests, authorizations, turnFor, get authorizeCount() { return authorizeCount; } };
 }
 
 export type FakeServer = ReturnType<typeof fakeServer>;
@@ -210,6 +220,8 @@ export type SocketScript = {
   extraEvent?: string;
   /** Echo user_message text as user_transcript. */
   echoTranscript?: boolean;
+  /** Deliver a client tool call twice (as if ElevenLabs re-invoked the LLM with the same turn). */
+  repeatClientToolCall?: boolean;
 };
 
 export type FakeSocketRecord = {
@@ -272,13 +284,18 @@ export function fakeAgentSockets(server: FakeServer, script: SocketScript = {}) 
             speak("Hmm, let me think about that.");
             return;
           }
-          const speech = server.speechFor(text, sessionId);
-          if (speech === null) {
+          const turn = server.turnFor(text, sessionId);
+          if ("speech" in turn) {
+            if (!script.silent) speak(turn.speech);
+          } else if (turn.tool === "skip_turn") {
             emit("agent_tool_response", {
               agent_tool_response: { tool_name: "skip_turn", tool_call_id: "c1", tool_type: "system", is_error: false, event_id: ++eventId, is_called: true, status: "success" },
             });
-          } else if (!script.silent) {
-            speak(speech);
+          } else {
+            const calls = script.repeatClientToolCall ? 2 : 1;
+            for (let i = 0; i < calls; i += 1) {
+              emit("client_tool_call", { client_tool_call: { tool_name: turn.tool, tool_call_id: `ct${i}`, parameters: turn.args, event_id: ++eventId } }, 2 + i);
+            }
           }
         }
       },
@@ -310,6 +327,9 @@ export function fakeElevenLabs(overrides: Partial<PreflightElevenLabs> = {}): Pr
     },
     async listSecrets() {
       return [];
+    },
+    async getTool(toolId) {
+      throw new Error(`ElevenLabs GET /v1/convai/tools/${toolId} failed (HTTP 404)`);
     },
     ...overrides,
   };
