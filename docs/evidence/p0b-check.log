@@ -1,0 +1,74 @@
+$ pnpm typecheck && pnpm lint && pnpm test && pnpm test:bundle
+$ tsc -p tsconfig.json && pnpm -r --parallel run typecheck
+Scope: 3 of 4 workspace projects
+apps/web typecheck$ next typegen && tsc -p tsconfig.json
+packages/core typecheck$ tsc -p tsconfig.json
+packages/solver typecheck$ tsc -p tsconfig.json
+apps/web typecheck: Generating route types...
+apps/web typecheck: ✓ Types generated successfully
+packages/solver typecheck: Done
+packages/core typecheck: Done
+apps/web typecheck: Done
+$ eslint .
+$ vitest run
+
+ RUN  v5.0.3 /home/24b4530/modiji
+
+
+ Test Files  28 passed (28)
+      Tests  513 passed (513)
+   Start at  01:39:00
+   Duration  5.63s (transform 39%, import 35%, tests 26%, worker 1%)
+
+  Transform  |scripts| transforming modules took 2.34s · 48% of tracked time, re-done on every run
+             persist transforms across runs with fsModuleCache: true
+             learn more: https://vitest.dev/guide/improving-performance#caching-between-reruns
+
+  Transform  |core| transforming modules took 7.90s · 49% of tracked time, re-done on every run
+             persist transforms across runs with fsModuleCache: true
+             learn more: https://vitest.dev/guide/improving-performance#caching-between-reruns
+
+$ pnpm --filter @vashistha/web build && vitest run --project web-bundle
+$ next build
+▲ Next.js 16.3.8 (Turbopack)
+✓ Running next.config.ts took 132ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 600ms
+  Running TypeScript ...
+  Finished TypeScript in 6.3s ...
+  Collecting page data using 10 workers ...
+  Generating static pages using 10 workers (0/4) ...
+  Generating static pages using 10 workers (1/4) 
+  Generating static pages using 10 workers (2/4) 
+  Generating static pages using 10 workers (3/4) 
+✓ Generating static pages using 10 workers (4/4) in 767ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /api/health
+├ ƒ /api/health/deep
+├ ƒ /api/llm/chat/completions
+├ ƒ /api/preflight/authorize
+├ ƒ /api/voice/token
+└ ○ /sandbox
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+
+ RUN  v5.0.3 /home/24b4530/modiji
+
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  01:39:17
+   Duration  1.08s (import 72%, transform 25%, tests 2%, worker 1%)
+
+
+real	0m33.939s
+user	1m30.346s
+sys	0m8.718s

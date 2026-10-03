@@ -1,0 +1,109 @@
+{
+  "tool": "vashistha-preflight",
+  "startedAt": "2026-10-03T20:07:28.348Z",
+  "finishedAt": "2026-10-03T20:07:28.449Z",
+  "target": "http://127.0.0.1:4317",
+  "options": {
+    "only": [
+      "env",
+      "public-llm",
+      "voice-skip-turn",
+      "permissions"
+    ],
+    "quietWindowMs": 8000,
+    "speechTimeoutMs": 20000
+  },
+  "exitCode": 1,
+  "summary": {
+    "pass": 1,
+    "fail": 2,
+    "skip": 0,
+    "info": 1
+  },
+  "results": [
+    {
+      "id": "env",
+      "title": "Environment variables",
+      "status": "fail",
+      "ms": 5,
+      "detail": "missing: ANTHROPIC_API_KEY, ELEVENLABS_API_KEY, ELEVENLABS_INTERVIEWER_AGENT_ID, ELEVENLABS_TUTOR_AGENT_ID",
+      "facts": {
+        "source": "process env (no .env file)",
+        "required": [
+          "ANTHROPIC_API_KEY",
+          "ELEVENLABS_API_KEY",
+          "ELEVENLABS_INTERVIEWER_AGENT_ID",
+          "ELEVENLABS_TUTOR_AGENT_ID",
+          "CUSTOM_LLM_SECRET",
+          "PUBLIC_BASE_URL"
+        ],
+        "missing": [
+          "ANTHROPIC_API_KEY",
+          "ELEVENLABS_API_KEY",
+          "ELEVENLABS_INTERVIEWER_AGENT_ID",
+          "ELEVENLABS_TUTOR_AGENT_ID"
+        ]
+      }
+    },
+    {
+      "id": "public-llm",
+      "title": "Custom-LLM endpoint over the public internet",
+      "status": "pass",
+      "ms": 94,
+      "detail": "401 without/with wrong bearer; unauthorised → skip_turn (8 ms); authorised → exact text (first chunk 9 ms); replay → skip_turn (already_used)",
+      "facts": {
+        "path": "/api/llm/chat/completions",
+        "model": "vashistha-interviewer-v1",
+        "sessionId": "preflight-607afbcb-7714-4789-b8cc-c548614307e4",
+        "skipTurn": {
+          "ok": true,
+          "reason": "not_control_message",
+          "firstChunkMs": 7,
+          "totalMs": 8
+        },
+        "speech": {
+          "ok": true,
+          "firstChunkMs": 9,
+          "totalMs": 9
+        },
+        "replay": {
+          "ok": true,
+          "reason": "already_used",
+          "totalMs": 7
+        }
+      }
+    },
+    {
+      "id": "voice-skip-turn",
+      "title": "skip_turn honoured end to end through ElevenLabs + TTS",
+      "status": "fail",
+      "ms": 1,
+      "detail": "refusing target http://127.0.0.1:4317: ElevenLabs calls the custom LLM from its own servers, so the target must be a public https URL (not localhost, a private address or plain http)"
+    },
+    {
+      "id": "permissions",
+      "title": "Demo machine mic/screen checklist",
+      "status": "info",
+      "ms": 1,
+      "detail": "6-item mic/screen checklist for the demo machine (printed below)",
+      "facts": {
+        "checklist": [
+          "Use Chrome (latest stable) on the demo machine; open the app on its HTTPS origin (PUBLIC_BASE_URL), never http or a LAN IP.",
+          "Site settings for that origin: Microphone = Allow; pick the demo headset as the input device.",
+          "Screen share via getDisplayMedia: choose \"Entire screen\" or the CaseDesk \"Window\"; leave \"Also share tab audio\" OFF.",
+          "macOS: System Settings → Privacy & Security → Screen Recording and Microphone both enabled for Chrome (restart Chrome after granting).",
+          "Close notification sources (Do Not Disturb on, Slack/Mail quit) and every other tab or window with personal data or PII.",
+          "Test the headset: confirm the input level moves when you speak (OS sound settings) and that agent speech plays in the headset only, not the room."
+        ]
+      }
+    }
+  ],
+  "checklist": [
+    "Use Chrome (latest stable) on the demo machine; open the app on its HTTPS origin (PUBLIC_BASE_URL), never http or a LAN IP.",
+    "Site settings for that origin: Microphone = Allow; pick the demo headset as the input device.",
+    "Screen share via getDisplayMedia: choose \"Entire screen\" or the CaseDesk \"Window\"; leave \"Also share tab audio\" OFF.",
+    "macOS: System Settings → Privacy & Security → Screen Recording and Microphone both enabled for Chrome (restart Chrome after granting).",
+    "Close notification sources (Do Not Disturb on, Slack/Mail quit) and every other tab or window with personal data or PII.",
+    "Test the headset: confirm the input level moves when you speak (OS sound settings) and that agent speech plays in the headset only, not the room."
+  ]
+}

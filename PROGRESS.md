@@ -90,7 +90,7 @@ API facts come from `docs/api-notes.md`, not `plan.md` §15.
 - `apps/web/lib/server/*`: runtime composition root, authorization store, custom-LLM handler.
 - `apps/web/app/api/{llm/chat/completions,voice/token,preflight/authorize,health/deep}`
 - `apps/web/app/sandbox`
-- `Dockerfile`, `railway.json`
+- `Dockerfile`, `.railway/railway.ts` (Railway IaC; `railway.json` is deprecated for new services, see `docs/api-notes.md` §13), `docs/deploy.md`
 - `scripts/preflight.ts`
 
 **Acceptance (plan §11–12).** `pnpm preflight` is all green against the deployed public URL:
@@ -103,3 +103,54 @@ API facts come from `docs/api-notes.md`, not `plan.md` §15.
 - Z3 initialises.
 - Sandbox route up.
 - Mic/screen permission checklist printed.
+
+### P0b results (2026-10-04)
+
+**Status: code complete and green locally. Acceptance NOT yet met.** `pnpm preflight` against the deployed URL needs `ANTHROPIC_API_KEY`, `ELEVENLABS_API_KEY` and Railway access, and none exist on this machine. Nothing below was moved to make it pass.
+
+**Measured.**
+- `pnpm check`: exit 0 in 34 s; log in `docs/evidence/p0b-check.log`.
+  - Typecheck covers root scripts/IaC, core, solver and web.
+  - Lint is clean.
+  - **513/513 tests** in 28 files, then a production build and bundle leak scan, 3/3.
+- **Custom-LLM wrapper invariant** (`apps/web/lib/server/custom-llm.ts`): a turn speaks only when its last message is exactly a control message. The nonce must be valid, unexpired and unused, and match the agent, session and context version. Every other turn streams `skip_turn`.
+  - Every skip reason has its own test.
+  - A property test (fast-check, seed 20261004, 400 runs) checks safety: content appears only for a valid unspent nonce, and only its text. It also checks liveness: a valid first try, or a retry after an aborted stream, speaks once and then skips.
+  - Mutation check: the agent broke each guard one at a time (context, expiry, replay, agent, release, complete, in-flight, plus "completion treated as abort"), and the suite failed every time.
+- **Nonce lifecycle:** issued → in_flight → used. A stream aborted before `[DONE]` releases the nonce, because ElevenLabs retries the same custom LLM on errors (api-notes §12).
+- **Ledger:** control messages are written as `system_control` / `gate.control_message`, storing only a nonce digest. Decisions are written as `engine` / `llm.turn_decision`, with the control entry as parent. `evidence()` excludes control entries (tested).
+- **Bundle isolation:** route bundles contain no `z3-solver`, `drizzle-orm`, `better-sqlite3` or `@anthropic-ai` (grep of `.next/server` and `.next/static`). The composition root runs unbundled in `server.ts`.
+- **Local production run** (`docs/evidence/preflight-2026-10-03T20-07-21.664Z.json`): `pnpm preflight --target http://127.0.0.1:4317 --only public-llm,server-deep,sandbox` was GREEN, 3/3.
+  - **public-llm:** 401 without or with a wrong bearer. Unauthorised → `skip_turn` in 18 ms. Authorised → exact text, first chunk in 16 ms. Replay → `skip_turn` (`already_used`).
+  - **server-deep:** DB ok in 0.8 ms, DATA_DIR ok in 24.9 ms, Z3 ok in 58.2 ms.
+  - **sandbox:** 200.
+  - The voice check correctly refuses a non-public target (`docs/evidence/preflight-2026-10-03T20-07-28.348Z.json`).
+- **Z3** (z3-solver 5.2.0): cold init plus self-test 328 ms, warm 26 ms.
+- **Agent sync:** `pnpm agents:sync --dry-run` renders both agents fully offline. Safety settings are checked as read-back invariants:
+  - `first_message: ""`
+  - `skip_turn` `pre_tool_speech: "off"`
+  - soft timeout off
+  - backup LLM disabled
+  - client overrides for first message and LLM off
+  - private agent (token auth)
+  - retention 30 days
+
+**How to see it.**
+- `pnpm check`
+- `pnpm agents:sync --dry-run` (needs `ELEVENLABS_API_KEY`, `CUSTOM_LLM_SECRET` and an https `PUBLIC_BASE_URL` in `.env`)
+- Local server: build, then `cd apps/web && NODE_ENV=production … npx tsx server.ts`, then `pnpm preflight --target http://127.0.0.1:<port> --only public-llm,server-deep,sandbox`
+- Deploy steps: `docs/deploy.md`
+
+**Open issues / decisions needed.**
+1. **Blocked: credentials and deployment.** Needed: the two API keys and Railway access (`pnpm exec railway login` by a team member, or a Railway account token). Then follow `docs/deploy.md` to deploy, run `agents:sync`, and run `pnpm preflight` against the public URL.
+2. **Live-only unknowns that the voice preflight settles:**
+   - the bearer header ElevenLabs sends;
+   - whether ElevenLabs accepts our streamed `skip_turn` and stays silent;
+   - how `pre_tool_speech` interacts with `skip_turn`;
+   - whether `sessionId` arrives via `elevenlabs_extra_body` on every turn;
+   - whether expressive v3 alters `agent_response` text.
+3. **Default voice `cjVigY5qzO86Huf0OWal`:** default voices exist only for ElevenLabs accounts created before March 2026, and expire on 31 Dec 2026. Sync validates it; if it's missing, the team picks a voice.
+4. **Railway:** `railway.json` is deprecated for new services, so the service is defined in `.railway/railway.ts`. The `railway` SDK and `@railway/cli` were added as root dev dependencies. The file typechecks but has not been planned live yet.
+5. **Unverified until a real build runs:** the Docker image (no Docker here), and the `setpriv` drop to the `node` user on a root-owned Railway volume.
+6. **Haiku 4.5 retirement:** not sooner than 15 Oct 2026 (carried from P0a).
+7. **`CHANGES.md` is still missing.**
