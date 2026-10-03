@@ -1,0 +1,17 @@
+{
+  "name": "@vashistha/perception",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./extraction": "./src/extraction.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@vashistha/core": "workspace:*",
+    "tesseract.js": "^7.0.0",
+    "zod": "^4.6.5"
+  }
+}
