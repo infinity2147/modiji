@@ -280,3 +280,119 @@ Also required:
 1. The "why" answers are rich (exact rules at vagueness 0), which upper-bounds real verbalisation and favours B. This is disclosed.
 2. There is a single synthetic policy.
 3. Human-tester usability (n=2–3) is still to be run with the live system and reported as an internal demonstration only.
+
+---
+
+## P2–P8 — parallel build (2026-10-04)
+
+These phases ran in parallel waves after the shared contracts were committed: engine and Work Map schemas, the ledger-kind registry, the interview/frames/debrief/tutor HTTP contracts. Integrated baseline: commit `b444189`.
+- **Checks:** typecheck clean (7 projects + root); eslint clean.
+- **vitest:** 1229 passed, 1 todo, 89 files.
+- **e2e:** 13/13 in the agents' isolated runs.
+
+### P2 — Perception
+
+**Status: acceptance NOT met (live).**
+
+**Built.**
+- Core (`packages/perception`): change detector (64×36 diff + dHash, bbox) and an ordered single-in-flight coalescing queue with a stale-result applier.
+- Best-effort OCR PII redaction (vendored Tesseract, SHA-pinned `tessdata_fast`, served from our own origin).
+- Haiku extraction schema and prompt.
+- Evaluation harness with the plan's fixed thresholds.
+- Web: capture card (disclosed), frames route (epoch/off-record/frameSeq checks, atomic storage, `frame.received`), extraction worker (`vision` `screen.event`, `concept.proposed`), media route.
+- Recorded fixture: 617 captures; 52 rating changes and 42 committed outcomes, with DOM ground truth. The frames are kept out of git and verified by `frames.sha256`.
+- Tests: "stale responses never applied" is tested at the queue, the applier and the server worker.
+
+**Measured** (`docs/evidence/p2/eval-live.txt`, Haiku 4.5, one real-time pass):
+
+| Metric | Live | Threshold | Result |
+|---|---|---|---|
+| Critical field-change recall | 0.192 | ≥ 0.95 | FAIL |
+| Critical action recall | 0.262 | ≥ 0.95 | FAIL |
+| False critical rate | 0.432 | ≤ 0.05 | FAIL |
+| p95 frame→event | 8.9 s | ≤ 3 s | FAIL |
+| Non-critical F1 | 0.792 | reported | — |
+
+- Client OCR+blur in Chromium: p50 381 ms, p95 3.4 s.
+
+**Causes, with evidence.**
+1. A full-snapshot output on every frame makes each request slow (Haiku p50 5.6 s), so 254 of 311 changed frames were coalesced away.
+2. Case switches are misread as edits to read-only fields.
+3. Concept over-proposal.
+
+A tuning pass is in progress. **Thresholds are unchanged.**
+
+### P3 — Voice + gate
+
+**Status: simulation acceptance met; live runs pending.**
+
+**Built.**
+- Deterministic gate core: reducer, evaluator, controller, HUD model.
+- Browser voice loop (ElevenLabs React, token, `customLlmExtraBody`) and server question queue / `gate/authorize` / utterance capture.
+- Judge view: HUD, engineering view, ledger ticker, compliance strip.
+
+**Measured.**
+- 5 scripted runs: 0 interruptions; authorization latency 0–4 ms in simulation; property tests show no interruption and ≤250 ms.
+- Live (preflight): unauthorised turn silent for 8 s; authorised question first audio in 580–619 ms.
+- Control turns never become evidence (tests). Live, ElevenLabs does not echo control messages.
+
+**Pending.** 5 live typing/talking runs with real voice; first-audio p50/p95 over those runs.
+
+### P4 — Hypothesis engine
+
+**Status: core built and tested; the live 3-case acceptance run is pending.**
+
+**Built.**
+- Enumerator with a grouped prior (one unit per feature/direction/action; within a group, split ∝ exp(−λ·complexity)).
+- Posterior, surprise, EIG (mutual information equals information gain to 1e-9).
+- Constraint-valid counterfactuals; never asks what the screen answers.
+- Answer application, evidence-validated promotion, event-sourced rulebook, Sonnet LLM contracts.
+
+**Measured on the real training cases 1→2** (honest; not tuned to the demo script):
+- Weight: country risk 0.306, owner share + owner verified 0.275, customer status 0.148, relationship age 0.148.
+- Surprise: case 2 at 1.56–2.02 bits (no "contradiction" at the 3-bit default); case 3 (PEP) 5.41 bits, contradiction.
+- Best counterfactual: "If country risk were medium instead of high…" at 0.73–0.95 bits.
+
+**Gap.** Stated stop-rules ("never approve…") became `recommend` rules. Fix in progress (F1).
+
+### P5 — Debrief + Work Map
+
+**Status: acceptance met in tests and e2e; live voice path pending.**
+- Starting from 3 decisions and 2 confirmed rules:
+  - Z3 found 3 unresolved cells and 1 boundary → 4 witness questions (≤25 words each).
+  - Answers plus one "escalate to controller" → 3/3 decisions explained.
+  - Teach-back: Opus, given confirmed rules only (asserted in the prompt).
+  - Deliberate correction (`>25%` → `≥25%`): revision +1, diff animated, solver reran.
+  - Coverage **closed** on all 4 criteria. The sentence "No unresolved counterexample exists under the current feature model." is shown only then.
+- Work Map JSON and Procedure exports round-trip. `/mcp` `check_action` blocks with the expert quote.
+- Live: one real Opus teach-back (`docs/evidence/p5/teachback-live.txt`; 5.3 s, 57 words, prompt checks true).
+- Screenshots: `docs/evidence/p5/`.
+
+### P6 — Tutor
+
+**Status: acceptance met in tests; the real stop-rule flow depends on the F1 fix.**
+- **Interlock:** a property test blocked **132/132 violating commits** end to end, with a mutation check.
+- **Intervention order:** ledger order is `tutor.intent` → `tutor.intervention` → queued intervention question, all before any `interlock.check`; Save then returns 409 blocked.
+- **Unseen case:** NS-2026-0201 handled with predict → reveal → replay; mastery moves untested → assisted.
+- **Practice cases:** Z3 generated cases at 24.9 / 25 / 25.1% owner share.
+- **Oracle isolation:** no tutor module imports the oracle (static test).
+- The intervention screenshot currently uses intercepted responses; it is replaced by the real flow in F1.
+
+### P7 — Trust
+
+**Status: built and tested; the live voice-phrase check is pending a redeploy.**
+- **Off record:**
+  - Mutes the mic first, then stops capture, cancels queued uploads and advances the epoch and context version (the in-flight nonce is refused).
+  - Shows the red banner with the accurate claim, and fails closed.
+- **Stores while off record:**
+  - The server refuses capture entries and frames (409).
+  - The voice phrase triggers a deterministic `set_off_record` client tool from our wrapper. Only a `privacy.phrase_detected` marker is stored, never the words.
+- **PII:** best-effort OCR blur before upload.
+- **Sign-off:** typed/spoken expert confirmation per rule.
+
+### P8 — Exports
+
+**Status: built and tested; the live agent demo is pending real stop-rules.**
+- MCP `check_action` over Streamable HTTP, mounted at `/mcp` with a bearer token. It matches the interlock on 300 random cases.
+- Work Map JSON round-trip; ElevenLabs Procedure compile/parse round-trip plus publisher.
+- `agent-blocked` demo: the scripted run blocks with the quote; the live Claude run is pending.
