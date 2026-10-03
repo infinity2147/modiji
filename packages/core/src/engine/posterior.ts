@@ -1,4 +1,7 @@
+import { predicateNode } from "../logic/node";
+import { isVarRef, type Predicate } from "../schemas/predicate";
 import type { HypothesisSet } from "../schemas/rules";
+import { canonicalJson } from "./canonical";
 import type { EngineConfig } from "./config";
 import { enumerateCandidates, type CandidateSeed } from "./enumerate";
 import { actionIndex, likelihoodMatrix, predictedAction, recordLookup, type FamilyModel, type Observation } from "./model";
@@ -20,7 +23,49 @@ export type FamilyKnowledge = {
 
 export const EMPTY_KNOWLEDGE: FamilyKnowledge = { observations: [], statedCandidates: [], eliminatedIds: [] };
 
-/** Prior ∝ exp(−λ·complexity), × `statedRulePriorMultiplier` for expert statements; normalised. */
+/**
+ * Prior group of a candidate under `priorGrouping: "per_feature_direction"` (config.ts): the
+ * predicted action plus, per top-level condition, (feature, up|down) for a threshold comparison or
+ * the condition itself otherwise.
+ */
+export function priorGroupKey(c: Pick<CandidateSeed, "predicate" | "predictedAction">): string {
+  const node = predicateNode(c.predicate);
+  const parts = node.key === "and" ? node.args : [c.predicate];
+  return canonicalJson({ action: c.predictedAction, conditions: parts.map(conditionGroup).sort() });
+}
+
+function conditionGroup(p: Predicate): string {
+  const node = predicateNode(p);
+  if (node.key === "<" || node.key === "<=" || node.key === ">" || node.key === ">=") {
+    const [l, r] = node.args;
+    const up = node.key === ">" || node.key === ">=";
+    if (isVarRef(l) && typeof r === "number") return `${l.var}:${up ? "up" : "down"}`;
+    if (isVarRef(r) && typeof l === "number") return `${r.var}:${up ? "down" : "up"}`;
+  }
+  return canonicalJson(p);
+}
+
+/** Log prior weights (unnormalised) of `seeds` under the configured grouping; see `priorGrouping`. */
+function logPriors(seeds: readonly CandidateSeed[], config: EngineConfig): number[] {
+  const own = seeds.map((s) => -config.lambda * s.complexity);
+  const bonus = seeds.map((s) => (s.origin === "expert_statement" ? Math.log(config.statedRulePriorMultiplier) : 0));
+  if (config.priorGrouping === "per_hypothesis") return own.map((l, i) => l + (bonus[i] ?? 0));
+  const groups = new Map<string, number[]>();
+  seeds.forEach((s, i) => {
+    const key = priorGroupKey(s);
+    groups.set(key, [...(groups.get(key) ?? []), i]);
+  });
+  const out = new Array<number>(seeds.length).fill(0);
+  for (const members of groups.values()) {
+    const ls = members.map((i) => own[i] ?? 0);
+    const unit = Math.max(...ls); // exp(−λ·lowest complexity in the group)
+    const share = logSumExp(ls);
+    members.forEach((i, k) => (out[i] = unit + (ls[k] ?? 0) - share + (bonus[i] ?? 0)));
+  }
+  return out;
+}
+
+/** Prior ∝ exp(−λ·complexity) per hypothesis or per group (`priorGrouping`), × `statedRulePriorMultiplier` for expert statements; normalised. */
 export function priorSet(params: {
   id: string;
   model: FamilyModel;
@@ -30,8 +75,7 @@ export function priorSet(params: {
   config: EngineConfig;
 }): HypothesisSet {
   const { id, model, seeds, schemaVersion, normalizationVersion, config } = params;
-  const logw = seeds.map((s) => -config.lambda * s.complexity + (s.origin === "expert_statement" ? Math.log(config.statedRulePriorMultiplier) : 0));
-  const weights = normalizeLog(logw);
+  const weights = normalizeLog(logPriors(seeds, config));
   return {
     id,
     decisionFamily: model.family.id,
@@ -116,4 +160,9 @@ function normalizeLog(logw: readonly number[]): number[] {
   const w = logw.map((l) => Math.exp(l - max));
   const total = w.reduce((s, x) => s + x, 0);
   return w.map((x) => x / total);
+}
+
+function logSumExp(ls: readonly number[]): number {
+  const max = Math.max(...ls);
+  return max + Math.log(ls.reduce((s, l) => s + Math.exp(l - max), 0));
 }

@@ -72,7 +72,7 @@ function trainingCases(): KycCase[] {
       funds: {
         sourceOfFunds: "verified",
         description: "Grain export revenue; audited 2025 accounts and three years of bank statements reviewed.",
-        expectedMonthlyVolumeEur: 120_000,
+        expectedMonthlyVolumeEur: 18_000,
       },
       documents: [
         { name: "Company registry extract", status: "received" },

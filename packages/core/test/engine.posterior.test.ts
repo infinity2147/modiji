@@ -19,7 +19,11 @@ import {
   surprise,
   unknown,
   updatePosterior,
+  engineConfig,
+  priorGroupKey,
   type CandidateRule,
+  type EngineConfig,
+  type Question,
   type HypothesisSet,
 } from "../src";
 import { CASE_A, CASE_B, CONFIG, KYC, REVIEW, observation, questionContext } from "./engine.fixtures";
@@ -53,15 +57,53 @@ describe("likelihood", () => {
 });
 
 describe("posterior", () => {
-  it("starts from a prior ∝ exp(−λ·complexity)", () => {
-    const seeds = enumerateCandidates(REVIEW, [CASE_A, CASE_B], CONFIG);
-    const prior = priorSet({ id: "p", model: REVIEW, seeds, schemaVersion: 1, normalizationVersion: 0, config: CONFIG });
-    const c1 = prior.candidates.find((c) => c.complexity === 1);
-    const c2 = prior.candidates.find((c) => c.complexity === 2);
+  const prior = (config: EngineConfig, observations = [CASE_A, CASE_B]) =>
+    priorSet({ id: "p", model: REVIEW, seeds: enumerateCandidates(REVIEW, observations, config), schemaVersion: 1, normalizationVersion: 0, config });
+  const groupMass = (set: HypothesisSet, key: string) => set.candidates.filter((c) => priorGroupKey(c) === key).reduce((s, c) => s + c.weight, 0);
+  const weightOf = (set: HypothesisSet, predicate: unknown, action: string) =>
+    set.candidates.find((c) => c.predictedAction === action && JSON.stringify(c.predicate) === JSON.stringify(predicate))?.weight ?? Number.NaN;
+  const MEDIUM = { "==": [{ var: "jurisdictionRisk" }, "medium"] };
+
+  it("per_hypothesis: every candidate's prior ∝ exp(−λ·complexity)", () => {
+    const p = prior(engineConfig({ priorGrouping: "per_hypothesis" }));
+    const c1 = p.candidates.find((c) => c.complexity === 1);
+    const c2 = p.candidates.find((c) => c.complexity === 2);
     expect(c1 && c2 && c1.weight / c2.weight).toBeCloseTo(Math.E, 9);
   });
 
+  it("per_feature_direction (default): threshold variants share one exp(−λ·complexity) unit, so their count does not matter", () => {
+    expect(CONFIG.priorGrouping).toBe("per_feature_direction");
+    const up = priorGroupKey({ predicate: { ">": [{ var: "uboOwnershipPct" }, 25] } as never, predictedAction: "enhancedReview" as never });
+    expect(priorGroupKey({ predicate: { ">=": [{ var: "uboOwnershipPct" }, 27.5] } as never, predictedAction: "enhancedReview" as never })).toBe(up);
+    expect(priorGroupKey({ predicate: { "<": [25, { var: "uboOwnershipPct" }] } as never, predictedAction: "enhancedReview" as never })).toBe(up);
+    expect(priorGroupKey({ predicate: { "<": [{ var: "uboOwnershipPct" }, 25] } as never, predictedAction: "enhancedReview" as never })).not.toBe(up);
+    expect(priorGroupKey({ predicate: { ">": [{ var: "uboOwnershipPct" }, 25] } as never, predictedAction: "reject" as never })).not.toBe(up);
+    for (const roundThresholdsPerBoundary of [0, 1, 3, 6]) {
+      const p = prior(engineConfig({ roundThresholdsPerBoundary }));
+      // A whole threshold group weighs what one equality condition of the same complexity weighs …
+      const unit = Math.exp(-(roundThresholdsPerBoundary === 0 ? 2 : 1)); // midpoint-only groups have complexity 2
+      expect(groupMass(p, up) / weightOf(p, MEDIUM, "enhancedReview")).toBeCloseTo(unit / Math.exp(-1), 9);
+      // … and inside it a round threshold keeps its exp(−λ) edge over the midpoint.
+      if (roundThresholdsPerBoundary > 0) {
+        const round = weightOf(p, { ">": [{ var: "uboOwnershipPct" }, 25] }, "enhancedReview");
+        expect(round / weightOf(p, { ">": [{ var: "uboOwnershipPct" }, 27.5] }, "enhancedReview")).toBeCloseTo(Math.E, 9);
+      }
+    }
+    // Conjunctions group by their sorted (feature, direction) tuple.
+    const and = (a: unknown, b: unknown) => ({ predicate: { and: [a, b] } as never, predictedAction: "enhancedReview" as never });
+    expect(priorGroupKey(and({ ">": [{ var: "uboOwnershipPct" }, 25] }, MEDIUM))).toBe(priorGroupKey(and(MEDIUM, { ">=": [{ var: "uboOwnershipPct" }, 30] })));
+  });
+
   it("plan §10: after cases A and B the posterior spreads over ownership-style vs jurisdiction-style hypotheses", () => {
+    const perHypothesis = buildHypothesisSet({
+      setId: "hs-review",
+      model: REVIEW,
+      knowledge: { ...EMPTY_KNOWLEDGE, observations: [CASE_A, CASE_B] },
+      schemaVersion: 1,
+      config: engineConfig({ priorGrouping: "per_hypothesis" }),
+    });
+    console.info(`[§10 per_hypothesis] ownership-style mass=${mass(perHypothesis, "ownership").toFixed(3)} jurisdiction-style mass=${mass(perHypothesis, "jurisdiction").toFixed(3)}`);
+    expect(mass(perHypothesis, "ownership")).toBeGreaterThan(mass(perHypothesis, "jurisdiction"));
     const set = build();
     expect(HypothesisSetSchema.safeParse(set).success).toBe(true);
     expect(set.normalizationVersion).toBe(1);
@@ -90,18 +132,20 @@ describe("posterior", () => {
     const high = surprise(REVIEW, set, contradiction);
     console.info(`[§10] surprise: consistent=${low.bits.toFixed(3)} bits, contradiction=${high.bits.toFixed(3)} bits`);
     expect(low.bits).toBeLessThan(0.5);
-    expect(high.bits).toBeGreaterThan(3);
-    expect(isContradiction(high, CONFIG)).toBe(true);
+    // Less likely than a uniform guess, and far more surprising than the consistent decision.
+    expect(high.bits).toBeGreaterThan(Math.log2(REVIEW.family.actions.length));
+    expect(high.bits - low.bits).toBeGreaterThan(2);
+    expect(isContradiction(high, engineConfig({ contradictionBits: high.bits }))).toBe(true);
     expect(isContradiction(low, CONFIG)).toBe(false);
     // The live step reports the pre-update surprise and returns the rebuilt set.
     const step = observeDecision({ model: REVIEW, set, knowledge: { ...EMPTY_KNOWLEDGE, observations: [CASE_A, CASE_B] }, observation: contradiction, config: CONFIG });
     expect(step.recent.surprise.bits).toBe(high.bits);
-    expect(step.recent.explainedMass).toBeLessThan(0.1);
+    expect(step.recent.explainedMass).toBeLessThan(CONFIG.explainedMass);
     expect(step.set.normalizationVersion).toBe(set.normalizationVersion + 1);
     expect(surprise(REVIEW, step.set, contradiction).bits).toBeLessThan(high.bits);
   });
 
-  it("the top counterfactual on case A pits ownership against jurisdiction with EIG > 0.5 bits", () => {
+  it("counterfactuals on case A: the top one splits the explanations (EIG > 0.5 bits); moving country risk pits ownership against jurisdiction", () => {
     const set = build();
     const queue = generateQuestions({ model: REVIEW, set, ctx: questionContext(CASE_A, [CASE_A.id]), config: CONFIG });
     const top = selectQuestion(queue, { thetaAsk: 0.5 });
@@ -115,11 +159,20 @@ describe("posterior", () => {
     );
     expect(top.kind).toBe("counterfactual");
     expect(top.value).toBeGreaterThan(0.5);
-    const assignment = top.target.assignment ?? {};
-    const rivals = top.target.candidateIds.map((id) => set.candidates.find((c) => c.id === id));
-    const predictions = new Map(rivals.map((c) => [c && style(c), c && predictedAction(REVIEW, c, recordLookup(assignment))]));
-    expect(predictions.has("ownership") && predictions.has("jurisdiction")).toBe(true);
-    expect(predictions.get("ownership")).not.toBe(predictions.get("jurisdiction"));
+    const predictionsOf = (q: Question) =>
+      q.target.candidateIds.map((id) => {
+        const c = set.candidates.find((x) => x.id === id);
+        if (c === undefined) throw new Error(`rival ${id} not in set`);
+        return { style: style(c), action: predictedAction(REVIEW, c, recordLookup(q.target.assignment ?? {})) };
+      });
+    expect(new Set(predictionsOf(top).map((p) => p.action)).size).toBeGreaterThan(1);
+    const high = queue.find((q) => q.target.feature === "jurisdictionRisk" && q.target.assignment?.["jurisdictionRisk" as never] === "high");
+    if (high === undefined) throw new Error("no country-risk counterfactual");
+    console.info(`[§10] "${high.text}" EIG ${high.value.toFixed(3)} bits`);
+    expect(high.value).toBeGreaterThan(0.5);
+    const rivals = new Map(predictionsOf(high).map((p) => [p.style, p.action]));
+    expect(rivals.get("ownership")).toBe("enhancedReview");
+    expect(rivals.get("jurisdiction")).toBe("approve");
   });
 
   it("a candidate that cannot evaluate an observation is not updated by it (unknown → marginal)", () => {

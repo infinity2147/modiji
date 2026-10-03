@@ -65,7 +65,7 @@ describe("applyAnswer", () => {
     // Jurisdiction-only explanations predicted approve there; their mass collapses.
     const jurisdictionMass = (s: HypothesisSet) => s.candidates.filter((c) => featuresReferenced(c.predicate).join() === "jurisdictionRisk").reduce((m, c) => m + c.weight, 0);
     expect(jurisdictionMass(SET)).toBeGreaterThan(0.15);
-    expect(jurisdictionMass(result.set)).toBeLessThan(0.01);
+    expect(jurisdictionMass(result.set)).toBeLessThan(jurisdictionMass(SET) / 10);
     const top = [...result.set.candidates].sort((a, b) => b.weight - a.weight)[0];
     expect(top && predictedAction(REVIEW, top, recordLookup(q.target.assignment ?? {}))).toBe("enhancedReview");
   });

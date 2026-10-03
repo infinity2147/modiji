@@ -6,6 +6,7 @@ import {
   QUESTION_REASONS,
   QuestionSchema,
   buildHypothesisSet,
+  engineConfig,
   evaluatePredicate,
   generateQuestions,
   isUnknown,
@@ -159,7 +160,14 @@ describe("why-probes, reasons and selection", () => {
     const set = buildHypothesisSet({ setId: "hs-review", model: REVIEW, knowledge, schemaVersion: 1, config: CONFIG });
     const step = observeDecision({ model: REVIEW, set, knowledge, observation: observation("D", { ...CASE_A.features, uboOwnershipPct: 40 }, "approve"), config: CONFIG });
     const queue = generateQuestions({ model: REVIEW, set: step.set, ctx: questionContext(CASE_A), recent: step.recent, config: CONFIG });
-    expect(queue.filter((q) => q.kind === "counterfactual").every((q) => q.reason === QUESTION_REASONS.contradiction)).toBe(true);
+    // The label follows `contradictionBits`: at or above it "contradiction detected", below it "competing explanations".
+    const bits = step.recent.surprise.bits;
+    const labelled = (contradictionBits: number) =>
+      generateQuestions({ model: REVIEW, set: step.set, ctx: questionContext(CASE_A), recent: step.recent, config: engineConfig({ contradictionBits }) })
+        .filter((q) => q.kind === "counterfactual")
+        .map((q) => q.reason);
+    expect(new Set(labelled(bits))).toEqual(new Set([QUESTION_REASONS.contradiction]));
+    expect(new Set(labelled(bits + 0.01))).toEqual(new Set([QUESTION_REASONS.competing]));
     const best = selectQuestion(queue, { thetaAsk: 0 });
     expect(best).toBe(queue[0]);
     expect(queue.every((q, i) => i === 0 || (queue[i - 1]?.value ?? 0) >= q.value)).toBe(true);

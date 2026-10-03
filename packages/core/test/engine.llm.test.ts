@@ -29,7 +29,7 @@ import { CASE_A, CASE_B, CONFIG, KYC, REVIEW, questionContext } from "./engine.f
 const SCHEMAS = { LlmAnswerSchema, LlmConceptProposalSchema, LlmRephraseSchema };
 const SET = buildHypothesisSet({ setId: "hs-review", model: REVIEW, knowledge: { ...EMPTY_KNOWLEDGE, observations: [CASE_A, CASE_B] }, schemaVersion: 1, config: CONFIG });
 const QUEUE = generateQuestions({ model: REVIEW, set: SET, ctx: questionContext(CASE_A), config: CONFIG });
-const QUESTION = QUEUE.find((q) => q.target.feature === "jurisdictionRisk") as Question;
+const QUESTION = QUEUE.find((q) => q.target.feature === "jurisdictionRisk" && q.target.assignment?.["jurisdictionRisk" as never] === "high") as Question;
 const UTTERANCE = { id: "utt-9", text: "Still enhanced review. Honestly, anything over a quarter that isn't verified goes to enhanced review, whatever the country.", t0Ms: 90_000, t1Ms: 97_500 };
 
 /** Visits every node of a JSON schema. */

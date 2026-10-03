@@ -8,6 +8,21 @@ import { ActionIdSchema, SymbolIdSchema } from "../schemas/primitives";
 export const EngineConfigSchema = z.strictObject({
   /** Prior ∝ exp(−λ·complexity). */
   lambda: z.number().nonnegative().default(1),
+  /**
+   * What one exp(−λ·complexity) prior unit is given to.
+   * - "per_hypothesis": every candidate gets its own unit (the literal plan §7.3 form). A numeric
+   *   feature then gets prior mass in proportion to how many thresholds the enumerator happened to
+   *   produce for it (round numbers + midpoint, × `>`/`>=`), so it outweighs a single enum
+   *   condition by sheer count — an enumeration artifact, not evidence.
+   * - "per_feature_direction" (default): candidates that differ only in threshold values share one
+   *   unit. The group is (predicted action, sorted (feature, direction) of each ordering condition;
+   *   `>`/`>=` are "up", `<`/`<=` are "down"); equality/membership conditions stand for themselves,
+   *   and conjunctions group by their sorted tuple. The group's unit is exp(−λ·its lowest
+   *   complexity), split across its variants in proportion to exp(−λ·complexity) — evenly when they
+   *   are equally complex, while a round threshold keeps its edge over a midpoint. Every
+   *   hypothesis's prior is still of the exp(−λ·complexity) form; only the count artifact goes.
+   */
+  priorGrouping: z.enum(["per_hypothesis", "per_feature_direction"]).default("per_feature_direction"),
   /** ε in P(a|h) = 1−ε if h predicts a, else ε/(|A|−1). */
   expertNoisePrior: z.number().gt(0).lt(1).default(0.05),
   /** Largest conjunction the enumerator builds (3 is opt-in: the space grows quickly). */
