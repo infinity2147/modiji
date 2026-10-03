@@ -1,7 +1,7 @@
 import type { Question } from "../schemas/engine";
 import { GateAuthorizationSchema, type GateAuthorization } from "../schemas/gate";
 import { GateConfigSchema, type GateConfigInput } from "./config";
-import { evaluateGate, type GateEvaluation, type GateMode } from "./evaluate";
+import { CONDITION_KEYS, evaluateGate, type ConditionKey, type GateEvaluation, type GateMode } from "./evaluate";
 import { hudModel, type HudModel } from "./hud";
 import { GateInputSchema, initialGateState, reduceGate, type GateInput } from "./state";
 
@@ -26,12 +26,20 @@ export type LatencySample = {
   latencyMs: number;
 };
 
+/** The evaluation the gate authorized on: what the issuer records with the authorization (`gate.authorized`). */
+export type GateDecision = {
+  becameValidAt: number;
+  decidedAt: number;
+  /** Per-condition snapshot at the moment of the decision. */
+  conditions: Record<ConditionKey, boolean>;
+};
+
 export type GateControllerOptions = {
   cfg?: GateConfigInput;
   mode: GateMode;
   clock: GateClock;
   /** Mints the single-use authorization (the server's nonce store, directly or over HTTP). */
-  issue: (question: Question) => Promise<GateAuthorization> | GateAuthorization;
+  issue: (question: Question, decision: GateDecision) => Promise<GateAuthorization> | GateAuthorization;
   /** Trigger the agent turn, e.g. `sendUserMessage(formatControlMessage(authorization.nonce))`. */
   onAuthorize: (authorization: GateAuthorization, question: Question, sample: LatencySample) => void;
   /** Called whenever the HUD model changes. */
@@ -89,11 +97,15 @@ export function createGateController(opts: GateControllerOptions): GateControlle
     opts.onAuthorize(parsed.data, question, sample);
   }
 
-  function authorize(question: Question, becameValidAt: number, now: number): void {
+  function authorize(question: Question, becameValidAt: number, now: number, evaluation: GateEvaluation): void {
     state = reduceGate(state, { kind: "authorized", t: now, question, expiresAt: now + cfg.authorizationTtlMs }, cfg);
+    const conditions = Object.fromEntries(CONDITION_KEYS.map((k) => [k, evaluation.conditions[k].ok])) as Record<
+      ConditionKey,
+      boolean
+    >;
     let result: Promise<GateAuthorization> | GateAuthorization;
     try {
-      result = opts.issue(question);
+      result = opts.issue(question, { becameValidAt, decidedAt: now, conditions });
     } catch (error) {
       onError(error, question);
       return;
@@ -117,7 +129,7 @@ export function createGateController(opts: GateControllerOptions): GateControlle
     const now = clock.now();
     let evaluation = evaluateGate(state, now, mode, cfg);
     if (evaluation.decision === "authorize" && evaluation.question !== null && evaluation.becameValidAt !== null) {
-      authorize(evaluation.question, evaluation.becameValidAt, now);
+      authorize(evaluation.question, evaluation.becameValidAt, now, evaluation);
       evaluation = evaluateGate(state, now, mode, cfg);
     }
     const hud = hudModel(evaluation);

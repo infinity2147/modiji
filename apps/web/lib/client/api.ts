@@ -65,9 +65,10 @@ async function readBody(response: Response): Promise<unknown> {
   }
 }
 
-type RawResponse = { status: number; ok: boolean; body: unknown };
+export type RawResponse = { status: number; ok: boolean; body: unknown };
 
-async function send(fetchFn: FetchFn, url: string, init: RequestInit): Promise<RawResponse> {
+/** Sends a request; a transport failure becomes a `network` ApiError. Bodies are parsed but not validated. */
+export async function send(fetchFn: FetchFn, url: string, init: RequestInit): Promise<RawResponse> {
   let response: Response;
   try {
     response = await fetchFn(url, { ...init, headers: { Accept: "application/json", ...init.headers }, cache: "no-store" });
@@ -77,20 +78,20 @@ async function send(fetchFn: FetchFn, url: string, init: RequestInit): Promise<R
   return { status: response.status, ok: response.ok, body: await readBody(response) };
 }
 
-function refusal({ status, body }: RawResponse): ApiError {
+export function refusal({ status, body }: RawResponse): ApiError {
   const parsed = ApiErrorSchema.safeParse(body);
   if (parsed.success) return new ApiError("http", status, parsed.data.error, parsed.data.detail);
   return new ApiError("http", status, `http_${status}`);
 }
 
-function validated<S extends z.ZodType>(schema: S, raw: RawResponse): z.infer<S> {
+export function validated<S extends z.ZodType>(schema: S, raw: RawResponse): z.infer<S> {
   const parsed = schema.safeParse(raw.body);
   if (!parsed.success) throw new ApiError("invalid_response", raw.status, "schema_mismatch", parsed.error.issues[0]?.message);
   return parsed.data;
 }
 
 /** Sends a request and validates the success body with `schema`; non-2xx bodies are read as `ApiErrorSchema`. */
-async function requestJson<S extends z.ZodType>(
+export async function requestJson<S extends z.ZodType>(
   fetchFn: FetchFn,
   url: string,
   schema: S,
@@ -101,7 +102,7 @@ async function requestJson<S extends z.ZodType>(
   return validated(schema, raw);
 }
 
-function postJson(body: unknown): RequestInit {
+export function postJson(body: unknown): RequestInit {
   return { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) };
 }
 

@@ -89,7 +89,3 @@ export async function readLedger(fetchFn: FetchFn, sessionId: string): Promise<L
     after = last.sequence;
   }
 }
-
-export async function loadSessionState(fetchFn: FetchFn, sessionId: string): Promise<SessionState> {
-  return summariseLedger(await readLedger(fetchFn, sessionId));
-}

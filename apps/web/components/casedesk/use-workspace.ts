@@ -1,20 +1,28 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import type { ActionId, GuardrailResult } from "@vashistha/core";
 import type { KycCase } from "@vashistha/core/domains/kyc";
 import { ApiError, describeError, listCases, type FetchFn } from "@/lib/client/api";
 import { createDomEventEmitter, type DomChannelStatus, type DomEventEmitter } from "@/lib/client/dom-events";
 import { commit, save, type SaveOutcome, type SaveRequest } from "@/lib/client/save-flow";
-import { loadSessionState, type DecisionOverride, type DecisionRecord, type RiskRating } from "@/lib/client/session-state";
+import {
+  readLedger,
+  summariseLedger,
+  type DecisionOverride,
+  type DecisionRecord,
+  type RiskRating,
+} from "@/lib/client/session-state";
 import type { SessionRef } from "@/lib/client/session-url";
+import { privacyFromLedger, type PrivacyBase } from "@/lib/client/voice/privacy";
+import type { CaptureControl, GateSensors } from "@/lib/client/voice/use-interview";
 
 const browserFetch: FetchFn = (input, init) => fetch(input, init);
 
 export type LoadState =
   | { status: "loading" }
   | { status: "error"; message: string }
-  | { status: "ready"; cases: readonly KycCase[] };
+  | { status: "ready"; cases: readonly KycCase[]; privacy: PrivacyBase };
 
 export type Draft = { riskRating: RiskRating; outcome: ActionId | undefined };
 
@@ -47,9 +55,15 @@ export type Workspace = {
   resolvePrompt: (override: DecisionOverride) => void;
   dismissPrompt: () => void;
   channel: DomChannelStatus;
+  /** Off-record hooks for the DOM channel (plan §7.8). */
+  capture: CaptureControl;
 };
 
-export function useWorkspace(ref: SessionRef): Workspace {
+/**
+ * CaseDesk state and actions. `sensors` (filled in by the interview loop) hears the gate-relevant
+ * moments: a case opened, an edit, a committed decision.
+ */
+export function useWorkspace(ref: SessionRef, sensors: RefObject<GateSensors | null>): Workspace {
   const [load, setLoad] = useState<LoadState>({ status: "loading" });
   const [attempt, setAttempt] = useState(0);
   const [selectedId, setSelectedId] = useState<string>();
@@ -64,9 +78,11 @@ export function useWorkspace(ref: SessionRef): Workspace {
   useEffect(() => {
     let cancelled = false;
     setLoad({ status: "loading" });
-    Promise.all([listCases(browserFetch, ref.caseSet), loadSessionState(browserFetch, ref.sessionId)]).then(
-      ([{ cases }, session]) => {
+    Promise.all([listCases(browserFetch, ref.caseSet), readLedger(browserFetch, ref.sessionId)]).then(
+      ([{ cases }, entries]) => {
         if (cancelled) return;
+        const session = summariseLedger(entries);
+        const privacy = privacyFromLedger(entries);
         if (session.caseSet !== ref.caseSet || session.mode !== ref.mode) {
           setLoad({ status: "error", message: "This link's case set or mode does not match the recorded session." });
           return;
@@ -79,9 +95,11 @@ export function useWorkspace(ref: SessionRef): Workspace {
         });
         emitterRef.current = emitter;
         emitter.subscribe(setChannel);
+        // Reloaded while off the record: capture stays off until the reviewer resumes.
+        if (privacy.offRecord) emitter.suspend();
         setChannel(emitter.status());
         setDecisions(session.decisions);
-        setLoad({ status: "ready", cases });
+        setLoad({ status: "ready", cases, privacy });
         emitter.emit({ kind: "navigate" });
       },
       (error: unknown) => {
@@ -118,8 +136,9 @@ export function useWorkspace(ref: SessionRef): Workspace {
       setSelectedId(caseId);
       if (saveState.status === "error") setSaveState({ status: "idle" });
       emitterRef.current?.emit({ kind: "open_case", caseId });
+      sensors.current?.caseOpened();
     },
-    [selectedId, saveState.status],
+    [selectedId, saveState.status, sensors],
   );
 
   const setRiskRating = useCallback(
@@ -128,13 +147,17 @@ export function useWorkspace(ref: SessionRef): Workspace {
       if (from === rating) return;
       updateDraft(kycCase, { riskRating: rating });
       emitterRef.current?.emit({ kind: "field_change", caseId: kycCase.id, field: "riskRating", from, to: rating });
+      sensors.current?.edited();
     },
-    [draftFor, updateDraft],
+    [draftFor, updateDraft, sensors],
   );
 
   const setOutcome = useCallback(
-    (kycCase: KycCase, action: ActionId) => updateDraft(kycCase, { outcome: action }),
-    [updateDraft],
+    (kycCase: KycCase, action: ActionId) => {
+      updateDraft(kycCase, { outcome: action });
+      sensors.current?.edited();
+    },
+    [updateDraft, sensors],
   );
 
   /** Applies a save/commit outcome: record the decision, or raise the interlock prompt. */
@@ -145,10 +168,19 @@ export function useWorkspace(ref: SessionRef): Workspace {
       setLastCommitted(decision.caseId);
       setPrompt(undefined);
       emitterRef.current?.emit({ kind: "action", caseId: decision.caseId, action: decision.action });
+      sensors.current?.committed();
       return;
     }
     setPrompt({ kind: outcome.kind, request, checkId: outcome.checkId, result: outcome.result, submitting: false, error: undefined });
-  }, []);
+  }, [sensors]);
+
+  const capture = useMemo<CaptureControl>(
+    () => ({
+      suspend: () => emitterRef.current?.suspend(),
+      resume: (epoch) => emitterRef.current?.resume(epoch),
+    }),
+    [],
+  );
 
   const saveCase = useCallback(
     (kycCase: KycCase) => {
@@ -202,5 +234,6 @@ export function useWorkspace(ref: SessionRef): Workspace {
     resolvePrompt,
     dismissPrompt,
     channel,
+    capture,
   };
 }

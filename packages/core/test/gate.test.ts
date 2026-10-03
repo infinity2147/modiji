@@ -6,6 +6,7 @@ import {
   createGateController,
   evaluateGate,
   hudModel,
+  type GateDecision,
   type GateEvent,
   type GateMode,
   type LatencySample,
@@ -339,7 +340,10 @@ describe("createGateController", () => {
     contextVersion: 0,
   });
 
-  function setup(issue: (question: Question) => Promise<GateAuthorization> | GateAuthorization = authorization) {
+  function setup(
+    issue: (question: Question, decision: GateDecision) => Promise<GateAuthorization> | GateAuthorization = (question) =>
+      authorization(question),
+  ) {
     const clock = fakeClock();
     const authorized: { question: string; sample: LatencySample }[] = [];
     const huds: string[] = [];
@@ -373,6 +377,26 @@ describe("createGateController", () => {
     ]);
     clock.advanceTo(60_000);
     expect(authorized).toHaveLength(1);
+  });
+
+  it("passes issue the decision it authorized on: becameValidAt, decidedAt and every condition", () => {
+    const decisions: GateDecision[] = [];
+    const { clock, gate } = setup((question, decision) => {
+      decisions.push(decision);
+      return authorization(question);
+    });
+    gate.feed({ kind: "breakpoint", t: 0, at: true });
+    gate.feed({ kind: "typing", t: 200 });
+    gate.feed(queue(300, q("q1")));
+    clock.advanceTo(1700);
+    expect(decisions).toEqual([
+      {
+        becameValidAt: 1700,
+        decidedAt: 1700,
+        conditions: Object.fromEntries(CONDITION_KEYS.map((k) => [k, true])),
+      },
+    ]);
+    expect(Object.keys(decisions[0]?.conditions ?? {}).sort()).toEqual([...CONDITION_KEYS].sort());
   });
 
   it("holds the floor until the agent has spoken, then asks the next question after the answer window", () => {

@@ -24,7 +24,7 @@ export function TopBar({ session }: { session?: SessionRef | undefined }) {
       <div className="ml-auto flex items-center gap-3 text-xs">
         <p className="flex items-center gap-1.5 text-slate-400">
           <Eye aria-hidden className="size-3.5" />
-          Sensing: DOM events (this app) — disclosed
+          Sensing (disclosed): DOM events · typing &amp; scroll timing · microphone only when voice is on
         </p>
         {session && (
           <>

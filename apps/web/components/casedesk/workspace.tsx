@@ -1,28 +1,44 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { ConversationProvider } from "@elevenlabs/react";
 import { AlertCircle, FolderOpen, RotateCw } from "lucide-react";
+import { attachActivitySensors } from "@/lib/client/gate/activity";
+import { PrivacyContext, useInterviewLoop, type GateSensors } from "@/lib/client/voice/use-interview";
 import type { DomChannelStatus } from "@/lib/client/dom-events";
 import { describeError } from "@/lib/client/api";
 import type { SessionRef } from "@/lib/client/session-url";
 import { Alert, AlertAction, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ScreenCaptureCard } from "@/components/capture/screen-capture";
+import { JudgeView } from "@/components/judge/judge-view";
+import { OffRecordBanner } from "@/components/voice/off-record";
+import { VoicePanel } from "@/components/voice/voice-panel";
 import { CaseDetail } from "./case-detail";
 import { CaseQueue } from "./case-queue";
 import { InterlockDialog } from "./interlock-dialog";
 import { ReviewPanel } from "./review-panel";
 import { useWorkspace } from "./use-workspace";
 
+function channelText(channel: DomChannelStatus): string {
+  switch (channel.state) {
+    case "idle":
+      return "All DOM events delivered";
+    case "sending":
+      return `Sending ${channel.pending} DOM event${channel.pending === 1 ? "" : "s"}…`;
+    case "retryable_error":
+      return `${channel.pending} DOM event${channel.pending === 1 ? "" : "s"} waiting — delivery retries on the next action`;
+    case "paused":
+      return "DOM event capture paused — off the record";
+    case "stopped":
+      return "DOM event capture stopped";
+  }
+}
+
 function ChannelStatus({ channel }: { channel: DomChannelStatus }) {
-  const text =
-    channel.state === "idle"
-      ? "All DOM events delivered"
-      : channel.state === "sending"
-        ? `Sending ${channel.pending} DOM event${channel.pending === 1 ? "" : "s"}…`
-        : channel.state === "retryable_error"
-          ? `${channel.pending} DOM event${channel.pending === 1 ? "" : "s"} waiting — delivery retries on the next action`
-          : "DOM event capture stopped";
+  const text = channelText(channel);
   return (
     <p role="status" aria-live="polite" className="px-1 text-[11px] text-muted-foreground">
       {text}
@@ -63,12 +79,47 @@ function LoadingQueue() {
 }
 
 /**
- * The CaseDesk working view: queue | case file | review. The grid keeps a `strip` row under the
- * three columns for the later event ticker / compliance strip; nothing is rendered there yet.
+ * The CaseDesk working view: queue | case file | review (+ voice panel), with the judge view (gate
+ * HUD, event ticker, compliance strip) in the full-width row underneath. The voice conversation lives
+ * in `ConversationProvider`; everything else works without it.
  */
 export function Workspace({ session }: { session: SessionRef }) {
-  const ws = useWorkspace(session);
+  return (
+    <ConversationProvider>
+      <WorkspaceBody session={session} />
+    </ConversationProvider>
+  );
+}
+
+function WorkspaceBody({ session }: { session: SessionRef }) {
+  const sensors = useRef<GateSensors | null>(null);
+  const ws = useWorkspace(session, sensors);
+  const [screenShared, setScreenShared] = useState(false);
+  const loop = useInterviewLoop({
+    sessionId: session.sessionId,
+    mode: session.mode,
+    privacyInit: ws.load.status === "ready" ? ws.load.privacy : undefined,
+    capture: ws.capture,
+    // Reported by the Screen capture card (components/capture): true only while frames are being captured.
+    screenShared,
+  });
+  const caseArea = useRef<HTMLDivElement>(null);
+  const loopSensors = loop.sensors;
+  useEffect(() => {
+    sensors.current = loopSensors;
+  });
+  const sensing = ws.load.status === "ready";
+  useEffect(() => {
+    const root = caseArea.current;
+    if (!root || !sensing) return;
+    return attachActivitySensors(root, {
+      typing: () => sensors.current?.typing(),
+      screenMotion: () => sensors.current?.screenMotion(),
+    });
+  }, [sensing]);
+
   const stopped = ws.channel.state === "stopped";
+  const offRecord = loop.privacyState?.offRecord ?? false;
 
   if (ws.load.status === "error") {
     return (
@@ -93,9 +144,10 @@ export function Workspace({ session }: { session: SessionRef }) {
 
   const selected = ws.selectedCase;
   return (
-    <>
+    <PrivacyContext value={loop.privacy}>
+      <OffRecordBanner state={loop.privacyState} />
       <ChannelStopped channel={ws.channel} />
-      <div className="grid min-h-0 flex-1 grid-cols-[18rem_minmax(0,1fr)_20rem] grid-rows-[minmax(0,1fr)_auto] [grid-template-areas:'queue_detail_review'_'strip_strip_strip'] 2xl:grid-cols-[20rem_minmax(0,1fr)_22rem]">
+      <div ref={caseArea} className="grid min-h-0 flex-1 grid-cols-[18rem_minmax(0,1fr)_20rem] grid-rows-[minmax(0,1fr)_auto] [grid-template-areas:'queue_detail_review'_'strip_strip_strip'] 2xl:grid-cols-[20rem_minmax(0,1fr)_22rem]">
         <div className="flex min-h-0 flex-col [grid-area:queue]">
           {ws.load.status === "ready" ? (
             <CaseQueue
@@ -125,7 +177,8 @@ export function Workspace({ session }: { session: SessionRef }) {
           )}
         </main>
 
-        <div className="grid min-h-0 content-start gap-2 overflow-y-auto border-l bg-muted/30 p-3 [grid-area:review]">
+        <div className="flex min-h-0 flex-col gap-2 overflow-y-auto border-l bg-muted/30 p-3 *:shrink-0 [grid-area:review]">
+          <VoicePanel loop={loop} />
           {selected && (
             <ReviewPanel
               kycCase={selected}
@@ -133,16 +186,21 @@ export function Workspace({ session }: { session: SessionRef }) {
               decision={ws.decisions.get(selected.id)}
               fresh={ws.lastCommitted === selected.id}
               saveState={ws.saveState}
-              locked={stopped}
+              locked={stopped || offRecord}
               onRiskRating={(rating) => ws.setRiskRating(selected, rating)}
               onOutcome={(action) => ws.setOutcome(selected, action)}
               onSave={() => ws.saveCase(selected)}
             />
           )}
           {ws.load.status === "ready" && <ChannelStatus channel={ws.channel} />}
+          {ws.load.status === "ready" && <ScreenCaptureCard sessionId={session.sessionId} cases={ws.load.cases} onSharingChange={setScreenShared} />}
+        </div>
+
+        <div className="min-h-0 [grid-area:strip]">
+          <JudgeView sessionId={session.sessionId} loop={loop} />
         </div>
       </div>
       <InterlockDialog prompt={ws.prompt} onResolve={ws.resolvePrompt} onDismiss={ws.dismissPrompt} />
-    </>
+    </PrivacyContext>
   );
 }
