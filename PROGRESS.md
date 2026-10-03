@@ -154,3 +154,31 @@ API facts come from `docs/api-notes.md`, not `plan.md` §15.
 5. **Unverified until a real build runs:** the Docker image (no Docker here), and the `setpriv` drop to the `node` user on a root-owned Railway volume.
 6. **Haiku 4.5 retirement:** not sooner than 15 Oct 2026 (carried from P0a).
 7. **`CHANGES.md` is still missing.**
+
+---
+
+## P1 — CaseDesk
+
+**Started:** 2026-10-04
+
+**Goal.** Build the domain-pluggable back-office sandbox at `/sandbox` on the D1 domain, "Northstar Bank Synthetic Review Policy" (synthetic KYC: fictional bank, jurisdictions and thresholds).
+- **Domain split:** a browser-safe public config, plus a hidden-policy oracle that is server- and bench-only.
+- **Cases:** a deterministic case generator with the demo sets (training, held-out) and bench cases.
+- **DOM channel:** labelled `source: "dom"` screen events go to the ledger.
+- **Save interlock:** Save is wired to a deterministic `checkAction` over the confirmed rulebook. The rulebook is empty until P5, but the evaluation is real code, not a stub.
+
+**Files.**
+- `packages/core/src/domains/kyc/`: `domain.public.ts`, `case.ts`, generator and demo sets, `domain.oracle.server.ts`.
+- `packages/core/src/rules/check-action.ts` and `packages/core/src/domain/values.ts`.
+- `apps/web/lib/contracts/casedesk.ts`
+- `apps/web/app/api/{sessions,cases,interlock}`
+- `apps/web/app/sandbox/**`
+- `apps/web/e2e/**` (Playwright)
+
+**Acceptance (plan §11 P1).**
+- Three cases can be processed by hand.
+- Playwright smoke test passes, with screenshots.
+
+Also required:
+- The oracle-not-in-bundle test now covers a real oracle.
+- The oracle marker is wired into the model-prompt guard.
