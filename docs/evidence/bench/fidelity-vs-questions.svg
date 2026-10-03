@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="500" viewBox="0 0 880 500" role="img" aria-labelledby="t d">
+<title id="t">Behavioural fidelity vs number of expert questions</title>
+<desc id="d">Simulated expert (NSRP-1 oracle) · mean ± 1 s.d. over 5 seeds · 500 held-out cases</desc>
+<style>
+    svg { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+    .bg { fill: #fcfcfb; }
+    .title { fill: #0b0b0b; font-size: 17px; font-weight: 600; }
+    .subtitle, .legend, .label { fill: #52514e; font-size: 12.5px; }
+    .tick { fill: #52514e; font-size: 11.5px; font-variant-numeric: tabular-nums; }
+    .grid { stroke: #e4e3df; stroke-width: 1; }
+    .axis { stroke: #8a8984; stroke-width: 1; }
+    .line { fill: none; stroke-width: 2; }
+    .err { fill: none; stroke-width: 1.25; opacity: 0.7; }
+    .ref { stroke-dasharray: 6 4; }
+    .series path:not(.line):not(.err), .series rect, .series circle { stroke: #fcfcfb; stroke-width: 1.5; }
+    .sA .line, .sA .err { stroke: #2a78d6; } .sA circle, .sA rect, .sA path:not(.line):not(.err) { fill: #2a78d6; }
+    .sB .line, .sB .err { stroke: #eb6834; } .sB circle, .sB rect, .sB path:not(.line):not(.err) { fill: #eb6834; }
+    .sC .line, .sC .err { stroke: #1baf7a; } .sC circle, .sC rect, .sC path:not(.line):not(.err) { fill: #1baf7a; }
+    .sD .line, .sD .err { stroke: #eda100; } .sD circle, .sD rect, .sD path:not(.line):not(.err) { fill: #eda100; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #1a1a19; }
+      .title { fill: #ffffff; }
+      .subtitle, .legend, .label, .tick { fill: #c3c2b7; }
+      .grid { stroke: #34332f; }
+      .series path:not(.line):not(.err), .series rect, .series circle { stroke: #1a1a19; }
+      .sA .line, .sA .err { stroke: #3987e5; } .sA circle, .sA rect, .sA path:not(.line):not(.err) { fill: #3987e5; }
+      .sB .line, .sB .err { stroke: #d95926; } .sB circle, .sB rect, .sB path:not(.line):not(.err) { fill: #d95926; }
+      .sC .line, .sC .err { stroke: #199e70; } .sC circle, .sC rect, .sC path:not(.line):not(.err) { fill: #199e70; }
+      .sD .line, .sD .err { stroke: #c98500; } .sD circle, .sD rect, .sD path:not(.line):not(.err) { fill: #c98500; }
+    }
+</style>
+<rect class="bg" width="880" height="500"/>
+<text class="title" x="72" y="30">Behavioural fidelity vs number of expert questions</text>
+<text class="subtitle" x="72" y="52">Simulated expert (NSRP-1 oracle) · mean ± 1 s.d. over 5 seeds · 500 held-out cases</text>
+<line class="grid" x1="72" x2="610" y1="436" y2="436"/>
+<text class="tick" x="62" y="440" text-anchor="end">0</text>
+<line class="grid" x1="72" x2="610" y1="364.4" y2="364.4"/>
+<text class="tick" x="62" y="368.4" text-anchor="end">0.25</text>
+<line class="grid" x1="72" x2="610" y1="292.8" y2="292.8"/>
+<text class="tick" x="62" y="296.8" text-anchor="end">0.5</text>
+<line class="grid" x1="72" x2="610" y1="221.2" y2="221.2"/>
+<text class="tick" x="62" y="225.2" text-anchor="end">0.75</text>
+<line class="grid" x1="72" x2="610" y1="149.6" y2="149.6"/>
+<text class="tick" x="62" y="153.6" text-anchor="end">1</text>
+<line class="grid" x1="72" x2="610" y1="78" y2="78"/>
+<text class="tick" x="62" y="82" text-anchor="end">1.25</text>
+<line class="axis" x1="72" x2="72" y1="436" y2="441"/>
+<text class="tick" x="72" y="456" text-anchor="middle">0</text>
+<line class="axis" x1="179.6" x2="179.6" y1="436" y2="441"/>
+<text class="tick" x="179.6" y="456" text-anchor="middle">5</text>
+<line class="axis" x1="287.2" x2="287.2" y1="436" y2="441"/>
+<text class="tick" x="287.2" y="456" text-anchor="middle">10</text>
+<line class="axis" x1="394.8" x2="394.8" y1="436" y2="441"/>
+<text class="tick" x="394.8" y="456" text-anchor="middle">15</text>
+<line class="axis" x1="502.4" x2="502.4" y1="436" y2="441"/>
+<text class="tick" x="502.4" y="456" text-anchor="middle">20</text>
+<line class="axis" x1="610" x2="610" y1="436" y2="441"/>
+<text class="tick" x="610" y="456" text-anchor="middle">25</text>
+<line class="axis" x1="72" x2="610" y1="436" y2="436"/>
+<text class="label" x="341" y="482" text-anchor="middle">Expert questions asked (mean per episode)</text>
+<text class="label" transform="translate(20 257) rotate(-90)" text-anchor="middle">Fidelity (agreement with oracle)</text>
+<g class="series sA" data-strategy="A"><title>A · record-only: 0.63 ± 0.04 at every budget (no questions)</title><path class="line ref" d="M72 254.65H610"/><circle cx="72" cy="254.65" r="5"/></g>
+<g class="series sB" data-strategy="B"><path class="line" d="M72 254.65L115.04 244.11L158.08 212.72L201.12 199.78L244.16 186.03L330.24 172.97L416.32 164.15L588.48 164.15"/><path class="err" d="M72 266.39V242.92M68 266.39H76M68 242.92H76"/><path class="err" d="M115.04 266.88V221.34M111.04 266.88H119.04M111.04 221.34H119.04"/><path class="err" d="M158.08 224.93V200.52M154.08 224.93H162.08M154.08 200.52H162.08"/><path class="err" d="M201.12 209.31V190.25M197.12 209.31H205.12M197.12 190.25H205.12"/><path class="err" d="M244.16 195.18V176.88M240.16 195.18H248.16M240.16 176.88H248.16"/><path class="err" d="M330.24 194.55V151.4M326.24 194.55H334.24M326.24 151.4H334.24"/><path class="err" d="M416.32 184.08V144.22M412.32 184.08H420.32M412.32 144.22H420.32"/><path class="err" d="M588.48 184.08V144.22M584.48 184.08H592.48M584.48 144.22H592.48"/><g><title>B · generic why — budget 0: 0.0 questions, 0.63 ± 0.04</title><rect x="67.5" y="250.15" width="9" height="9"/></g><g><title>B · generic why — budget 2: 2.0 questions, 0.67 ± 0.08</title><rect x="110.54" y="239.61" width="9" height="9"/></g><g><title>B · generic why — budget 4: 4.0 questions, 0.78 ± 0.04</title><rect x="153.58" y="208.22" width="9" height="9"/></g><g><title>B · generic why — budget 6: 6.0 questions, 0.82 ± 0.03</title><rect x="196.62" y="195.28" width="9" height="9"/></g><g><title>B · generic why — budget 8: 8.0 questions, 0.87 ± 0.03</title><rect x="239.66" y="181.53" width="9" height="9"/></g><g><title>B · generic why — budget 12: 12.0 questions, 0.92 ± 0.08</title><rect x="325.74" y="168.47" width="9" height="9"/></g><g><title>B · generic why — budget 16: 16.0 questions, 0.95 ± 0.07</title><rect x="411.82" y="159.65" width="9" height="9"/></g><g><title>B · generic why — budget 24: 24.0 questions, 0.95 ± 0.07</title><rect x="583.98" y="159.65" width="9" height="9"/></g></g>
+<g class="series sC" data-strategy="C"><path class="line" d="M72 254.65L115.04 244.11L158.08 212.72L201.12 177.44L244.16 177.44L330.24 166.78L416.32 166.78L588.48 166.78"/><path class="err" d="M72 266.39V242.92M68 266.39H76M68 242.92H76"/><path class="err" d="M115.04 266.88V221.34M111.04 266.88H119.04M111.04 221.34H119.04"/><path class="err" d="M158.08 224.93V200.52M154.08 224.93H162.08M154.08 200.52H162.08"/><path class="err" d="M201.12 190.81V164.06M197.12 190.81H205.12M197.12 164.06H205.12"/><path class="err" d="M244.16 190.81V164.06M240.16 190.81H248.16M240.16 164.06H248.16"/><path class="err" d="M330.24 171.29V162.27M326.24 171.29H334.24M326.24 162.27H334.24"/><path class="err" d="M416.32 171.29V162.27M412.32 171.29H420.32M412.32 162.27H420.32"/><path class="err" d="M588.48 171.29V162.27M584.48 171.29H592.48M584.48 162.27H592.48"/><g><title>C · ACTA templates — budget 0: 0.0 questions, 0.63 ± 0.04</title><path d="M72 248.65L78 259.15L66 259.15Z"/></g><g><title>C · ACTA templates — budget 2: 2.0 questions, 0.67 ± 0.08</title><path d="M115.04 238.11L121.04 248.61L109.04 248.61Z"/></g><g><title>C · ACTA templates — budget 4: 4.0 questions, 0.78 ± 0.04</title><path d="M158.08 206.72L164.08 217.22L152.08 217.22Z"/></g><g><title>C · ACTA templates — budget 6: 6.0 questions, 0.9 ± 0.05</title><path d="M201.12 171.44L207.12 181.94L195.12 181.94Z"/></g><g><title>C · ACTA templates — budget 8: 8.0 questions, 0.9 ± 0.05</title><path d="M244.16 171.44L250.16 181.94L238.16 181.94Z"/></g><g><title>C · ACTA templates — budget 12: 12.0 questions, 0.94 ± 0.02</title><path d="M330.24 160.78L336.24 171.28L324.24 171.28Z"/></g><g><title>C · ACTA templates — budget 16: 16.0 questions, 0.94 ± 0.02</title><path d="M416.32 160.78L422.32 171.28L410.32 171.28Z"/></g><g><title>C · ACTA templates — budget 24: 24.0 questions, 0.94 ± 0.02</title><path d="M588.48 160.78L594.48 171.28L582.48 171.28Z"/></g></g>
+<g class="series sD" data-strategy="D"><path class="line" d="M72 254.65L115.04 244.11L158.08 212.72L201.12 179.16L244.16 152.35L325.94 152.35L347.46 152.35L347.46 152.35"/><path class="err" d="M72 266.39V242.92M68 266.39H76M68 242.92H76"/><path class="err" d="M115.04 266.88V221.34M111.04 266.88H119.04M111.04 221.34H119.04"/><path class="err" d="M158.08 224.93V200.52M154.08 224.93H162.08M154.08 200.52H162.08"/><path class="err" d="M201.12 190.94V167.37M197.12 190.94H205.12M197.12 167.37H205.12"/><path class="err" d="M244.16 158.5V146.2M240.16 158.5H248.16M240.16 146.2H248.16"/><path class="err" d="M325.94 158.5V146.2M321.94 158.5H329.94M321.94 146.2H329.94"/><path class="err" d="M347.46 158.5V146.2M343.46 158.5H351.46M343.46 146.2H351.46"/><path class="err" d="M347.46 158.5V146.2M343.46 158.5H351.46M343.46 146.2H351.46"/><g><title>D · ours (surprise + EIG + Z3) — budget 0: 0.0 questions, 0.63 ± 0.04</title><path d="M72 248.15L78.5 254.65L72 261.15L65.5 254.65Z"/></g><g><title>D · ours (surprise + EIG + Z3) — budget 2: 2.0 questions, 0.67 ± 0.08</title><path d="M115.04 237.61L121.54 244.11L115.04 250.61L108.54 244.11Z"/></g><g><title>D · ours (surprise + EIG + Z3) — budget 4: 4.0 questions, 0.78 ± 0.04</title><path d="M158.08 206.22L164.58 212.72L158.08 219.22L151.58 212.72Z"/></g><g><title>D · ours (surprise + EIG + Z3) — budget 6: 6.0 questions, 0.9 ± 0.04</title><path d="M201.12 172.66L207.62 179.16L201.12 185.66L194.62 179.16Z"/></g><g><title>D · ours (surprise + EIG + Z3) — budget 8: 8.0 questions, 0.99 ± 0.02</title><path d="M244.16 145.85L250.66 152.35L244.16 158.85L237.66 152.35Z"/></g><g><title>D · ours (surprise + EIG + Z3) — budget 12: 11.8 questions, 0.99 ± 0.02</title><path d="M325.94 145.85L332.44 152.35L325.94 158.85L319.44 152.35Z"/></g><g><title>D · ours (surprise + EIG + Z3) — budget 16: 12.8 questions, 0.99 ± 0.02</title><path d="M347.46 145.85L353.96 152.35L347.46 158.85L340.96 152.35Z"/></g><g><title>D · ours (surprise + EIG + Z3) — budget 24: 12.8 questions, 0.99 ± 0.02</title><path d="M347.46 145.85L353.96 152.35L347.46 158.85L340.96 152.35Z"/></g></g>
+<g class="series sA"><circle cx="634" cy="86" r="5"/><line class="line ref" x1="622" x2="646" y1="86" y2="86"/></g><text class="legend" x="654" y="90">A · record-only (asks nothing)</text><g class="series sB"><rect x="629.5" y="107.5" width="9" height="9"/><line class="line" x1="622" x2="646" y1="112" y2="112"/></g><text class="legend" x="654" y="116">B · generic why</text><g class="series sC"><path d="M634 132L640 142.5L628 142.5Z"/><line class="line" x1="622" x2="646" y1="138" y2="138"/></g><text class="legend" x="654" y="142">C · ACTA templates</text><g class="series sD"><path d="M634 157.5L640.5 164L634 170.5L627.5 164Z"/><line class="line" x1="622" x2="646" y1="164" y2="164"/></g><text class="legend" x="654" y="168">D · ours (surprise + EIG + Z3)</text>
+</svg>

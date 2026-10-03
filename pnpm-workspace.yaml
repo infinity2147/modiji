@@ -1,6 +1,7 @@
 packages:
   - apps/*
   - packages/*
+  - bench
 allowBuilds:
   '@railway/cli': true
   better-sqlite3: true

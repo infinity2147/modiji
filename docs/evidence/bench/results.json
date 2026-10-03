@@ -1,0 +1,6152 @@
+{
+  "benchmark": "Apprentice-Bench",
+  "simulatedExpert": true,
+  "config": {
+    "seeds": [
+      1001,
+      1002,
+      1003,
+      1004,
+      1005
+    ],
+    "budgets": [
+      0,
+      2,
+      4,
+      6,
+      8,
+      12,
+      16,
+      24
+    ],
+    "trainingSize": 24,
+    "heldoutSize": 500,
+    "expert": {
+      "noise": 0,
+      "vagueness": 0
+    },
+    "robustness": [
+      {
+        "budget": 12,
+        "expert": {
+          "noise": 0,
+          "vagueness": 0.25
+        }
+      },
+      {
+        "budget": 12,
+        "expert": {
+          "noise": 0,
+          "vagueness": 0.5
+        }
+      },
+      {
+        "budget": 12,
+        "expert": {
+          "noise": 0.1,
+          "vagueness": 0
+        }
+      }
+    ],
+    "thetaAsk": 0.5
+  },
+  "engine": {
+    "lambda": 1,
+    "expertNoisePrior": 0.05,
+    "maxConditions": 2,
+    "maxCandidates": 2000,
+    "roundThresholdsPerBoundary": 1
+  },
+  "oracle": {
+    "policy": "NSRP-1",
+    "family": "reviewOutcome",
+    "rules": 9,
+    "simpleRules": [
+      "nsrp.sanctions.no_approve",
+      "nsrp.sanctions.reject",
+      "nsrp.pep.approval",
+      "nsrp.pep.escalate",
+      "nsrp.funds.missing",
+      "nsrp.highrisk.edd",
+      "nsrp.media.edd"
+    ]
+  },
+  "rows": [
+    {
+      "strategy": "A",
+      "seed": 1001,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 0,
+      "metrics": {
+        "fidelity": 0.604,
+        "unsafeFnRate": 0.11688311688311688,
+        "guardrailRecall": 0.9153846153846154,
+        "rulesRecovered": 1,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 6
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1001,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 2,
+      "metrics": {
+        "fidelity": 0.604,
+        "unsafeFnRate": 0.11688311688311688,
+        "guardrailRecall": 0.9153846153846154,
+        "rulesRecovered": 1,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 6
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1001,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 4,
+      "metrics": {
+        "fidelity": 0.604,
+        "unsafeFnRate": 0.11688311688311688,
+        "guardrailRecall": 0.9153846153846154,
+        "rulesRecovered": 1,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 6
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1001,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 6,
+      "metrics": {
+        "fidelity": 0.604,
+        "unsafeFnRate": 0.11688311688311688,
+        "guardrailRecall": 0.9153846153846154,
+        "rulesRecovered": 1,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 6
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1001,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 8,
+      "metrics": {
+        "fidelity": 0.604,
+        "unsafeFnRate": 0.11688311688311688,
+        "guardrailRecall": 0.9153846153846154,
+        "rulesRecovered": 1,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 6
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1001,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.604,
+        "unsafeFnRate": 0.11688311688311688,
+        "guardrailRecall": 0.9153846153846154,
+        "rulesRecovered": 1,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 6
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1001,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 16,
+      "metrics": {
+        "fidelity": 0.604,
+        "unsafeFnRate": 0.11688311688311688,
+        "guardrailRecall": 0.9153846153846154,
+        "rulesRecovered": 1,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 6
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1001,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 24,
+      "metrics": {
+        "fidelity": 0.604,
+        "unsafeFnRate": 0.11688311688311688,
+        "guardrailRecall": 0.9153846153846154,
+        "rulesRecovered": 1,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 6
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1002,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 0,
+      "metrics": {
+        "fidelity": 0.676,
+        "unsafeFnRate": 0.089058524173028,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 8
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1002,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 2,
+      "metrics": {
+        "fidelity": 0.676,
+        "unsafeFnRate": 0.089058524173028,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 8
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1002,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 4,
+      "metrics": {
+        "fidelity": 0.676,
+        "unsafeFnRate": 0.089058524173028,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 8
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1002,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 6,
+      "metrics": {
+        "fidelity": 0.676,
+        "unsafeFnRate": 0.089058524173028,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 8
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1002,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 8,
+      "metrics": {
+        "fidelity": 0.676,
+        "unsafeFnRate": 0.089058524173028,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 8
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1002,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.676,
+        "unsafeFnRate": 0.089058524173028,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 8
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1002,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 16,
+      "metrics": {
+        "fidelity": 0.676,
+        "unsafeFnRate": 0.089058524173028,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 8
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1002,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 24,
+      "metrics": {
+        "fidelity": 0.676,
+        "unsafeFnRate": 0.089058524173028,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 8
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1003,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 0,
+      "metrics": {
+        "fidelity": 0.68,
+        "unsafeFnRate": 0.0810126582278481,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 5
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1003,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 2,
+      "metrics": {
+        "fidelity": 0.68,
+        "unsafeFnRate": 0.0810126582278481,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 5
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1003,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 4,
+      "metrics": {
+        "fidelity": 0.68,
+        "unsafeFnRate": 0.0810126582278481,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 5
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1003,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 6,
+      "metrics": {
+        "fidelity": 0.68,
+        "unsafeFnRate": 0.0810126582278481,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 5
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1003,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 8,
+      "metrics": {
+        "fidelity": 0.68,
+        "unsafeFnRate": 0.0810126582278481,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 5
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1003,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.68,
+        "unsafeFnRate": 0.0810126582278481,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 5
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1003,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 16,
+      "metrics": {
+        "fidelity": 0.68,
+        "unsafeFnRate": 0.0810126582278481,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 5
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1003,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 24,
+      "metrics": {
+        "fidelity": 0.68,
+        "unsafeFnRate": 0.0810126582278481,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 5
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1004,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 0,
+      "metrics": {
+        "fidelity": 0.606,
+        "unsafeFnRate": 0.2236503856041131,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 6
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1004,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 2,
+      "metrics": {
+        "fidelity": 0.606,
+        "unsafeFnRate": 0.2236503856041131,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 6
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1004,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 4,
+      "metrics": {
+        "fidelity": 0.606,
+        "unsafeFnRate": 0.2236503856041131,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 6
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1004,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 6,
+      "metrics": {
+        "fidelity": 0.606,
+        "unsafeFnRate": 0.2236503856041131,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 6
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1004,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 8,
+      "metrics": {
+        "fidelity": 0.606,
+        "unsafeFnRate": 0.2236503856041131,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 6
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1004,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.606,
+        "unsafeFnRate": 0.2236503856041131,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 6
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1004,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 16,
+      "metrics": {
+        "fidelity": 0.606,
+        "unsafeFnRate": 0.2236503856041131,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 6
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1004,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 24,
+      "metrics": {
+        "fidelity": 0.606,
+        "unsafeFnRate": 0.2236503856041131,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 6
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1005,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 0,
+      "metrics": {
+        "fidelity": 0.6,
+        "unsafeFnRate": 0.2366412213740458,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 4
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1005,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 2,
+      "metrics": {
+        "fidelity": 0.6,
+        "unsafeFnRate": 0.2366412213740458,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 4
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1005,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 4,
+      "metrics": {
+        "fidelity": 0.6,
+        "unsafeFnRate": 0.2366412213740458,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 4
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1005,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 6,
+      "metrics": {
+        "fidelity": 0.6,
+        "unsafeFnRate": 0.2366412213740458,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 4
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1005,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 8,
+      "metrics": {
+        "fidelity": 0.6,
+        "unsafeFnRate": 0.2366412213740458,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 4
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1005,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.6,
+        "unsafeFnRate": 0.2366412213740458,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 4
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1005,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 16,
+      "metrics": {
+        "fidelity": 0.6,
+        "unsafeFnRate": 0.2366412213740458,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 4
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1005,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 24,
+      "metrics": {
+        "fidelity": 0.6,
+        "unsafeFnRate": 0.2366412213740458,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 4
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1001,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 0,
+      "metrics": {
+        "fidelity": 0.604,
+        "unsafeFnRate": 0.11688311688311688,
+        "guardrailRecall": 0.9153846153846154,
+        "rulesRecovered": 1,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 6
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1001,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 2,
+      "metrics": {
+        "fidelity": 0.602,
+        "unsafeFnRate": 0.03636363636363636,
+        "guardrailRecall": 0.9615384615384616,
+        "rulesRecovered": 2,
+        "questions": 2,
+        "whyQuestions": 2,
+        "counterfactualQuestions": 0,
+        "interruptions": 2,
+        "statedRules": 3,
+        "inducedRules": 3
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1001,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 4,
+      "metrics": {
+        "fidelity": 0.76,
+        "unsafeFnRate": 0.023376623376623377,
+        "guardrailRecall": 1,
+        "rulesRecovered": 5,
+        "questions": 4,
+        "whyQuestions": 4,
+        "counterfactualQuestions": 0,
+        "interruptions": 4,
+        "statedRules": 7,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1001,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 6,
+      "metrics": {
+        "fidelity": 0.852,
+        "unsafeFnRate": 0.023376623376623377,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 6,
+        "whyQuestions": 6,
+        "counterfactualQuestions": 0,
+        "interruptions": 6,
+        "statedRules": 8,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1001,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 8,
+      "metrics": {
+        "fidelity": 0.852,
+        "unsafeFnRate": 0.023376623376623377,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 8,
+        "whyQuestions": 8,
+        "counterfactualQuestions": 0,
+        "interruptions": 8,
+        "statedRules": 8,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1001,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.87,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 12,
+        "whyQuestions": 12,
+        "counterfactualQuestions": 0,
+        "interruptions": 12,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1001,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 16,
+      "metrics": {
+        "fidelity": 0.87,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 16,
+        "whyQuestions": 16,
+        "counterfactualQuestions": 0,
+        "interruptions": 16,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1001,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 24,
+      "metrics": {
+        "fidelity": 0.87,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 24,
+        "whyQuestions": 24,
+        "counterfactualQuestions": 0,
+        "interruptions": 24,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1002,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 0,
+      "metrics": {
+        "fidelity": 0.676,
+        "unsafeFnRate": 0.089058524173028,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 8
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1002,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 2,
+      "metrics": {
+        "fidelity": 0.686,
+        "unsafeFnRate": 0.10432569974554708,
+        "guardrailRecall": 0.9457364341085271,
+        "rulesRecovered": 3,
+        "questions": 2,
+        "whyQuestions": 2,
+        "counterfactualQuestions": 0,
+        "interruptions": 2,
+        "statedRules": 3,
+        "inducedRules": 4
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1002,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 4,
+      "metrics": {
+        "fidelity": 0.776,
+        "unsafeFnRate": 0.08651399491094147,
+        "guardrailRecall": 1,
+        "rulesRecovered": 5,
+        "questions": 4,
+        "whyQuestions": 4,
+        "counterfactualQuestions": 0,
+        "interruptions": 4,
+        "statedRules": 7,
+        "inducedRules": 2
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1002,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 6,
+      "metrics": {
+        "fidelity": 0.776,
+        "unsafeFnRate": 0.08651399491094147,
+        "guardrailRecall": 1,
+        "rulesRecovered": 5,
+        "questions": 6,
+        "whyQuestions": 6,
+        "counterfactualQuestions": 0,
+        "interruptions": 6,
+        "statedRules": 7,
+        "inducedRules": 2
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1002,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 8,
+      "metrics": {
+        "fidelity": 0.922,
+        "unsafeFnRate": 0.03307888040712468,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 8,
+        "whyQuestions": 8,
+        "counterfactualQuestions": 0,
+        "interruptions": 8,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1002,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 1,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 12,
+        "whyQuestions": 12,
+        "counterfactualQuestions": 0,
+        "interruptions": 12,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1002,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 16,
+      "metrics": {
+        "fidelity": 1,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 16,
+        "whyQuestions": 16,
+        "counterfactualQuestions": 0,
+        "interruptions": 16,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1002,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 24,
+      "metrics": {
+        "fidelity": 1,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 24,
+        "whyQuestions": 24,
+        "counterfactualQuestions": 0,
+        "interruptions": 24,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1003,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 0,
+      "metrics": {
+        "fidelity": 0.68,
+        "unsafeFnRate": 0.0810126582278481,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 5
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1003,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 2,
+      "metrics": {
+        "fidelity": 0.578,
+        "unsafeFnRate": 0.04556962025316456,
+        "guardrailRecall": 0.9375,
+        "rulesRecovered": 2,
+        "questions": 2,
+        "whyQuestions": 2,
+        "counterfactualQuestions": 0,
+        "interruptions": 2,
+        "statedRules": 3,
+        "inducedRules": 4
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1003,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 4,
+      "metrics": {
+        "fidelity": 0.722,
+        "unsafeFnRate": 0.02531645569620253,
+        "guardrailRecall": 1,
+        "rulesRecovered": 5,
+        "questions": 4,
+        "whyQuestions": 4,
+        "counterfactualQuestions": 0,
+        "interruptions": 4,
+        "statedRules": 7,
+        "inducedRules": 2
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1003,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 6,
+      "metrics": {
+        "fidelity": 0.856,
+        "unsafeFnRate": 0.02531645569620253,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 6,
+        "whyQuestions": 6,
+        "counterfactualQuestions": 0,
+        "interruptions": 6,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1003,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 8,
+      "metrics": {
+        "fidelity": 0.856,
+        "unsafeFnRate": 0.02531645569620253,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 8,
+        "whyQuestions": 8,
+        "counterfactualQuestions": 0,
+        "interruptions": 8,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1003,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.876,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 12,
+        "whyQuestions": 12,
+        "counterfactualQuestions": 0,
+        "interruptions": 12,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1003,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 16,
+      "metrics": {
+        "fidelity": 0.876,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 16,
+        "whyQuestions": 16,
+        "counterfactualQuestions": 0,
+        "interruptions": 16,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1003,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 24,
+      "metrics": {
+        "fidelity": 0.876,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 24,
+        "whyQuestions": 24,
+        "counterfactualQuestions": 0,
+        "interruptions": 24,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1004,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 0,
+      "metrics": {
+        "fidelity": 0.606,
+        "unsafeFnRate": 0.2236503856041131,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 6
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1004,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 2,
+      "metrics": {
+        "fidelity": 0.714,
+        "unsafeFnRate": 0.07197943444730077,
+        "guardrailRecall": 0.9538461538461539,
+        "rulesRecovered": 3,
+        "questions": 2,
+        "whyQuestions": 2,
+        "counterfactualQuestions": 0,
+        "interruptions": 2,
+        "statedRules": 3,
+        "inducedRules": 4
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1004,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 4,
+      "metrics": {
+        "fidelity": 0.808,
+        "unsafeFnRate": 0.056555269922879174,
+        "guardrailRecall": 1,
+        "rulesRecovered": 5,
+        "questions": 4,
+        "whyQuestions": 4,
+        "counterfactualQuestions": 0,
+        "interruptions": 4,
+        "statedRules": 7,
+        "inducedRules": 2
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1004,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 6,
+      "metrics": {
+        "fidelity": 0.808,
+        "unsafeFnRate": 0.056555269922879174,
+        "guardrailRecall": 1,
+        "rulesRecovered": 5,
+        "questions": 6,
+        "whyQuestions": 6,
+        "counterfactualQuestions": 0,
+        "interruptions": 6,
+        "statedRules": 7,
+        "inducedRules": 2
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1004,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 8,
+      "metrics": {
+        "fidelity": 0.846,
+        "unsafeFnRate": 0.05398457583547558,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 8,
+        "whyQuestions": 8,
+        "counterfactualQuestions": 0,
+        "interruptions": 8,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1004,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.846,
+        "unsafeFnRate": 0.05398457583547558,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 12,
+        "whyQuestions": 12,
+        "counterfactualQuestions": 0,
+        "interruptions": 12,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1004,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 16,
+      "metrics": {
+        "fidelity": 1,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 16,
+        "whyQuestions": 16,
+        "counterfactualQuestions": 0,
+        "interruptions": 16,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1004,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 24,
+      "metrics": {
+        "fidelity": 1,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 24,
+        "whyQuestions": 24,
+        "counterfactualQuestions": 0,
+        "interruptions": 24,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1005,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 0,
+      "metrics": {
+        "fidelity": 0.6,
+        "unsafeFnRate": 0.2366412213740458,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 4
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1005,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 2,
+      "metrics": {
+        "fidelity": 0.77,
+        "unsafeFnRate": 0.11959287531806616,
+        "guardrailRecall": 0.9083969465648855,
+        "rulesRecovered": 3,
+        "questions": 2,
+        "whyQuestions": 2,
+        "counterfactualQuestions": 0,
+        "interruptions": 2,
+        "statedRules": 3,
+        "inducedRules": 4
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1005,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 4,
+      "metrics": {
+        "fidelity": 0.832,
+        "unsafeFnRate": 0.089058524173028,
+        "guardrailRecall": 1,
+        "rulesRecovered": 5,
+        "questions": 4,
+        "whyQuestions": 4,
+        "counterfactualQuestions": 0,
+        "interruptions": 4,
+        "statedRules": 7,
+        "inducedRules": 2
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1005,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 6,
+      "metrics": {
+        "fidelity": 0.832,
+        "unsafeFnRate": 0.089058524173028,
+        "guardrailRecall": 1,
+        "rulesRecovered": 5,
+        "questions": 6,
+        "whyQuestions": 6,
+        "counterfactualQuestions": 0,
+        "interruptions": 6,
+        "statedRules": 7,
+        "inducedRules": 2
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1005,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 8,
+      "metrics": {
+        "fidelity": 0.888,
+        "unsafeFnRate": 0.035623409669211195,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 8,
+        "whyQuestions": 8,
+        "counterfactualQuestions": 0,
+        "interruptions": 8,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1005,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 1,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 12,
+        "whyQuestions": 12,
+        "counterfactualQuestions": 0,
+        "interruptions": 12,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1005,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 16,
+      "metrics": {
+        "fidelity": 1,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 16,
+        "whyQuestions": 16,
+        "counterfactualQuestions": 0,
+        "interruptions": 16,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1005,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 24,
+      "metrics": {
+        "fidelity": 1,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 24,
+        "whyQuestions": 24,
+        "counterfactualQuestions": 0,
+        "interruptions": 24,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1001,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 0,
+      "metrics": {
+        "fidelity": 0.604,
+        "unsafeFnRate": 0.11688311688311688,
+        "guardrailRecall": 0.9153846153846154,
+        "rulesRecovered": 1,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 6
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1001,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 2,
+      "metrics": {
+        "fidelity": 0.602,
+        "unsafeFnRate": 0.03636363636363636,
+        "guardrailRecall": 0.9615384615384616,
+        "rulesRecovered": 2,
+        "questions": 2,
+        "whyQuestions": 2,
+        "counterfactualQuestions": 0,
+        "interruptions": 2,
+        "statedRules": 3,
+        "inducedRules": 3
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1001,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 4,
+      "metrics": {
+        "fidelity": 0.76,
+        "unsafeFnRate": 0.023376623376623377,
+        "guardrailRecall": 1,
+        "rulesRecovered": 5,
+        "questions": 4,
+        "whyQuestions": 4,
+        "counterfactualQuestions": 0,
+        "interruptions": 4,
+        "statedRules": 7,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1001,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 6,
+      "metrics": {
+        "fidelity": 0.852,
+        "unsafeFnRate": 0.023376623376623377,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 6,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 1,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1001,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 8,
+      "metrics": {
+        "fidelity": 0.852,
+        "unsafeFnRate": 0.023376623376623377,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 8,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 3,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1001,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.952,
+        "unsafeFnRate": 0.06233766233766234,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 12,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 7,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1001,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 16,
+      "metrics": {
+        "fidelity": 0.952,
+        "unsafeFnRate": 0.06233766233766234,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 16,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 11,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1001,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 24,
+      "metrics": {
+        "fidelity": 0.952,
+        "unsafeFnRate": 0.06233766233766234,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 24,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 19,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1002,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 0,
+      "metrics": {
+        "fidelity": 0.676,
+        "unsafeFnRate": 0.089058524173028,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 8
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1002,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 2,
+      "metrics": {
+        "fidelity": 0.686,
+        "unsafeFnRate": 0.10432569974554708,
+        "guardrailRecall": 0.9457364341085271,
+        "rulesRecovered": 3,
+        "questions": 2,
+        "whyQuestions": 2,
+        "counterfactualQuestions": 0,
+        "interruptions": 2,
+        "statedRules": 3,
+        "inducedRules": 4
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1002,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 4,
+      "metrics": {
+        "fidelity": 0.776,
+        "unsafeFnRate": 0.08651399491094147,
+        "guardrailRecall": 1,
+        "rulesRecovered": 5,
+        "questions": 4,
+        "whyQuestions": 4,
+        "counterfactualQuestions": 0,
+        "interruptions": 4,
+        "statedRules": 7,
+        "inducedRules": 2
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1002,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 6,
+      "metrics": {
+        "fidelity": 0.922,
+        "unsafeFnRate": 0.03307888040712468,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 6,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 1,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1002,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 8,
+      "metrics": {
+        "fidelity": 0.922,
+        "unsafeFnRate": 0.03307888040712468,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 8,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 3,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1002,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.922,
+        "unsafeFnRate": 0.03307888040712468,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 12,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 7,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1002,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 16,
+      "metrics": {
+        "fidelity": 0.922,
+        "unsafeFnRate": 0.03307888040712468,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 16,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 11,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1002,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 24,
+      "metrics": {
+        "fidelity": 0.922,
+        "unsafeFnRate": 0.03307888040712468,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 24,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 19,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1003,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 0,
+      "metrics": {
+        "fidelity": 0.68,
+        "unsafeFnRate": 0.0810126582278481,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 5
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1003,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 2,
+      "metrics": {
+        "fidelity": 0.578,
+        "unsafeFnRate": 0.04556962025316456,
+        "guardrailRecall": 0.9375,
+        "rulesRecovered": 2,
+        "questions": 2,
+        "whyQuestions": 2,
+        "counterfactualQuestions": 0,
+        "interruptions": 2,
+        "statedRules": 3,
+        "inducedRules": 4
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1003,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 4,
+      "metrics": {
+        "fidelity": 0.722,
+        "unsafeFnRate": 0.02531645569620253,
+        "guardrailRecall": 1,
+        "rulesRecovered": 5,
+        "questions": 4,
+        "whyQuestions": 4,
+        "counterfactualQuestions": 0,
+        "interruptions": 4,
+        "statedRules": 7,
+        "inducedRules": 2
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1003,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 6,
+      "metrics": {
+        "fidelity": 0.856,
+        "unsafeFnRate": 0.02531645569620253,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 6,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 1,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1003,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 8,
+      "metrics": {
+        "fidelity": 0.856,
+        "unsafeFnRate": 0.02531645569620253,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 8,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 3,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1003,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.942,
+        "unsafeFnRate": 0.02531645569620253,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 12,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 7,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1003,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 16,
+      "metrics": {
+        "fidelity": 0.942,
+        "unsafeFnRate": 0.02531645569620253,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 16,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 11,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1003,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 24,
+      "metrics": {
+        "fidelity": 0.942,
+        "unsafeFnRate": 0.02531645569620253,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 24,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 19,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1004,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 0,
+      "metrics": {
+        "fidelity": 0.606,
+        "unsafeFnRate": 0.2236503856041131,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 6
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1004,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 2,
+      "metrics": {
+        "fidelity": 0.714,
+        "unsafeFnRate": 0.07197943444730077,
+        "guardrailRecall": 0.9538461538461539,
+        "rulesRecovered": 3,
+        "questions": 2,
+        "whyQuestions": 2,
+        "counterfactualQuestions": 0,
+        "interruptions": 2,
+        "statedRules": 3,
+        "inducedRules": 4
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1004,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 4,
+      "metrics": {
+        "fidelity": 0.808,
+        "unsafeFnRate": 0.056555269922879174,
+        "guardrailRecall": 1,
+        "rulesRecovered": 5,
+        "questions": 4,
+        "whyQuestions": 4,
+        "counterfactualQuestions": 0,
+        "interruptions": 4,
+        "statedRules": 7,
+        "inducedRules": 2
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1004,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 6,
+      "metrics": {
+        "fidelity": 0.958,
+        "unsafeFnRate": 0.010282776349614395,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 6,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 1,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1004,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 8,
+      "metrics": {
+        "fidelity": 0.958,
+        "unsafeFnRate": 0.010282776349614395,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 8,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 3,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1004,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.958,
+        "unsafeFnRate": 0.010282776349614395,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 12,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 7,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1004,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 16,
+      "metrics": {
+        "fidelity": 0.958,
+        "unsafeFnRate": 0.010282776349614395,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 16,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 11,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1004,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 24,
+      "metrics": {
+        "fidelity": 0.958,
+        "unsafeFnRate": 0.010282776349614395,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 24,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 19,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1005,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 0,
+      "metrics": {
+        "fidelity": 0.6,
+        "unsafeFnRate": 0.2366412213740458,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 4
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1005,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 2,
+      "metrics": {
+        "fidelity": 0.77,
+        "unsafeFnRate": 0.11959287531806616,
+        "guardrailRecall": 0.9083969465648855,
+        "rulesRecovered": 3,
+        "questions": 2,
+        "whyQuestions": 2,
+        "counterfactualQuestions": 0,
+        "interruptions": 2,
+        "statedRules": 3,
+        "inducedRules": 4
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1005,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 4,
+      "metrics": {
+        "fidelity": 0.832,
+        "unsafeFnRate": 0.089058524173028,
+        "guardrailRecall": 1,
+        "rulesRecovered": 5,
+        "questions": 4,
+        "whyQuestions": 4,
+        "counterfactualQuestions": 0,
+        "interruptions": 4,
+        "statedRules": 7,
+        "inducedRules": 2
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1005,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 6,
+      "metrics": {
+        "fidelity": 0.926,
+        "unsafeFnRate": 0.0737913486005089,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 6,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 1,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1005,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 8,
+      "metrics": {
+        "fidelity": 0.926,
+        "unsafeFnRate": 0.0737913486005089,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 8,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 3,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1005,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.926,
+        "unsafeFnRate": 0.0737913486005089,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 12,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 7,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1005,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 16,
+      "metrics": {
+        "fidelity": 0.926,
+        "unsafeFnRate": 0.0737913486005089,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 16,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 11,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1005,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 24,
+      "metrics": {
+        "fidelity": 0.926,
+        "unsafeFnRate": 0.0737913486005089,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 24,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 19,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1001,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 0,
+      "metrics": {
+        "fidelity": 0.604,
+        "unsafeFnRate": 0.11688311688311688,
+        "guardrailRecall": 0.9153846153846154,
+        "rulesRecovered": 1,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 6
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1001,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 2,
+      "metrics": {
+        "fidelity": 0.602,
+        "unsafeFnRate": 0.03636363636363636,
+        "guardrailRecall": 0.9615384615384616,
+        "rulesRecovered": 2,
+        "questions": 2,
+        "whyQuestions": 2,
+        "counterfactualQuestions": 0,
+        "interruptions": 2,
+        "statedRules": 3,
+        "inducedRules": 3
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1001,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 4,
+      "metrics": {
+        "fidelity": 0.76,
+        "unsafeFnRate": 0.023376623376623377,
+        "guardrailRecall": 1,
+        "rulesRecovered": 5,
+        "questions": 4,
+        "whyQuestions": 4,
+        "counterfactualQuestions": 0,
+        "interruptions": 4,
+        "statedRules": 7,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1001,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 6,
+      "metrics": {
+        "fidelity": 0.952,
+        "unsafeFnRate": 0.06233766233766234,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 6,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 1,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1001,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 8,
+      "metrics": {
+        "fidelity": 0.952,
+        "unsafeFnRate": 0.06233766233766234,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 8,
+        "whyQuestions": 6,
+        "counterfactualQuestions": 2,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1001,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.952,
+        "unsafeFnRate": 0.06233766233766234,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 11,
+        "whyQuestions": 6,
+        "counterfactualQuestions": 5,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1001,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 16,
+      "metrics": {
+        "fidelity": 0.952,
+        "unsafeFnRate": 0.06233766233766234,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 11,
+        "whyQuestions": 6,
+        "counterfactualQuestions": 5,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1001,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 24,
+      "metrics": {
+        "fidelity": 0.952,
+        "unsafeFnRate": 0.06233766233766234,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 11,
+        "whyQuestions": 6,
+        "counterfactualQuestions": 5,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1002,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 0,
+      "metrics": {
+        "fidelity": 0.676,
+        "unsafeFnRate": 0.089058524173028,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 8
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1002,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 2,
+      "metrics": {
+        "fidelity": 0.686,
+        "unsafeFnRate": 0.10432569974554708,
+        "guardrailRecall": 0.9457364341085271,
+        "rulesRecovered": 3,
+        "questions": 2,
+        "whyQuestions": 2,
+        "counterfactualQuestions": 0,
+        "interruptions": 2,
+        "statedRules": 3,
+        "inducedRules": 4
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1002,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 4,
+      "metrics": {
+        "fidelity": 0.776,
+        "unsafeFnRate": 0.08651399491094147,
+        "guardrailRecall": 1,
+        "rulesRecovered": 5,
+        "questions": 4,
+        "whyQuestions": 4,
+        "counterfactualQuestions": 0,
+        "interruptions": 4,
+        "statedRules": 7,
+        "inducedRules": 2
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1002,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 6,
+      "metrics": {
+        "fidelity": 0.922,
+        "unsafeFnRate": 0.03307888040712468,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 6,
+        "whyQuestions": 6,
+        "counterfactualQuestions": 0,
+        "interruptions": 6,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1002,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 8,
+      "metrics": {
+        "fidelity": 1,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 8,
+        "whyQuestions": 7,
+        "counterfactualQuestions": 1,
+        "interruptions": 8,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1002,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 1,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 12,
+        "whyQuestions": 7,
+        "counterfactualQuestions": 5,
+        "interruptions": 9,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1002,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 16,
+      "metrics": {
+        "fidelity": 1,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 13,
+        "whyQuestions": 7,
+        "counterfactualQuestions": 6,
+        "interruptions": 9,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1002,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 24,
+      "metrics": {
+        "fidelity": 1,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 13,
+        "whyQuestions": 7,
+        "counterfactualQuestions": 6,
+        "interruptions": 9,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1003,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 0,
+      "metrics": {
+        "fidelity": 0.68,
+        "unsafeFnRate": 0.0810126582278481,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 5
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1003,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 2,
+      "metrics": {
+        "fidelity": 0.578,
+        "unsafeFnRate": 0.04556962025316456,
+        "guardrailRecall": 0.9375,
+        "rulesRecovered": 2,
+        "questions": 2,
+        "whyQuestions": 2,
+        "counterfactualQuestions": 0,
+        "interruptions": 2,
+        "statedRules": 3,
+        "inducedRules": 4
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1003,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 4,
+      "metrics": {
+        "fidelity": 0.722,
+        "unsafeFnRate": 0.02531645569620253,
+        "guardrailRecall": 1,
+        "rulesRecovered": 5,
+        "questions": 4,
+        "whyQuestions": 4,
+        "counterfactualQuestions": 0,
+        "interruptions": 4,
+        "statedRules": 7,
+        "inducedRules": 2
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1003,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 6,
+      "metrics": {
+        "fidelity": 0.876,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 6,
+        "whyQuestions": 6,
+        "counterfactualQuestions": 0,
+        "interruptions": 6,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1003,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 8,
+      "metrics": {
+        "fidelity": 1,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 8,
+        "whyQuestions": 7,
+        "counterfactualQuestions": 1,
+        "interruptions": 6,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1003,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 1,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 12,
+        "whyQuestions": 7,
+        "counterfactualQuestions": 5,
+        "interruptions": 6,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1003,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 16,
+      "metrics": {
+        "fidelity": 1,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 13,
+        "whyQuestions": 7,
+        "counterfactualQuestions": 6,
+        "interruptions": 6,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1003,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 24,
+      "metrics": {
+        "fidelity": 1,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 13,
+        "whyQuestions": 7,
+        "counterfactualQuestions": 6,
+        "interruptions": 6,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1004,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 0,
+      "metrics": {
+        "fidelity": 0.606,
+        "unsafeFnRate": 0.2236503856041131,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 6
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1004,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 2,
+      "metrics": {
+        "fidelity": 0.714,
+        "unsafeFnRate": 0.07197943444730077,
+        "guardrailRecall": 0.9538461538461539,
+        "rulesRecovered": 3,
+        "questions": 2,
+        "whyQuestions": 2,
+        "counterfactualQuestions": 0,
+        "interruptions": 2,
+        "statedRules": 3,
+        "inducedRules": 4
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1004,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 4,
+      "metrics": {
+        "fidelity": 0.808,
+        "unsafeFnRate": 0.056555269922879174,
+        "guardrailRecall": 1,
+        "rulesRecovered": 5,
+        "questions": 4,
+        "whyQuestions": 4,
+        "counterfactualQuestions": 0,
+        "interruptions": 4,
+        "statedRules": 7,
+        "inducedRules": 2
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1004,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 6,
+      "metrics": {
+        "fidelity": 0.846,
+        "unsafeFnRate": 0.05398457583547558,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 6,
+        "whyQuestions": 6,
+        "counterfactualQuestions": 0,
+        "interruptions": 6,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1004,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 8,
+      "metrics": {
+        "fidelity": 1,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 8,
+        "whyQuestions": 7,
+        "counterfactualQuestions": 1,
+        "interruptions": 8,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1004,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 1,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 12,
+        "whyQuestions": 7,
+        "counterfactualQuestions": 5,
+        "interruptions": 9,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1004,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 16,
+      "metrics": {
+        "fidelity": 1,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 13,
+        "whyQuestions": 7,
+        "counterfactualQuestions": 6,
+        "interruptions": 9,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1004,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 24,
+      "metrics": {
+        "fidelity": 1,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 13,
+        "whyQuestions": 7,
+        "counterfactualQuestions": 6,
+        "interruptions": 9,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1005,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 0,
+      "metrics": {
+        "fidelity": 0.6,
+        "unsafeFnRate": 0.2366412213740458,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 4
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1005,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 2,
+      "metrics": {
+        "fidelity": 0.77,
+        "unsafeFnRate": 0.11959287531806616,
+        "guardrailRecall": 0.9083969465648855,
+        "rulesRecovered": 3,
+        "questions": 2,
+        "whyQuestions": 2,
+        "counterfactualQuestions": 0,
+        "interruptions": 2,
+        "statedRules": 3,
+        "inducedRules": 4
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1005,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 4,
+      "metrics": {
+        "fidelity": 0.832,
+        "unsafeFnRate": 0.089058524173028,
+        "guardrailRecall": 1,
+        "rulesRecovered": 5,
+        "questions": 4,
+        "whyQuestions": 4,
+        "counterfactualQuestions": 0,
+        "interruptions": 4,
+        "statedRules": 7,
+        "inducedRules": 2
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1005,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 6,
+      "metrics": {
+        "fidelity": 0.888,
+        "unsafeFnRate": 0.035623409669211195,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 6,
+        "whyQuestions": 6,
+        "counterfactualQuestions": 0,
+        "interruptions": 6,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1005,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 8,
+      "metrics": {
+        "fidelity": 1,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 8,
+        "whyQuestions": 7,
+        "counterfactualQuestions": 1,
+        "interruptions": 8,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1005,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 1,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 12,
+        "whyQuestions": 7,
+        "counterfactualQuestions": 5,
+        "interruptions": 10,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1005,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 16,
+      "metrics": {
+        "fidelity": 1,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 14,
+        "whyQuestions": 7,
+        "counterfactualQuestions": 7,
+        "interruptions": 10,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1005,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "budget": 24,
+      "metrics": {
+        "fidelity": 1,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 14,
+        "whyQuestions": 7,
+        "counterfactualQuestions": 7,
+        "interruptions": 10,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1001,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.25
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.604,
+        "unsafeFnRate": 0.11688311688311688,
+        "guardrailRecall": 0.9153846153846154,
+        "rulesRecovered": 1,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 6
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1002,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.25
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.676,
+        "unsafeFnRate": 0.089058524173028,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 8
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1003,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.25
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.68,
+        "unsafeFnRate": 0.0810126582278481,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 5
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1004,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.25
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.606,
+        "unsafeFnRate": 0.2236503856041131,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 6
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1005,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.25
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.6,
+        "unsafeFnRate": 0.2366412213740458,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 4
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1001,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.25
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.802,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 12,
+        "whyQuestions": 12,
+        "counterfactualQuestions": 0,
+        "interruptions": 12,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1002,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.25
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.856,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 5,
+        "questions": 12,
+        "whyQuestions": 12,
+        "counterfactualQuestions": 0,
+        "interruptions": 12,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1003,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.25
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.884,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 12,
+        "whyQuestions": 12,
+        "counterfactualQuestions": 0,
+        "interruptions": 12,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1004,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.25
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.846,
+        "unsafeFnRate": 0.05398457583547558,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 12,
+        "whyQuestions": 12,
+        "counterfactualQuestions": 0,
+        "interruptions": 12,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1005,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.25
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 1,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 12,
+        "whyQuestions": 12,
+        "counterfactualQuestions": 0,
+        "interruptions": 12,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1001,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.25
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.928,
+        "unsafeFnRate": 0.05714285714285714,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 12,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 7,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1002,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.25
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.922,
+        "unsafeFnRate": 0.03307888040712468,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 12,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 7,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1003,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.25
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.942,
+        "unsafeFnRate": 0.02531645569620253,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 12,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 7,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1004,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.25
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.936,
+        "unsafeFnRate": 0.007712082262210797,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 12,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 7,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1005,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.25
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.926,
+        "unsafeFnRate": 0.0737913486005089,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 12,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 7,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1001,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.25
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.928,
+        "unsafeFnRate": 0.05714285714285714,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 11,
+        "whyQuestions": 6,
+        "counterfactualQuestions": 5,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1002,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.25
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 1,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 12,
+        "whyQuestions": 7,
+        "counterfactualQuestions": 5,
+        "interruptions": 9,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1003,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.25
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 1,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 12,
+        "whyQuestions": 7,
+        "counterfactualQuestions": 5,
+        "interruptions": 6,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1004,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.25
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.964,
+        "unsafeFnRate": 0.012853470437017995,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 12,
+        "whyQuestions": 9,
+        "counterfactualQuestions": 3,
+        "interruptions": 10,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1005,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.25
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 1,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 12,
+        "whyQuestions": 7,
+        "counterfactualQuestions": 5,
+        "interruptions": 10,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1001,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.5
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.604,
+        "unsafeFnRate": 0.11688311688311688,
+        "guardrailRecall": 0.9153846153846154,
+        "rulesRecovered": 1,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 6
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1002,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.5
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.676,
+        "unsafeFnRate": 0.089058524173028,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 8
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1003,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.5
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.68,
+        "unsafeFnRate": 0.0810126582278481,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 5
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1004,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.5
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.606,
+        "unsafeFnRate": 0.2236503856041131,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 6
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1005,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.5
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.6,
+        "unsafeFnRate": 0.2366412213740458,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 4
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1001,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.5
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.87,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 12,
+        "whyQuestions": 12,
+        "counterfactualQuestions": 0,
+        "interruptions": 12,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1002,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.5
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.92,
+        "unsafeFnRate": 0.01272264631043257,
+        "guardrailRecall": 1,
+        "rulesRecovered": 5,
+        "questions": 12,
+        "whyQuestions": 12,
+        "counterfactualQuestions": 0,
+        "interruptions": 12,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1003,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.5
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.79,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 12,
+        "whyQuestions": 12,
+        "counterfactualQuestions": 0,
+        "interruptions": 12,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1004,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.5
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.834,
+        "unsafeFnRate": 0.06940874035989718,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 12,
+        "whyQuestions": 12,
+        "counterfactualQuestions": 0,
+        "interruptions": 12,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1005,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.5
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.878,
+        "unsafeFnRate": 0.027989821882951654,
+        "guardrailRecall": 1,
+        "rulesRecovered": 5,
+        "questions": 12,
+        "whyQuestions": 12,
+        "counterfactualQuestions": 0,
+        "interruptions": 12,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1001,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.5
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.846,
+        "unsafeFnRate": 0.046753246753246755,
+        "guardrailRecall": 1,
+        "rulesRecovered": 5,
+        "questions": 12,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 7,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1002,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.5
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.77,
+        "unsafeFnRate": 0.02544529262086514,
+        "guardrailRecall": 1,
+        "rulesRecovered": 5,
+        "questions": 12,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 7,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1003,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.5
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.918,
+        "unsafeFnRate": 0.03291139240506329,
+        "guardrailRecall": 1,
+        "rulesRecovered": 5,
+        "questions": 12,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 7,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1004,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.5
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.738,
+        "unsafeFnRate": 0.017994858611825194,
+        "guardrailRecall": 1,
+        "rulesRecovered": 5,
+        "questions": 12,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 7,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1005,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.5
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.75,
+        "unsafeFnRate": 0.08396946564885496,
+        "guardrailRecall": 1,
+        "rulesRecovered": 5,
+        "questions": 12,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 7,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1001,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.5
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.846,
+        "unsafeFnRate": 0.046753246753246755,
+        "guardrailRecall": 1,
+        "rulesRecovered": 5,
+        "questions": 12,
+        "whyQuestions": 6,
+        "counterfactualQuestions": 6,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1002,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.5
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.794,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 5,
+        "questions": 12,
+        "whyQuestions": 8,
+        "counterfactualQuestions": 4,
+        "interruptions": 10,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1003,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.5
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.974,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 11,
+        "whyQuestions": 8,
+        "counterfactualQuestions": 3,
+        "interruptions": 7,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1004,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.5
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.848,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 12,
+        "whyQuestions": 11,
+        "counterfactualQuestions": 1,
+        "interruptions": 11,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1005,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.5
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.852,
+        "unsafeFnRate": 0.030534351145038167,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 12,
+        "whyQuestions": 10,
+        "counterfactualQuestions": 2,
+        "interruptions": 12,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1001,
+      "expert": {
+        "noise": 0.1,
+        "vagueness": 0
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.646,
+        "unsafeFnRate": 0.11428571428571428,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 6
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1002,
+      "expert": {
+        "noise": 0.1,
+        "vagueness": 0
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.65,
+        "unsafeFnRate": 0.08651399491094147,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 8
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1003,
+      "expert": {
+        "noise": 0.1,
+        "vagueness": 0
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.644,
+        "unsafeFnRate": 0.030379746835443037,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 6
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1004,
+      "expert": {
+        "noise": 0.1,
+        "vagueness": 0
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.616,
+        "unsafeFnRate": 0.08740359897172237,
+        "guardrailRecall": 1,
+        "rulesRecovered": 1,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 9
+      }
+    },
+    {
+      "strategy": "A",
+      "seed": 1005,
+      "expert": {
+        "noise": 0.1,
+        "vagueness": 0
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.6,
+        "unsafeFnRate": 0.2366412213740458,
+        "guardrailRecall": 1,
+        "rulesRecovered": 2,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 4
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1001,
+      "expert": {
+        "noise": 0.1,
+        "vagueness": 0
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.87,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 12,
+        "whyQuestions": 12,
+        "counterfactualQuestions": 0,
+        "interruptions": 12,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1002,
+      "expert": {
+        "noise": 0.1,
+        "vagueness": 0
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 1,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 12,
+        "whyQuestions": 12,
+        "counterfactualQuestions": 0,
+        "interruptions": 12,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1003,
+      "expert": {
+        "noise": 0.1,
+        "vagueness": 0
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.876,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 12,
+        "whyQuestions": 12,
+        "counterfactualQuestions": 0,
+        "interruptions": 12,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1004,
+      "expert": {
+        "noise": 0.1,
+        "vagueness": 0
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.842,
+        "unsafeFnRate": 0.038560411311053984,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 12,
+        "whyQuestions": 12,
+        "counterfactualQuestions": 0,
+        "interruptions": 12,
+        "statedRules": 8,
+        "inducedRules": 2
+      }
+    },
+    {
+      "strategy": "B",
+      "seed": 1005,
+      "expert": {
+        "noise": 0.1,
+        "vagueness": 0
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 1,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 12,
+        "whyQuestions": 12,
+        "counterfactualQuestions": 0,
+        "interruptions": 12,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1001,
+      "expert": {
+        "noise": 0.1,
+        "vagueness": 0
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.87,
+        "unsafeFnRate": 0.03896103896103896,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 12,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 7,
+        "interruptions": 5,
+        "statedRules": 7,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1002,
+      "expert": {
+        "noise": 0.1,
+        "vagueness": 0
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.922,
+        "unsafeFnRate": 0.03307888040712468,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 12,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 7,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1003,
+      "expert": {
+        "noise": 0.1,
+        "vagueness": 0
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.942,
+        "unsafeFnRate": 0.02531645569620253,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 12,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 7,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1004,
+      "expert": {
+        "noise": 0.1,
+        "vagueness": 0
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.772,
+        "unsafeFnRate": 0.033419023136246784,
+        "guardrailRecall": 1,
+        "rulesRecovered": 5,
+        "questions": 12,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 7,
+        "interruptions": 5,
+        "statedRules": 7,
+        "inducedRules": 3
+      }
+    },
+    {
+      "strategy": "C",
+      "seed": 1005,
+      "expert": {
+        "noise": 0.1,
+        "vagueness": 0
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.926,
+        "unsafeFnRate": 0.0737913486005089,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 12,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 7,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1001,
+      "expert": {
+        "noise": 0.1,
+        "vagueness": 0
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.952,
+        "unsafeFnRate": 0.06233766233766234,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 12,
+        "whyQuestions": 7,
+        "counterfactualQuestions": 5,
+        "interruptions": 6,
+        "statedRules": 8,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1002,
+      "expert": {
+        "noise": 0.1,
+        "vagueness": 0
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 1,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 12,
+        "whyQuestions": 9,
+        "counterfactualQuestions": 3,
+        "interruptions": 11,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1003,
+      "expert": {
+        "noise": 0.1,
+        "vagueness": 0
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 1,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 12,
+        "whyQuestions": 9,
+        "counterfactualQuestions": 3,
+        "interruptions": 8,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1004,
+      "expert": {
+        "noise": 0.1,
+        "vagueness": 0
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 0.946,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 12,
+        "whyQuestions": 12,
+        "counterfactualQuestions": 0,
+        "interruptions": 12,
+        "statedRules": 9,
+        "inducedRules": 1
+      }
+    },
+    {
+      "strategy": "D",
+      "seed": 1005,
+      "expert": {
+        "noise": 0.1,
+        "vagueness": 0
+      },
+      "budget": 12,
+      "metrics": {
+        "fidelity": 1,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 12,
+        "whyQuestions": 7,
+        "counterfactualQuestions": 5,
+        "interruptions": 10,
+        "statedRules": 9,
+        "inducedRules": 0
+      }
+    }
+  ],
+  "main": [
+    {
+      "strategy": "A",
+      "budget": 0,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.6332,
+        "unsafeFnRate": 0.1494491812524304,
+        "guardrailRecall": 0.9830769230769232,
+        "rulesRecovered": 1.8,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 5.8
+      },
+      "std": {
+        "fidelity": 0.040978042901046445,
+        "unsafeFnRate": 0.07499901379766935,
+        "guardrailRecall": 0.03784115038845799,
+        "rulesRecovered": 0.44721359549995804,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 1.4832396974191326
+      }
+    },
+    {
+      "strategy": "A",
+      "budget": 2,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.6332,
+        "unsafeFnRate": 0.1494491812524304,
+        "guardrailRecall": 0.9830769230769232,
+        "rulesRecovered": 1.8,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 5.8
+      },
+      "std": {
+        "fidelity": 0.040978042901046445,
+        "unsafeFnRate": 0.07499901379766935,
+        "guardrailRecall": 0.03784115038845799,
+        "rulesRecovered": 0.44721359549995804,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 1.4832396974191326
+      }
+    },
+    {
+      "strategy": "A",
+      "budget": 4,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.6332,
+        "unsafeFnRate": 0.1494491812524304,
+        "guardrailRecall": 0.9830769230769232,
+        "rulesRecovered": 1.8,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 5.8
+      },
+      "std": {
+        "fidelity": 0.040978042901046445,
+        "unsafeFnRate": 0.07499901379766935,
+        "guardrailRecall": 0.03784115038845799,
+        "rulesRecovered": 0.44721359549995804,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 1.4832396974191326
+      }
+    },
+    {
+      "strategy": "A",
+      "budget": 6,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.6332,
+        "unsafeFnRate": 0.1494491812524304,
+        "guardrailRecall": 0.9830769230769232,
+        "rulesRecovered": 1.8,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 5.8
+      },
+      "std": {
+        "fidelity": 0.040978042901046445,
+        "unsafeFnRate": 0.07499901379766935,
+        "guardrailRecall": 0.03784115038845799,
+        "rulesRecovered": 0.44721359549995804,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 1.4832396974191326
+      }
+    },
+    {
+      "strategy": "A",
+      "budget": 8,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.6332,
+        "unsafeFnRate": 0.1494491812524304,
+        "guardrailRecall": 0.9830769230769232,
+        "rulesRecovered": 1.8,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 5.8
+      },
+      "std": {
+        "fidelity": 0.040978042901046445,
+        "unsafeFnRate": 0.07499901379766935,
+        "guardrailRecall": 0.03784115038845799,
+        "rulesRecovered": 0.44721359549995804,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 1.4832396974191326
+      }
+    },
+    {
+      "strategy": "A",
+      "budget": 12,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.6332,
+        "unsafeFnRate": 0.1494491812524304,
+        "guardrailRecall": 0.9830769230769232,
+        "rulesRecovered": 1.8,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 5.8
+      },
+      "std": {
+        "fidelity": 0.040978042901046445,
+        "unsafeFnRate": 0.07499901379766935,
+        "guardrailRecall": 0.03784115038845799,
+        "rulesRecovered": 0.44721359549995804,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 1.4832396974191326
+      }
+    },
+    {
+      "strategy": "A",
+      "budget": 16,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.6332,
+        "unsafeFnRate": 0.1494491812524304,
+        "guardrailRecall": 0.9830769230769232,
+        "rulesRecovered": 1.8,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 5.8
+      },
+      "std": {
+        "fidelity": 0.040978042901046445,
+        "unsafeFnRate": 0.07499901379766935,
+        "guardrailRecall": 0.03784115038845799,
+        "rulesRecovered": 0.44721359549995804,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 1.4832396974191326
+      }
+    },
+    {
+      "strategy": "A",
+      "budget": 24,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.6332,
+        "unsafeFnRate": 0.1494491812524304,
+        "guardrailRecall": 0.9830769230769232,
+        "rulesRecovered": 1.8,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 5.8
+      },
+      "std": {
+        "fidelity": 0.040978042901046445,
+        "unsafeFnRate": 0.07499901379766935,
+        "guardrailRecall": 0.03784115038845799,
+        "rulesRecovered": 0.44721359549995804,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 1.4832396974191326
+      }
+    },
+    {
+      "strategy": "B",
+      "budget": 0,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.6332,
+        "unsafeFnRate": 0.1494491812524304,
+        "guardrailRecall": 0.9830769230769232,
+        "rulesRecovered": 1.8,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 5.8
+      },
+      "std": {
+        "fidelity": 0.040978042901046445,
+        "unsafeFnRate": 0.07499901379766935,
+        "guardrailRecall": 0.03784115038845799,
+        "rulesRecovered": 0.44721359549995804,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 1.4832396974191326
+      }
+    },
+    {
+      "strategy": "B",
+      "budget": 2,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.67,
+        "unsafeFnRate": 0.07556625322554299,
+        "guardrailRecall": 0.9414035992116057,
+        "rulesRecovered": 2.6,
+        "questions": 2,
+        "whyQuestions": 2,
+        "counterfactualQuestions": 0,
+        "interruptions": 2,
+        "statedRules": 3,
+        "inducedRules": 3.8
+      },
+      "std": {
+        "fidelity": 0.07949842765740718,
+        "unsafeFnRate": 0.03610733181939577,
+        "guardrailRecall": 0.02051633806716753,
+        "rulesRecovered": 0.5477225575051661,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 0.44721359549995787
+      }
+    },
+    {
+      "strategy": "B",
+      "budget": 4,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.7796,
+        "unsafeFnRate": 0.05616417361593491,
+        "guardrailRecall": 1,
+        "rulesRecovered": 5,
+        "questions": 4,
+        "whyQuestions": 4,
+        "counterfactualQuestions": 0,
+        "interruptions": 4,
+        "statedRules": 7,
+        "inducedRules": 1.8
+      },
+      "std": {
+        "fidelity": 0.04262393693689029,
+        "unsafeFnRate": 0.03174077842099901,
+        "guardrailRecall": 0,
+        "rulesRecovered": 0,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 0.44721359549995804
+      }
+    },
+    {
+      "strategy": "B",
+      "budget": 6,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.8248,
+        "unsafeFnRate": 0.05616417361593491,
+        "guardrailRecall": 1,
+        "rulesRecovered": 5.4,
+        "questions": 6,
+        "whyQuestions": 6,
+        "counterfactualQuestions": 0,
+        "interruptions": 6,
+        "statedRules": 7.4,
+        "inducedRules": 1.4
+      },
+      "std": {
+        "fidelity": 0.03327461494893665,
+        "unsafeFnRate": 0.03174077842099901,
+        "guardrailRecall": 0,
+        "rulesRecovered": 0.5477225575051662,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0.5477225575051662,
+        "inducedRules": 0.8944271909999159
+      }
+    },
+    {
+      "strategy": "B",
+      "budget": 8,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.8728,
+        "unsafeFnRate": 0.03427598899692748,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 8,
+        "whyQuestions": 8,
+        "counterfactualQuestions": 0,
+        "interruptions": 8,
+        "statedRules": 8,
+        "inducedRules": 0.8
+      },
+      "std": {
+        "fidelity": 0.03195622005181467,
+        "unsafeFnRate": 0.01215263772302473,
+        "guardrailRecall": 0,
+        "rulesRecovered": 0,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 0.44721359549995804
+      }
+    },
+    {
+      "strategy": "B",
+      "budget": 12,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.9184000000000001,
+        "unsafeFnRate": 0.010796915167095116,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6.8,
+        "questions": 12,
+        "whyQuestions": 12,
+        "counterfactualQuestions": 0,
+        "interruptions": 12,
+        "statedRules": 8.8,
+        "inducedRules": 0.2
+      },
+      "std": {
+        "fidelity": 0.07533126840827786,
+        "unsafeFnRate": 0.02414263626092318,
+        "guardrailRecall": 0,
+        "rulesRecovered": 0.4472135954999579,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0.4472135954999579,
+        "inducedRules": 0.447213595499958
+      }
+    },
+    {
+      "strategy": "B",
+      "budget": 16,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.9492,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 16,
+        "whyQuestions": 16,
+        "counterfactualQuestions": 0,
+        "interruptions": 16,
+        "statedRules": 9,
+        "inducedRules": 0
+      },
+      "std": {
+        "fidelity": 0.0695931031065579,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 0,
+        "rulesRecovered": 0,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "B",
+      "budget": 24,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.9492,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 1,
+        "rulesRecovered": 7,
+        "questions": 24,
+        "whyQuestions": 24,
+        "counterfactualQuestions": 0,
+        "interruptions": 24,
+        "statedRules": 9,
+        "inducedRules": 0
+      },
+      "std": {
+        "fidelity": 0.0695931031065579,
+        "unsafeFnRate": 0,
+        "guardrailRecall": 0,
+        "rulesRecovered": 0,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "C",
+      "budget": 0,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.6332,
+        "unsafeFnRate": 0.1494491812524304,
+        "guardrailRecall": 0.9830769230769232,
+        "rulesRecovered": 1.8,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 5.8
+      },
+      "std": {
+        "fidelity": 0.040978042901046445,
+        "unsafeFnRate": 0.07499901379766935,
+        "guardrailRecall": 0.03784115038845799,
+        "rulesRecovered": 0.44721359549995804,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 1.4832396974191326
+      }
+    },
+    {
+      "strategy": "C",
+      "budget": 2,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.67,
+        "unsafeFnRate": 0.07556625322554299,
+        "guardrailRecall": 0.9414035992116057,
+        "rulesRecovered": 2.6,
+        "questions": 2,
+        "whyQuestions": 2,
+        "counterfactualQuestions": 0,
+        "interruptions": 2,
+        "statedRules": 3,
+        "inducedRules": 3.8
+      },
+      "std": {
+        "fidelity": 0.07949842765740718,
+        "unsafeFnRate": 0.03610733181939577,
+        "guardrailRecall": 0.02051633806716753,
+        "rulesRecovered": 0.5477225575051661,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 0.44721359549995787
+      }
+    },
+    {
+      "strategy": "C",
+      "budget": 4,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.7796,
+        "unsafeFnRate": 0.05616417361593491,
+        "guardrailRecall": 1,
+        "rulesRecovered": 5,
+        "questions": 4,
+        "whyQuestions": 4,
+        "counterfactualQuestions": 0,
+        "interruptions": 4,
+        "statedRules": 7,
+        "inducedRules": 1.8
+      },
+      "std": {
+        "fidelity": 0.04262393693689029,
+        "unsafeFnRate": 0.03174077842099901,
+        "guardrailRecall": 0,
+        "rulesRecovered": 0,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 0.44721359549995804
+      }
+    },
+    {
+      "strategy": "C",
+      "budget": 6,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.9028,
+        "unsafeFnRate": 0.03316921688601478,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 6,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 1,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 0.8
+      },
+      "std": {
+        "fidelity": 0.04670331893987836,
+        "unsafeFnRate": 0.024142885349931323,
+        "guardrailRecall": 0,
+        "rulesRecovered": 0,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 0.44721359549995804
+      }
+    },
+    {
+      "strategy": "C",
+      "budget": 8,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.9028,
+        "unsafeFnRate": 0.03316921688601478,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 8,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 3,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 0.8
+      },
+      "std": {
+        "fidelity": 0.04670331893987836,
+        "unsafeFnRate": 0.024142885349931323,
+        "guardrailRecall": 0,
+        "rulesRecovered": 0,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 0.44721359549995804
+      }
+    },
+    {
+      "strategy": "C",
+      "budget": 12,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.9400000000000001,
+        "unsafeFnRate": 0.04096142467822257,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 12,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 7,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 0.8
+      },
+      "std": {
+        "fidelity": 0.015748015748023578,
+        "unsafeFnRate": 0.02637625098038271,
+        "guardrailRecall": 0,
+        "rulesRecovered": 0,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 0.44721359549995804
+      }
+    },
+    {
+      "strategy": "C",
+      "budget": 16,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.9400000000000001,
+        "unsafeFnRate": 0.04096142467822257,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 16,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 11,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 0.8
+      },
+      "std": {
+        "fidelity": 0.015748015748023578,
+        "unsafeFnRate": 0.02637625098038271,
+        "guardrailRecall": 0,
+        "rulesRecovered": 0,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 0.44721359549995804
+      }
+    },
+    {
+      "strategy": "C",
+      "budget": 24,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.9400000000000001,
+        "unsafeFnRate": 0.04096142467822257,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 24,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 19,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 0.8
+      },
+      "std": {
+        "fidelity": 0.015748015748023578,
+        "unsafeFnRate": 0.02637625098038271,
+        "guardrailRecall": 0,
+        "rulesRecovered": 0,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 0.44721359549995804
+      }
+    },
+    {
+      "strategy": "D",
+      "budget": 0,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.6332,
+        "unsafeFnRate": 0.1494491812524304,
+        "guardrailRecall": 0.9830769230769232,
+        "rulesRecovered": 1.8,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 5.8
+      },
+      "std": {
+        "fidelity": 0.040978042901046445,
+        "unsafeFnRate": 0.07499901379766935,
+        "guardrailRecall": 0.03784115038845799,
+        "rulesRecovered": 0.44721359549995804,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 1.4832396974191326
+      }
+    },
+    {
+      "strategy": "D",
+      "budget": 2,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.67,
+        "unsafeFnRate": 0.07556625322554299,
+        "guardrailRecall": 0.9414035992116057,
+        "rulesRecovered": 2.6,
+        "questions": 2,
+        "whyQuestions": 2,
+        "counterfactualQuestions": 0,
+        "interruptions": 2,
+        "statedRules": 3,
+        "inducedRules": 3.8
+      },
+      "std": {
+        "fidelity": 0.07949842765740718,
+        "unsafeFnRate": 0.03610733181939577,
+        "guardrailRecall": 0.02051633806716753,
+        "rulesRecovered": 0.5477225575051661,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 0.44721359549995787
+      }
+    },
+    {
+      "strategy": "D",
+      "budget": 4,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.7796,
+        "unsafeFnRate": 0.05616417361593491,
+        "guardrailRecall": 1,
+        "rulesRecovered": 5,
+        "questions": 4,
+        "whyQuestions": 4,
+        "counterfactualQuestions": 0,
+        "interruptions": 4,
+        "statedRules": 7,
+        "inducedRules": 1.8
+      },
+      "std": {
+        "fidelity": 0.04262393693689029,
+        "unsafeFnRate": 0.03174077842099901,
+        "guardrailRecall": 0,
+        "rulesRecovered": 0,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 0.44721359549995804
+      }
+    },
+    {
+      "strategy": "D",
+      "budget": 6,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.8968,
+        "unsafeFnRate": 0.03700490564989476,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6.2,
+        "questions": 6,
+        "whyQuestions": 5.8,
+        "counterfactualQuestions": 0.2,
+        "interruptions": 5.8,
+        "statedRules": 8.2,
+        "inducedRules": 0.6
+      },
+      "std": {
+        "fidelity": 0.04114851151621404,
+        "unsafeFnRate": 0.02406627831906016,
+        "guardrailRecall": 0,
+        "rulesRecovered": 0.4472135954999579,
+        "questions": 0,
+        "whyQuestions": 0.44721359549995787,
+        "counterfactualQuestions": 0.44721359549995804,
+        "interruptions": 0.44721359549995787,
+        "statedRules": 0.4472135954999579,
+        "inducedRules": 0.5477225575051662
+      }
+    },
+    {
+      "strategy": "D",
+      "budget": 8,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.9904,
+        "unsafeFnRate": 0.012467532467532468,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6.8,
+        "questions": 8,
+        "whyQuestions": 6.8,
+        "counterfactualQuestions": 1.2,
+        "interruptions": 7,
+        "statedRules": 8.8,
+        "inducedRules": 0
+      },
+      "std": {
+        "fidelity": 0.021466252583998,
+        "unsafeFnRate": 0.027878250109088287,
+        "guardrailRecall": 0,
+        "rulesRecovered": 0.44721359549995787,
+        "questions": 0,
+        "whyQuestions": 0.44721359549995787,
+        "counterfactualQuestions": 0.44721359549995804,
+        "interruptions": 1.4142135623730951,
+        "statedRules": 0.4472135954999579,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "D",
+      "budget": 12,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.9904,
+        "unsafeFnRate": 0.012467532467532468,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6.8,
+        "questions": 11.8,
+        "whyQuestions": 6.8,
+        "counterfactualQuestions": 5,
+        "interruptions": 7.8,
+        "statedRules": 8.8,
+        "inducedRules": 0
+      },
+      "std": {
+        "fidelity": 0.021466252583998,
+        "unsafeFnRate": 0.027878250109088287,
+        "guardrailRecall": 0,
+        "rulesRecovered": 0.44721359549995787,
+        "questions": 0.4472135954999579,
+        "whyQuestions": 0.44721359549995787,
+        "counterfactualQuestions": 0,
+        "interruptions": 2.16794833886788,
+        "statedRules": 0.4472135954999579,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "D",
+      "budget": 16,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.9904,
+        "unsafeFnRate": 0.012467532467532468,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6.8,
+        "questions": 12.8,
+        "whyQuestions": 6.8,
+        "counterfactualQuestions": 6,
+        "interruptions": 7.8,
+        "statedRules": 8.8,
+        "inducedRules": 0
+      },
+      "std": {
+        "fidelity": 0.021466252583998,
+        "unsafeFnRate": 0.027878250109088287,
+        "guardrailRecall": 0,
+        "rulesRecovered": 0.44721359549995787,
+        "questions": 1.0954451150103321,
+        "whyQuestions": 0.44721359549995787,
+        "counterfactualQuestions": 0.7071067811865476,
+        "interruptions": 2.16794833886788,
+        "statedRules": 0.4472135954999579,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "D",
+      "budget": 24,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.9904,
+        "unsafeFnRate": 0.012467532467532468,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6.8,
+        "questions": 12.8,
+        "whyQuestions": 6.8,
+        "counterfactualQuestions": 6,
+        "interruptions": 7.8,
+        "statedRules": 8.8,
+        "inducedRules": 0
+      },
+      "std": {
+        "fidelity": 0.021466252583998,
+        "unsafeFnRate": 0.027878250109088287,
+        "guardrailRecall": 0,
+        "rulesRecovered": 0.44721359549995787,
+        "questions": 1.0954451150103321,
+        "whyQuestions": 0.44721359549995787,
+        "counterfactualQuestions": 0.7071067811865476,
+        "interruptions": 2.16794833886788,
+        "statedRules": 0.4472135954999579,
+        "inducedRules": 0
+      }
+    }
+  ],
+  "robustness": [
+    {
+      "strategy": "A",
+      "budget": 12,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.25
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.6332,
+        "unsafeFnRate": 0.1494491812524304,
+        "guardrailRecall": 0.9830769230769232,
+        "rulesRecovered": 1.8,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 5.8
+      },
+      "std": {
+        "fidelity": 0.040978042901046445,
+        "unsafeFnRate": 0.07499901379766935,
+        "guardrailRecall": 0.03784115038845799,
+        "rulesRecovered": 0.44721359549995804,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 1.4832396974191326
+      }
+    },
+    {
+      "strategy": "B",
+      "budget": 12,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.25
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.8775999999999999,
+        "unsafeFnRate": 0.010796915167095116,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 12,
+        "whyQuestions": 12,
+        "counterfactualQuestions": 0,
+        "interruptions": 12,
+        "statedRules": 8.8,
+        "inducedRules": 0.2
+      },
+      "std": {
+        "fidelity": 0.07450369118372592,
+        "unsafeFnRate": 0.02414263626092318,
+        "guardrailRecall": 0,
+        "rulesRecovered": 0.7071067811865476,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0.4472135954999579,
+        "inducedRules": 0.447213595499958
+      }
+    },
+    {
+      "strategy": "C",
+      "budget": 12,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.25
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.9308,
+        "unsafeFnRate": 0.03940832482178081,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6,
+        "questions": 12,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 7,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 0.8
+      },
+      "std": {
+        "fidelity": 0.008074651695274509,
+        "unsafeFnRate": 0.026172506544376046,
+        "guardrailRecall": 0,
+        "rulesRecovered": 0,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 0.44721359549995804
+      }
+    },
+    {
+      "strategy": "D",
+      "budget": 12,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.25
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.9783999999999999,
+        "unsafeFnRate": 0.013999265515975027,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6.8,
+        "questions": 11.8,
+        "whyQuestions": 7.2,
+        "counterfactualQuestions": 4.6,
+        "interruptions": 8,
+        "statedRules": 8.8,
+        "inducedRules": 0
+      },
+      "std": {
+        "fidelity": 0.032199378875996956,
+        "unsafeFnRate": 0.024751871897850664,
+        "guardrailRecall": 0,
+        "rulesRecovered": 0.44721359549995787,
+        "questions": 0.4472135954999579,
+        "whyQuestions": 1.0954451150103321,
+        "counterfactualQuestions": 0.8944271909999159,
+        "interruptions": 2.345207879911715,
+        "statedRules": 0.4472135954999579,
+        "inducedRules": 0
+      }
+    },
+    {
+      "strategy": "A",
+      "budget": 12,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.5
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.6332,
+        "unsafeFnRate": 0.1494491812524304,
+        "guardrailRecall": 0.9830769230769232,
+        "rulesRecovered": 1.8,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 5.8
+      },
+      "std": {
+        "fidelity": 0.040978042901046445,
+        "unsafeFnRate": 0.07499901379766935,
+        "guardrailRecall": 0.03784115038845799,
+        "rulesRecovered": 0.44721359549995804,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 1.4832396974191326
+      }
+    },
+    {
+      "strategy": "B",
+      "budget": 12,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.5
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.8583999999999999,
+        "unsafeFnRate": 0.02202424171065628,
+        "guardrailRecall": 1,
+        "rulesRecovered": 5.8,
+        "questions": 12,
+        "whyQuestions": 12,
+        "counterfactualQuestions": 0,
+        "interruptions": 12,
+        "statedRules": 8.8,
+        "inducedRules": 0.2
+      },
+      "std": {
+        "fidelity": 0.048957124098541575,
+        "unsafeFnRate": 0.028885692746930453,
+        "guardrailRecall": 0,
+        "rulesRecovered": 0.8366600265340756,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0.4472135954999579,
+        "inducedRules": 0.447213595499958
+      }
+    },
+    {
+      "strategy": "C",
+      "budget": 12,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.5
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.8044,
+        "unsafeFnRate": 0.04141485120797107,
+        "guardrailRecall": 1,
+        "rulesRecovered": 5,
+        "questions": 12,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 7,
+        "interruptions": 5,
+        "statedRules": 8,
+        "inducedRules": 0.8
+      },
+      "std": {
+        "fidelity": 0.07613671913078472,
+        "unsafeFnRate": 0.02605391210304793,
+        "guardrailRecall": 0,
+        "rulesRecovered": 0,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 0.4472135954999579
+      }
+    },
+    {
+      "strategy": "D",
+      "budget": 12,
+      "expert": {
+        "noise": 0,
+        "vagueness": 0.5
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.8628,
+        "unsafeFnRate": 0.015457519579656983,
+        "guardrailRecall": 1,
+        "rulesRecovered": 5.6,
+        "questions": 11.8,
+        "whyQuestions": 8.6,
+        "counterfactualQuestions": 3.2,
+        "interruptions": 9,
+        "statedRules": 8.8,
+        "inducedRules": 0.2
+      },
+      "std": {
+        "fidelity": 0.06655223512399863,
+        "unsafeFnRate": 0.021929079575081785,
+        "guardrailRecall": 0,
+        "rulesRecovered": 0.5477225575051662,
+        "questions": 0.4472135954999579,
+        "whyQuestions": 1.9493588689617927,
+        "counterfactualQuestions": 1.9235384061671346,
+        "interruptions": 2.9154759474226504,
+        "statedRules": 0.4472135954999579,
+        "inducedRules": 0.44721359549995804
+      }
+    },
+    {
+      "strategy": "A",
+      "budget": 12,
+      "expert": {
+        "noise": 0.1,
+        "vagueness": 0
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.6312,
+        "unsafeFnRate": 0.1110448552755734,
+        "guardrailRecall": 1,
+        "rulesRecovered": 1.8,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 6.6
+      },
+      "std": {
+        "fidelity": 0.022027255843613404,
+        "unsafeFnRate": 0.07657101634067645,
+        "guardrailRecall": 0,
+        "rulesRecovered": 0.4472135954999579,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0,
+        "inducedRules": 1.9493588689617927
+      }
+    },
+    {
+      "strategy": "B",
+      "budget": 12,
+      "expert": {
+        "noise": 0.1,
+        "vagueness": 0
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.9176,
+        "unsafeFnRate": 0.007712082262210797,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6.8,
+        "questions": 12,
+        "whyQuestions": 12,
+        "counterfactualQuestions": 0,
+        "interruptions": 12,
+        "statedRules": 8.8,
+        "inducedRules": 0.4
+      },
+      "std": {
+        "fidelity": 0.07630727357205211,
+        "unsafeFnRate": 0.0172447401863737,
+        "guardrailRecall": 0,
+        "rulesRecovered": 0.4472135954999579,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0.4472135954999579,
+        "inducedRules": 0.894427190999916
+      }
+    },
+    {
+      "strategy": "C",
+      "budget": 12,
+      "expert": {
+        "noise": 0.1,
+        "vagueness": 0
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.8864000000000001,
+        "unsafeFnRate": 0.04091334936022437,
+        "guardrailRecall": 1,
+        "rulesRecovered": 5.8,
+        "questions": 12,
+        "whyQuestions": 5,
+        "counterfactualQuestions": 7,
+        "interruptions": 5,
+        "statedRules": 7.6,
+        "inducedRules": 1.2
+      },
+      "std": {
+        "fidelity": 0.06943198110381123,
+        "unsafeFnRate": 0.019010400253770324,
+        "guardrailRecall": 0,
+        "rulesRecovered": 0.4472135954999579,
+        "questions": 0,
+        "whyQuestions": 0,
+        "counterfactualQuestions": 0,
+        "interruptions": 0,
+        "statedRules": 0.5477225575051662,
+        "inducedRules": 1.0954451150103321
+      }
+    },
+    {
+      "strategy": "D",
+      "budget": 12,
+      "expert": {
+        "noise": 0.1,
+        "vagueness": 0
+      },
+      "n": 5,
+      "mean": {
+        "fidelity": 0.9795999999999999,
+        "unsafeFnRate": 0.012467532467532468,
+        "guardrailRecall": 1,
+        "rulesRecovered": 6.8,
+        "questions": 12,
+        "whyQuestions": 8.8,
+        "counterfactualQuestions": 3.2,
+        "interruptions": 9.4,
+        "statedRules": 8.8,
+        "inducedRules": 0.2
+      },
+      "std": {
+        "fidelity": 0.02801428207182903,
+        "unsafeFnRate": 0.027878250109088287,
+        "guardrailRecall": 0,
+        "rulesRecovered": 0.44721359549995787,
+        "questions": 0,
+        "whyQuestions": 2.04939015319192,
+        "counterfactualQuestions": 2.04939015319192,
+        "interruptions": 2.4083189157584592,
+        "statedRules": 0.4472135954999579,
+        "inducedRules": 0.447213595499958
+      }
+    }
+  ]
+}
