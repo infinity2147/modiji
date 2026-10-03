@@ -4,8 +4,10 @@
  * Next's route bundles never load SQLite, Drizzle or Z3 themselves: everything from
  * `@vashistha/core/server` is imported here as a type only.
  */
-import type { ElevenLabsClient, Ledger, ServerEnv } from "@vashistha/core/server";
+import type { ConfirmedRule } from "@vashistha/core";
+import type { Claude, ElevenLabsClient, Ledger, ServerEnv } from "@vashistha/core/server";
 import type { AuthorizationStore } from "./authorizations";
+import type { CaseDeskStore } from "./casedesk/session";
 import type { RateLimiter } from "./rate-limit";
 
 export type CheckResult = { ok: true; ms: number } | { ok: false; error: string; ms?: number };
@@ -16,6 +18,12 @@ export type Runtime = {
   authorizations: AuthorizationStore;
   /** Null when ELEVENLABS_API_KEY is not set (allowed outside production). */
   elevenLabs: ElevenLabsClient | null;
+  /** Null when ANTHROPIC_API_KEY is not set (allowed outside production). Refuses any prompt carrying an oracle marker. */
+  claude: Claude | null;
+  /** The confirmed rulebook in force now. Empty until confirmed rules exist (P5); a function so storage can back it. */
+  rulebook: () => readonly ConfirmedRule[];
+  /** CaseDesk session facts and per-session frame order. */
+  casedesk: CaseDeskStore;
   voiceTokenLimiter: RateLimiter;
   /** Probes behind `GET /api/health/deep`. */
   checks: { db: () => CheckResult; dataDir: () => Promise<CheckResult>; z3: () => Promise<CheckResult> };

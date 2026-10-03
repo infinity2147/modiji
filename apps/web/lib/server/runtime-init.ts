@@ -7,16 +7,22 @@ import { randomUUID } from "node:crypto";
 import { unlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import {
+  createClaude,
   createElevenLabsClient,
   createLedger,
   loadServerEnv,
   openDatabase,
   type OpenedDatabase,
 } from "@vashistha/core/server";
+import { ORACLE_MARKER as KYC_ORACLE_MARKER } from "@vashistha/core/domains/kyc/oracle";
 import { z3SelfTest } from "@vashistha/solver";
 import { createAuthorizationStore } from "./authorizations";
+import { createCaseDeskStore } from "./casedesk/session";
 import { createRateLimiter } from "./rate-limit";
 import { registerRuntime, type CheckResult, type Runtime } from "./runtime";
+
+/** Markers of every hidden policy this process loads; the model wrapper refuses prompts containing any. */
+const ORACLE_MARKERS = [KYC_ORACLE_MARKER];
 
 /** Tokens cost agent minutes; a real session needs one or two. */
 const VOICE_TOKEN_RATE_LIMIT = { limit: 10, windowMs: 60_000 };
@@ -96,6 +102,12 @@ export function createRuntime(source: Readonly<Record<string, string | undefined
     ledger: createLedger(opened.db),
     authorizations: createAuthorizationStore(),
     elevenLabs: env.ELEVENLABS_API_KEY === undefined ? null : createElevenLabsClient({ apiKey: env.ELEVENLABS_API_KEY }),
+    claude:
+      env.ANTHROPIC_API_KEY === undefined
+        ? null
+        : createClaude({ apiKey: env.ANTHROPIC_API_KEY, forbiddenMarkers: ORACLE_MARKERS }),
+    rulebook: () => [],
+    casedesk: createCaseDeskStore(),
     voiceTokenLimiter: createRateLimiter(VOICE_TOKEN_RATE_LIMIT),
     checks: { db: () => probeDatabase(opened), dataDir: () => probeDataDir(env.DATA_DIR), z3: probeZ3 },
   };

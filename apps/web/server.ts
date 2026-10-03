@@ -5,17 +5,32 @@
  */
 import { existsSync } from "node:fs";
 import { createServer } from "node:http";
+import { registerHooks } from "node:module";
 import type { Socket } from "node:net";
 import next from "next";
 import { EnvError } from "@vashistha/core/server";
-import { createRuntime } from "./lib/server/runtime-init";
 
 const SHUTDOWN_TIMEOUT_MS = 10_000;
 /** Local development reads the repo-root `.env` (the same file scripts use); production env comes from Railway only. */
 const ROOT_ENV_FILE = new URL("../../.env", import.meta.url);
 const HOSTNAME = "0.0.0.0";
 
+/**
+ * `server-only` throws unless resolved under the `react-server` condition, which Next applies inside
+ * its bundles. This process IS the server, and the composition root loads `*.oracle.server.ts`
+ * modules (whose first import is `server-only`) unbundled, so resolve it the same way here. Only
+ * that one specifier changes; it must be registered before the runtime's module graph is loaded.
+ */
+registerHooks({
+  resolve(specifier, context, nextResolve) {
+    return specifier === "server-only"
+      ? nextResolve(specifier, { ...context, conditions: [...context.conditions, "react-server"] })
+      : nextResolve(specifier, context);
+  },
+});
+
 async function main(): Promise<void> {
+  const { createRuntime } = await import("./lib/server/runtime-init");
   // Variables already set in the environment win over the file (process.loadEnvFile never overrides).
   if (process.env.NODE_ENV !== "production" && existsSync(ROOT_ENV_FILE)) process.loadEnvFile(ROOT_ENV_FILE);
   const { runtime, close: closeRuntime } = createRuntime(process.env);
