@@ -397,3 +397,29 @@ UNVERIFIED:
 - pnpm 12.8.1 blocks dependency build scripts by default. Allowed packages are listed under `allowBuilds` in `pnpm-workspace.yaml` (esbuild, better-sqlite3), managed with `pnpm approve-builds <pkg>`.
 - Next.js 16 `next-env.d.ts` imports `.next/types/*`, so `apps/web` typecheck runs `next typegen && tsc`.
 - pnpm does not forward SIGTERM to its child. The deploy start command must exec the server directly (`tsx server.ts`), not `pnpm start`.
+
+## 12. Facts verified during P0b — ElevenLabs
+- **LLM cascading and retries — VERIFIED** (eleven-agents/customization/llm/llm-cascading.md; agents/create.md):
+  - Custom LLMs never fall back to hosted models.
+  - On errors, timeouts **or empty responses**, ElevenLabs retries the *same* custom LLM, at least 3 attempts.
+  - Consequences for `/api/llm`:
+    1. Never send an empty completion; the skip path always streams the `skip_turn` tool call.
+    2. A nonce is `issued → in_flight → used`. It returns to `issued` if the speech stream aborts before completing, so a retry inside the TTL can still speak, exactly once.
+  - We also set `backup_llm_config.preference: "disabled"`.
+- **Default voice expiry — VERIFIED** (help-center/…/what-are-default-voices.md):
+  - The agents-platform default `tts.voice_id` is `cjVigY5qzO86Huf0OWal` (agents/create.md).
+  - Default voices "expire on December 31, 2026 and are only available for accounts created before March 2026". `agents:sync` validates the voice with `GET /v1/voices/{id}` and stops if it is missing.
+- **Workspace secrets — VERIFIED** (api-reference/workspace/secrets/list.md, create.md):
+  - `GET /v1/convai/secrets` takes `page_size`, `search`, `cursor` and returns `{secrets:[{type:"stored",secret_id,name,used_by}], next_cursor?}`.
+  - Sync names the secret `vashistha_custom_llm_<sha256[:12]>`, so it is idempotent without reading the value back.
+- **Signed URL — VERIFIED:** a `wss://…&conversation_signature=…` URL, valid for 15 minutes. Over WebRTC, `audio` events are not sent because LiveKit carries the audio; over the WebSocket they are. Preflight's voice probe uses the WebSocket for this reason.
+- **Client overrides and auth — VERIFIED** (create.md, react.md):
+  - Override flags under `platform_settings.overrides.conversation_config_override` are booleans that default to false. We set `first_message` and `prompt.llm` false explicitly and check this as an invariant.
+  - `auth.enable_auth: true` makes conversations require a signed URL or a conversation token.
+- **PATCH agent publishes drafts — VERIFIED** (agents/update.md): if `procedures` is omitted, pending procedure drafts are used. This matters for the Procedure export in P8.
+
+## 13. Railway — DIFFERS FROM DEFAULTS
+- Config as Code (`railway.json`/`railway.toml`) is **deprecated**. New services cannot opt in, and existing files stop being read on 2026-12-01 (docs.railway.com/infrastructure-as-code, line 32–40 of the saved page). We use `.railway/railway.ts` with the `railway` TypeScript SDK 3.12.0 and `@railway/cli` 5.63.1, both root dev dependencies.
+- The IaC engine ships in the CLI (≥ 5.42.1), not the SDK. `railway config plan` needs a linked, authenticated project, so the file is typechecked against the SDK types but not yet planned live.
+- Railway's default deployment draining is 0 s. We set `RAILWAY_DEPLOYMENT_DRAINING_SECONDS=15`.
+- Volumes are mounted as root. The image's entrypoint `chown`s `$DATA_DIR`, then drops to `node` via `setpriv`.

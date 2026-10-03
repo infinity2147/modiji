@@ -1,31 +1,26 @@
 /**
- * The single persistent Node service (plan §5). Next.js handles pages and route handlers;
- * later phases mount the custom-LLM SSE endpoint and the MCP server on this same process.
+ * The single persistent Node service (plan §5) and the composition root: it builds the runtime
+ * (database, ledger, authorization store, ElevenLabs client, Z3 warm-up) unbundled, then hands
+ * pages and route handlers to Next.js, whose routes reach the runtime through `getRuntime()`.
  */
+import { existsSync } from "node:fs";
 import { createServer } from "node:http";
 import type { Socket } from "node:net";
 import next from "next";
+import { EnvError } from "@vashistha/core/server";
+import { createRuntime } from "./lib/server/runtime-init";
 
 const SHUTDOWN_TIMEOUT_MS = 10_000;
+/** Local development reads the repo-root `.env` (the same file scripts use); production env comes from Railway only. */
+const ROOT_ENV_FILE = new URL("../../.env", import.meta.url);
 const HOSTNAME = "0.0.0.0";
 
-type ServerConfig = { port: number; dev: boolean };
-
-/**
- * Reads the only two variables this process needs today. Full env validation lives in
- * `@vashistha/core/server` (packages/core/src/server/env.ts); swap this for it once it lands.
- */
-function readServerConfig(env: NodeJS.ProcessEnv): ServerConfig {
-  const rawPort = env["PORT"] ?? "3000";
-  const port = Number(rawPort);
-  if (!/^\d+$/.test(rawPort) || port > 65_535) {
-    throw new Error(`PORT must be an integer in 0..65535, got "${rawPort}"`);
-  }
-  return { port, dev: env["NODE_ENV"] !== "production" };
-}
-
 async function main(): Promise<void> {
-  const { port, dev } = readServerConfig(process.env);
+  // Variables already set in the environment win over the file (process.loadEnvFile never overrides).
+  if (process.env.NODE_ENV !== "production" && existsSync(ROOT_ENV_FILE)) process.loadEnvFile(ROOT_ENV_FILE);
+  const { runtime, close: closeRuntime } = createRuntime(process.env);
+  const port = runtime.env.PORT;
+  const dev = runtime.env.NODE_ENV !== "production";
   const httpServer = createServer();
   // Passing httpServer lets Next attach its own WebSocket upgrade handling (dev HMR).
   const app = next({ dev, dir: import.meta.dirname, hostname: HOSTNAME, port, httpServer });
@@ -79,7 +74,10 @@ async function main(): Promise<void> {
       app
         .close()
         .catch((error: unknown) => console.error("Error while closing Next.js", error))
-        .finally(() => process.exit(closeError ? 1 : 0));
+        .finally(() => {
+          closeRuntime();
+          process.exit(closeError ? 1 : 0);
+        });
     });
     if (inFlightRequests === 0) destroySockets();
     else httpServer.closeIdleConnections();
@@ -94,6 +92,8 @@ async function main(): Promise<void> {
 }
 
 main().catch((error: unknown) => {
-  console.error("Server failed to start", error);
+  // EnvError messages name variables only; print just the message so nothing else is echoed.
+  if (error instanceof EnvError) console.error(`Server failed to start. ${error.message}`);
+  else console.error("Server failed to start", error);
   process.exit(1);
 });

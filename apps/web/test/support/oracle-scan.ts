@@ -18,6 +18,9 @@ import path from "node:path";
 import ts from "typescript";
 import { SymbolIdSchema } from "@vashistha/core";
 
+/** The model-prompt guard lives in core (`oracle-guard.ts`); re-exported for the existing tests. */
+export { findMarkersInText } from "@vashistha/core";
+
 export type OracleModule = { file: string; marker: string };
 export type MarkerHit = { file: string; marker: string };
 
@@ -142,9 +145,4 @@ export async function scanFilesForMarkers(files: readonly string[], markers: rea
 /** Every marker occurrence in any text file under `dir`. */
 export async function scanForMarkers(dir: string, markers: readonly string[]): Promise<MarkerHit[]> {
   return scanFilesForMarkers(await listTextFiles(dir), markers);
-}
-
-/** Markers present in `text` — reused by the model-prompt guard. */
-export function findMarkersInText(text: string, markers: readonly string[]): string[] {
-  return markers.filter((marker) => text.includes(marker));
 }

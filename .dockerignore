@@ -1,0 +1,21 @@
+# Build context is the repo root; keep it to sources and the lockfile.
+**/node_modules
+**/.next
+.git
+.vitest
+**/coverage
+**/dist
+**/*.tsbuildinfo
+data
+**/*.db
+**/*.db-journal
+**/*.db-wal
+**/*.db-shm
+.env
+.env.*
+!.env.example
+docs/evidence
+**/test-results
+**/playwright-report
+Dockerfile
+.dockerignore

@@ -66,3 +66,40 @@ Phase log for Vashistha (codename). Spec: `plan.md` v2. Decisions D0–D6 are fi
 4. Context values are not yet validated against feature types. Ingestion (P1/P2) must validate them or map them to `Unknown`. LLM-proposed predicates must pass `typecheckPredicate` (P4).
 5. `openDatabase` resolves migrations relative to its own module, so it must run where it isn't bundled by Next. Handled in P0b.
 6. `claude-haiku-4-5-20251001` has an earliest retirement date of 15 Oct 2026 (see `docs/api-notes.md` §10).
+
+---
+
+## P0b — integration
+
+**Started:** 2026-10-04
+
+**Goal.** One persistent Node service deployable to Railway (D5) with a volume, containing:
+- ElevenLabs agents created and updated only by `scripts/agents.ts` from versioned JSON in `/agents`.
+- A server-minted WebRTC conversation token endpoint.
+- An OpenAI-compatible SSE custom-LLM endpoint (D2 option A) that returns `skip_turn` unless a valid `GateAuthorization` nonce is present.
+- `pnpm preflight` covering every check in plan §12.
+
+API facts come from `docs/api-notes.md`, not `plan.md` §15.
+
+**Files.**
+- `packages/core/src/server/elevenlabs*.ts`: typed raw-REST client and agent-invariant checks.
+- `packages/core/src/server/claude.ts`: Anthropic wrapper with structured output, prompt caching and the oracle prompt guard.
+- `packages/core/src/oracle-guard.ts`
+- `packages/solver/`: Z3 init and self-test.
+- `agents/interviewer.json`, `agents/tutor.json`, `scripts/agents.ts`
+- `apps/web/lib/server/*`: runtime composition root, authorization store, custom-LLM handler.
+- `apps/web/app/api/{llm/chat/completions,voice/token,preflight/authorize,health/deep}`
+- `apps/web/app/sandbox`
+- `Dockerfile`, `railway.json`
+- `scripts/preflight.ts`
+
+**Acceptance (plan §11–12).** `pnpm preflight` is all green against the deployed public URL:
+- Anthropic call with structured output.
+- ElevenLabs agents exist with the invariant config.
+- Conversation token minted.
+- Custom-LLM URL reachable from the public internet.
+- `skip_turn` honoured end to end through ElevenLabs: no agent speech on an unauthorised turn, and speech plus TTS audio on an authorised one.
+- DB and `DATA_DIR` writable.
+- Z3 initialises.
+- Sandbox route up.
+- Mic/screen permission checklist printed.

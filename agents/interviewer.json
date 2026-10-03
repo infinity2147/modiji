@@ -1,0 +1,112 @@
+{
+  "version": 1,
+  "name": "vashistha-interviewer",
+  "role": "interviewer",
+  "body": {
+    "conversation_config": {
+      "agent": {
+        "first_message": "",
+        "language": "en",
+        "prompt": {
+          "prompt": "You are the voice of an apprentice interviewer. You never decide whether, when or what to speak: the server supplies every utterance verbatim and stays silent otherwise. This prompt is not used for any decision.",
+          "llm": "custom-llm",
+          "custom_llm": {
+            "url": "{{PUBLIC_BASE_URL}}/api/llm",
+            "model_id": "vashistha-interviewer-v1",
+            "api_key": { "secret_id": "{{CUSTOM_LLM_SECRET_ID}}" },
+            "api_type": "chat_completions"
+          },
+          "backup_llm_config": { "preference": "disabled" },
+          "built_in_tools": {
+            "skip_turn": {
+              "type": "system",
+              "name": "skip_turn",
+              "description": "",
+              "pre_tool_speech": "off",
+              "params": { "system_tool_type": "skip_turn" }
+            },
+            "end_call": {
+              "type": "system",
+              "name": "end_call",
+              "description": "",
+              "params": { "system_tool_type": "end_call" }
+            },
+            "language_detection": {
+              "type": "system",
+              "name": "language_detection",
+              "description": "",
+              "params": { "system_tool_type": "language_detection" }
+            }
+          },
+          "tool_ids": []
+        }
+      },
+      "turn": {
+        "turn_eagerness": "patient",
+        "turn_timeout": 30,
+        "soft_timeout_config": { "timeout_seconds": -1 }
+      },
+      "tts": {
+        "model_id": "eleven_v3_conversational",
+        "expressive_mode": true,
+        "voice_id": "cjVigY5qzO86Huf0OWal"
+      },
+      "asr": {
+        "provider": "scribe_realtime",
+        "keywords": [
+          "Northstar",
+          "CaseDesk",
+          "KYC",
+          "AML",
+          "beneficial owner",
+          "ultimate beneficial owner",
+          "UBO",
+          "ownership threshold",
+          "customer due diligence",
+          "CDD",
+          "enhanced due diligence",
+          "EDD",
+          "PEP",
+          "politically exposed person",
+          "source of funds",
+          "source of wealth",
+          "jurisdiction",
+          "high-risk jurisdiction",
+          "sanctions screening",
+          "adverse media",
+          "shell company",
+          "nominee director",
+          "risk rating",
+          "escalate",
+          "compliance officer"
+        ]
+      },
+      "conversation": {
+        "max_duration_seconds": 3600,
+        "client_events": [
+          "conversation_initiation_metadata",
+          "ping",
+          "audio",
+          "interruption",
+          "user_transcript",
+          "agent_response",
+          "agent_response_correction",
+          "agent_tool_response",
+          "client_tool_call",
+          "vad_score",
+          "client_error"
+        ]
+      }
+    },
+    "platform_settings": {
+      "auth": { "enable_auth": true },
+      "privacy": { "retention_days": 30, "record_voice": true },
+      "overrides": {
+        "custom_llm_extra_body": true,
+        "conversation_config_override": {
+          "agent": { "first_message": false, "prompt": { "llm": false } }
+        }
+      }
+    }
+  }
+}

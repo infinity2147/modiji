@@ -1,0 +1,15 @@
+{
+  "name": "@vashistha/solver",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@vashistha/core": "workspace:*",
+    "z3-solver": "^5.2.0"
+  }
+}
