@@ -11,7 +11,8 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "check": "pnpm typecheck && pnpm lint && pnpm test",
+    "test:bundle": "pnpm --filter @vashistha/web build && vitest run --project web-bundle",
+    "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm test:bundle",
     "db:generate": "pnpm --filter @vashistha/core db:generate"
   },
   "devDependencies": {

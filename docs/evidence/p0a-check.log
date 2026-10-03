@@ -1,0 +1,61 @@
+$ pnpm typecheck && pnpm lint && pnpm test && pnpm test:bundle
+$ pnpm -r --parallel run typecheck
+Scope: 2 of 3 workspace projects
+apps/web typecheck$ next typegen && tsc -p tsconfig.json
+packages/core typecheck$ tsc -p tsconfig.json
+apps/web typecheck: Generating route types...
+apps/web typecheck: ✓ Types generated successfully
+apps/web typecheck: Done
+packages/core typecheck: Done
+$ eslint .
+$ vitest run
+
+ RUN  v5.0.3 /home/24b4530/modiji
+
+
+ Test Files  11 passed (11)
+      Tests  243 passed (243)
+   Start at  00:51:12
+   Duration  1.23s (import 55%, transform 31%, tests 13%, worker 1%)
+
+$ pnpm --filter @vashistha/web build && vitest run --project web-bundle
+$ next build
+▲ Next.js 16.3.8 (Turbopack)
+✓ Running next.config.ts took 34ms
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 1352ms
+  Running TypeScript ...
+  Finished TypeScript in 3.7s ...
+  Collecting page data using 5 workers ...
+  Generating static pages using 5 workers (0/3) ...
+✓ Generating static pages using 5 workers (3/3) in 752ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+└ ƒ /api/health
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+
+ RUN  v5.0.3 /home/24b4530/modiji
+
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  00:51:47
+   Duration  1.06s (import 71%, transform 26%, tests 2%, worker 1%)
+
+
+real	0m44.317s
+user	0m43.853s
+sys	0m4.920s
