@@ -423,3 +423,14 @@ UNVERIFIED:
 - The IaC engine ships in the CLI (≥ 5.42.1), not the SDK. `railway config plan` needs a linked, authenticated project, so the file is typechecked against the SDK types but not yet planned live.
 - Railway's default deployment draining is 0 s. We set `RAILWAY_DEPLOYMENT_DRAINING_SECONDS=15`.
 - Volumes are mounted as root. The image's entrypoint `chown`s `$DATA_DIR`, then drops to `node` via `setpriv`.
+
+## 14. Playwright browser install — DIFFERS FROM DEFAULTS
+- `@playwright/test` is pinned to **1.63.0** (Chromium headless shell revision **1243**, Chrome for Testing 153.0.8010.12).
+- On this network `npx playwright install chromium` fails ("Download failure, code=1"). The Chrome-for-Testing file itself is reachable, so the headless shell was installed manually:
+  ```sh
+  D=~/.cache/ms-playwright/chromium_headless_shell-1243 && mkdir -p $D && cd $D
+  curl -fL -o hs.zip https://storage.googleapis.com/chrome-for-testing-public/153.0.8010.12/linux64/chrome-headless-shell-linux64.zip
+  python3 -c "import zipfile;zipfile.ZipFile('hs.zip').extractall('.')" && rm hs.zip
+  touch INSTALLATION_COMPLETE DEPENDENCIES_VALIDATED
+  ```
+- `ldd` showed every shared library present (Debian 13), so no system packages were needed. On a machine where the normal installer works, use `pnpm --filter @vashistha/web exec playwright install chromium`.

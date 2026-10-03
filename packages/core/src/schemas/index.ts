@@ -7,3 +7,5 @@ export * from "./context";
 export * from "./rules";
 export * from "./guardrail";
 export * from "./gate";
+export * from "./engine";
+export * from "./workmap";
