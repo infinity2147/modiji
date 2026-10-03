@@ -8,5 +8,6 @@ export * from "./oracle-guard";
 export * from "./agents";
 export * from "./domain/values";
 export * from "./rules/check-action";
-export { predicateNode, type PredicateNode } from "./logic/node";
 export * from "./gate/index";
+export { predicateNode, type PredicateNode } from "./logic/node";
+export * from "./engine/index";
