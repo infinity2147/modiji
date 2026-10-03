@@ -10,6 +10,7 @@
     "typecheck": "next typegen && tsc -p tsconfig.json"
   },
   "dependencies": {
+    "@elevenlabs/react": "^1.16.0",
     "@vashistha/core": "workspace:*",
     "@vashistha/solver": "workspace:*",
     "class-variance-authority": "^0.7.1",
