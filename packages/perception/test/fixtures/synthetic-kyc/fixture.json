@@ -1,0 +1,404 @@
+{
+  "version": 1,
+  "domainId": "kycNorthstar",
+  "sessionEpoch": 0,
+  "frames": [
+    {
+      "frameSeq": 1,
+      "captureTime": 1790000000250,
+      "file": "frames/000001.png"
+    },
+    {
+      "frameSeq": 2,
+      "captureTime": 1790000000750,
+      "file": "frames/000002.png"
+    },
+    {
+      "frameSeq": 3,
+      "captureTime": 1790000001250,
+      "file": "frames/000003.png"
+    },
+    {
+      "frameSeq": 4,
+      "captureTime": 1790000001750,
+      "file": "frames/000004.png"
+    },
+    {
+      "frameSeq": 5,
+      "captureTime": 1790000002250,
+      "file": "frames/000005.png"
+    },
+    {
+      "frameSeq": 6,
+      "captureTime": 1790000002750,
+      "file": "frames/000006.png"
+    },
+    {
+      "frameSeq": 7,
+      "captureTime": 1790000003250,
+      "file": "frames/000007.png"
+    },
+    {
+      "frameSeq": 8,
+      "captureTime": 1790000003750,
+      "file": "frames/000008.png"
+    },
+    {
+      "frameSeq": 9,
+      "captureTime": 1790000004250,
+      "file": "frames/000009.png"
+    },
+    {
+      "frameSeq": 10,
+      "captureTime": 1790000004750,
+      "file": "frames/000010.png"
+    },
+    {
+      "frameSeq": 11,
+      "captureTime": 1790000005250,
+      "file": "frames/000011.png"
+    },
+    {
+      "frameSeq": 12,
+      "captureTime": 1790000005750,
+      "file": "frames/000012.png"
+    },
+    {
+      "frameSeq": 13,
+      "captureTime": 1790000006250,
+      "file": "frames/000013.png"
+    },
+    {
+      "frameSeq": 14,
+      "captureTime": 1790000006750,
+      "file": "frames/000014.png"
+    },
+    {
+      "frameSeq": 15,
+      "captureTime": 1790000007250,
+      "file": "frames/000015.png"
+    },
+    {
+      "frameSeq": 16,
+      "captureTime": 1790000007750,
+      "file": "frames/000016.png"
+    },
+    {
+      "frameSeq": 17,
+      "captureTime": 1790000008250,
+      "file": "frames/000017.png"
+    },
+    {
+      "frameSeq": 18,
+      "captureTime": 1790000008750,
+      "file": "frames/000018.png"
+    },
+    {
+      "frameSeq": 19,
+      "captureTime": 1790000009250,
+      "file": "frames/000019.png"
+    },
+    {
+      "frameSeq": 20,
+      "captureTime": 1790000009750,
+      "file": "frames/000020.png"
+    },
+    {
+      "frameSeq": 21,
+      "captureTime": 1790000010250,
+      "file": "frames/000021.png"
+    },
+    {
+      "frameSeq": 22,
+      "captureTime": 1790000010750,
+      "file": "frames/000022.png"
+    },
+    {
+      "frameSeq": 23,
+      "captureTime": 1790000011250,
+      "file": "frames/000023.png"
+    },
+    {
+      "frameSeq": 24,
+      "captureTime": 1790000011750,
+      "file": "frames/000024.png"
+    },
+    {
+      "frameSeq": 25,
+      "captureTime": 1790000012250,
+      "file": "frames/000025.png"
+    },
+    {
+      "frameSeq": 26,
+      "captureTime": 1790000012750,
+      "file": "frames/000026.png"
+    },
+    {
+      "frameSeq": 27,
+      "captureTime": 1790000013250,
+      "file": "frames/000027.png"
+    },
+    {
+      "frameSeq": 28,
+      "captureTime": 1790000013750,
+      "file": "frames/000028.png"
+    },
+    {
+      "frameSeq": 29,
+      "captureTime": 1790000014250,
+      "file": "frames/000029.png"
+    },
+    {
+      "frameSeq": 30,
+      "captureTime": 1790000014750,
+      "file": "frames/000030.png"
+    },
+    {
+      "frameSeq": 31,
+      "captureTime": 1790000015250,
+      "file": "frames/000031.png"
+    },
+    {
+      "frameSeq": 32,
+      "captureTime": 1790000015750,
+      "file": "frames/000032.png"
+    },
+    {
+      "frameSeq": 33,
+      "captureTime": 1790000016250,
+      "file": "frames/000033.png"
+    },
+    {
+      "frameSeq": 34,
+      "captureTime": 1790000016750,
+      "file": "frames/000034.png"
+    },
+    {
+      "frameSeq": 35,
+      "captureTime": 1790000017250,
+      "file": "frames/000035.png"
+    },
+    {
+      "frameSeq": 36,
+      "captureTime": 1790000017750,
+      "file": "frames/000036.png"
+    },
+    {
+      "frameSeq": 37,
+      "captureTime": 1790000018250,
+      "file": "frames/000037.png"
+    },
+    {
+      "frameSeq": 38,
+      "captureTime": 1790000018750,
+      "file": "frames/000038.png"
+    },
+    {
+      "frameSeq": 39,
+      "captureTime": 1790000019250,
+      "file": "frames/000039.png"
+    },
+    {
+      "frameSeq": 40,
+      "captureTime": 1790000019750,
+      "file": "frames/000040.png"
+    },
+    {
+      "frameSeq": 41,
+      "captureTime": 1790000020250,
+      "file": "frames/000041.png"
+    },
+    {
+      "frameSeq": 42,
+      "captureTime": 1790000020750,
+      "file": "frames/000042.png"
+    },
+    {
+      "frameSeq": 43,
+      "captureTime": 1790000021250,
+      "file": "frames/000043.png"
+    },
+    {
+      "frameSeq": 44,
+      "captureTime": 1790000021750,
+      "file": "frames/000044.png"
+    },
+    {
+      "frameSeq": 45,
+      "captureTime": 1790000022250,
+      "file": "frames/000045.png"
+    },
+    {
+      "frameSeq": 46,
+      "captureTime": 1790000022750,
+      "file": "frames/000046.png"
+    },
+    {
+      "frameSeq": 47,
+      "captureTime": 1790000023250,
+      "file": "frames/000047.png"
+    },
+    {
+      "frameSeq": 48,
+      "captureTime": 1790000023750,
+      "file": "frames/000048.png"
+    }
+  ],
+  "domEvents": [
+    {
+      "id": "dom-1",
+      "frameSeq": 1,
+      "captureTime": 1790000000300,
+      "sessionEpoch": 0,
+      "kind": "navigate",
+      "confidence": 1,
+      "source": "dom",
+      "critical": false
+    },
+    {
+      "id": "dom-2",
+      "frameSeq": 2,
+      "captureTime": 1790000002100,
+      "sessionEpoch": 0,
+      "kind": "open_case",
+      "confidence": 1,
+      "source": "dom",
+      "critical": false,
+      "caseId": "NS-2026-0101"
+    },
+    {
+      "id": "dom-3",
+      "frameSeq": 3,
+      "captureTime": 1790000004200,
+      "sessionEpoch": 0,
+      "kind": "field_change",
+      "confidence": 1,
+      "source": "dom",
+      "critical": true,
+      "caseId": "NS-2026-0101",
+      "field": "riskRating",
+      "from": "unrated",
+      "to": "high"
+    },
+    {
+      "id": "dom-4",
+      "frameSeq": 4,
+      "captureTime": 1790000006300,
+      "sessionEpoch": 0,
+      "kind": "action",
+      "confidence": 1,
+      "source": "dom",
+      "critical": false,
+      "caseId": "NS-2026-0101",
+      "action": "enhancedReview"
+    },
+    {
+      "id": "dom-5",
+      "frameSeq": 5,
+      "captureTime": 1790000007000,
+      "sessionEpoch": 0,
+      "kind": "navigate",
+      "confidence": 1,
+      "source": "dom",
+      "critical": false
+    },
+    {
+      "id": "dom-6",
+      "frameSeq": 6,
+      "captureTime": 1790000007600,
+      "sessionEpoch": 0,
+      "kind": "open_case",
+      "confidence": 1,
+      "source": "dom",
+      "critical": false,
+      "caseId": "NS-2026-0102"
+    },
+    {
+      "id": "dom-7",
+      "frameSeq": 7,
+      "captureTime": 1790000009900,
+      "sessionEpoch": 0,
+      "kind": "field_change",
+      "confidence": 1,
+      "source": "dom",
+      "critical": true,
+      "caseId": "NS-2026-0102",
+      "field": "riskRating",
+      "from": "unrated",
+      "to": "medium"
+    },
+    {
+      "id": "dom-8",
+      "frameSeq": 8,
+      "captureTime": 1790000011800,
+      "sessionEpoch": 0,
+      "kind": "field_change",
+      "confidence": 1,
+      "source": "dom",
+      "critical": true,
+      "caseId": "NS-2026-0102",
+      "field": "riskRating",
+      "from": "medium",
+      "to": "low"
+    },
+    {
+      "id": "dom-9",
+      "frameSeq": 9,
+      "captureTime": 1790000013600,
+      "sessionEpoch": 0,
+      "kind": "action",
+      "confidence": 1,
+      "source": "dom",
+      "critical": false,
+      "caseId": "NS-2026-0102",
+      "action": "approve"
+    },
+    {
+      "id": "dom-10",
+      "frameSeq": 10,
+      "captureTime": 1790000015400,
+      "sessionEpoch": 0,
+      "kind": "open_case",
+      "confidence": 1,
+      "source": "dom",
+      "critical": false,
+      "caseId": "NS-2026-0103"
+    },
+    {
+      "id": "dom-11",
+      "frameSeq": 11,
+      "captureTime": 1790000017300,
+      "sessionEpoch": 0,
+      "kind": "field_change",
+      "confidence": 1,
+      "source": "dom",
+      "critical": true,
+      "caseId": "NS-2026-0103",
+      "field": "riskRating",
+      "from": "unrated",
+      "to": "high"
+    },
+    {
+      "id": "dom-12",
+      "frameSeq": 12,
+      "captureTime": 1790000019200,
+      "sessionEpoch": 0,
+      "kind": "action",
+      "confidence": 1,
+      "source": "dom",
+      "critical": false,
+      "caseId": "NS-2026-0103",
+      "action": "escalateCompliance"
+    },
+    {
+      "id": "dom-13",
+      "frameSeq": 13,
+      "captureTime": 1790000021000,
+      "sessionEpoch": 0,
+      "kind": "navigate",
+      "confidence": 1,
+      "source": "dom",
+      "critical": false
+    }
+  ]
+}
