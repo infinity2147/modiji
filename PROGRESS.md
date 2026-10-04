@@ -396,3 +396,29 @@ A tuning pass is in progress. **Thresholds are unchanged.**
 - MCP `check_action` over Streamable HTTP, mounted at `/mcp` with a bearer token. It matches the interlock on 300 random cases.
 - Work Map JSON round-trip; ElevenLabs Procedure compile/parse round-trip plus publisher.
 - `agent-blocked` demo: the scripted run blocks with the quote; the live Claude run is pending.
+
+### P2 — live tuning result and DECISION NEEDED (2026-10-04)
+
+All 4 permitted live passes were used. Thresholds, fixture, matching window and the one-in-flight rule were left unchanged. Run 4 is the final code (`docs/evidence/p2/eval-live-4.txt`):
+
+| Metric | Baseline | Run 4 | Threshold | Result |
+|---|---|---|---|---|
+| Critical field-change recall | 0.192 | 0.577 | ≥ 0.95 | FAIL |
+| Critical action recall | 0.262 | 0.667 | ≥ 0.95 | FAIL |
+| False critical rate | 0.432 | 0.227 | ≤ 0.05 | FAIL |
+| p95 frame→event (server) | 8.9 s | 3.7 s | ≤ 3 s | FAIL |
+
+- End-to-end estimate including client OCR: p95 5.8 s (`docs/evidence/p2/e2e-latency.json`).
+- 16/17 false criticals come from Haiku misreading the small grey case id ("NS-2626-…"). With ids corrected after the fact (diagnostic only, not a result): false critical 0.013, action recall 0.88.
+
+**Why field recall ≥ 0.95 cannot be met as specified.**
+- Two of the 52 edits are never visible in any captured frame (overwritten within 500 ms), so the ceiling is 0.96 even with perfect reads.
+- Reaching that ceiling with one request in flight needs mean extraction ≤ ~0.6 s. Measured Haiku 4.5 is 0.95 s at best (text-only), with crop reads at p50 1.43 s and full-screen reads at p50 1.93 s.
+
+**Options for the team (D6).**
+1. **Read the case id on the client.** Tesseract already reads the header; sending the id as metadata would remove ~90% of false criticals. Vision is then no longer "pure Haiku", and this would be disclosed.
+2. **Larger/higher-resolution model for full-screen reads** (Sonnet/Opus at up to 2576 px). Better id reading; latency not measured.
+3. **Re-record the fixture with realistic human pacing** (no edit overwritten within 500 ms). This changes the fixture, so it is the team's call.
+4. **Revise the P2 thresholds or allow 2 requests in flight** (team call; roughly halves queue wait).
+
+The product is unaffected for the demo: the tutor and the Save interlock use the disclosed DOM channel (D3), and vision is measured independently, as the plan intends.
