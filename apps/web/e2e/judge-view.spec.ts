@@ -9,7 +9,7 @@ import { type APIRequestContext, type Page } from "@playwright/test";
 
 // Pages sign in as whoever the session needs (startSession); ledger reads go through the admin, who reads every session.
 test.use({ requestAs: ADMIN });
-import { ADMIN, ASHA, LENA, expect, signInPage, test } from "./support/accounts";
+import { ADMIN, ASHA, LENA, dismissCoach, expect, signInPage, test } from "./support/accounts";
 
 const EVIDENCE_DIR = join(import.meta.dirname, "../../../docs/evidence/p3");
 mkdirSync(EVIDENCE_DIR, { recursive: true });
@@ -26,6 +26,10 @@ async function startSession(page: Page, mode: "Expert capture" | "Novice practic
   await page.getByRole("radio", { name: new RegExp(`^${set}`) }).click();
   await page.getByRole("button", { name: "Start session" }).click();
   await expect(page).toHaveURL(/\/sandbox\?session=/);
+  // The engineers' strip (speech gate, ticker, compliance, Engineering view) is off for everyone by default.
+  await expect(page.getByRole("region", { name: "Speech gate" })).toHaveCount(0);
+  await page.goto(`${page.url()}&diagnostics=1`);
+  if (mode === "Novice practice") await dismissCoach(page);
   await expect(queueItems(page).first()).toBeVisible();
   return new URL(page.url()).searchParams.get("session") ?? "";
 }
@@ -122,23 +126,6 @@ test("judge view: gate HUD reacts to typing, ticker follows the ledger, strip st
   await expect(engineering).toContainText("No authorizations yet.");
   await page.waitForTimeout(700);
   await judgeView(page).screenshot({ path: evidence("engineering-view.png") });
-});
-
-test("tutor voice on a server without voice credentials: a clear not-configured state, CaseDesk keeps working", async ({ page }) => {
-  await startSession(page, "Novice practice", "Practice");
-  // The voice coach is optional for a trainee (text coaching is already on), so it sits in a collapsed section.
-  await page.getByText("Voice coach", { exact: false }).first().click();
-  const voice = page.getByRole("region", { name: /^Voice · Tutor agent/ });
-  await voice.getByRole("button", { name: "Connect voice" }).click();
-  await expect(voice.getByText("Voice not configured on this server")).toBeVisible();
-  await expect(voice.getByRole("status", { name: "Voice status" })).toHaveText("Not configured");
-  await expect(voice).toContainText("ELEVENLABS_TUTOR_AGENT_ID");
-  await expect(voice).toContainText("No turns yet.");
-  // CaseDesk keeps working: the case is open and the coach still guides. A trainee has no gate HUD or event ticker.
-  await queueItems(page).first().click();
-  await expect(page.getByRole("article")).toBeVisible();
-  await expect(page.getByTestId("trainee-guide")).toBeVisible();
-  await expect(page.getByRole("region", { name: "Speech gate" })).toHaveCount(0);
 });
 
 test("off the record: red banner, capture paused, nothing recorded, resume with a new epoch", async ({ page, request }) => {

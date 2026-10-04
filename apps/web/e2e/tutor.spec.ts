@@ -17,7 +17,7 @@ import { mkdirSync } from "node:fs";
 import { randomUUID } from "node:crypto";
 import { join } from "node:path";
 import { type APIRequestContext, type Page } from "@playwright/test";
-import { LENA, expect, signInPage, test } from "./support/accounts";
+import { LENA, dismissCoach, expect, signInPage, test } from "./support/accounts";
 import { uploadFrame } from "./support/screen-frame";
 
 const EVIDENCE_DIR = join(import.meta.dirname, "../../../docs/evidence/p6");
@@ -83,6 +83,7 @@ async function startNovice(page: Page): Promise<string> {
   await page.getByRole("radio", { name: /^Held-out/ }).click();
   await page.getByRole("button", { name: "Start session" }).click();
   await expect(page).toHaveURL(/\/sandbox\?session=[^&]+&set=heldout&mode=novice$/);
+  await dismissCoach(page);
   return new URL(page.url()).searchParams.get("session") ?? "";
 }
 
@@ -247,4 +248,80 @@ test("tutor: a real stop-rule from the debrief → intervention on selection, be
   expect(Math.max(...after.filter((e) => e.kind === "tutor.intervention").map((e) => e.sequence))).toBeLessThan(
     Math.min(...after.filter((e) => e.kind === "interlock.check").map((e) => e.sequence)),
   );
+});
+
+// ── The coach pop-up: one step to a live coach ──
+
+/** Headless Chromium cannot capture a screen (see perception.spec): a canvas stream stands in for what the picker returns. */
+async function installFakeScreen(page: Page) {
+  await page.addInitScript(() => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 1280;
+    canvas.height = 720;
+    const ctx = canvas.getContext("2d");
+    // Redrawn on a timer: a canvas that is never redrawn yields no video frame, and the share would wait for one forever.
+    let tick = 0;
+    setInterval(() => {
+      if (!ctx) return;
+      ctx.fillStyle = tick++ % 2 === 0 ? "#ffffff" : "#fefefe";
+      ctx.fillRect(0, 0, 1280, 720);
+    }, 100);
+    if (navigator.mediaDevices) navigator.mediaDevices.getDisplayMedia = async () => canvas.captureStream(10);
+  });
+}
+
+/** The coach needs rules to teach: seed them unless an earlier test in this file already did. */
+async function ensureRules(request: APIRequestContext): Promise<void> {
+  const book = await ok<{ rules: unknown[] }>(await request.get("/api/rulebook"));
+  if (book.rules.length === 0) await seedExpertRulebook(request);
+}
+
+test("coach pop-up: taking a case asks for microphone and screen once; yes starts both; the coach still guides if voice is unavailable", async ({ page, request }) => {
+  test.setTimeout(120_000);
+  await ensureRules(request);
+  await installFakeScreen(page);
+  await signInPage(page, LENA);
+  await page.goto("/sandbox");
+  await page.getByRole("radio", { name: /^Novice practice/ }).click();
+  await page.getByRole("radio", { name: /^Held-out/ }).click();
+  await page.getByRole("button", { name: "Start session" }).click();
+
+  // The first case is open and the coach asks, in one pop-up, for everything it needs.
+  const dialog = page.getByTestId("coach-dialog");
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByRole("heading", { name: "Meet your coach" })).toBeVisible();
+  await expect(dialog).toContainText("Microphone");
+  await expect(dialog).toContainText("Screen");
+  await expect(dialog).toContainText("off the record");
+  await expect(dialog.getByTestId("coach-allow")).toBeVisible();
+  await shot(page, "coach-popup.png");
+
+  await dialog.getByTestId("coach-allow").click();
+  // Screen: shared (the browser's picker is faked). Voice: this server has no voice credentials, and says so plainly.
+  await expect(dialog.getByRole("heading", { name: /Starting your coach|Almost there/ })).toBeVisible();
+  await expect(dialog.locator('li[data-state="ready"]')).toContainText("Shared with this session");
+  await expect(dialog.locator('li[data-state="unavailable"]')).toContainText("Voice is not set up on this server");
+  await shot(page, "coach-connecting.png");
+  await dialog.getByTestId("coach-continue").click();
+  await expect(dialog).toHaveCount(0);
+
+  // The coach is never lost: the bar says where it is, and offers to turn voice on again.
+  const bar = page.getByTestId("coach-bar");
+  await expect(bar).toContainText("Coaching in text");
+  await expect(bar.getByRole("button", { name: "Turn on voice coach" })).toBeVisible();
+  await expect(page.getByTestId("trainee-guide")).toHaveAttribute("data-stage", "working");
+  await shot(page, "coach-text-only.png");
+});
+
+test("coach pop-up: 'Not now' is respected, remembered across a reload, and reversible from the bar", async ({ page, request }) => {
+  await ensureRules(request);
+  const sessionId = await startNovice(page);
+  const bar = page.getByTestId("coach-bar");
+  await expect(bar).toContainText("Voice coach is off");
+  await page.reload();
+  await expect(page.getByTestId("coach-bar")).toContainText("Voice coach is off");
+  await expect(page.getByTestId("coach-dialog")).toHaveCount(0);
+  await bar.getByRole("button", { name: "Turn on voice coach" }).click();
+  await expect(page.getByTestId("coach-dialog")).toBeVisible();
+  expect(sessionId).not.toBe("");
 });

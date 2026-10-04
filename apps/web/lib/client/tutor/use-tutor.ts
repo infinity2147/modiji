@@ -11,7 +11,7 @@ import type { KycCase } from "@vashistha/core/domains/kyc";
 import type { JudgeFeatures, PredictionView, TutorState } from "../../contracts/tutor";
 import { describeError, type FetchFn } from "../api";
 import type { RiskRating } from "../session-state";
-import { fetchTutorState, postIntent, postJudgeCase, postPractice, postPrediction } from "./api";
+import { fetchTutorState, postBriefing, postIntent, postJudgeCase, postPractice, postPrediction } from "./api";
 
 const browserFetch: FetchFn = (input, init) => fetch(input, init);
 
@@ -24,6 +24,8 @@ export type Tutor = {
   predict: (caseId: string, predicted: ActionId, riskRating: RiskRating) => Promise<PredictionView>;
   practice: () => Promise<{ cases: readonly KycCase[]; note: string | null }>;
   judgeCase: (features: JudgeFeatures) => Promise<KycCase>;
+  /** Queue the coach's spoken welcome (once per session); resolves quietly if there is nothing to say. */
+  briefing: (caseId?: string) => Promise<void>;
 };
 
 export function useTutor(sessionId: string, enabled: boolean): Tutor {
@@ -88,5 +90,12 @@ export function useTutor(sessionId: string, enabled: boolean): Tutor {
     [sessionId],
   );
 
-  return { state, error, refresh, intent, predict, practice, judgeCase };
+  const briefing = useCallback(
+    async (caseId?: string) => {
+      await postBriefing(browserFetch, sessionId, caseId === undefined ? {} : { caseId });
+    },
+    [sessionId],
+  );
+
+  return { state, error, refresh, intent, predict, practice, judgeCase, briefing };
 }

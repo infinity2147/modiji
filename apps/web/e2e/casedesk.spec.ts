@@ -9,7 +9,7 @@ import { type APIRequestContext, type Page, type Route } from "@playwright/test"
 
 // Pages sign in as whoever the session needs (startSession); ledger reads go through the admin, who reads every session.
 test.use({ requestAs: ADMIN });
-import { ADMIN, ASHA, LENA, expect, signInPage, test } from "./support/accounts";
+import { ADMIN, ASHA, LENA, dismissCoach, expect, signInPage, test } from "./support/accounts";
 
 const EVIDENCE_DIR = join(import.meta.dirname, "../../../docs/evidence/p1");
 mkdirSync(EVIDENCE_DIR, { recursive: true });
@@ -46,6 +46,7 @@ async function startSession(page: Page, mode: "Expert capture" | "Novice practic
   await page.getByRole("radio", { name: new RegExp(`^${set}`) }).click();
   await page.getByRole("button", { name: "Start session" }).click();
   await expect(page).toHaveURL(/\/sandbox\?session=[^&]+&set=\w+&mode=\w+$/);
+  if (mode === "Novice practice") await dismissCoach(page);
   await expect(queueItems(page).first()).toBeVisible();
   return new URL(page.url()).searchParams.get("session") ?? "";
 }

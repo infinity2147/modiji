@@ -86,3 +86,15 @@ export const test = base.extend<{ requestAs: Person | null; pageAs: Person | nul
 });
 
 export { expect };
+
+/**
+ * A trainee's session with a coach that has rules to teach opens with the coach pop-up. Most tests are about
+ * something else, so they decline it ("Not now"); the coach's own test (tutor.spec) goes through it.
+ */
+export async function dismissCoach(page: Page): Promise<void> {
+  const skip = page.getByTestId("coach-skip");
+  // The pop-up appears once the coach's rules have loaded; with no rules to teach it never appears.
+  const shown = await skip.waitFor({ state: "visible", timeout: 4000 }).then(() => true, () => false);
+  if (shown) await skip.click();
+  await expect(page.getByTestId("coach-dialog")).toHaveCount(0);
+}

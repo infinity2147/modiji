@@ -20,6 +20,7 @@ import { JudgeView } from "@/components/judge/judge-view";
 import { OffRecordBanner } from "@/components/voice/off-record";
 import { VoicePanel } from "@/components/voice/voice-panel";
 import { NoviceReview } from "@/components/tutor/novice-review";
+import { CoachSession } from "@/components/tutor/coach-session";
 import { TraineeGuide, guideStage } from "@/components/tutor/trainee-guide";
 import { TutorPanels } from "@/components/tutor/tutor-panels";
 import { CaseDetail } from "./case-detail";
@@ -47,7 +48,8 @@ function channelText(channel: DomChannelStatus): string {
 function ChannelStatus({ channel }: { channel: DomChannelStatus }) {
   const text = channelText(channel);
   return (
-    <p role="status" aria-live="polite" className="px-1 text-[11px] text-muted-foreground">
+    // Quiet when all is well (screen readers and tests still get it); visible the moment something is waiting or wrong.
+    <p role="status" aria-live="polite" className={channel.state === "idle" ? "sr-only" : "px-1 text-[11px] text-muted-foreground"}>
       {text}
     </p>
   );
@@ -114,15 +116,19 @@ function NoviceReviewSlot({
  * HUD, event ticker, compliance strip) in the full-width row underneath. The voice conversation lives
  * in `ConversationProvider`; everything else works without it.
  */
-export function Workspace({ session, role }: { session: SessionRef; role: UserRole }) {
+/**
+ * `diagnostics`: show the engineers' strip (speech gate, event ticker, compliance scoreboard, Engineering view). Off by
+ * default for everyone: it is evidence for judges and engineers, not part of the work. Admins and `?diagnostics=1` turn it on.
+ */
+export function Workspace({ session, role, diagnostics }: { session: SessionRef; role: UserRole; diagnostics: boolean }) {
   return (
     <ConversationProvider>
-      <WorkspaceBody session={session} role={role} />
+      <WorkspaceBody session={session} role={role} diagnostics={diagnostics} />
     </ConversationProvider>
   );
 }
 
-function WorkspaceBody({ session, role }: { session: SessionRef; role: UserRole }) {
+function WorkspaceBody({ session, role, diagnostics }: { session: SessionRef; role: UserRole; diagnostics: boolean }) {
   const sensors = useRef<GateSensors | null>(null);
   const ws = useWorkspace(session, sensors);
   const [screenShared, setScreenShared] = useState(false);
@@ -248,14 +254,17 @@ function WorkspaceBody({ session, role }: { session: SessionRef; role: UserRole 
             />
           )}
           {novice ? (
-            <details className="group rounded-2xl border bg-card">
-              <summary className="cursor-pointer list-none px-4 py-3 text-sm font-semibold marker:hidden">
-                Voice coach <span className="font-normal text-muted-foreground">(optional: text coaching is already on)</span>
-              </summary>
-              <div className="border-t p-2">
-                <VoicePanel loop={loop} />
-              </div>
-            </details>
+            ws.load.status === "ready" && (
+              <CoachSession
+                sessionId={session.sessionId}
+                caseId={selected?.id}
+                cases={ws.load.cases}
+                loop={loop}
+                tutor={tutor}
+                ready={(tutor.state?.rules.length ?? 0) > 0 && selected !== undefined}
+                onSharingChange={setScreenShared}
+              />
+            )
           ) : (
             <VoicePanel loop={loop} />
           )}
@@ -283,8 +292,8 @@ function WorkspaceBody({ session, role }: { session: SessionRef; role: UserRole 
           {!novice && ws.load.status === "ready" && <ScreenCaptureCard sessionId={session.sessionId} cases={ws.load.cases} onSharingChange={setScreenShared} />}
         </div>
 
-        {/* The gate HUD, event ticker and compliance strip are expert and judge instruments: a trainee works without them. */}
-        <div className="min-h-0 [grid-area:strip]">{(!novice || role === "admin") && <JudgeView sessionId={session.sessionId} loop={loop} />}</div>
+        {/* The gate HUD, event ticker, compliance strip and Engineering view: engineers' and judges' evidence, never part of the work. */}
+        <div className="min-h-0 [grid-area:strip]">{diagnostics && <JudgeView sessionId={session.sessionId} loop={loop} />}</div>
       </div>
       <InterlockDialog prompt={ws.prompt} onResolve={ws.resolvePrompt} onDismiss={ws.dismissPrompt} />
     </PrivacyContext>

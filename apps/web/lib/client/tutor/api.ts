@@ -1,6 +1,8 @@
 /** Typed client for the tutor HTTP contract (`lib/contracts/tutor.ts`); every response is validated before the UI sees it. */
 import type { z } from "zod";
 import {
+  BriefingResponseSchema,
+  type BriefingRequestSchema,
   JudgeCaseResponseSchema,
   PracticeResponseSchema,
   PredictionResponseSchema,
@@ -34,4 +36,8 @@ export function postPractice(fetchFn: FetchFn, sessionId: string) {
 
 export function postJudgeCase(fetchFn: FetchFn, sessionId: string, body: z.input<typeof JudgeCaseRequestSchema>) {
   return requestJson(fetchFn, tutorPath(sessionId, "/cases"), JudgeCaseResponseSchema, postJson(body));
+}
+
+export function postBriefing(fetchFn: FetchFn, sessionId: string, body: z.input<typeof BriefingRequestSchema> = {}) {
+  return requestJson(fetchFn, tutorPath(sessionId, "/briefing"), BriefingResponseSchema, postJson(body));
 }
