@@ -35,13 +35,14 @@ import {
 import { ApiFailure, json, parseOr400, respond } from "../casedesk/http";
 import { CASEDESK_SCHEMA_VERSION, loadSession, requireOnRecord, type CaseDeskStore } from "../casedesk/session";
 import type { PerceptionService } from "./service";
-import { pngDimensions, removeFrame, writeFrame } from "./storage";
+import type { FrameStore } from "./frame-store";
+import { pngDimensions } from "./storage";
 
 export type PerceptionDeps = {
   ledger: Ledger;
   store: CaseDeskStore;
   perception: PerceptionService;
-  dataDir: string;
+  frames: FrameStore;
   now: () => number;
   log: Pick<Console, "error">;
 };
@@ -128,7 +129,7 @@ export function handlePostFrame(request: Request, sessionId: string, deps: Perce
 
     const frameId = randomUUID();
     const traceId = randomUUID();
-    await writeFrame(deps.dataDir, session.id, frameId, frame.bytes);
+    await deps.frames.put(session.id, frameId, frame.bytes);
     let ledgerId: string;
     try {
       ledgerId = deps.ledger.append({
@@ -153,7 +154,7 @@ export function handlePostFrame(request: Request, sessionId: string, deps: Perce
       }).id;
     } catch (error) {
       // Refused (e.g. the session went off the record while the file was written): keep nothing.
-      await removeFrame(deps.dataDir, session.id, frameId);
+      await deps.frames.remove(session.id, frameId);
       throw error;
     }
 

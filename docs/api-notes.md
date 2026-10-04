@@ -539,3 +539,9 @@ The P2 vision thresholds are unchanged; this records how the team's decision is 
 - **Trust boundary.** The id is read from a synthetic CaseDesk header; it is client-supplied, so the
   server validates its shape (`ClientCaseIdSchema`) but, as with every client channel, treats it as
   data. It never carries hidden policy and is independent of the DOM channel.
+
+## 20. Cloudflare R2 for frames (2026-10-04) — implementation note, NOT yet verified against a live bucket
+
+- Source: Cloudflare R2's S3-compatible API as I know it, not read from installed types (there is no Cloudflare SDK here). **Unverified until the first preflight against a real bucket.** Assumed: endpoint `https://<ACCOUNT_ID>.r2.cloudflarestorage.com`, path-style `/<bucket>/<key>`, SigV4 with region `auto` and service `s3`, `ListObjectsV2` (`list-type=2`, `continuation-token`, `IsTruncated`) returning `Key`, `LastModified`, `Size`, and a 404 for a missing key.
+- Client: `aws4fetch` 1.0.20 (65 KB, no dependencies; the AWS SDK is 3.3 MB and production already ran near its memory cap). Installed signature checked in `node_modules/aws4fetch/dist/main.d.ts`: `new AwsClient({ accessKeyId, secretAccessKey, service, region, retries })`, `client.sign(url, init) → Request`.
+- Tested against an in-memory fake of that API (`apps/web/test/server/frame-store.test.ts`), which proves our requests are signed and our parsing and pruning logic, not that Cloudflare behaves as assumed.

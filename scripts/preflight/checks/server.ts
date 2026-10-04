@@ -26,6 +26,19 @@ function diskOf(value: unknown): Disk | null {
     : null;
 }
 
+type Frames = { backend: "volume" | "r2"; usedBytes: number | null; capBytes: number | null; probeOk: boolean; probeError: string | null };
+function framesOf(value: unknown): Frames | null {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) return null;
+  const v = value as Record<string, unknown>;
+  const probe = v.probe as Record<string, unknown> | null | undefined;
+  if ((v.backend !== "volume" && v.backend !== "r2") || probe === null || typeof probe !== "object" || typeof probe.ok !== "boolean") return null;
+  const num = (x: unknown): number | null => (typeof x === "number" ? x : null);
+  return { backend: v.backend, usedBytes: num(v.usedBytes), capBytes: num(v.capBytes), probeOk: probe.ok, probeError: typeof probe.error === "string" ? probe.error : null };
+}
+
+/** Frames may overshoot the cap briefly between a write and the next retention pass; more than this over means it is not being enforced. */
+export const FRAMES_CAP_SLACK = 1.1;
+
 function eventLoopOf(value: unknown): EventLoop | null {
   if (value === null || typeof value !== "object" || Array.isArray(value)) return null;
   const v = value as Record<string, unknown>;
@@ -114,6 +127,14 @@ export async function checkServerDeep(ctx: Ctx): Promise<CheckOutcome> {
         problems.push(`volume nearly full: ${disk.freeMB} MB free of ${disk.totalMB} MB (${disk.usedPct}% used; need ≥ ${MIN_FREE_DISK_MB} MB free and ≤ ${MAX_DISK_USED_PCT}% used)`);
     } else if (body.disk === null) facts.disk = null;
     else problems.push("/api/health/deep does not report disk (server older than this preflight?)");
+    const frames = framesOf(body.frames);
+    if (frames === null) problems.push("/api/health/deep does not report frames (server older than this preflight?)");
+    else {
+      facts.frames = { backend: frames.backend, usedBytes: frames.usedBytes, capBytes: frames.capBytes };
+      if (!frames.probeOk) problems.push(`frame store (${frames.backend}) probe failed: ${frames.probeError ?? "no detail"}`);
+      if (frames.usedBytes !== null && frames.capBytes !== null && frames.usedBytes > frames.capBytes * FRAMES_CAP_SLACK)
+        problems.push(`frame store holds ${frames.usedBytes} bytes, over its ${frames.capBytes}-byte cap: retention is not being enforced`);
+    }
     // GC and CPU-throttle are surfaced for ops to tell a code stall from a host/GC freeze; never a reason to fail.
     const gc = gcOf(body.gc);
     if (gc !== null) facts.gc = gc;
@@ -134,10 +155,18 @@ export async function checkServerDeep(ctx: Ctx): Promise<CheckOutcome> {
   const gcPart = gc === null ? "" : `; GC max pause ${gc.maxPauseMs} ms (${gc.count})`;
   const diskReported = diskOf(body?.disk);
   const diskPart = diskReported === null ? "" : `; disk ${diskReported.freeMB} MB free (${diskReported.usedPct}% used)`;
+  const framesReported = framesOf(body?.frames);
+  const mb = (bytes: number): number => Math.round(bytes / 1_000_000);
+  const framesPart =
+    framesReported === null
+      ? ""
+      : framesReported.backend === "r2"
+        ? `; frames r2 ok, ${framesReported.usedBytes === null ? "not yet counted" : `${mb(framesReported.usedBytes)} MB`} of ${mb(framesReported.capBytes ?? 0)} MB cap`
+        : "; frames on the volume";
   const throttlePart = cpuThrottle === null ? (body?.cpuThrottle === null ? "; CPU throttle n/a" : "") : `; CPU throttled ${cpuThrottle.nrThrottled}×/${cpuThrottle.throttledMs} ms`;
   return {
     status: "pass",
-    detail: `health 200; deep 401 without bearer; ${parts.join(", ")}; model calls on; event-loop delay p99 ${eventLoop?.p99Ms ?? "?"} ms${gcPart}${throttlePart}${diskPart}`,
+    detail: `health 200; deep 401 without bearer; ${parts.join(", ")}; model calls on; event-loop delay p99 ${eventLoop?.p99Ms ?? "?"} ms${gcPart}${throttlePart}${diskPart}${framesPart}`,
     facts,
   };
 }

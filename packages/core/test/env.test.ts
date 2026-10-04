@@ -31,6 +31,7 @@ describe("loadServerEnv", () => {
       PUBLIC_BASE_URL: "http://localhost:3000",
       DATA_DIR: "./data",
       LLM_CALLS: "on",
+      R2_MAX_BYTES: 2_000_000_000,
     });
   });
 
@@ -69,6 +70,7 @@ describe("loadServerEnv", () => {
       PUBLIC_BASE_URL: "http://localhost:3000",
       DATA_DIR: "./data",
       LLM_CALLS: "on",
+      R2_MAX_BYTES: 2_000_000_000,
     });
     expect(envError({ ...dev, DATA_DIR: "" }).message).toContain("DATA_DIR: missing");
     expect(envError({ ...prod, CUSTOM_LLM_SECRET: "" }).variables).toEqual(["CUSTOM_LLM_SECRET"]);

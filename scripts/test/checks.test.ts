@@ -305,7 +305,7 @@ describe("server-deep and sandbox", () => {
   it("passes when health is up, deep refuses anonymous callers and every probe is ok", async () => {
     const r = await checkServerDeep(makeContext());
     expect(r.status).toBe("pass");
-    expect(r.detail).toBe("health 200; deep 401 without bearer; db ok 1.5 ms, dataDir ok 1.5 ms, z3 ok 1.5 ms; model calls on; event-loop delay p99 4 ms; disk 3072 MB free (40% used)");
+    expect(r.detail).toBe("health 200; deep 401 without bearer; db ok 1.5 ms, dataDir ok 1.5 ms, z3 ok 1.5 ms; model calls on; event-loop delay p99 4 ms; disk 3072 MB free (40% used); frames on the volume");
     expect(r.facts?.llmCalls).toBe("on");
     expect(r.facts?.eventLoop).toMatchObject({ p99Ms: 4, samples: 6000 });
   });
@@ -379,6 +379,22 @@ describe("server-deep and sandbox", () => {
     const unknown = await checkServerDeep(makeContext({ fetch: fakeServer({ disk: null }).fetch }));
     expect(unknown.status).toBe("pass");
     expect(unknown.facts).toMatchObject({ disk: null });
+  });
+
+  it("server-deep reports the R2 frame store and fails on a broken probe, an unreported store, or a cap that is not enforced", async () => {
+    const r2 = { backend: "r2" as const, usedBytes: 500_000_000, capBytes: 2_000_000_000, probe: { ok: true } };
+    const ok = await checkServerDeep(makeContext({ fetch: fakeServer({ frames: r2 }).fetch }));
+    expect(ok.status).toBe("pass");
+    expect(ok.detail).toContain("frames r2 ok, 500 MB of 2000 MB cap");
+    const broken = await checkServerDeep(makeContext({ fetch: fakeServer({ frames: { ...r2, probe: { ok: false, error: "R2 put failed: HTTP 403" } } }).fetch }));
+    expect(broken.status).toBe("fail");
+    expect(broken.detail).toContain("frame store (r2) probe failed: R2 put failed: HTTP 403");
+    const over = await checkServerDeep(makeContext({ fetch: fakeServer({ frames: { ...r2, usedBytes: 2_500_000_000 } }).fetch }));
+    expect(over.status).toBe("fail");
+    expect(over.detail).toContain("retention is not being enforced");
+    const omitted = await checkServerDeep(makeContext({ fetch: fakeServer({ frames: "omit" }).fetch }));
+    expect(omitted.status).toBe("fail");
+    expect(omitted.detail).toContain("does not report frames");
   });
 
   it("server-deep fails a server that does not report the disk at all", async () => {

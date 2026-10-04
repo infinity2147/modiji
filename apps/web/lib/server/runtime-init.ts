@@ -27,6 +27,7 @@ import { createDebriefStore } from "./debrief/deps";
 import { createDisagreementHolds, createExpertDirectory, createLedgerRulebook, teamRulebookView } from "./debrief/rulebook-store";
 import { createEventLoopMonitor, createGcMonitor, readCpuThrottle } from "./event-loop";
 import { createInterviewStore } from "./interview/engine-state";
+import { createFrameStore } from "./perception/frame-store";
 import { createPerception } from "./perception/init";
 import { createRateLimiter } from "./rate-limit";
 import { registerRuntime, type CheckResult, type Runtime } from "./runtime";
@@ -119,6 +120,7 @@ export function createRuntime(source: Readonly<Record<string, string | undefined
   const env = loadServerEnv(source);
   const opened = openDatabase({ dataDir: env.DATA_DIR });
   const ledger = createLedger(opened.db);
+  const frames = createFrameStore(env);
   // The only model client in the process: interview, debrief and perception all receive this value.
   const claude =
     env.LLM_CALLS === "off" || env.ANTHROPIC_API_KEY === undefined
@@ -154,6 +156,7 @@ export function createRuntime(source: Readonly<Record<string, string | undefined
     experts: { directory: createExpertDirectory(opened.sqlite), team, solver: z3.disagreements, store: { tail: Promise.resolve() } },
     casedesk: createCaseDeskStore(),
     // LLM_CALLS=off subsumes the vision-only switch, so the vision state reports `disabled` rather than `no_api_key`.
+    frames,
     perception: createPerception({ source: env.LLM_CALLS === "off" ? { ...source, VISION_EXTRACTION: "off" } : source, ledger, claude, prepare: vision.prepare }),
     interview: createInterviewStore(),
     engine: { questions: engine.questions },
@@ -164,14 +167,14 @@ export function createRuntime(source: Readonly<Record<string, string | undefined
       store: createDebriefStore(),
     },
     schema: {
-      reread: claude === null ? null : createConceptReread(claude, mediaFrameLoader(env.DATA_DIR), console),
+      reread: claude === null ? null : createConceptReread(claude, mediaFrameLoader(frames), console),
       store: createSchemaStore(),
     },
     tutor: { practice: z3.practice },
     voiceTokenLimiter: createRateLimiter(VOICE_TOKEN_RATE_LIMIT),
     accounts,
     authLimits: { signIn: createRateLimiter(SIGN_IN_FAILURE_LIMIT), signUp: createRateLimiter(SIGN_UP_LIMIT) },
-    checks: { db: () => probeDatabase(opened), dataDir: () => probeDataDir(env.DATA_DIR), z3: () => probeZ3(z3), eventLoop: eventLoop.snapshot, gc: gc.snapshot, cpuThrottle: readCpuThrottle },
+    checks: { db: () => probeDatabase(opened), dataDir: () => probeDataDir(env.DATA_DIR), frames: () => frames.probe(), z3: () => probeZ3(z3), eventLoop: eventLoop.snapshot, gc: gc.snapshot, cpuThrottle: readCpuThrottle },
   };
   registerRuntime(runtime);
 

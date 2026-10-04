@@ -9,7 +9,7 @@ import { z } from "zod";
 import { ApiFailure, respond } from "../casedesk/http";
 import { loadSession } from "../casedesk/session";
 import type { PerceptionDeps } from "./frames";
-import { isUuid, readFrame } from "./storage";
+import { isUuid } from "./storage";
 
 const FrameIdPayloadSchema = z.object({ frameId: z.string() });
 
@@ -27,13 +27,13 @@ export function handleGetFrameMedia(sessionId: string, file: string, deps: Omit<
       .list(session.id, { sources: ["client"], kinds: ["frame.received"] })
       .some((entry) => FrameIdPayloadSchema.safeParse(entry.payload).data?.frameId === frameId);
     if (!recorded) throw notFound();
-    const png = await readFrame(deps.dataDir, session.id, frameId);
+    const png = await deps.frames.get(session.id, frameId);
     if (png === null) throw notFound();
     return new Response(new Uint8Array(png), {
       status: 200,
       headers: {
         "Content-Type": "image/png",
-        "Content-Length": String(png.length),
+        "Content-Length": String(png.byteLength),
         // Frames are immutable once written; private because the session id is the capability.
         "Cache-Control": "private, max-age=3600, immutable",
         "X-Content-Type-Options": "nosniff",

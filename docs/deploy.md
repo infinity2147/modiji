@@ -127,3 +127,17 @@ Adding `deploy.limitOverride` and a literal `VISION_EXTRACTION` to the IaC file 
 Apply these as plain variables / dashboard settings instead:
 - `railway variable set VISION_EXTRACTION=off --skip-deploys` (demo-safe: frames are still stored; no Haiku reads).
 - Memory limit: dashboard, Settings, Resources.
+
+## Screen frames in Cloudflare R2 (2026-10-04)
+
+Redacted frames used to accumulate on the volume (335 MB of them filled it and took sign-in down). They now go to a private R2 bucket when it is configured. Everything else stays on the volume: the SQLite ledger, accounts, replay bundles and saved Work Map JSON.
+
+1. In Cloudflare, create an R2 bucket with public access off. Create an API token with **Object Read & Write** scoped to that bucket only. Note the Account ID.
+2. Set the four variables on the Railway service (never in chat, a file or git):
+   `railway variable set R2_ACCOUNT_ID=… R2_ACCESS_KEY_ID=… R2_SECRET_ACCESS_KEY=… R2_BUCKET=… --service vashistha`
+   A partial set fails startup on purpose. `R2_MAX_BYTES` is optional (default 2000000000).
+3. Deploy, then run `pnpm preflight`. `server-deep` now reports `frames r2 ok, <n> MB of 2000 MB cap`: its probe writes, reads and deletes a throwaway object, so a wrong key, bucket or permission fails there. `/api/health/deep` carries the same counters (`frames.usedBytes`, `capBytes`, `prunes`, `lastPrune`).
+
+**Retention.** The cap is 2 GB. A running byte count is checked after each write. At the cap the server lists the bucket, deletes the oldest objects (by upload time) until about half of the bytes remain, and logs the counts. A pass never runs on the request path, and a failure only logs. It is by age alone: a frame that a confirmed rule cites can be deleted too, and its evidence link then shows the frame as gone. Frames written to the volume before the switch stay readable (reads fall back to the volume) and are not counted against the cap.
+
+**Privacy.** Frames are best-effort PII-blurred in the browser, then held by Cloudflare (a third party) in a private bucket, reachable only through the app's session-checked media route. Describe it that way.

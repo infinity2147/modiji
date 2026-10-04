@@ -3,6 +3,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { KYC_DOMAIN, kycCases } from "@vashistha/core/domains/kyc";
+import { createVolumeFrameStore } from "../../lib/server/perception/frame-store";
 import { CASEDESK_SCREEN } from "../../lib/server/perception/screen-profile";
 import { createRgba } from "@vashistha/perception";
 import type { FrameReading, FullRead, ReadMode } from "@vashistha/perception/extraction";
@@ -118,7 +119,7 @@ export function createPerceptionHarness(extractor: PerceptionServiceOptions["ext
     ledger: h.ledger,
     store: h.deps.store,
     perception: build(extractor),
-    dataDir,
+    frames: createVolumeFrameStore(dataDir),
     now: () => clock.now,
     log: h.deps.log,
   };

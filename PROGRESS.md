@@ -693,3 +693,13 @@ Source: `docs/evidence/live/ACCEPTANCE.txt` and `SUMMARY.txt`. All expert speech
 **Operational lessons recorded in `docs/deploy.md`.**
 1. Putting `limitOverride` and `VISION_EXTRACTION` in `.railway/railway.ts` crashed a deploy (the `preserve()` variables arrived missing). A failed deploy leaves the old build serving. After every deploy, check `railway deployment list` and confirm a new behaviour is live.
 2. This machine's network stalls about one new connection in six for the full 10 s connect timeout, on every host. Preflight now retries a connect timeout once.
+
+---
+
+## Frames to Cloudflare R2 with a 2 GB cap (2026-10-04, branch `feat/r2-media`, NOT deployed)
+
+**Goal.** Stop the volume filling up: redacted frames bloated it (335 MB in the old `/data/media` took production down).
+
+**Done.** `apps/web/lib/server/perception/frame-store.ts`: volume, R2 and tiered stores; with R2 configured new frames go to a private bucket and reads fall back to the volume. Retention: at `R2_MAX_BYTES` (default 2 GB) the oldest half of the bytes is deleted, off the request path. Deep health reports the backend, a real write/read/delete probe, and the retention counters; preflight fails on a broken probe, a missing report, or a cap that is not enforced. Env: four `R2_*` variables, all or none. 14 new frame-store tests, env tests, preflight tests. Whole suite 1575 passing, typecheck, lint and bundle clean.
+
+**Not done / honest limits.** Not deployed: it needs the four R2 variables from the user. The R2 API behaviour is unverified against a real bucket (docs/api-notes §20). The cap deletes by age alone, so a frame cited by a confirmed rule can go (its evidence link then shows it gone); the user chose oldest-50% and has not asked for cited frames to be kept. Replay bundles, the ledger and saved Work Maps stay on the volume. No migration script: frames already on the volume stay readable and are not counted against the cap.

@@ -6,7 +6,7 @@
  */
 import type { Claude } from "@vashistha/core/server";
 import { BACKFILL_MAX_FRAMES, buildBackfillRequest, toBackfillReading, type BackfillFrame } from "@vashistha/perception/backfill";
-import { readFrame } from "../perception/storage";
+import type { FrameStore } from "../perception/frame-store";
 import type { ConceptReread } from "./deps";
 
 /** Bound on one re-read; a late call is a `model_error`, never a guess. */
@@ -14,11 +14,11 @@ const REREAD_DEADLINE_MS = 30_000;
 
 export type FrameLoader = (sessionId: string, frameId: string) => Promise<Uint8Array | null>;
 
-/** Stored frames from DATA_DIR/media; a frame id that is not a server-made UUID counts as missing. */
-export function mediaFrameLoader(dataDir: string): FrameLoader {
+/** Stored frames (R2 or the volume); a frame id that is not a server-made UUID counts as missing. */
+export function mediaFrameLoader(frames: FrameStore): FrameLoader {
   return async (sessionId, frameId) => {
     try {
-      return await readFrame(dataDir, sessionId, frameId);
+      return await frames.get(sessionId, frameId);
     } catch (error) {
       if (error instanceof RangeError) return null;
       throw error;

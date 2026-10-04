@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { EnvError, loadServerEnv } from "@vashistha/core/server";
 import { deepHealth } from "../../lib/server/health";
+import { createVolumeFrameStore } from "../../lib/server/perception/frame-store";
 import { createRuntime } from "../../lib/server/runtime-init";
 import { getRuntime } from "../../lib/server/runtime";
 
@@ -96,11 +97,13 @@ describe("deep health response", () => {
     eventLoop: () => ({ p50Ms: 0, p99Ms: 1, maxMs: 2, samples: 10, sinceMs: 100 }),
     gc: () => ({ count: 3, totalPauseMs: 5, maxPauseMs: 2, sinceMs: 100 }),
     cpuThrottle: () => null,
+    frames: async () => ({ ok: true as const, ms: 0 }),
   });
+  const frames = createVolumeFrameStore("/nonexistent");
 
   it("reports GC and CPU-throttle telemetry alongside the event loop, without letting them affect ok", async () => {
     const env = loadServerEnv({ ...baseEnv(), LLM_CALLS: "on" });
-    expect(await deepHealth({ env, checks: checks(true) })).toMatchObject({
+    expect(await deepHealth({ env, frames, checks: checks(true) })).toMatchObject({
       ok: true,
       eventLoop: { p99Ms: 1 },
       gc: { count: 3, totalPauseMs: 5, maxPauseMs: 2 },
@@ -110,8 +113,8 @@ describe("deep health response", () => {
 
   it("reports llmCalls from the environment, without letting it affect ok", async () => {
     const env = loadServerEnv({ ...baseEnv(), LLM_CALLS: "off" });
-    expect(await deepHealth({ env, checks: checks(true) })).toMatchObject({ ok: true, llmCalls: "off" });
-    expect(await deepHealth({ env: { ...env, LLM_CALLS: "on" }, checks: checks(false) })).toMatchObject({
+    expect(await deepHealth({ env, frames, checks: checks(true) })).toMatchObject({ ok: true, llmCalls: "off" });
+    expect(await deepHealth({ env: { ...env, LLM_CALLS: "on" }, frames, checks: checks(false) })).toMatchObject({
       ok: false,
       z3: { ok: false, error: "boom" },
       llmCalls: "on",

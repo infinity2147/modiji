@@ -17,6 +17,7 @@ import type { DisagreementSolver } from "./disagreements/deps";
 import type { CpuThrottle, EventLoopDelay, GcStats } from "./event-loop";
 import type { InterviewStore } from "./interview/engine-state";
 import type { QuestionGenerator } from "./interview/questions";
+import type { FrameStore, ProbeResult } from "./perception/frame-store";
 import type { PerceptionService } from "./perception/service";
 import type { RateLimiter } from "./rate-limit";
 import type { ConceptReread, SchemaStore } from "./schema/deps";
@@ -64,6 +65,8 @@ export type Runtime = {
    * epoch)` is the off-the-record hook (abandons in-flight extraction for the new epoch).
    */
   perception: PerceptionService;
+  /** Redacted frames: Cloudflare R2 when configured (capped, oldest half pruned), otherwise the volume. */
+  frames: FrameStore;
   /** Debrief (P5): the Z3 witness search, the deterministic exports, prose model routing and caches. */
   debrief: { solver: WitnessSolver; exports: DebriefExports; models: DebriefModels; store: DebriefStore };
   /** Schema versioning (plan §6.6): the concept re-reader (null without a model) and the backfill queues. */
@@ -79,6 +82,7 @@ export type Runtime = {
   checks: {
     db: () => CheckResult;
     dataDir: () => Promise<CheckResult>;
+    frames: () => Promise<ProbeResult>;
     z3: () => Promise<CheckResult>;
     eventLoop: () => EventLoopDelay;
     gc: () => GcStats;

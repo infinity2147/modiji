@@ -15,9 +15,16 @@ const ENV_KEYS = [
   "LLM_CALLS",
   "ADMIN_USERNAME",
   "ADMIN_PASSWORD",
+  "R2_ACCOUNT_ID",
+  "R2_ACCESS_KEY_ID",
+  "R2_SECRET_ACCESS_KEY",
+  "R2_BUCKET",
+  "R2_ENDPOINT",
+  "R2_MAX_BYTES",
 ] as const;
 type EnvKey = (typeof ENV_KEYS)[number];
 
+const R2_REQUIRED = ["R2_ACCOUNT_ID", "R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY", "R2_BUCKET"] as const;
 const PRODUCTION_REQUIRED = ["ANTHROPIC_API_KEY", "ELEVENLABS_API_KEY", "CUSTOM_LLM_SECRET"] as const;
 
 /** Fixed hints for error messages; never derived from the offending value. */
@@ -35,6 +42,12 @@ const HINTS: Record<EnvKey, string> = {
   LLM_CALLS: "on or off",
   ADMIN_USERNAME: "a username (lowercase letters, digits and hyphens); set together with ADMIN_PASSWORD",
   ADMIN_PASSWORD: "at least 12 characters; set together with ADMIN_USERNAME",
+  R2_ACCOUNT_ID: "Cloudflare account id; set together with the other R2_ variables",
+  R2_ACCESS_KEY_ID: "R2 API token access key id; set together with the other R2_ variables",
+  R2_SECRET_ACCESS_KEY: "R2 API token secret; set together with the other R2_ variables",
+  R2_BUCKET: "R2 bucket name; set together with the other R2_ variables",
+  R2_ENDPOINT: "https URL overriding https://<account>.r2.cloudflarestorage.com (tests only)",
+  R2_MAX_BYTES: "integer byte cap for stored frames (default 2000000000); at the cap the oldest half is deleted",
 };
 
 const optional = z.string().optional();
@@ -75,6 +88,17 @@ const ServerEnvSchema = z.strictObject({
    */
   ADMIN_USERNAME: UsernameSchema.optional(),
   ADMIN_PASSWORD: z.string().min(12).max(200).optional(),
+  /**
+   * Cloudflare R2 for redacted screen frames (they would otherwise fill the volume). All four set: frames go to the
+   * bucket; none set: frames stay on the volume under DATA_DIR/media. Never log these.
+   */
+  R2_ACCOUNT_ID: z.string().regex(/^[0-9a-f]{32}$/i).optional(),
+  R2_ACCESS_KEY_ID: z.string().min(8).max(128).optional(),
+  R2_SECRET_ACCESS_KEY: z.string().min(16).max(256).optional(),
+  R2_BUCKET: z.string().regex(/^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$/).optional(),
+  R2_ENDPOINT: z.url({ protocol: /^https?$/ }).optional(),
+  /** Frames in the bucket never exceed this many bytes for long: at the cap the oldest half is deleted. 2 GB by default. */
+  R2_MAX_BYTES: z.string().regex(/^\d+$/).transform(Number).pipe(z.int().min(1_000_000)).default(2_000_000_000),
 });
 export type ServerEnv = z.infer<typeof ServerEnvSchema>;
 
@@ -122,6 +146,9 @@ export function loadServerEnv(source: Readonly<Record<string, string | undefined
   if ((input.ADMIN_USERNAME === undefined) !== (input.ADMIN_PASSWORD === undefined)) {
     invalid.add(input.ADMIN_USERNAME === undefined ? "ADMIN_USERNAME" : "ADMIN_PASSWORD");
   }
+  // A partial R2 configuration would silently keep frames on the volume.
+  const r2 = R2_REQUIRED.filter((key) => input[key] !== undefined);
+  if (r2.length > 0 && r2.length < R2_REQUIRED.length) for (const key of R2_REQUIRED) if (input[key] === undefined) invalid.add(key);
   if (result.success && invalid.size === 0) return result.data;
 
   const names = ENV_KEYS.filter((key) => invalid.has(key));
