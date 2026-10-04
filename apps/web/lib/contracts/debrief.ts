@@ -190,6 +190,18 @@ export const ExpertActionRequestSchema = z.discriminatedUnion("action", [
   z.strictObject({ action: z.literal("confirm_boundary"), witnessId: IdSchema, quote: ExpertQuoteSchema }),
   z.strictObject({ action: z.literal("confirm_teachback"), teachBackId: IdSchema, quote: ExpertQuoteSchema }),
   /**
+   * A decision rule the expert stated in their own words ("a company whose owner holds over 25% and isn't
+   * verified goes to enhanced review"), read back and confirmed in the debrief conversation. The conditions
+   * are converted and type-checked against the domain like a stop-rule's.
+   */
+  z.strictObject({
+    action: z.literal("confirm_stated_rule"),
+    decisionFamily: z.string().min(1),
+    when: StopRuleConditionsSchema,
+    decision: ActionIdSchema,
+    quote: ExpertQuoteSchema,
+  }),
+  /**
    * "Never approve a customer on a high-risk country list at desk level": a guardrail the expert states
    * outright. Confirmed with the expert's exact words and the redacted screen frame of `momentEntryId`
    * (a decision, frame or screen event of this session; default: the latest frame) — refused with 409
@@ -269,3 +281,52 @@ export const RulebookResponseSchema = z.strictObject({
   rules: z.array(ConfirmedRuleSchema),
 });
 
+
+// ── The debrief conversation (chat or voice) ──
+
+export const DebriefTopicSchema = z.enum(["proposal", "unexplained", "witness", "concept", "stop_rules", "teach_back", "readback", "closing"]);
+
+/** One line of the debrief conversation, from its ledger entry. */
+export const DebriefTurnSchema = z.strictObject({
+  /** The `debrief.asked` / `debrief.replied` entry. */
+  id: IdSchema,
+  role: z.enum(["agent", "expert"]),
+  text: z.string(),
+  at: z.int().nonnegative(),
+  /** How the expert replied; null for the agent. */
+  via: z.enum(["chat", "voice"]).nullable(),
+  /** For an expert turn: how it was read and what came of it. Null until read, and for the agent. */
+  outcome: z
+    .strictObject({
+      readAs: z.enum(["yes", "no", "skip", "statement", "unclear"]),
+      /** A free reply read by the model (a proposal, read back before anything was saved). */
+      byModel: z.boolean(),
+      /** The reply saved something (a rule, a resolution, a confirmation, a concept). */
+      saved: z.boolean(),
+      /** Why the code refused what the expert confirmed, if it did. */
+      refused: z.string().nullable(),
+    })
+    .nullable(),
+});
+export type DebriefTurn = z.infer<typeof DebriefTurnSchema>;
+
+/** GET / POST /api/sessions/:sessionId/debrief/conversation */
+export const DebriefConversationSchema = z.strictObject({
+  sessionId: IdSchema,
+  turns: z.array(DebriefTurnSchema),
+  /** The question waiting for the expert's reply, or null (not started, or finished). */
+  awaiting: z.strictObject({ promptId: IdSchema, topic: DebriefTopicSchema, text: z.string() }).nullable(),
+  /** Every agenda item has been talked through. The expert may still add a rule by saying it. */
+  done: z.boolean(),
+  /** Free replies can be read (a language model is configured); without it only yes / no / skip are understood. */
+  llmAvailable: z.boolean(),
+  state: DebriefStateSchema,
+});
+export type DebriefConversation = z.infer<typeof DebriefConversationSchema>;
+
+/** POST /api/sessions/:sessionId/debrief/conversation: start (or resume) the conversation, or reply in the expert's own words. */
+export const DebriefConversationRequestSchema = z.discriminatedUnion("type", [
+  z.strictObject({ type: z.literal("start") }),
+  z.strictObject({ type: z.literal("reply"), text: z.string().trim().min(1).max(1000) }),
+]);
+export type DebriefConversationRequest = z.infer<typeof DebriefConversationRequestSchema>;

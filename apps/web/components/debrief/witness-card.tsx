@@ -13,7 +13,7 @@ import type { DebriefState, ExpertActionRequest, WitnessStatus, WitnessView } fr
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TraceButton } from "@/components/lineage/lineage-trace";
-import { numericComparisons, replaceComparison } from "./predicate-edit";
+import { numericComparisons, replaceComparison } from "@/lib/debrief-predicate-edit";
 import { QuoteForm } from "./quote-form";
 import { witnessTarget } from "@/lib/client/voice/question-cues";
 

@@ -223,6 +223,16 @@ function describe(entry: LedgerEntry, ctx: TickerContext): { text: string; tone:
       const p = parseLedgerPayload(entry, "expert.statement");
       return evidence(`Expert (typed, ${sentence(p.intent)}): ${quote(p.text)}`);
     }
+    case "debrief.asked":
+      return system(`Debrief asked: ${quote(parseLedgerPayload(entry, "debrief.asked").text)}`);
+    case "debrief.replied": {
+      const p = parseLedgerPayload(entry, "debrief.replied");
+      return evidence(`Expert (${p.via === "voice" ? "spoken" : "typed"}, debrief): ${quote(p.text)}`);
+    }
+    case "debrief.understood": {
+      const p = parseLedgerPayload(entry, "debrief.understood");
+      return system(`Debrief reply read as ${p.intent}${p.origin === "llm" ? " (model proposal)" : ""}${p.refused === null ? "" : ` · refused: ${p.refused}`}`);
+    }
     case "teachback.generated":
       return system(`Teach-back written from ${parseLedgerPayload(entry, "teachback.generated").ruleIds.length} confirmed rule(s)`);
     case "teachback.confirmed":

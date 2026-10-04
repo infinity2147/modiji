@@ -51,8 +51,8 @@ function ModelUpdatedBanner({ state }: { state: ConceptsState }) {
 
 type Concepts = { state: ConceptsState | null; error: string | null; act: (body: ConceptActionRequest) => Promise<void> };
 
-/** Polls the session's concepts (fast while a backfill runs) and records the expert's confirm/dismiss. */
-function useConcepts(sessionId: string, onChange?: () => void): Concepts {
+/** Polls the session's concepts (fast while a backfill runs, and again whenever `refreshKey` changes) and records the expert's confirm/dismiss. */
+function useConcepts(sessionId: string, onChange?: () => void, refreshKey?: number): Concepts {
   const [state, setState] = useState<ConceptsState | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -63,6 +63,10 @@ function useConcepts(sessionId: string, onChange?: () => void): Concepts {
       // Not an expert session, or the server is away: nothing is shown or the last state stays.
     }
   }, [sessionId]);
+
+  useEffect(() => {
+    if (refreshKey !== undefined) void load();
+  }, [load, refreshKey]);
 
   const recomputing = state?.recomputing ?? false;
   useEffect(() => {
@@ -93,6 +97,28 @@ function useConcepts(sessionId: string, onChange?: () => void): Concepts {
 export function ConceptsPanel({ sessionId, onChange }: { sessionId: string; onChange?: () => void }) {
   const concepts = useConcepts(sessionId, onChange);
   return concepts.state === null ? null : <ConceptsCard state={concepts.state} error={concepts.error} act={concepts.act} />;
+}
+
+/**
+ * The debrief conversation's side card: the "Model updated" banner and the confirmed concepts with their
+ * re-reads, read-only (concepts are confirmed or dismissed in the conversation). Shown once a concept exists.
+ */
+export function ConceptsStatus({ sessionId, refreshKey }: { sessionId: string; refreshKey: number }) {
+  const { state } = useConcepts(sessionId, undefined, refreshKey);
+  if (state === null || (state.latest === null && state.confirmed.length === 0)) return null;
+  return (
+    <Card aria-label="Concepts" data-testid="concepts">
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-base">
+          New concepts <span className="ml-auto font-mono text-xs text-muted-foreground">schema v{state.schemaVersion}</span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <ModelUpdatedBanner state={state} />
+        <ConfirmedConcepts state={state} />
+      </CardContent>
+    </Card>
+  );
 }
 
 /** CaseDesk judge view: the banner and a "Concepts" toggle opening the same card in a side drawer. */
@@ -145,31 +171,7 @@ function ConceptsCard({ state, error, act }: { state: ConceptsState; error: stri
             <ConceptItem key={c.name} concept={c} features={state.features} act={act} />
           ))}
         </ul>
-        {state.confirmed.length > 0 && (
-          <div className="space-y-2">
-            <h3 className="text-sm font-medium">Confirmed concepts</h3>
-            <ul className="space-y-2">
-              {state.confirmed.map((c) => (
-                <li key={c.name} className="rounded-md border p-2 text-sm" data-testid={`confirmed-${c.name}`}>
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">{c.label}</span>
-                    <span className="font-mono text-xs text-muted-foreground">{c.name}</span>
-                    <Badge variant="outline">v{c.schemaVersion}</Badge>
-                  </div>
-                  <p className="text-xs text-muted-foreground">“{c.statement}”</p>
-                  <ul className="mt-1 grid gap-0.5 font-mono text-xs">
-                    {c.backfill.map((b) => (
-                      <li key={b.decisionEntryId}>
-                        {b.caseId}: {b.entryId === null ? "re-reading…" : b.value !== null ? String(b.value) : `unknown (${FAILURE[b.failure ?? ""] ?? "backfill failed"})`}
-                        {b.frameIds.length > 0 && <span className="text-muted-foreground"> · {b.frameIds.length} frame(s)</span>}
-                      </li>
-                    ))}
-                  </ul>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+        <ConfirmedConcepts state={state} />
         {state.dismissed.length > 0 && (
           <p className="text-xs text-muted-foreground">
             Dismissed: {state.dismissed.map((d) => (d.coveredBy === null ? d.name : `${d.name} (covered by ${d.coveredBy})`)).join(", ")}
@@ -177,6 +179,35 @@ function ConceptsCard({ state, error, act }: { state: ConceptsState; error: stri
         )}
       </CardContent>
     </Card>
+  );
+}
+
+function ConfirmedConcepts({ state }: { state: ConceptsState }) {
+  if (state.confirmed.length === 0) return null;
+  return (
+    <div className="space-y-2">
+      <h3 className="text-sm font-medium">Confirmed concepts</h3>
+      <ul className="space-y-2">
+        {state.confirmed.map((c) => (
+          <li key={c.name} className="rounded-md border p-2 text-sm" data-testid={`confirmed-${c.name}`}>
+            <div className="flex items-center gap-2">
+              <span className="font-medium">{c.label}</span>
+              <span className="font-mono text-xs text-muted-foreground">{c.name}</span>
+              <Badge variant="outline">v{c.schemaVersion}</Badge>
+            </div>
+            <p className="text-xs text-muted-foreground">“{c.statement}”</p>
+            <ul className="mt-1 grid gap-0.5 font-mono text-xs">
+              {c.backfill.map((b) => (
+                <li key={b.decisionEntryId}>
+                  {b.caseId}: {b.entryId === null ? "re-reading…" : b.value !== null ? String(b.value) : `unknown (${FAILURE[b.failure ?? ""] ?? "backfill failed"})`}
+                  {b.frameIds.length > 0 && <span className="text-muted-foreground"> · {b.frameIds.length} frame(s)</span>}
+                </li>
+              ))}
+            </ul>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 

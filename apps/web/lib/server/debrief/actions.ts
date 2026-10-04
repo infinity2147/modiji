@@ -686,6 +686,32 @@ export function applyExpertAction(deps: DebriefDeps, sessionId: string, req: Exp
         change = w.confirmRule(snap, [statementEntry.id, req.momentEntryId], rule);
         break;
       }
+      case "confirm_stated_rule": {
+        const family = familyOf(req.decisionFamily);
+        if (!family.actions.includes(req.decision)) throw new ApiFailure(400, "invalid_action", `${req.decision} is not an action of ${family.id}`);
+        const converted = conditionListToPredicate(req.when);
+        if (!converted.ok) throw new ApiFailure(400, "invalid_predicate", converted.reasons.join("; "));
+        const issues = typecheckPredicate(converted.predicate, snap.domain.features);
+        if (issues.length > 0) throw new ApiFailure(400, "invalid_predicate", issues.map((i) => `${i.path || "/"}: ${i.message}`).join("; "));
+        const predicate = converted.predicate;
+        const probe: RuleShape = { id: PENDING_STATEMENT, decisionFamily: family.id, kind: "decision", predicate, effect: { type: "recommend", action: req.decision }, priority: DEBRIEF_RULE_PRIORITY, overrides: [] };
+        const explained = explainedBy(snap, probe);
+        const moment = requireMoment(snap, explained.length > 0 ? explained : familyDecisionIds(snap, family.id));
+        const make = (statementId: string, ledger: LedgerReader): ConfirmedRule =>
+          newRule(deps, snap, {
+            ruleId: contentId("rule", canonicalJson({ stated: statementId })),
+            family: family.id,
+            source: { predicate, action: req.decision },
+            evidence: [typedQuote(statementId, req.quote, moment)],
+            confirmationEntryId: statementId,
+            ledger,
+          });
+        requireSomethingNew(snap, make(PENDING_STATEMENT, pending));
+        statementEntry = statement([...explained], { text: req.quote, intent: "confirm_stated_rule", target: { action: req.decision } });
+        const rule = make(statementEntry.id, deps.ledger);
+        change = w.confirmRule(snap, [statementEntry.id, ...explained], rule);
+        break;
+      }
       case "confirm_teachback": {
         const tb = snap.teachBack;
         if (tb?.entry.id !== req.teachBackId || tb.rulebookRevision !== snap.book.revision)

@@ -6,6 +6,7 @@ import "server-only";
 import { z } from "zod";
 import { IdSchema } from "@vashistha/core";
 import {
+  DebriefConversationRequestSchema,
   ExpertActionRequestSchema,
   type DebriefState,
   type ExpertActionResponseSchema,
@@ -13,6 +14,7 @@ import {
 } from "../../contracts/debrief";
 import { ApiFailure, NO_STORE, json, parseOr400, readJson, respond } from "../casedesk/http";
 import { applyExpertAction, generateTeachBack, rebuildWitnesses } from "./actions";
+import { conversationView, replyToConversation, startConversation, type ConversationDeps } from "./conversation";
 import type { DebriefDeps } from "./deps";
 import { lineageView } from "./lineage";
 import { debriefState, snapshot } from "./state";
@@ -97,5 +99,20 @@ export function handleGetRulebook(deps: Pick<DebriefDeps, "rulebook" | "log">): 
     const { rules, revision } = deps.rulebook();
     const body: z.infer<typeof RulebookResponseSchema> = { revision, rules };
     return json(body);
+  });
+}
+
+/** GET /api/sessions/:sessionId/debrief/conversation — the conversation so far (read-only). */
+export function handleGetConversation(sessionId: string, deps: ConversationDeps): Promise<Response> {
+  return respond(deps.debrief.log, async () => json(await conversationView(deps, sessionId)));
+}
+
+/** POST /api/sessions/:sessionId/debrief/conversation — start (or resume) the debrief conversation, or reply to it in the expert's own words. */
+export function handleConversation(request: Request, sessionId: string, deps: ConversationDeps): Promise<Response> {
+  return respond(deps.debrief.log, async () => {
+    const body = await readJson(request, DebriefConversationRequestSchema);
+    if (body.type === "start") await startConversation(deps, sessionId);
+    else await replyToConversation(deps, sessionId, { text: body.text, via: "chat" });
+    return json(await conversationView(deps, sessionId));
   });
 }

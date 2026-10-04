@@ -6,25 +6,18 @@
  * teach-back, and "Coverage under current model". Everything shown is computed by the server from
  * the ledger; the page only records the expert's explicit answers (with their own words).
  */
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { AnimatePresence } from "framer-motion";
-import { ArrowRight, Check, RefreshCw, X } from "lucide-react";
-import { describeError } from "@/lib/client/api";
+import { Check, X } from "lucide-react";
 import type { DebriefState, ExpertActionRequest } from "@/lib/contracts/debrief";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineageProvider, TraceButton } from "@/components/lineage/lineage-trace";
-import { expertAction, generateTeachBack, getDebrief, rebuildWitnesses } from "./api";
-import { ConceptsPanel } from "@/components/concepts/concepts-panel";
-import { CoveragePanel } from "./coverage-panel";
 import { QuoteForm } from "./quote-form";
-import { RulebookPanel } from "./rulebook-panel";
-import { StopRuleForm } from "./stop-rule-form";
-import { WitnessCard, actionLabel } from "./witness-card";
+import { actionLabel } from "./witness-card";
+import { DebriefChat } from "./debrief-chat";
 
-const POLL_MS = 4_000;
 const GAP_SOURCE: Record<DebriefState["gaps"][number]["source"], string> = {
   live_question: "queued live question",
   unexplained_decision: "unexplained decision",
@@ -34,63 +27,9 @@ const GAP_SOURCE: Record<DebriefState["gaps"][number]["source"], string> = {
 
 /**
  * `readOnly`: why the viewer may not write to this session (another account's, e.g. an admin
- * reviewing it). The view then never reruns the solver or records answers; the server refuses anyway.
+ * reviewing it). The conversation is then shown without a reply box; the server refuses writes anyway.
  */
 export function DebriefView({ sessionId, readOnly }: { sessionId: string; readOnly?: string | undefined }) {
-  const [state, setState] = useState<DebriefState | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState<string | null>(null);
-  const started = useRef(false);
-
-  /** Runs a request that returns the new state; false (with the error shown) when it was refused. */
-  const run = useCallback(async (label: string, task: () => Promise<DebriefState>): Promise<boolean> => {
-    setBusy(label);
-    try {
-      setState(await task());
-      setError(null);
-      return true;
-    } catch (e) {
-      setError(describeError(e));
-      return false;
-    } finally {
-      setBusy(null);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (started.current) return;
-    started.current = true;
-    void run(readOnly === undefined ? "Running the solver…" : "Loading the debrief…", () =>
-      readOnly === undefined ? rebuildWitnesses(fetch, sessionId) : getDebrief(fetch, sessionId),
-    );
-  }, [run, sessionId, readOnly]);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      getDebrief(fetch, sessionId).then(
-        (s) => {
-          setState(s);
-          // Voice answers to apply, or an open witness whose question the interview queue dropped: rebuild re-asks it.
-          if (readOnly === undefined && (s.pendingVoiceAnswers > 0 || s.witnesses.some((v) => v.current && v.status === "open")))
-            void rebuildWitnesses(fetch, sessionId).then(setState, () => undefined);
-        },
-        () => undefined,
-      );
-    }, POLL_MS);
-    return () => clearInterval(timer);
-  }, [sessionId, readOnly]);
-
-  /** After a concept is confirmed or dismissed: the solver reruns under the new feature model. */
-  const recompute = useCallback(() => void run("Recomputing under the new model…", () => rebuildWitnesses(fetch, sessionId)), [run, sessionId]);
-
-  /** Rejects when refused, so the form keeps the expert's words for another try. */
-  const act = useCallback(
-    async (body: ExpertActionRequest): Promise<void> => {
-      if (!(await run("Recording the expert's answer…", async () => (await expertAction(fetch, sessionId, body)).state))) throw new Error("refused");
-    },
-    [run, sessionId],
-  );
-
   return (
     <LineageProvider sessionId={sessionId}>
       <main className="mx-auto max-w-7xl space-y-4 px-4 py-6">
@@ -100,15 +39,6 @@ export function DebriefView({ sessionId, readOnly }: { sessionId: string; readOn
             <p className="font-mono text-xs text-muted-foreground">expert session {sessionId}</p>
           </div>
           <div className="ml-auto flex items-center gap-2">
-            {busy !== null && <span className="text-sm text-muted-foreground">{busy}</span>}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => void run("Running the solver…", () => rebuildWitnesses(fetch, sessionId))}
-              disabled={busy !== null || readOnly !== undefined}
-            >
-              <RefreshCw /> Rerun solver
-            </Button>
             <Button asChild variant="outline" size="sm">
               <Link href={`/sandbox?session=${encodeURIComponent(sessionId)}&set=training&mode=expert`}>CaseDesk</Link>
             </Button>
@@ -120,87 +50,9 @@ export function DebriefView({ sessionId, readOnly }: { sessionId: string; readOn
             </Button>
           </div>
         </header>
-        {readOnly !== undefined && (
-          <p role="status" className="rounded-md border bg-muted px-3 py-2 text-sm">
-            <strong>Read-only:</strong> {readOnly}. Only the expert who captured this session confirms or corrects its rules.
-          </p>
-        )}
-        {error !== null && (
-          <p role="alert" className="rounded-md bg-destructive/10 px-3 py-2 text-destructive">
-            {error}
-          </p>
-        )}
-        {state !== null && readOnly === undefined && <NextAction state={state} />}
-        {state === null ? (
-          <p className="text-muted-foreground">Loading the debrief…</p>
-        ) : (
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)]">
-            <div className="space-y-4">
-              <CoveragePanel coverage={state.coverage} revision={state.rulebookRevision} />
-              <ConceptsPanel sessionId={sessionId} onChange={recompute} />
-              <TeachBackPanel state={state} busy={busy !== null} generate={() => void run("Writing the teach-back…", () => generateTeachBack(fetch, sessionId))} act={act} />
-              <DecisionsCard state={state} />
-              <GapsCard state={state} />
-            </div>
-            <div className="space-y-4">
-              <Card aria-label="Solver witnesses">
-                <CardHeader>
-                  <CardTitle>
-                    Counterexamples (Z3) · debrief questions {state.debriefQuestions} · gaps closed {state.gapsClosed.closed}/{state.gapsClosed.total}
-                  </CardTitle>
-                  <p className="text-xs text-muted-foreground">
-                    Valid cases within the domain constraints where the confirmed rules decide nothing, conflict, or sit on a threshold. Questions are queued for the interviewer; answer here when voice is not used.
-                  </p>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2">
-                    <AnimatePresence>
-                      {[...state.witnesses]
-                        .sort((a, b) => Number(b.current) - Number(a.current))
-                        .map((v) => (
-                          <WitnessCard key={v.witness.id} view={v} state={state} act={act} />
-                        ))}
-                    </AnimatePresence>
-                  </ul>
-                  {state.witnesses.length === 0 && <p className="text-muted-foreground">No witnesses: the solver finds no gap, conflict or threshold under the current rulebook.</p>}
-                </CardContent>
-              </Card>
-              <RulebookPanel state={state} act={act} />
-              <StopRuleForm state={state} act={act} />
-              <ProposalsCard state={state} act={act} />
-            </div>
-          </div>
-        )}
+        <DebriefChat sessionId={sessionId} readOnly={readOnly} />
       </main>
     </LineageProvider>
-  );
-}
-
-/** The one thing to do next, as a banner: the first of open cases, unconfirmed rules, teach-back, then done. */
-function NextAction({ state }: { state: DebriefState }) {
-  const openCases = state.witnesses.filter((w) => w.current && (w.status === "open" || w.status === "queued" || w.status === "asked")).length;
-  const tb = state.teachBack;
-  const closed = state.coverage.closed;
-  const next = state.decisions.length === 0
-    ? { eyebrow: "NEXT STEP", title: "Capture a few cases first", body: "The debrief starts once you have decided some cases in a capture session. Open CaseDesk above and work them." }
-    : closed
-    ? { eyebrow: "ALL CHECKS MET", title: "Your rules are confirmed and covered", body: "Nothing is left that your rulebook cannot decide, under the current feature model." }
-    : openCases > 0
-      ? { eyebrow: "NEEDS YOUR ANSWER", title: `${openCases} case${openCases === 1 ? "" : "s"} your rules cannot decide`, body: "Answer in the Counterexamples card below, in your own words." }
-      : state.rules.length === 0 || state.proposals.length > 0
-        ? { eyebrow: "NEXT STEP", title: "Confirm the proposed rules", body: "Suggestions only: nothing is enforced until you confirm each one in your own words." }
-        : tb === null || tb.confirmedEntryId === null
-          ? { eyebrow: "NEXT STEP", title: "Check the teach-back", body: "Write it, read it, and confirm it or correct any rule it got wrong." }
-          : { eyebrow: "NEXT STEP", title: "Resolve what is left", body: "Open the cards below to finish the remaining checks." };
-  return (
-    <section aria-label="What to do next" data-testid="debrief-next" className="flex flex-wrap items-center gap-4 rounded-3xl bg-primary px-6 py-5 text-primary-foreground">
-      <span className="rounded-full bg-highlight px-3.5 py-1.5 text-xs font-bold tracking-wider text-highlight-foreground">{next.eyebrow}</span>
-      <div className="grid min-w-0 flex-1 gap-0.5">
-        <h2 className="font-heading text-xl font-bold tracking-tight">{next.title}</h2>
-        <p className="text-sm text-primary-foreground/85">{next.body}</p>
-      </div>
-      <ArrowRight aria-hidden className="size-5 text-highlight" />
-    </section>
   );
 }
 

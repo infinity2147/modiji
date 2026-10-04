@@ -1,7 +1,7 @@
 /**
  * Schema versioning end to end against the production server (plan §6.6): an expert session seeded
  * through the public APIs (three training cases decided with a redacted frame each), one undefined
- * concept surfaced, then the debrief page — the expert confirms the concept with their own words, the
+ * concept surfaced, then the debrief conversation — the expert says yes to the concept in their own words, the
  * banner reads "Model updated: new concept … — coverage …", the backfill result per case is shown, and
  * coverage is computed under feature model v2.
  *
@@ -71,23 +71,24 @@ test("concepts: undefined concept → expert confirms → Model updated banner �
   proposeConcept(sessionId);
 
   await page.goto(`/debrief/${sessionId}`);
-  const panel = page.getByTestId("concepts");
-  await expect(panel).toBeVisible();
-  const concept = panel.getByTestId("concept-documentsComplete");
-  await expect(concept.getByText(`Expert: “${QUOTE}”`)).toBeVisible();
   await expect(page.getByTestId("coverage-panel").getByText("Feature model v1")).toBeVisible();
+  // The conversation reaches the proposed concept: everything before it is skipped.
+  const agent = page.getByTestId("debrief-transcript").getByTestId("turn-agent");
+  for (let i = 0; i < 20 && !((await agent.last().textContent()) ?? "").includes("documents complete"); i += 1) {
+    const count = await agent.count();
+    await page.getByRole("group", { name: "Quick replies" }).getByRole("button", { name: "Skip", exact: true }).click();
+    await expect(agent).toHaveCount(count + 1);
+  }
+  await expect(agent.last()).toContainText('You seem to use an idea the system doesn\'t have yet: "documents complete" (Every required document is on file.). Should I add it?');
+  await page.getByLabel("Your answer").fill("Yes — documents complete means nothing on the checklist is missing or expired.");
+  await page.getByLabel("Your answer").press("Enter");
 
-  await concept.getByRole("button", { name: "Confirm as a feature" }).click();
-  await concept.getByLabel("Concept label").fill("Documents complete");
-  await concept.getByLabel("Your words (recorded as evidence)").fill("Yes — documents complete means nothing on the checklist is missing or expired.");
-  await concept.getByRole("button", { name: "Confirm concept" }).click();
-
+  const panel = page.getByTestId("concepts");
   const banner = page.getByTestId("model-updated");
-  await expect(banner).toContainText("Model updated: new concept Documents complete —");
+  await expect(banner).toContainText("Model updated: new concept documents complete —");
   await expect(banner).toContainText("coverage recomputed under schema v2");
   const confirmed = panel.getByTestId("confirmed-documentsComplete");
   for (const caseId of Object.keys(DECISIONS)) await expect(confirmed.getByText(`${caseId}: unknown (no vision model)`)).toBeVisible();
-  await expect(panel.getByText("No undefined concept under the current model.")).toBeVisible();
   await expect(page.getByTestId("coverage-panel").getByText("Feature model v2")).toBeVisible();
   await page.screenshot({ path: join(EVIDENCE_DIR, "concept-confirmed.png"), fullPage: true });
 

@@ -202,6 +202,8 @@ const kinds = {
         "confirm_boundary",
         "confirm_teachback",
         "confirm_stop_rule",
+        /** A decision rule the expert stated in their own words in the debrief conversation, read back and confirmed. */
+        "confirm_stated_rule",
         /** Two experts (plan §7.10): this expert's decision on a disagreement case (`target.witnessId`, `target.action`). */
         "answer_disagreement",
       ]),
@@ -212,6 +214,48 @@ const kinds = {
         teachBackId: IdSchema.optional(),
         action: ActionIdSchema.optional(),
       }),
+    }),
+  },
+  /**
+   * The debrief conversation (plan §7.5 as a dialogue): what the engine asked, in order. `topic` says what the
+   * turn is about and `ref` names it (candidate, witness, decision entry or teach-back id). A `readback` turn
+   * carries the expert action it would apply, as `pending`: only the expert's next reply, if it is a plain
+   * yes, applies it. The text is deterministic (no model wrote it).
+   */
+  "debrief.asked": {
+    sources: ["engine"],
+    payload: z.strictObject({
+      promptId: IdSchema,
+      topic: z.enum(["proposal", "unexplained", "witness", "concept", "stop_rules", "teach_back", "readback", "closing"]),
+      ref: z.string().min(1).nullable(),
+      text: z.string().min(1).max(2000),
+      pending: z.json().nullable(),
+    }),
+  },
+  /** The expert's reply to a debrief turn, in their own words, typed (`chat`) or spoken (`voice`, with its utterance). */
+  "debrief.replied": {
+    sources: ["expert"],
+    payload: z.strictObject({
+      promptId: IdSchema,
+      text: z.string().trim().min(1).max(1000),
+      via: z.enum(["chat", "voice"]),
+      utteranceId: IdSchema.nullable(),
+    }),
+  },
+  /**
+   * How the engine took a reply: a plain yes or no is read by code (`origin: "rule"`); anything else by the
+   * model (`origin: "llm"`, a proposal only). `statementId` is the `expert.statement` an applied action wrote.
+   */
+  "debrief.understood": {
+    sources: ["engine"],
+    payload: z.strictObject({
+      promptId: IdSchema,
+      replyId: IdSchema,
+      intent: z.enum(["yes", "no", "skip", "statement", "unclear"]),
+      origin: z.enum(["rule", "llm"]),
+      statementId: IdSchema.nullable(),
+      /** Why an action the expert confirmed was refused by code, in plain words. */
+      refused: z.string().nullable(),
     }),
   },
   "teachback.generated": {

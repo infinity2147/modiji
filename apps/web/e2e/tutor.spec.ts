@@ -7,8 +7,9 @@
  * typed words (`confirm_candidate`, `revise_rule`). The novice then works the held-out set: predict →
  * reveal on NS-2026-0201, commit, mastery, practice cases.
  *
- * Stop-rule: the second test has an expert state a REAL stop-rule on the debrief page's "Add a
- * stop-rule" form (`confirm_stop_rule`, tied to a real frame); the novice's selection of the forbidden
+ * Stop-rule: the second test has an expert state a REAL stop-rule through the debrief's expert action
+ * (`confirm_stop_rule`, tied to a real frame; the conversation applies the same action after its read-back,
+ * but reading free words needs the model, which this server runs without); the novice's selection of the forbidden
  * outcome then makes the guardrail monitor intervene before Save, and Save is blocked by the interlock.
  * Nothing is route-intercepted. Screenshots go to docs/evidence/p6/.
  */
@@ -182,20 +183,25 @@ async function stateStopRule(page: Page, request: APIRequestContext): Promise<vo
   await ok(await request.post(`/api/sessions/${sessionId}/events`, { data: { events: [event] } }));
   const frame = await uploadFrame(request, sessionId, 1);
 
+  // The debrief states stop-rules in the conversation, which needs the model to read free words; this server runs
+  // without one (LLM_CALLS=off), so the same expert action the conversation applies is sent through the debrief API.
+  await ok(
+    await request.post(`/api/sessions/${sessionId}/debrief`, {
+      data: {
+        action: "confirm_stop_rule",
+        decisionFamily: "reviewOutcome",
+        when: { combinator: "all", conditions: [{ feature: "jurisdictionRisk", op: "==", value: "high" }] },
+        effect: { type: "forbid", action: "approve" },
+        quote: STOP_QUOTE,
+      },
+    }),
+  );
   await page.goto(`/debrief/${sessionId}`);
-  const form = page.getByTestId("stop-rule-form");
-  await expect(form).toBeVisible();
-  await form.getByLabel("Condition 1 feature").selectOption({ label: "Country risk (Northstar list)" });
-  await form.getByLabel("Condition 1 value").selectOption("high");
-  await form.getByRole("radio", { name: "Never allow" }).check();
-  await form.getByLabel("Action").selectOption({ label: "Approve onboarding" });
-  await form.getByLabel("Your words (recorded as evidence)").fill(STOP_QUOTE);
-  await page.screenshot({ path: evidence("debrief-add-stop-rule.png"), fullPage: true });
-  await form.getByRole("button", { name: "Confirm stop-rule" }).click();
   const rule = page.getByTestId("rule").filter({ hasText: "never approve onboarding" });
   await expect(rule).toBeVisible();
-  await expect(rule).toContainText(`“${STOP_QUOTE}” (typed)`);
-  await expect(rule.getByText("guardrail")).toBeVisible();
+  await expect(rule).toContainText(`you said “${STOP_QUOTE}”`);
+  await expect(rule.getByText("hard stop")).toBeVisible();
+  await page.screenshot({ path: evidence("debrief-stop-rule.png"), fullPage: true });
 
   // The confirmed rule cites the real frame (not a DOM event) and the exact words.
   const book = await ok<{ rules: { kind: string; effect: { type: string; action?: string }; evidence: { exactQuote?: string; frameIds?: string[] }[] }[] }>(await request.get("/api/rulebook"));

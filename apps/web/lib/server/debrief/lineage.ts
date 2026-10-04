@@ -84,6 +84,14 @@ export function entrySummary(e: LedgerEntry): string {
       const t = ruleText(DOMAIN, rule);
       return `Revised rule (r${rule.revision}): when ${t.when}, ${t.then}`;
     }
+    case "debrief.asked":
+      return `Debrief asked: “${parseLedgerPayload(e, "debrief.asked").text}”`;
+    case "debrief.replied": {
+      const p = parseLedgerPayload(e, "debrief.replied");
+      return `Expert (${p.via === "voice" ? "voice" : "typed"}, debrief): “${p.text}”`;
+    }
+    case "debrief.understood":
+      return `Debrief reply read as ${parseLedgerPayload(e, "debrief.understood").intent}`;
     case "teachback.generated":
       return `Teach-back (${parseLedgerPayload(e, "teachback.generated").origin === "llm" ? "Opus prose" : "template"})`;
     case "teachback.confirmed":

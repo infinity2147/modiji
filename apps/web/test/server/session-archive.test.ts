@@ -21,6 +21,7 @@ import { handlePostEvents } from "../../lib/server/casedesk/events";
 import { handleLedgerPage } from "../../lib/server/casedesk/ledger-page";
 import { handleCreateSession, handleListCases } from "../../lib/server/casedesk/sessions";
 import {
+  handleConversation,
   handleExpertAction,
   handleExport,
   handleGenerateTeachBack,
@@ -121,6 +122,8 @@ const WRITES: Record<string, (sessionId: string) => Promise<Response>> = {
   "sessions/[sessionId]/gate/authorize": (id) =>
     handleGateAuthorize(post(`/api/sessions/${id}/gate/authorize`, { questionId: "q_1", contextVersion: 0, becameValidAt: 1, decidedAt: 2, conditions: {} }), id, interviewDeps()),
   "sessions/[sessionId]/off-record": (id) => handleOffRecord(post(`/api/sessions/${id}/off-record`, { offRecord: true }), id, interviewDeps()),
+  "sessions/[sessionId]/debrief/conversation": (id) =>
+    handleConversation(post(`/api/sessions/${id}/debrief/conversation`, { type: "reply", text: "Never approve a sanctions hit." }), id, { debrief: debriefDeps(), schema: schemaDeps() }),
   "sessions/[sessionId]/debrief": (id) =>
     handleExpertAction(post(`/api/sessions/${id}/debrief`, { action: "confirm_teachback", teachBackId: randomUUID(), quote: "Yes, that's right." }), id, debriefDeps()),
   "sessions/[sessionId]/teachback": (id) => handleGenerateTeachBack(id, debriefDeps()),

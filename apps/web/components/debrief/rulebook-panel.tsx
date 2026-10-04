@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TraceButton } from "@/components/lineage/lineage-trace";
-import { addCondition, numericComparisons, replaceComparison } from "./predicate-edit";
+import { addCondition, numericComparisons, replaceComparison } from "@/lib/debrief-predicate-edit";
 import { QuoteForm } from "./quote-form";
 
 const OPS: ComparisonOp[] = [">", ">=", "<", "<="];
