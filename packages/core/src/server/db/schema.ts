@@ -33,6 +33,10 @@ export const ledgerEntries = sqliteTable(
     unique("ledger_entries_session_sequence_unique").on(t.sessionId, t.sequence),
     index("ledger_entries_session_source_idx").on(t.sessionId, t.source),
     index("ledger_entries_trace_idx").on(t.traceId),
+    // The rulebook, expert directory and disagreement holds read only new rows of a few kinds (kind = ? AND rowid > ?).
+    index("ledger_entries_kind_idx").on(t.kind),
+    // One session's entries of a kind: the archived check on every append, a newly expert session's rule rows.
+    index("ledger_entries_session_kind_idx").on(t.sessionId, t.kind),
   ],
 );
 

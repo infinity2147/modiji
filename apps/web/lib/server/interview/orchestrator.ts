@@ -99,6 +99,18 @@ function entryContext(deps: InterviewDeps, sessionId: string, traceId: string): 
   return { sessionId, occurredAt: deps.now(), traceId, privacyEpoch: session.privacyEpoch };
 }
 
+/**
+ * Whether the session is archived (read-only, `session.archived`). Engine work that outlives the
+ * archive — a lapsed authorization, an answer window closing, a parse or rephrase still in flight —
+ * stops here instead of appending, which the ledger would refuse (`session_archived`). Logged once per
+ * skipped step.
+ */
+function archived(deps: InterviewDeps, sessionId: string, skipped: string): boolean {
+  if (deps.ledger.getSession(sessionId)?.archived !== true) return false;
+  deps.log.info(`[interview] session ${sessionId} is archived; ${skipped} skipped`);
+  return true;
+}
+
 /** The CaseDesk handlers call these after their own writes succeeded. */
 export function interviewHooks(deps: InterviewDeps): InterviewHooks {
   return {
@@ -120,6 +132,7 @@ export function interviewHooks(deps: InterviewDeps): InterviewHooks {
  * (the fold computed it), then the queue regenerated for the decided case.
  */
 async function afterDecision(deps: InterviewDeps, sessionId: string, decision: LedgerEntry): Promise<void> {
+  if (archived(deps, sessionId, `the engine step for decision ${decision.id}`)) return;
   const state = engineState(deps, sessionId);
   for (const family of state.families.values()) {
     const record = family.decisions.find((d) => d.entryId === decision.id);
@@ -176,6 +189,7 @@ async function requeue(
     planned.filter((q) => !wasLive.has(q.id)),
     before.expert?.language ?? "en",
   );
+  if (archived(deps, sessionId, `regenerating the ${familyId} queue`)) return;
 
   const live = queuedQuestions(engineState(deps, sessionId)).filter((r) => isLiveQuestionKind(r.question.kind));
   const liveIds = new Set(live.map((r) => r.question.id));
@@ -282,6 +296,7 @@ export function recordUtterance(deps: InterviewDeps, sessionId: string, body: Po
       deps.log.info(`[interview] ${utterance.id} arrived after the answer to ${record.question.id} was parsed: recorded, not parsed again`);
       return recorded;
     }
+    if (archived(deps, sessionId, `collecting answer segment ${utterance.id}`)) return recorded;
     collectSegment(deps, sessionId, record.question.id, ctx.traceId, {
       id: utterance.id,
       text: body.text,
@@ -327,6 +342,7 @@ export function closeAnswer(deps: InterviewDeps, sessionId: string): Promise<voi
   deps.store.answers.delete(sessionId);
   const [utterance, ...continuation] = open.segments;
   return serially(deps, sessionId, async () => {
+    if (archived(deps, sessionId, `parsing answer ${utterance.id} to ${open.questionId}`)) return;
     const record = engineState(deps, sessionId).questions.get(open.questionId);
     if (deps.claude === null || record?.asked === undefined) {
       deps.log.info(`[interview] answer ${utterance.id} to ${open.questionId} left unparsed (no parser, or the question is no longer asked)`);
@@ -345,6 +361,7 @@ export function closeAnswer(deps: InterviewDeps, sessionId: string): Promise<voi
  */
 export function requeueLapsed(deps: InterviewDeps): void {
   for (const lapsed of deps.authorizations.sweep(deps.now())) {
+    if (archived(deps, lapsed.sessionId, `re-queueing ${lapsed.questionId} after its authorization lapsed`)) continue;
     const state = engineState(deps, lapsed.sessionId);
     const record = state.questions.get(lapsed.questionId);
     // Only the question's latest authorization re-queues it (an older lapsed one says nothing about a newer).
@@ -392,6 +409,7 @@ async function translate(
     deps.log.warn(`[interview] translation of utterance ${input.utteranceId} rejected (${result.reason}); translation pending`);
     return undefined;
   }
+  if (archived(deps, input.sessionId, `recording the translation of utterance ${input.utteranceId}`)) return undefined;
   deps.ledger.append(
     entry(entryContext(deps, input.sessionId, input.traceId), "utterance.translated", "engine", [input.utteranceId], {
       utteranceId: input.utteranceId,
@@ -434,6 +452,7 @@ async function interpretAnswer(
     return;
   }
   for (const r of conversion.rejected) deps.log.info(`[interview] parser output rejected (${r.item}): ${r.reason}`);
+  if (archived(deps, sessionId, `recording the parse of answer ${utteranceId}`)) return;
 
   const ctx = entryContext(deps, sessionId, input.traceId);
   const parsedEntry = deps.ledger.append(entry(ctx, "answer.parsed", "engine", [...segmentIds, record.queuedEntryId], conversion.answer));
@@ -538,6 +557,7 @@ async function proposeNewConcepts(deps: InterviewDeps, claude: Claude, ctx: Entr
   try {
     const conversion = await proposeConcepts(claude, { transcript: state.transcript, unexplained, pendingConcepts: state.undefinedConcepts });
     for (const r of conversion.rejected) deps.log.info(`[interview] proposed concept ${r.name} rejected: ${r.reason}`);
+    if (archived(deps, ctx.sessionId, "recording proposed concepts")) return;
     deps.ledger.appendMany(conversion.concepts.map((c) => entry(ctx, "concept.proposed", "engine", [input.utterance], c)));
   } catch (error) {
     deps.log.warn(`[interview] concept proposer failed: ${describeError(error)}`);

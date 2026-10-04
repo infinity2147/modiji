@@ -61,6 +61,8 @@ function requireNoControlText(text: string): void {
  * `GET /api/sessions/:sessionId/questions`: live questions are valid at the current context version
  * (questions.ts). Questions whose authorization expired unspoken are re-queued first (the browser gate
  * polls this every second, so a lost question is back in its queue within about a second of lapsing).
+ * An archived session is read-only: its queue is empty (nothing in it can be authorized), while what
+ * was asked stays readable.
  */
 export function handleQuestionQueue(sessionId: string, deps: InterviewDeps): Promise<Response> {
   return respond(deps.log, () => {
@@ -69,7 +71,7 @@ export function handleQuestionQueue(sessionId: string, deps: InterviewDeps): Pro
     const state = engineState(deps, session.id);
     const contextVersion = deps.authorizations.getContextVersion(session.id);
     const body: z.infer<typeof QuestionQueueResponseSchema> = {
-      queue: queuedQuestions(state).map((r) => ({ ...r.question, contextVersion })),
+      queue: session.archived ? [] : queuedQuestions(state).map((r) => ({ ...r.question, contextVersion })),
       contextVersion,
       asked: askedQuestions(state).flatMap((r) => (r.asked ? [{ questionId: r.question.id, authorizedAt: r.asked.at }] : [])),
       offRecord: session.offRecord,

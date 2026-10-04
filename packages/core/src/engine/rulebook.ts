@@ -32,14 +32,24 @@ export type Rulebook = {
   rejected: { ledgerEntryId: string; reason: string }[];
 };
 
+type RuleEventEntry = Pick<LedgerEntry, "id" | "source" | "kind" | "payload">;
+
+/** A resumable rulebook fold: `apply` entries in ledger order; `rulebook` is the book so far. */
+export type RulebookFold = {
+  apply: (entry: RuleEventEntry) => void;
+  /** A snapshot: later `apply` calls never change a rulebook already returned. */
+  rulebook: () => Rulebook;
+};
+
 /**
  * Folds `rule.confirmed` / `rule.revised` / `rule.retired` ledger entries (in ledger order) into the
- * current rulebook. Payloads are zod-validated (so every rule carries its supporting expert quote);
- * entries of other kinds are ignored; `system_control` or other non-engine/expert sources are
- * rejected. A confirmation must be revision 1 of an id never used before; a revision must be exactly
- * the current revision + 1 of a live rule; a retirement must name a live rule.
+ * current rulebook, one entry at a time (`rulebookFromLedger` folds a whole list). Payloads are
+ * zod-validated (so every rule carries its supporting expert quote); entries of other kinds are
+ * ignored; `system_control` or other non-engine/expert sources are rejected. A confirmation must be
+ * revision 1 of an id never used before; a revision must be exactly the current revision + 1 of a live
+ * rule; a retirement must name a live rule.
  */
-export function rulebookFromLedger(entries: readonly Pick<LedgerEntry, "id" | "source" | "kind" | "payload">[]): Rulebook {
+export function createRulebookFold(): RulebookFold {
   const live = new Map<string, ConfirmedRule>();
   const used = new Set<string>();
   const history: RulebookEvent[] = [];
@@ -47,11 +57,11 @@ export function rulebookFromLedger(entries: readonly Pick<LedgerEntry, "id" | "s
   let revision = 0;
   const reject = (e: { id: string }, reason: string): void => void rejected.push({ ledgerEntryId: e.id, reason });
 
-  for (const e of entries) {
-    if (e.kind !== RULE_EVENT_KINDS.confirmed && e.kind !== RULE_EVENT_KINDS.revised && e.kind !== RULE_EVENT_KINDS.retired) continue;
+  function apply(e: RuleEventEntry): void {
+    if (e.kind !== RULE_EVENT_KINDS.confirmed && e.kind !== RULE_EVENT_KINDS.revised && e.kind !== RULE_EVENT_KINDS.retired) return;
     if (!RULE_EVENT_SOURCES.includes(e.source)) {
       reject(e, `rule events must come from the engine or the expert, not "${e.source}"`);
-      continue;
+      return;
     }
     if (e.kind === RULE_EVENT_KINDS.confirmed) {
       const p = RuleConfirmedPayloadSchema.safeParse(e.payload);
@@ -86,7 +96,15 @@ export function rulebookFromLedger(entries: readonly Pick<LedgerEntry, "id" | "s
       }
     }
   }
-  return { rules: [...live.values()], revision, history, rejected };
+
+  return { apply, rulebook: () => ({ rules: [...live.values()], revision, history: [...history], rejected: [...rejected] }) };
+}
+
+/** The rulebook folded from `entries` (in ledger order); see `createRulebookFold`. */
+export function rulebookFromLedger(entries: readonly RuleEventEntry[]): Rulebook {
+  const fold = createRulebookFold();
+  for (const e of entries) fold.apply(e);
+  return fold.rulebook();
 }
 
 /**

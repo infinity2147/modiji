@@ -15,6 +15,13 @@
       "when": 1791054443128,
       "tag": "0001_append_only",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1791082682204,
+      "tag": "0002_ledger_kind_indexes",
+      "breakpoints": true
     }
   ]
 }
