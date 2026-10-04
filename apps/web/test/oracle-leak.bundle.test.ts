@@ -10,7 +10,8 @@ import { discoverOracleModules, listTextFiles, scanFilesForMarkers, type OracleM
 
 const WEB_ROOT = path.resolve(import.meta.dirname, "..");
 const REPO_ROOT = path.resolve(WEB_ROOT, "../..");
-const NEXT_DIR = path.join(WEB_ROOT, ".next");
+// The build under test: NEXT_DIST_DIR (as next.config.ts reads it), so isolated builds can be scanned.
+const NEXT_DIR = path.join(WEB_ROOT, process.env.NEXT_DIST_DIR ?? ".next");
 const STATIC_DIR = path.join(NEXT_DIR, "static");
 const SERVER_APP_DIR = path.join(NEXT_DIR, "server", "app");
 

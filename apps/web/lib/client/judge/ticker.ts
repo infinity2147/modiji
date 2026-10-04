@@ -7,6 +7,7 @@
 import { z } from "zod";
 import {
   IdSchema,
+  MACHINE_TRANSLATION_LABEL,
   isLedgerKind,
   parseLedgerPayload,
   type LedgerEntry,
@@ -130,7 +131,8 @@ function describe(entry: LedgerEntry, ctx: TickerContext): { text: string; tone:
     case "question.queued": {
       const p = parseLedgerPayload(entry, "question.queued");
       const value = p.kind === "intervention" ? `priority ${p.value.toFixed(2)}` : `EIG ${p.value.toFixed(2)} bits`;
-      return system(`Question queued · ${p.reason} · ${value} · ${quote(p.text, 70)}`);
+      const english = p.textEnglish === undefined ? "" : ` (English: ${quote(p.textEnglish, 70)})`;
+      return system(`Question queued · ${p.reason} · ${value} · ${quote(p.text, 70)}${english}`);
     }
     case "question.dropped": {
       const p = parseLedgerPayload(entry, "question.dropped");
@@ -157,8 +159,12 @@ function describe(entry: LedgerEntry, ctx: TickerContext): { text: string; tone:
     case "llm.stream_aborted":
       parseLedgerPayload(entry, "llm.stream_aborted");
       return { text: "Agent speech stream aborted — the authorization stays usable once", tone: "warning" };
-    case "utterance.transcript":
-      return evidence(`Expert: ${quote(parseLedgerPayload(entry, "utterance.transcript").text)}`);
+    case "utterance.transcript": {
+      const p = parseLedgerPayload(entry, "utterance.transcript");
+      return evidence(`Expert${p.language === undefined ? "" : ` (${p.language})`}: ${quote(p.text)}`);
+    }
+    case "utterance.translated":
+      return system(`${MACHINE_TRANSLATION_LABEL}: ${quote(parseLedgerPayload(entry, "utterance.translated").translation)}`);
     case "agent.utterance":
       return system(`Agent: ${quote(parseLedgerPayload(entry, "agent.utterance").text)}`);
     case "answer.parsed": {

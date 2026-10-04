@@ -4,7 +4,7 @@
  * committed. The ledger is the only source of truth, so a reload shows exactly what was recorded.
  */
 import { z } from "zod";
-import { ActionIdSchema, GuardrailResultSchema, type ActionId, type GuardrailResult, type LedgerEntry } from "@vashistha/core";
+import { ActionIdSchema, ExpertLanguageSchema, GuardrailResultSchema, type ActionId, type ExpertLanguage, type GuardrailResult, type LedgerEntry } from "@vashistha/core";
 import { CaseSetSchema, RiskRatingSchema, type CaseSet } from "@vashistha/core/domains/kyc";
 import { CommitDecisionRequestSchema, SessionModeSchema, type SessionMode } from "../contracts/casedesk";
 import { LEDGER_PAGE_MAX } from "../contracts/ledger";
@@ -26,6 +26,8 @@ export type DecisionRecord = {
 export type SessionState = {
   mode: SessionMode;
   caseSet: CaseSet;
+  /** The language the session's expert declared at start (plan §7.11); English for novice and unnamed sessions. */
+  expertLanguage: ExpertLanguage;
   privacyEpoch: number;
   /** Highest frameSeq of a recorded DOM screen event; 0 when none. */
   lastFrameSeq: number;
@@ -33,7 +35,7 @@ export type SessionState = {
 };
 
 /* Only the members the UI reads; unknown members are tolerated so newer payload versions still resume. */
-const StartedPayloadSchema = z.object({ mode: SessionModeSchema, caseSet: CaseSetSchema });
+const StartedPayloadSchema = z.object({ mode: SessionModeSchema, caseSet: CaseSetSchema, expert: z.object({ language: ExpertLanguageSchema }).optional() });
 const ScreenEventPayloadSchema = z.object({ frameSeq: z.int().nonnegative() });
 const DecisionPayloadSchema = z.object({
   caseId: z.string().min(1),
@@ -54,7 +56,7 @@ function payload<S extends z.ZodType>(schema: S, entry: LedgerEntry): z.infer<S>
 export function summariseLedger(entries: readonly LedgerEntry[]): SessionState {
   const started = entries.find((e) => e.source === "engine" && e.kind === "session.started");
   if (!started) throw new ApiError("invalid_response", 200, "not_a_casedesk_session", "the session has no session.started entry");
-  const { mode, caseSet } = payload(StartedPayloadSchema, started);
+  const { mode, caseSet, expert } = payload(StartedPayloadSchema, started);
   let privacyEpoch = 0;
   let lastFrameSeq = 0;
   const decisions = new Map<string, DecisionRecord>();
@@ -74,7 +76,7 @@ export function summariseLedger(entries: readonly LedgerEntry[]): SessionState {
       });
     }
   }
-  return { mode, caseSet, privacyEpoch, lastFrameSeq, decisions };
+  return { mode, caseSet, expertLanguage: expert?.language ?? "en", privacyEpoch, lastFrameSeq, decisions };
 }
 
 /** Reads the whole session ledger page by page. */

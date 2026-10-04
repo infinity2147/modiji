@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ExpertLanguageSchema } from "./expert";
 import { ActionIdSchema, EpochMsSchema, IdSchema, SchemaVersionSchema, SymbolIdSchema } from "./primitives";
 import { PredicateSchema } from "./predicate";
 
@@ -57,8 +58,19 @@ export const ExpertQuoteEvidenceSchema = z
     eventIds: z.array(IdSchema),
     relation: z.enum(["supports", "contradicts"]),
     provenance: z.enum(["human_voice", "human_text"]),
+    /**
+     * P10, any language: the language the expert spoke (absent = English). `exactQuote` is always the
+     * expert's ORIGINAL words — the evidence; `translation` is its English rendering for display, a
+     * model product that is never authoritative and never parsed back into a rule.
+     */
+    language: ExpertLanguageSchema.optional(),
+    translation: z.string().trim().min(1).optional(),
   })
-  .refine((e) => e.t1Ms >= e.t0Ms, { message: "t1Ms must be >= t0Ms", path: ["t1Ms"] });
+  .refine((e) => e.t1Ms >= e.t0Ms, { message: "t1Ms must be >= t0Ms", path: ["t1Ms"] })
+  .refine((e) => e.translation === undefined || (e.language !== undefined && e.language !== "en"), {
+    message: "a translation belongs to a quote in a language other than English",
+    path: ["translation"],
+  });
 export type ExpertQuoteEvidence = z.infer<typeof ExpertQuoteEvidenceSchema>;
 
 /** Non-quote evidence points at ledger entries. */

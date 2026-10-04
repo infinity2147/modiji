@@ -1,0 +1,97 @@
+LIVE acceptance runs against production (https://vashistha-production.up.railway.app, commit 1da6e3c), 2026-10-04 00:27–01:37 UTC
+All expert speech is synthetic voice input (ElevenLabs TTS), voice "Matilda" (XrExE9yKIg1WjnnlVkGX), eleven_multilingual_v2.
+Runner: apps/web/e2e/live/** (README there). Headless Chromium shell 153 + WebRTC worked against production.
+Numbers: docs/evidence/live/SUMMARY.txt (aggregates) and the per-run .txt/.json files (production ledger excerpts + harness events).
+
+=== P3 voice + gate — 5 scripted typing/talking runs ==========================================
+Run  scenario                                session                               conversation                       asked/spoken  interruptions  talk-over
+A    types a note while talking              da9b8e52-07ac-4180-bee0-0bba455da897  conv_2601m4264hdxf8ev7pthnwxjxhfr  4/3           0              0
+B    long pause, resumes mid-answer          94cf3b7b-e6dd-457c-a038-8908a4b6e885  conv_7501m42697w2fjs9fr7j7spz6pfa  4/4           0              3 (agent began in a 3.5 s / 6 s pause; expert resumed over it)
+C    rapid case navigation + scrolling       4dfb1645-5772-47fe-bf92-3e3babd6d2fc  conv_8101m426grvvfk199fvbrddddmq9  5/5           0              0
+D    short noisy utterances near VAD thr.    e047ef8b-3680-4cb3-b48c-735ae5920449  conv_4201m426pjgsfvqtwhqqv4haq7p2  4/3           3              1
+E    6 decisions, live budget (Practice set) e0ca4cd6-0101-4cc0-9014-33a0720adbeb  conv_9701m426yhjxef8bcmz7w20msady  5/5           0              0
+
+0 interruptions across 5 runs ............................ FAIL: 3, all in run D.
+  - Authorization 338 ms after a quiet "Right." (gain 0.12) began. ElevenLabs VAD max for that clip: 0.000.
+    The previous murmur's VAD had fallen below 0.4 1.2 s earlier, so the gate saw silence.
+  - That question's agent audio began 991 ms after the authorization: 593 ms after that murmur ended, inside its 1.2 s
+    guard, between the murmurs.
+  - Authorization 409 ms after the expert began a full answer. The first VAD ≥ 0.4 arrived 603 ms after onset.
+    Its control message was then swallowed (see BUGS #1), so no agent audio followed.
+Authorization ≤ 250 ms after conditions valid ............ MET for the gate decision (decidedAt − becameValidAt):
+                                                           p50 0 · p95 3 · max 15 ms (n=22).
+  The browser holds the authorization only after the production round trip.
+  Conditions valid → control message sent: p50 274 · p95 967 · max 2641 ms (n=22).
+  The bare network RTT is ≈ 265 ms from this network, so even that path cannot meet 250 ms.
+First audio (control message sent → agent audio on the WebRTC track):
+  p50 697 · p95 808 · max 848 ms (n=20).
+  First audio event on the data channel: p50 547 · p95 612 ms.
+  First agent_response text: p50 1788 · p95 2802 ms.
+Control turns never in evidence .......................... MET in all 5 runs, and in all 4 P4 runs.
+  - No control text in any utterance.transcript or agent.utterance.
+  - No user_transcript echo, and no control text in any posted utterance.
+  - All gate.control_message entries are system_control.
+  - No rule evidence cites one.
+  - Production Work Map / Procedure exports contain no control text.
+Live budget (run E) ...................................... MET: 5 questions in 10 min. 4 more stayed queued.
+  HUD "Budget wait 438 s" (p3/run-e-budget-engineering-view-*.png).
+Questions: 22 authorized, 20 spoken.
+  2 were authorized but never spoken (BUGS #1).
+  3 runs spent a budget slot on a refused authorization (BUGS #4).
+
+=== P4 hypothesis engine — live, real Sonnet answer parsing, 3 training cases ================
+Final run (attempt 4): session f77499f8-9078-4ea1-9beb-00fd5a335d93, conv_5301m4287g82ebzt3ajs7sx5efej,
+LIVE_P4_VARIANT=single-sentence+concept → MET on all four criteria, by voice. No typed debrief confirmation was used.
+  ≥1 threshold rule .......... rule_1e58bdad60bc40, uboOwnershipPct > 25 ∧ ¬uboVerified → enhancedReview (explicit_statement, human_voice)
+  ≥1 guardrail/exception ..... rule_0db2a2b89d2203, require_approval(compliance_officer) when pep = true
+                               Quote: "Never approve a politically exposed person without compliance sign-off."
+  ≥1 unresolved concept ...... registryExtractAgeMonths (answer parser) + complianceSignOff (concept proposer)
+  evidence validation ........ 2/2 rule.confirmed valid: exact quote ⊂ utterance, ≥1 frame.received, provenance human_voice
+Disclosed script choices, both made after the bugs below:
+  - Stop-rules are said as single-sentence answers (BUGS #3).
+  - The first answer names a concept outside the feature model (registry extract age), to exercise concept surfacing.
+  - At most 1 question per case, to leave live budget.
+Earlier attempts (all kept in p4/attempt-*):
+  1 f4f88cde… conv_8301…: the conversation failed ("custom_llm_error: LLM Cascade Error: TimeoutError")
+    after a double authorization and server stalls (BUGS #2, #6).
+    Its 2 concepts came from vision reading the synthetic canvas headings (junk, BUGS #10).
+  2 1368ae76…: both stop-rules were spoken and transcribed verbatim, but only as the 2nd ASR segment.
+    They were never parsed (BUGS #3). Threshold rule ✓, guardrail ✗, concept ✗.
+  3 cad2596d… conv_0001m427xr96egjt9d9s1yk6yh2z: single-sentence high-risk stop-rule → 2 forbid(approve) guardrails, by voice:
+    - rule_1e5796de1f0929: jurisdictionRisk=high ∧ accountAgeMonths<24
+    - rule_03e987e9b68836: jurisdictionRisk=high ∧ sourceOfFunds≠verified
+    All 4 rules were valid. No concept. The PEP rule was never asked for (budget: BUGS #4).
+
+=== P8 exports — live ========================================================================
+Agent blocked with expert quote .......................... MET (p8/agent-blocked-live.txt).
+  Real Claude (claude-opus-5-5, no --scripted) against /mcp with MCP_BEARER_TOKEN, held-out NS-2026-0201, "approve":
+  - one check_action call → forbid (rulebook r23) by rule_1e5796de1f0929;
+  - final line: BLOCKED: "Never approve a customer from a high-risk country at desk level unless they've banked with us
+    for two years with verified funds." This is the exact production utterance from P4 attempt 3.
+Exports round-trip against source rules .................. MET (p8/exports-roundtrip.txt), Work Maps of sessions f77499f8 and cad2596d:
+  - Work Map JSON import→export byte-identical;
+  - 23/23 rules in GET /api/rulebook and deep-equal;
+  - the Procedure's machine-readable block equals the Work Map rules and the rulebook projection, at revision 23;
+  - every expert quote appears in the Procedure text;
+  - MCP check_action vs local checkAction over /api/rulebook: 55/55 agree (11 demo cases × 5 outcomes).
+
+=== Side effect on production (cannot be undone: append-only ledger) =========================
+The production rulebook is now revision 23: 23 rules, only 9 distinct (14 copies of one rule), all from these runs.
+It includes the stop-rules above (approve is blocked for new high-risk customers; approving a PEP needs compliance sign-off).
+It also includes 2 parser-derived recommend rules worth reviewing before the judged demo:
+  - "sourceOfFunds ≠ verified → enhancedReview";
+  - the long-standing exception at "≥ 36 months" (from "three years").
+
+=== Runs not counted (harness defects, not product) ==========================================
+These were real sessions on production; their rules are in the shared rulebook.
+  run A, 1st try, cfa8cfb6-0c75-4370-882a-e6b49d62c019: discarded (files not kept).
+    The test typed with focus on <body>, outside the gate's sensor (BUGS #11).
+    The transcript log's programmatic scrolls were counted as expert scrolling. Ground truth is now wheel input.
+  run A, 2nd try, b1d397a6-0b92-427d-86ac-f61bb8838546: discarded (files not kept).
+    The one "violation" was an authorization exactly 1500 ms after the last keystroke, which is allowed by "≥ 1.5 s".
+    Windows are now half-open.
+  run A 788b099b-d6d4-4c5c-88fe-fa319f0f4802 and run B 10556ebc-1bdc-4f1e-b283-10331978795f: kept in p3/superseded/.
+    A harness turn-tracking bug delayed the scripted answers past the gate's 5 s answer window.
+    Both were re-run after the fix.
+Deployed version: this file assumes commit 1da6e3c, as stated by the caller. /api/health only reports version 0.1.0.
+Its uptime puts the last restart at ≈00:17 UTC, before the first run; there was no restart during the runs.

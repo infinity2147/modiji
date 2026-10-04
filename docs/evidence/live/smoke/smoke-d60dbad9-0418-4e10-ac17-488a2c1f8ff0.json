@@ -1,0 +1,477 @@
+{
+  "label": "synthetic voice input (ElevenLabs TTS)",
+  "sessionId": "d60dbad9-0418-4e10-ac17-488a2c1f8ff0",
+  "events": [
+    {
+      "t": 1791073658786,
+      "type": "ui_agent_mode",
+      "mode": "silent"
+    },
+    {
+      "t": 1791073659417,
+      "type": "fetch_voice_token",
+      "url": "/api/voice/token?agent=interviewer",
+      "status": 200,
+      "doneAt": 1791073659900
+    },
+    {
+      "t": 1791073659949,
+      "type": "mic_opened",
+      "constraints": "{\"audio\":true}"
+    },
+    {
+      "t": 1791073670476,
+      "type": "mic_opened",
+      "constraints": "{\"video\":false,\"audio\":{\"deviceId\":{\"ideal\":\"default\"},\"autoGainControl\":true,\"echoCancellation\":true,\"noiseSuppression\":true,\"voiceIsolation\":true}}"
+    },
+    {
+      "t": 1791073670523,
+      "type": "remote_audio_track",
+      "id": "1fc2aefa-e12e-436a-91ee-04de9357fb35"
+    },
+    {
+      "t": 1791073670524,
+      "type": "remote_audio_track",
+      "id": "1b8b7fac-120e-4402-86df-ac2e3bc3503e"
+    },
+    {
+      "t": 1791073670524,
+      "type": "remote_audio_track",
+      "id": "6e7461fe-1ae5-47ab-99d8-c9cd5944e1d8"
+    },
+    {
+      "t": 1791073672145,
+      "type": "out_conversation_initiation_client_data"
+    },
+    {
+      "t": 1791073672396,
+      "type": "el_conversation_initiation_metadata",
+      "raw": "{\"conversation_initiation_metadata_event\":{\"conversation_id\":\"conv_8801m424yaqpeb3th11z2dj5nkmg\",\"agent_output_audio_format\":\"pcm_48000\",\"user_input_audio_format\":\"pcm_48000\",\"persistent_session_token\":null},\"type\":\"conversation_initiation_metadata\"}"
+    },
+    {
+      "t": 1791073675864,
+      "type": "speech_start",
+      "key": "a9667ba27eaa22b7",
+      "gain": 1,
+      "label": "smoke",
+      "durationMs": 2368
+    },
+    {
+      "t": 1791073678238,
+      "type": "speech_end",
+      "key": "a9667ba27eaa22b7",
+      "label": "smoke"
+    },
+    {
+      "t": 1791073678891,
+      "type": "user_transcript",
+      "text": "Okay, I am looking at the first case now."
+    },
+    {
+      "t": 1791073678897,
+      "type": "el_agent_tool_response",
+      "raw": "{\"agent_tool_response\":{\"tool_name\":\"skip_turn\",\"tool_call_id\":\"call_skip_xqf0tnmjr0j4\",\"tool_type\":\"system\",\"is_error\":false,\"is_blocked\":false,\"event_id\":39,\"is_called\":true,\"status\":\"success\"},\"type\":\"agent_tool_response\"}"
+    },
+    {
+      "t": 1791073678892,
+      "type": "fetch_utterances",
+      "url": "/api/sessions/d60dbad9-0418-4e10-ac17-488a2c1f8ff0/utterances",
+      "status": 200,
+      "doneAt": 1791073679167,
+      "body": "{\"conversationId\":\"conv_8801m424yaqpeb3th11z2dj5nkmg\",\"text\":\"Okay, I am looking at the first case now.\",\"t0Ms\":4116,\"t1Ms\":6745,\"privacyEpoch\":0}",
+      "response": "{\"utteranceId\":\"96a4aa6b-82d2-48e8-9ed1-7767f528c468\"}"
+    },
+    {
+      "t": 1791073679712,
+      "type": "scroll"
+    },
+    {
+      "t": 1791073672569,
+      "type": "vad",
+      "v": 0.01201203465461731
+    },
+    {
+      "t": 1791073672748,
+      "type": "vad",
+      "v": 0.004032492637634277
+    },
+    {
+      "t": 1791073672900,
+      "type": "vad",
+      "v": 0.002504408359527588
+    },
+    {
+      "t": 1791073673051,
+      "type": "vad",
+      "v": 0.0027580559253692627
+    },
+    {
+      "t": 1791073673231,
+      "type": "vad",
+      "v": 0.0029753446578979492
+    },
+    {
+      "t": 1791073673383,
+      "type": "vad",
+      "v": 0.0031277239322662354
+    },
+    {
+      "t": 1791073673538,
+      "type": "vad",
+      "v": 0.003218621015548706
+    },
+    {
+      "t": 1791073673689,
+      "type": "vad",
+      "v": 0.003265887498855591
+    },
+    {
+      "t": 1791073673889,
+      "type": "vad",
+      "v": 0.003284931182861328
+    },
+    {
+      "t": 1791073674021,
+      "type": "vad",
+      "v": 0.0032889246940612793
+    },
+    {
+      "t": 1791073674175,
+      "type": "vad",
+      "v": 0.0032882988452911377
+    },
+    {
+      "t": 1791073674329,
+      "type": "vad",
+      "v": 0.003280162811279297
+    },
+    {
+      "t": 1791073674506,
+      "type": "vad",
+      "v": 0.0032638907432556152
+    },
+    {
+      "t": 1791073674661,
+      "type": "vad",
+      "v": 0.00324094295501709
+    },
+    {
+      "t": 1791073674810,
+      "type": "vad",
+      "v": 0.0032122433185577393
+    },
+    {
+      "t": 1791073674991,
+      "type": "vad",
+      "v": 0.0031801462173461914
+    },
+    {
+      "t": 1791073675144,
+      "type": "vad",
+      "v": 0.0031447112560272217
+    },
+    {
+      "t": 1791073675294,
+      "type": "vad",
+      "v": 0.0031059682369232178
+    },
+    {
+      "t": 1791073675448,
+      "type": "vad",
+      "v": 0.0030648410320281982
+    },
+    {
+      "t": 1791073675629,
+      "type": "vad",
+      "v": 0.00302201509475708
+    },
+    {
+      "t": 1791073675778,
+      "type": "vad",
+      "v": 0.002977997064590454
+    },
+    {
+      "t": 1791073675933,
+      "type": "vad",
+      "v": 0.0029334425926208496
+    },
+    {
+      "t": 1791073676110,
+      "type": "vad",
+      "v": 0.002888917922973633
+    },
+    {
+      "t": 1791073676263,
+      "type": "vad",
+      "v": 0.9189743995666504
+    },
+    {
+      "t": 1791073676414,
+      "type": "vad",
+      "v": 0.9975997805595398
+    },
+    {
+      "t": 1791073676569,
+      "type": "vad",
+      "v": 0.9997831583023071
+    },
+    {
+      "t": 1791073676739,
+      "type": "vad",
+      "v": 0.9995242357254028
+    },
+    {
+      "t": 1791073676898,
+      "type": "vad",
+      "v": 0.9993230700492859
+    },
+    {
+      "t": 1791073677050,
+      "type": "vad",
+      "v": 0.9998235702514648
+    },
+    {
+      "t": 1791073677223,
+      "type": "vad",
+      "v": 0.9998942613601685
+    },
+    {
+      "t": 1791073677387,
+      "type": "vad",
+      "v": 0.9998303651809692
+    },
+    {
+      "t": 1791073677549,
+      "type": "vad",
+      "v": 0.9999416470527649
+    },
+    {
+      "t": 1791073677705,
+      "type": "vad",
+      "v": 0.9999598264694214
+    },
+    {
+      "t": 1791073677851,
+      "type": "vad",
+      "v": 0.9999812245368958
+    },
+    {
+      "t": 1791073678019,
+      "type": "vad",
+      "v": 0.9999728202819824
+    },
+    {
+      "t": 1791073678171,
+      "type": "vad",
+      "v": 0.999960720539093
+    },
+    {
+      "t": 1791073678338,
+      "type": "vad",
+      "v": 0.9992845058441162
+    },
+    {
+      "t": 1791073678511,
+      "type": "vad",
+      "v": 0.00019660592079162598
+    },
+    {
+      "t": 1791073678667,
+      "type": "vad",
+      "v": 0.0001233518123626709
+    },
+    {
+      "t": 1791073678808,
+      "type": "vad",
+      "v": 0.00006625056266784668
+    },
+    {
+      "t": 1791073678973,
+      "type": "vad",
+      "v": 0.00005030632019042969
+    },
+    {
+      "t": 1791073679005,
+      "type": "vad",
+      "v": 0.00004363059997558594
+    },
+    {
+      "t": 1791073679141,
+      "type": "vad",
+      "v": 0.00003501772880554199
+    },
+    {
+      "t": 1791073679295,
+      "type": "vad",
+      "v": 0.000027060508728027344
+    },
+    {
+      "t": 1791073679447,
+      "type": "vad",
+      "v": 0.000019669532775878906
+    },
+    {
+      "t": 1791073679621,
+      "type": "vad",
+      "v": 0.000014454126358032227
+    },
+    {
+      "t": 1791073679779,
+      "type": "vad",
+      "v": 0.000011265277862548828
+    },
+    {
+      "t": 1791073679933,
+      "type": "vad",
+      "v": 0.00000908970832824707
+    },
+    {
+      "t": 1791073680113,
+      "type": "vad",
+      "v": 0.000007539987564086914
+    },
+    {
+      "t": 1791073680266,
+      "type": "vad",
+      "v": 0.000007599592208862305
+    }
+  ],
+  "ledger": [
+    {
+      "sessionId": "d60dbad9-0418-4e10-ac17-488a2c1f8ff0",
+      "source": "engine",
+      "kind": "session.started",
+      "occurredAt": 1791073658253,
+      "traceId": "13489040-c2f3-4bfa-8849-5e54b118b40b",
+      "parentIds": [],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "mode": "expert",
+        "caseSet": "training",
+        "domainId": "kycNorthstar",
+        "schemaVersion": 1
+      },
+      "id": "d630f65a-828d-483c-ba9f-920be0e6f10e",
+      "sequence": 0,
+      "receivedAt": 1791073658253
+    },
+    {
+      "sessionId": "d60dbad9-0418-4e10-ac17-488a2c1f8ff0",
+      "source": "dom",
+      "kind": "screen.event",
+      "occurredAt": 1791073658994,
+      "traceId": "b686f13b-4053-457d-a7a8-958c8b62023a",
+      "parentIds": [
+        "d630f65a-828d-483c-ba9f-920be0e6f10e"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "c175b127-00d3-4b03-bfb1-aabc4ff1b986",
+        "frameSeq": 1,
+        "captureTime": 1791073658994,
+        "sessionEpoch": 0,
+        "kind": "navigate",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      "id": "f3374e4b-9c04-43da-a637-1dc5b8010f82",
+      "sequence": 1,
+      "receivedAt": 1791073659399
+    },
+    {
+      "sessionId": "d60dbad9-0418-4e10-ac17-488a2c1f8ff0",
+      "source": "client",
+      "kind": "frame.received",
+      "occurredAt": 1791073659866,
+      "traceId": "033bd7e6-0954-454e-9fa5-d5ca19f0be7b",
+      "parentIds": [
+        "d630f65a-828d-483c-ba9f-920be0e6f10e"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "frameId": "a520dafb-1082-4da7-b2ba-de6d1ab082ab",
+        "frameSeq": 1,
+        "captureTime": 1791073659866,
+        "width": 1280,
+        "height": 720,
+        "mediaPath": "d60dbad9-0418-4e10-ac17-488a2c1f8ff0/frames/a520dafb-1082-4da7-b2ba-de6d1ab082ab.png",
+        "redactedRegions": 0,
+        "changeScore": 0
+      },
+      "id": "93ea44d7-de93-4a8e-b25e-1d82d83d6095",
+      "sequence": 2,
+      "receivedAt": 1791073662348
+    },
+    {
+      "sessionId": "d60dbad9-0418-4e10-ac17-488a2c1f8ff0",
+      "source": "vision",
+      "kind": "screen.event",
+      "occurredAt": 1791073659866,
+      "traceId": "033bd7e6-0954-454e-9fa5-d5ca19f0be7b",
+      "parentIds": [
+        "93ea44d7-de93-4a8e-b25e-1d82d83d6095"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "vision-0-1-0",
+        "frameSeq": 1,
+        "captureTime": 1791073659866,
+        "sessionEpoch": 0,
+        "kind": "navigate",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": false
+      },
+      "id": "d6a8ba1d-c526-4190-a551-51e9363c314e",
+      "sequence": 3,
+      "receivedAt": 1791073663714
+    },
+    {
+      "sessionId": "d60dbad9-0418-4e10-ac17-488a2c1f8ff0",
+      "source": "engine",
+      "kind": "llm.turn_decision",
+      "occurredAt": 1791073678708,
+      "traceId": "chatcmpl-dWb_UpoFxwLLfbXx",
+      "parentIds": [],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "decision": "skip_turn",
+        "reason": "not_control_message",
+        "agent": "interviewer",
+        "model": "vashistha-interviewer-v2",
+        "handlerLatencyMs": 0.85
+      },
+      "id": "50d2392a-0cfc-4d12-a941-b31530dfd972",
+      "sequence": 4,
+      "receivedAt": 1791073678708
+    },
+    {
+      "sessionId": "d60dbad9-0418-4e10-ac17-488a2c1f8ff0",
+      "source": "voice",
+      "kind": "utterance.transcript",
+      "occurredAt": 1791073679015,
+      "traceId": "693c6df7-c9a9-4406-ae49-78d08dde27ad",
+      "parentIds": [],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "conversationId": "conv_8801m424yaqpeb3th11z2dj5nkmg",
+        "text": "Okay, I am looking at the first case now.",
+        "t0Ms": 4116,
+        "t1Ms": 6745,
+        "frameIds": [
+          "93ea44d7-de93-4a8e-b25e-1d82d83d6095"
+        ]
+      },
+      "id": "96a4aa6b-82d2-48e8-9ed1-7767f528c468",
+      "sequence": 5,
+      "receivedAt": 1791073679016
+    }
+  ]
+}

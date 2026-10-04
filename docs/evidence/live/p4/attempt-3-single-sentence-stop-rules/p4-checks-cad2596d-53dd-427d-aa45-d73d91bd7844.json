@@ -1,0 +1,1642 @@
+{
+  "sessionId": "cad2596d-53dd-427d-aa45-d73d91bd7844",
+  "checks": {
+    "pass": {
+      "thresholdRuleOrCandidate": true,
+      "thresholdRuleConfirmed": true,
+      "guardrailOrExceptionConfirmed": true,
+      "unresolvedConceptSurfaced": false,
+      "everyPromotedRuleValid": true
+    },
+    "rulesConfirmed": [
+      {
+        "ruleId": "rule_1779bf245d6bff",
+        "entryId": "108923e9-acc9-4e1e-8f87-d80f38589cdd",
+        "kind": "decision",
+        "effect": {
+          "type": "recommend",
+          "action": "enhancedReview"
+        },
+        "predicate": {
+          "and": [
+            {
+              ">": [
+                {
+                  "var": "uboOwnershipPct"
+                },
+                25
+              ]
+            },
+            {
+              "==": [
+                {
+                  "var": "uboVerified"
+                },
+                false
+              ]
+            }
+          ]
+        },
+        "method": [
+          "explicit_statement"
+        ],
+        "provenance": [
+          "human_voice"
+        ],
+        "quotes": [
+          "Anything over 25% that isn't verified goes to enhanced review."
+        ],
+        "frames": 2,
+        "problems": [],
+        "valid": true
+      },
+      {
+        "ruleId": "rule_171a5b41cd4ac8",
+        "entryId": "8da9813c-55af-43d4-9216-1c373485def9",
+        "kind": "decision",
+        "effect": {
+          "type": "recommend",
+          "action": "enhancedReview"
+        },
+        "predicate": {
+          "and": [
+            {
+              ">": [
+                {
+                  "var": "uboOwnershipPct"
+                },
+                25
+              ]
+            },
+            {
+              "==": [
+                {
+                  "var": "uboVerified"
+                },
+                false
+              ]
+            }
+          ]
+        },
+        "method": [
+          "explicit_statement"
+        ],
+        "provenance": [
+          "human_voice"
+        ],
+        "quotes": [
+          "If the largest owner holds more than 25% and isn't verified, it goes to enhanced review."
+        ],
+        "frames": 2,
+        "problems": [],
+        "valid": true
+      },
+      {
+        "ruleId": "rule_1e5796de1f0929",
+        "entryId": "b95a9479-3947-4165-ba53-e1b7155344c7",
+        "kind": "guardrail",
+        "effect": {
+          "type": "forbid",
+          "action": "approve"
+        },
+        "predicate": {
+          "and": [
+            {
+              "==": [
+                {
+                  "var": "jurisdictionRisk"
+                },
+                "high"
+              ]
+            },
+            {
+              "<": [
+                {
+                  "var": "accountAgeMonths"
+                },
+                24
+              ]
+            }
+          ]
+        },
+        "method": [
+          "explicit_statement"
+        ],
+        "provenance": [
+          "human_voice"
+        ],
+        "quotes": [
+          "Never approve a customer from a high-risk country at desk level unless they've banked with us for two years with verified funds."
+        ],
+        "frames": 1,
+        "problems": [],
+        "valid": true
+      },
+      {
+        "ruleId": "rule_03e987e9b68836",
+        "entryId": "b55ddac9-aa72-4112-88f6-30b619b9b640",
+        "kind": "guardrail",
+        "effect": {
+          "type": "forbid",
+          "action": "approve"
+        },
+        "predicate": {
+          "and": [
+            {
+              "==": [
+                {
+                  "var": "jurisdictionRisk"
+                },
+                "high"
+              ]
+            },
+            {
+              "!=": [
+                {
+                  "var": "sourceOfFunds"
+                },
+                "verified"
+              ]
+            }
+          ]
+        },
+        "method": [
+          "explicit_statement"
+        ],
+        "provenance": [
+          "human_voice"
+        ],
+        "quotes": [
+          "Never approve a customer from a high-risk country at desk level unless they've banked with us for two years with verified funds."
+        ],
+        "frames": 1,
+        "problems": [],
+        "valid": true
+      }
+    ],
+    "thresholdRules": [
+      {
+        "id": "rule_1779bf245d6bff",
+        "predicate": {
+          "and": [
+            {
+              ">": [
+                {
+                  "var": "uboOwnershipPct"
+                },
+                25
+              ]
+            },
+            {
+              "==": [
+                {
+                  "var": "uboVerified"
+                },
+                false
+              ]
+            }
+          ]
+        },
+        "effect": {
+          "type": "recommend",
+          "action": "enhancedReview"
+        }
+      },
+      {
+        "id": "rule_171a5b41cd4ac8",
+        "predicate": {
+          "and": [
+            {
+              ">": [
+                {
+                  "var": "uboOwnershipPct"
+                },
+                25
+              ]
+            },
+            {
+              "==": [
+                {
+                  "var": "uboVerified"
+                },
+                false
+              ]
+            }
+          ]
+        },
+        "effect": {
+          "type": "recommend",
+          "action": "enhancedReview"
+        }
+      },
+      {
+        "id": "rule_1e5796de1f0929",
+        "predicate": {
+          "and": [
+            {
+              "==": [
+                {
+                  "var": "jurisdictionRisk"
+                },
+                "high"
+              ]
+            },
+            {
+              "<": [
+                {
+                  "var": "accountAgeMonths"
+                },
+                24
+              ]
+            }
+          ]
+        },
+        "effect": {
+          "type": "forbid",
+          "action": "approve"
+        }
+      }
+    ],
+    "hypothesisThresholdCandidates": [],
+    "statedThresholdCandidates": [
+      {
+        "entryId": "2214f564-11ce-485f-9eef-093652d4e1cc",
+        "predicate": {
+          "and": [
+            {
+              ">": [
+                {
+                  "var": "uboOwnershipPct"
+                },
+                25
+              ]
+            },
+            {
+              "==": [
+                {
+                  "var": "uboVerified"
+                },
+                false
+              ]
+            }
+          ]
+        },
+        "action": "enhancedReview",
+        "kind": "decision",
+        "effect": {
+          "type": "recommend",
+          "action": "enhancedReview"
+        },
+        "exactQuote": "Anything over 25% that isn't verified goes to enhanced review.",
+        "t0Ms": 14980,
+        "t1Ms": 23653
+      },
+      {
+        "entryId": "f18f6c5f-a16f-45ae-a4a0-069c2d1fb30c",
+        "predicate": {
+          "and": [
+            {
+              ">": [
+                {
+                  "var": "uboOwnershipPct"
+                },
+                25
+              ]
+            },
+            {
+              "==": [
+                {
+                  "var": "uboVerified"
+                },
+                false
+              ]
+            }
+          ]
+        },
+        "action": "enhancedReview",
+        "kind": "decision",
+        "effect": {
+          "type": "recommend",
+          "action": "enhancedReview"
+        },
+        "exactQuote": "If the largest owner holds more than 25% and isn't verified, it goes to enhanced review.",
+        "t0Ms": 37045,
+        "t1Ms": 43480
+      },
+      {
+        "entryId": "2f7973f9-d0d1-4fdf-bfba-76ab3420d426",
+        "predicate": {
+          "and": [
+            {
+              "==": [
+                {
+                  "var": "jurisdictionRisk"
+                },
+                "high"
+              ]
+            },
+            {
+              "<": [
+                {
+                  "var": "accountAgeMonths"
+                },
+                24
+              ]
+            }
+          ]
+        },
+        "action": "approve",
+        "kind": "guardrail",
+        "effect": {
+          "type": "forbid",
+          "action": "approve"
+        },
+        "exactQuote": "Never approve a customer from a high-risk country at desk level unless they've banked with us for two years with verified funds.",
+        "t0Ms": 62965,
+        "t1Ms": 70053
+      }
+    ],
+    "guardrailsOrExceptions": [
+      {
+        "id": "rule_1e5796de1f0929",
+        "kind": "guardrail",
+        "effect": {
+          "type": "forbid",
+          "action": "approve"
+        },
+        "predicate": {
+          "and": [
+            {
+              "==": [
+                {
+                  "var": "jurisdictionRisk"
+                },
+                "high"
+              ]
+            },
+            {
+              "<": [
+                {
+                  "var": "accountAgeMonths"
+                },
+                24
+              ]
+            }
+          ]
+        },
+        "quote": "Never approve a customer from a high-risk country at desk level unless they've banked with us for two years with verified funds."
+      },
+      {
+        "id": "rule_03e987e9b68836",
+        "kind": "guardrail",
+        "effect": {
+          "type": "forbid",
+          "action": "approve"
+        },
+        "predicate": {
+          "and": [
+            {
+              "==": [
+                {
+                  "var": "jurisdictionRisk"
+                },
+                "high"
+              ]
+            },
+            {
+              "!=": [
+                {
+                  "var": "sourceOfFunds"
+                },
+                "verified"
+              ]
+            }
+          ]
+        },
+        "quote": "Never approve a customer from a high-risk country at desk level unless they've banked with us for two years with verified funds."
+      }
+    ],
+    "conceptsProposed": [],
+    "unresolvedConcepts": [],
+    "answersParsed": 4
+  },
+  "rulebookAfter": {
+    "revision": 21,
+    "rules": [
+      {
+        "id": "rule_15ac7035644056",
+        "decisionFamily": "reviewOutcome",
+        "kind": "decision",
+        "predicate": {
+          "and": [
+            {
+              ">": [
+                {
+                  "var": "uboOwnershipPct"
+                },
+                25
+              ]
+            },
+            {
+              "==": [
+                {
+                  "var": "uboVerified"
+                },
+                false
+              ]
+            }
+          ]
+        },
+        "effect": {
+          "type": "recommend",
+          "action": "enhancedReview"
+        },
+        "priority": 10,
+        "overrides": [],
+        "evidence": [
+          {
+            "kind": "expert_quote",
+            "utteranceId": "7455e328-b564-45ce-a4bc-3e645c343c8a",
+            "exactQuote": "Anything over 25% that isn't verified goes to enhanced review.",
+            "t0Ms": 19610,
+            "t1Ms": 28282,
+            "frameIds": [
+              "0133e1ac-758a-4001-8e6d-f82f61c6a6d8",
+              "694015db-50fc-4092-b671-61a4ab41cd44"
+            ],
+            "eventIds": [],
+            "relation": "supports",
+            "provenance": "human_voice"
+          }
+        ],
+        "confirmedBy": [
+          {
+            "expertId": "expert-cfa8cfb6-0c75-4370-882a-e6b49d62c019",
+            "at": 1791073992571,
+            "method": "explicit_statement",
+            "ledgerEntryId": "7455e328-b564-45ce-a4bc-3e645c343c8a"
+          }
+        ],
+        "revision": 1,
+        "schemaVersion": 1,
+        "expertId": "expert-cfa8cfb6-0c75-4370-882a-e6b49d62c019"
+      },
+      {
+        "id": "rule_03ab16bbfa0b70",
+        "decisionFamily": "reviewOutcome",
+        "kind": "decision",
+        "predicate": {
+          "and": [
+            {
+              ">": [
+                {
+                  "var": "uboOwnershipPct"
+                },
+                25
+              ]
+            },
+            {
+              "==": [
+                {
+                  "var": "uboVerified"
+                },
+                false
+              ]
+            }
+          ]
+        },
+        "effect": {
+          "type": "recommend",
+          "action": "enhancedReview"
+        },
+        "priority": 10,
+        "overrides": [],
+        "evidence": [
+          {
+            "kind": "expert_quote",
+            "utteranceId": "c18fb817-9ada-49d3-84ea-de9d35b68dc8",
+            "exactQuote": "If the largest owner holds more than 25% and isn't verified, it goes to enhanced review.",
+            "t0Ms": 73384,
+            "t1Ms": 79966,
+            "frameIds": [
+              "1c7e59d0-04f4-47c0-9049-b2b5acac8206"
+            ],
+            "eventIds": [],
+            "relation": "supports",
+            "provenance": "human_voice"
+          }
+        ],
+        "confirmedBy": [
+          {
+            "expertId": "expert-cfa8cfb6-0c75-4370-882a-e6b49d62c019",
+            "at": 1791074041303,
+            "method": "explicit_statement",
+            "ledgerEntryId": "c18fb817-9ada-49d3-84ea-de9d35b68dc8"
+          }
+        ],
+        "revision": 1,
+        "schemaVersion": 1,
+        "expertId": "expert-cfa8cfb6-0c75-4370-882a-e6b49d62c019"
+      },
+      {
+        "id": "rule_1f58dab96927e9",
+        "decisionFamily": "reviewOutcome",
+        "kind": "decision",
+        "predicate": {
+          "and": [
+            {
+              ">": [
+                {
+                  "var": "uboOwnershipPct"
+                },
+                25
+              ]
+            },
+            {
+              "==": [
+                {
+                  "var": "uboVerified"
+                },
+                false
+              ]
+            }
+          ]
+        },
+        "effect": {
+          "type": "recommend",
+          "action": "enhancedReview"
+        },
+        "priority": 10,
+        "overrides": [],
+        "evidence": [
+          {
+            "kind": "expert_quote",
+            "utteranceId": "0e62a07f-1f14-45c1-a0c0-1dcec93f4f70",
+            "exactQuote": "Anything over 25% that isn't verified goes to enhanced review.",
+            "t0Ms": 20905,
+            "t1Ms": 29535,
+            "frameIds": [
+              "dfe3ff74-e760-49c8-bc77-f7d558606f86",
+              "eee612b7-d536-4dd0-818b-fe825916df12"
+            ],
+            "eventIds": [],
+            "relation": "supports",
+            "provenance": "human_voice"
+          }
+        ],
+        "confirmedBy": [
+          {
+            "expertId": "expert-b1d397a6-0b92-427d-86ac-f61bb8838546",
+            "at": 1791074294987,
+            "method": "explicit_statement",
+            "ledgerEntryId": "0e62a07f-1f14-45c1-a0c0-1dcec93f4f70"
+          }
+        ],
+        "revision": 1,
+        "schemaVersion": 1,
+        "expertId": "expert-b1d397a6-0b92-427d-86ac-f61bb8838546"
+      },
+      {
+        "id": "rule_1c0c500bd78c2d",
+        "decisionFamily": "reviewOutcome",
+        "kind": "decision",
+        "predicate": {
+          "and": [
+            {
+              ">": [
+                {
+                  "var": "uboOwnershipPct"
+                },
+                25
+              ]
+            },
+            {
+              "==": [
+                {
+                  "var": "uboVerified"
+                },
+                false
+              ]
+            }
+          ]
+        },
+        "effect": {
+          "type": "recommend",
+          "action": "enhancedReview"
+        },
+        "priority": 10,
+        "overrides": [],
+        "evidence": [
+          {
+            "kind": "expert_quote",
+            "utteranceId": "d50aff8d-fbf7-40eb-935a-d37c49f412e3",
+            "exactQuote": "Anything over 25% that isn't verified goes to enhanced review.",
+            "t0Ms": 19613,
+            "t1Ms": 28235,
+            "frameIds": [
+              "341a3631-cf1b-4495-ae05-2fb922dfdb44",
+              "85265acb-d566-43a9-b243-14ac1058844e"
+            ],
+            "eventIds": [],
+            "relation": "supports",
+            "provenance": "human_voice"
+          }
+        ],
+        "confirmedBy": [
+          {
+            "expertId": "expert-788b099b-d6d4-4c5c-88fe-fa319f0f4802",
+            "at": 1791074509289,
+            "method": "explicit_statement",
+            "ledgerEntryId": "d50aff8d-fbf7-40eb-935a-d37c49f412e3"
+          }
+        ],
+        "revision": 1,
+        "schemaVersion": 1,
+        "expertId": "expert-788b099b-d6d4-4c5c-88fe-fa319f0f4802"
+      },
+      {
+        "id": "rule_116f597cd629bd",
+        "decisionFamily": "reviewOutcome",
+        "kind": "decision",
+        "predicate": {
+          "and": [
+            {
+              ">": [
+                {
+                  "var": "uboOwnershipPct"
+                },
+                25
+              ]
+            },
+            {
+              "==": [
+                {
+                  "var": "uboVerified"
+                },
+                false
+              ]
+            }
+          ]
+        },
+        "effect": {
+          "type": "recommend",
+          "action": "enhancedReview"
+        },
+        "priority": 10,
+        "overrides": [],
+        "evidence": [
+          {
+            "kind": "expert_quote",
+            "utteranceId": "970e2bb9-ac97-498e-a7fd-0a45602bc7aa",
+            "exactQuote": "Anything over 25% that isn't verified goes to enhanced review.",
+            "t0Ms": 31320,
+            "t1Ms": 39931,
+            "frameIds": [
+              "4bcf3cc7-758e-4d55-8192-00c5c23f3149",
+              "a1984025-915b-492e-a6c2-8ebdefa07ba9"
+            ],
+            "eventIds": [],
+            "relation": "supports",
+            "provenance": "human_voice"
+          }
+        ],
+        "confirmedBy": [
+          {
+            "expertId": "expert-10556ebc-1bdc-4f1e-b283-10331978795f",
+            "at": 1791074691900,
+            "method": "explicit_statement",
+            "ledgerEntryId": "970e2bb9-ac97-498e-a7fd-0a45602bc7aa"
+          }
+        ],
+        "revision": 1,
+        "schemaVersion": 1,
+        "expertId": "expert-10556ebc-1bdc-4f1e-b283-10331978795f"
+      },
+      {
+        "id": "rule_05e570a9eb1b78",
+        "decisionFamily": "reviewOutcome",
+        "kind": "decision",
+        "predicate": {
+          "!=": [
+            {
+              "var": "sourceOfFunds"
+            },
+            "verified"
+          ]
+        },
+        "effect": {
+          "type": "recommend",
+          "action": "enhancedReview"
+        },
+        "priority": 10,
+        "overrides": [],
+        "evidence": [
+          {
+            "kind": "expert_quote",
+            "utteranceId": "a4344aaa-61a1-49a5-b9d9-d8917d2d496c",
+            "exactQuote": "Without it, I'd want enhanced review.",
+            "t0Ms": 71787,
+            "t1Ms": 78229,
+            "frameIds": [
+              "58599e8d-d3be-49bd-a053-26f69c60e57e"
+            ],
+            "eventIds": [],
+            "relation": "supports",
+            "provenance": "human_voice"
+          }
+        ],
+        "confirmedBy": [
+          {
+            "expertId": "expert-10556ebc-1bdc-4f1e-b283-10331978795f",
+            "at": 1791074729847,
+            "method": "explicit_statement",
+            "ledgerEntryId": "a4344aaa-61a1-49a5-b9d9-d8917d2d496c"
+          }
+        ],
+        "revision": 1,
+        "schemaVersion": 1,
+        "expertId": "expert-10556ebc-1bdc-4f1e-b283-10331978795f"
+      },
+      {
+        "id": "rule_1aba5eb68f9a3d",
+        "decisionFamily": "reviewOutcome",
+        "kind": "exception",
+        "predicate": {
+          "and": [
+            {
+              "==": [
+                {
+                  "var": "jurisdictionRisk"
+                },
+                "high"
+              ]
+            },
+            {
+              ">=": [
+                {
+                  "var": "accountAgeMonths"
+                },
+                36
+              ]
+            },
+            {
+              "==": [
+                {
+                  "var": "sourceOfFunds"
+                },
+                "verified"
+              ]
+            }
+          ]
+        },
+        "effect": {
+          "type": "recommend",
+          "action": "approve"
+        },
+        "priority": 30,
+        "overrides": [],
+        "evidence": [
+          {
+            "kind": "expert_quote",
+            "utteranceId": "5fd83df5-d687-4f6e-8be2-4a1ff230cdbb",
+            "exactQuote": "They've banked with us for three years, and their source of funds is verified, so the high-risk country on its own doesn't send them to enhanced review.",
+            "t0Ms": 68091,
+            "t1Ms": 76455,
+            "frameIds": [
+              "e92702f7-e891-4097-9ce3-d8a351f16af7"
+            ],
+            "eventIds": [],
+            "relation": "supports",
+            "provenance": "human_voice"
+          }
+        ],
+        "confirmedBy": [
+          {
+            "expertId": "expert-da9b8e52-07ac-4180-bee0-0bba455da897",
+            "at": 1791075003084,
+            "method": "explicit_statement",
+            "ledgerEntryId": "5fd83df5-d687-4f6e-8be2-4a1ff230cdbb"
+          }
+        ],
+        "revision": 1,
+        "schemaVersion": 1,
+        "expertId": "expert-da9b8e52-07ac-4180-bee0-0bba455da897"
+      },
+      {
+        "id": "rule_1c41c261f0b59a",
+        "decisionFamily": "reviewOutcome",
+        "kind": "decision",
+        "predicate": {
+          "and": [
+            {
+              ">": [
+                {
+                  "var": "uboOwnershipPct"
+                },
+                25
+              ]
+            },
+            {
+              "==": [
+                {
+                  "var": "uboVerified"
+                },
+                false
+              ]
+            }
+          ]
+        },
+        "effect": {
+          "type": "recommend",
+          "action": "enhancedReview"
+        },
+        "priority": 10,
+        "overrides": [],
+        "evidence": [
+          {
+            "kind": "expert_quote",
+            "utteranceId": "f7fbfa64-4976-4c45-8f15-23f5a4c9343e",
+            "exactQuote": "Anything over 25% that isn't verified goes to enhanced review.",
+            "t0Ms": 30648,
+            "t1Ms": 39156,
+            "frameIds": [
+              "e19d095e-15cc-4c68-bf59-1a14869c7416",
+              "aa517ee5-0514-4b1f-9546-127c0c5aeb1c"
+            ],
+            "eventIds": [],
+            "relation": "supports",
+            "provenance": "human_voice"
+          }
+        ],
+        "confirmedBy": [
+          {
+            "expertId": "expert-94cf3b7b-e6dd-457c-a038-8908a4b6e885",
+            "at": 1791075119118,
+            "method": "explicit_statement",
+            "ledgerEntryId": "f7fbfa64-4976-4c45-8f15-23f5a4c9343e"
+          }
+        ],
+        "revision": 1,
+        "schemaVersion": 1,
+        "expertId": "expert-94cf3b7b-e6dd-457c-a038-8908a4b6e885"
+      },
+      {
+        "id": "rule_1cdbe70b974ed9",
+        "decisionFamily": "reviewOutcome",
+        "kind": "decision",
+        "predicate": {
+          "and": [
+            {
+              ">": [
+                {
+                  "var": "uboOwnershipPct"
+                },
+                25
+              ]
+            },
+            {
+              "==": [
+                {
+                  "var": "uboVerified"
+                },
+                false
+              ]
+            }
+          ]
+        },
+        "effect": {
+          "type": "recommend",
+          "action": "enhancedReview"
+        },
+        "priority": 10,
+        "overrides": [],
+        "evidence": [
+          {
+            "kind": "expert_quote",
+            "utteranceId": "f55bd981-62aa-4020-8d73-c2ec8feddd22",
+            "exactQuote": "Anything over 25% that isn't verified goes to enhanced review.",
+            "t0Ms": 25869,
+            "t1Ms": 34560,
+            "frameIds": [
+              "2d51ae69-30a6-41c6-8e84-c6e64d31444b",
+              "978f40b3-a05c-4b13-aeb9-84803604091a",
+              "167d12d5-39c4-40ed-807a-52396c20cc87",
+              "f28b6097-4fd1-4b84-b186-ad486db19ff2",
+              "772d1f9c-44a5-4d4c-a28a-0407da7e50d3",
+              "946f06fa-0445-47b0-b28c-29b5dafa59e2",
+              "c79cd025-555c-45d5-94b8-f03e63db2a4d",
+              "d63f01bc-7631-4eee-a677-e7af7f22759d"
+            ],
+            "eventIds": [],
+            "relation": "supports",
+            "provenance": "human_voice"
+          }
+        ],
+        "confirmedBy": [
+          {
+            "expertId": "expert-4dfb1645-5772-47fe-bf92-3e3babd6d2fc",
+            "at": 1791075352074,
+            "method": "explicit_statement",
+            "ledgerEntryId": "f55bd981-62aa-4020-8d73-c2ec8feddd22"
+          }
+        ],
+        "revision": 1,
+        "schemaVersion": 1,
+        "expertId": "expert-4dfb1645-5772-47fe-bf92-3e3babd6d2fc"
+      },
+      {
+        "id": "rule_144f1d067b6d4e",
+        "decisionFamily": "reviewOutcome",
+        "kind": "decision",
+        "predicate": {
+          "and": [
+            {
+              ">": [
+                {
+                  "var": "uboOwnershipPct"
+                },
+                25
+              ]
+            },
+            {
+              "==": [
+                {
+                  "var": "uboVerified"
+                },
+                false
+              ]
+            }
+          ]
+        },
+        "effect": {
+          "type": "recommend",
+          "action": "enhancedReview"
+        },
+        "priority": 10,
+        "overrides": [],
+        "evidence": [
+          {
+            "kind": "expert_quote",
+            "utteranceId": "35c5de83-6fd9-436b-8fee-06f69d02efac",
+            "exactQuote": "If the largest owner holds more than 25% and isn't verified, it goes to enhanced review.",
+            "t0Ms": 47774,
+            "t1Ms": 54243,
+            "frameIds": [
+              "2d51ae69-30a6-41c6-8e84-c6e64d31444b",
+              "978f40b3-a05c-4b13-aeb9-84803604091a",
+              "167d12d5-39c4-40ed-807a-52396c20cc87",
+              "f28b6097-4fd1-4b84-b186-ad486db19ff2",
+              "772d1f9c-44a5-4d4c-a28a-0407da7e50d3",
+              "946f06fa-0445-47b0-b28c-29b5dafa59e2",
+              "c79cd025-555c-45d5-94b8-f03e63db2a4d",
+              "d63f01bc-7631-4eee-a677-e7af7f22759d"
+            ],
+            "eventIds": [],
+            "relation": "supports",
+            "provenance": "human_voice"
+          }
+        ],
+        "confirmedBy": [
+          {
+            "expertId": "expert-4dfb1645-5772-47fe-bf92-3e3babd6d2fc",
+            "at": 1791075371222,
+            "method": "explicit_statement",
+            "ledgerEntryId": "35c5de83-6fd9-436b-8fee-06f69d02efac"
+          }
+        ],
+        "revision": 1,
+        "schemaVersion": 1,
+        "expertId": "expert-4dfb1645-5772-47fe-bf92-3e3babd6d2fc"
+      },
+      {
+        "id": "rule_03907d56eb787e",
+        "decisionFamily": "reviewOutcome",
+        "kind": "exception",
+        "predicate": {
+          "and": [
+            {
+              "==": [
+                {
+                  "var": "jurisdictionRisk"
+                },
+                "high"
+              ]
+            },
+            {
+              "==": [
+                {
+                  "var": "sourceOfFunds"
+                },
+                "verified"
+              ]
+            },
+            {
+              "==": [
+                {
+                  "var": "customerStatus"
+                },
+                "existing"
+              ]
+            }
+          ]
+        },
+        "effect": {
+          "type": "recommend",
+          "action": "approve"
+        },
+        "priority": 30,
+        "overrides": [],
+        "evidence": [
+          {
+            "kind": "expert_quote",
+            "utteranceId": "b556c1e2-f563-4c53-b485-acc276f5b0da",
+            "exactQuote": "They've banked with us for three years, and their source of funds is verified, so the high-risk country on its own doesn't send them to enhanced review.",
+            "t0Ms": 78508,
+            "t1Ms": 86713,
+            "frameIds": [
+              "d6e9a794-6330-4c11-815f-802ba1a52fcb",
+              "07ec8e26-7597-4ad8-a4ef-b03c949eeda0",
+              "6317ab8f-9403-412d-b6df-e8bc5fe856e7",
+              "4b503e1d-7a04-4f58-800c-4de1ab03fc0d",
+              "d34ff2d6-45f2-4002-9e7b-8d40199d883d",
+              "9f53e009-41ca-4388-95db-01f124bad0e0",
+              "8c21bd63-52ff-497a-99a1-df84837e226d",
+              "74fa7a96-ad87-45af-a335-687ee4b8e5a6"
+            ],
+            "eventIds": [],
+            "relation": "supports",
+            "provenance": "human_voice"
+          }
+        ],
+        "confirmedBy": [
+          {
+            "expertId": "expert-4dfb1645-5772-47fe-bf92-3e3babd6d2fc",
+            "at": 1791075410456,
+            "method": "explicit_statement",
+            "ledgerEntryId": "b556c1e2-f563-4c53-b485-acc276f5b0da"
+          }
+        ],
+        "revision": 1,
+        "schemaVersion": 1,
+        "expertId": "expert-4dfb1645-5772-47fe-bf92-3e3babd6d2fc"
+      },
+      {
+        "id": "rule_01070ba187e2c5",
+        "decisionFamily": "reviewOutcome",
+        "kind": "escalation",
+        "predicate": {
+          "==": [
+            {
+              "var": "pep"
+            },
+            true
+          ]
+        },
+        "effect": {
+          "type": "recommend",
+          "action": "escalateCompliance"
+        },
+        "priority": 20,
+        "overrides": [],
+        "evidence": [
+          {
+            "kind": "expert_quote",
+            "utteranceId": "04b20b9a-f54f-40d5-a81d-f312c99582c2",
+            "exactQuote": "She's a politically exposed person, so it goes to the compliance officer, whatever else the file says.",
+            "t0Ms": 130023,
+            "t1Ms": 139812,
+            "frameIds": [
+              "132173c0-9673-4f57-a8fc-7260756b7ff0",
+              "1ea527c0-fa1d-4f9d-912a-d543cf0a600a",
+              "10a26738-0890-408b-bd6c-9765886704c6",
+              "d9e13b51-e77d-435e-a344-9a73c008a037",
+              "53e50271-e2ab-481e-98ec-456e712f6b36",
+              "e1462fc4-f8b9-4278-9f3a-cd5de57a864c",
+              "c8a36c25-4329-4712-af5c-0fc91f0c138b",
+              "47263c7e-a594-4ebc-8b2b-ba23e9dbdc18"
+            ],
+            "eventIds": [],
+            "relation": "supports",
+            "provenance": "human_voice"
+          }
+        ],
+        "confirmedBy": [
+          {
+            "expertId": "expert-4dfb1645-5772-47fe-bf92-3e3babd6d2fc",
+            "at": 1791075457130,
+            "method": "explicit_statement",
+            "ledgerEntryId": "04b20b9a-f54f-40d5-a81d-f312c99582c2"
+          }
+        ],
+        "revision": 1,
+        "schemaVersion": 1,
+        "expertId": "expert-4dfb1645-5772-47fe-bf92-3e3babd6d2fc"
+      },
+      {
+        "id": "rule_15afbdc3922d03",
+        "decisionFamily": "reviewOutcome",
+        "kind": "decision",
+        "predicate": {
+          "and": [
+            {
+              "==": [
+                {
+                  "var": "sourceOfFunds"
+                },
+                "not_provided"
+              ]
+            },
+            {
+              ">": [
+                {
+                  "var": "expectedMonthlyVolume"
+                },
+                50000
+              ]
+            }
+          ]
+        },
+        "effect": {
+          "type": "recommend",
+          "action": "requestDocuments"
+        },
+        "priority": 10,
+        "overrides": [],
+        "evidence": [
+          {
+            "kind": "expert_quote",
+            "utteranceId": "19e629ee-d6c7-4a75-91bf-f0d4eb8f8c4c",
+            "exactQuote": "Above 50,000 a month without a source of funds, I request documents.",
+            "t0Ms": 64738,
+            "t1Ms": 72600,
+            "frameIds": [
+              "0d11d46b-c1d1-4136-a12b-883cc1a7f999"
+            ],
+            "eventIds": [],
+            "relation": "supports",
+            "provenance": "human_voice"
+          }
+        ],
+        "confirmedBy": [
+          {
+            "expertId": "expert-e0ca4cd6-0101-4cc0-9014-33a0720adbeb",
+            "at": 1791075843480,
+            "method": "explicit_statement",
+            "ledgerEntryId": "19e629ee-d6c7-4a75-91bf-f0d4eb8f8c4c"
+          }
+        ],
+        "revision": 1,
+        "schemaVersion": 1,
+        "expertId": "expert-e0ca4cd6-0101-4cc0-9014-33a0720adbeb"
+      },
+      {
+        "id": "rule_15c7a9caf6b031",
+        "decisionFamily": "reviewOutcome",
+        "kind": "decision",
+        "predicate": {
+          "and": [
+            {
+              ">": [
+                {
+                  "var": "uboOwnershipPct"
+                },
+                25
+              ]
+            },
+            {
+              "==": [
+                {
+                  "var": "uboVerified"
+                },
+                false
+              ]
+            }
+          ]
+        },
+        "effect": {
+          "type": "recommend",
+          "action": "enhancedReview"
+        },
+        "priority": 10,
+        "overrides": [],
+        "evidence": [
+          {
+            "kind": "expert_quote",
+            "utteranceId": "b28098e2-8c2b-4ef4-b937-8736450559bc",
+            "exactQuote": "If the largest owner holds more than 25% and isn't verified, it goes to enhanced review.",
+            "t0Ms": 87939,
+            "t1Ms": 94383,
+            "frameIds": [
+              "0d11d46b-c1d1-4136-a12b-883cc1a7f999"
+            ],
+            "eventIds": [],
+            "relation": "supports",
+            "provenance": "human_voice"
+          }
+        ],
+        "confirmedBy": [
+          {
+            "expertId": "expert-e0ca4cd6-0101-4cc0-9014-33a0720adbeb",
+            "at": 1791075862923,
+            "method": "explicit_statement",
+            "ledgerEntryId": "b28098e2-8c2b-4ef4-b937-8736450559bc"
+          }
+        ],
+        "revision": 1,
+        "schemaVersion": 1,
+        "expertId": "expert-e0ca4cd6-0101-4cc0-9014-33a0720adbeb"
+      },
+      {
+        "id": "rule_0825544f35bccb",
+        "decisionFamily": "reviewOutcome",
+        "kind": "decision",
+        "predicate": {
+          "and": [
+            {
+              ">": [
+                {
+                  "var": "uboOwnershipPct"
+                },
+                25
+              ]
+            },
+            {
+              "==": [
+                {
+                  "var": "uboVerified"
+                },
+                false
+              ]
+            }
+          ]
+        },
+        "effect": {
+          "type": "recommend",
+          "action": "enhancedReview"
+        },
+        "priority": 10,
+        "overrides": [],
+        "evidence": [
+          {
+            "kind": "expert_quote",
+            "utteranceId": "b77e9c61-360f-4cae-ab77-f6e64ab2cd31",
+            "exactQuote": "Anything over 25% that isn't verified goes to enhanced review.",
+            "t0Ms": 19616,
+            "t1Ms": 28287,
+            "frameIds": [
+              "6a534784-eb4d-4ec1-85f5-68b64646180c",
+              "70c8b896-77b6-42f1-a253-9075dfbad7ff"
+            ],
+            "eventIds": [],
+            "relation": "supports",
+            "provenance": "human_voice"
+          }
+        ],
+        "confirmedBy": [
+          {
+            "expertId": "expert-f4f88cde-7b1c-4ac6-892b-9dbe5279f192",
+            "at": 1791076112808,
+            "method": "explicit_statement",
+            "ledgerEntryId": "b77e9c61-360f-4cae-ab77-f6e64ab2cd31"
+          }
+        ],
+        "revision": 1,
+        "schemaVersion": 1,
+        "expertId": "expert-f4f88cde-7b1c-4ac6-892b-9dbe5279f192"
+      },
+      {
+        "id": "rule_1841412ed4a1d8",
+        "decisionFamily": "reviewOutcome",
+        "kind": "decision",
+        "predicate": {
+          "and": [
+            {
+              ">": [
+                {
+                  "var": "uboOwnershipPct"
+                },
+                25
+              ]
+            },
+            {
+              "==": [
+                {
+                  "var": "uboVerified"
+                },
+                false
+              ]
+            }
+          ]
+        },
+        "effect": {
+          "type": "recommend",
+          "action": "enhancedReview"
+        },
+        "priority": 10,
+        "overrides": [],
+        "evidence": [
+          {
+            "kind": "expert_quote",
+            "utteranceId": "ffabd65b-1a76-4adc-a701-b7b689cacd2b",
+            "exactQuote": "Anything over 25% that isn't verified goes to enhanced review.",
+            "t0Ms": 15613,
+            "t1Ms": 24280,
+            "frameIds": [
+              "db16e50d-9e90-42c2-b1e3-55508125e116",
+              "fb1b1b5f-6124-4bec-968d-c56160805106"
+            ],
+            "eventIds": [],
+            "relation": "supports",
+            "provenance": "human_voice"
+          }
+        ],
+        "confirmedBy": [
+          {
+            "expertId": "expert-1368ae76-e5c3-482d-b817-e68ff3e5b8f1",
+            "at": 1791076520766,
+            "method": "explicit_statement",
+            "ledgerEntryId": "ffabd65b-1a76-4adc-a701-b7b689cacd2b"
+          }
+        ],
+        "revision": 1,
+        "schemaVersion": 1,
+        "expertId": "expert-1368ae76-e5c3-482d-b817-e68ff3e5b8f1"
+      },
+      {
+        "id": "rule_0e6d5f56f47b3a",
+        "decisionFamily": "reviewOutcome",
+        "kind": "escalation",
+        "predicate": {
+          "==": [
+            {
+              "var": "pep"
+            },
+            true
+          ]
+        },
+        "effect": {
+          "type": "recommend",
+          "action": "escalateCompliance"
+        },
+        "priority": 20,
+        "overrides": [],
+        "evidence": [
+          {
+            "kind": "expert_quote",
+            "utteranceId": "5479173d-ab55-4d84-b4d4-77332388a212",
+            "exactQuote": "She's a politically exposed person, so it goes to the compliance officer.",
+            "t0Ms": 97703,
+            "t1Ms": 101900,
+            "frameIds": [
+              "112948c5-d1d1-4ee0-b014-aa1ab7bd7c30"
+            ],
+            "eventIds": [],
+            "relation": "supports",
+            "provenance": "human_voice"
+          }
+        ],
+        "confirmedBy": [
+          {
+            "expertId": "expert-1368ae76-e5c3-482d-b817-e68ff3e5b8f1",
+            "at": 1791076597767,
+            "method": "explicit_statement",
+            "ledgerEntryId": "5479173d-ab55-4d84-b4d4-77332388a212"
+          }
+        ],
+        "revision": 1,
+        "schemaVersion": 1,
+        "expertId": "expert-1368ae76-e5c3-482d-b817-e68ff3e5b8f1"
+      },
+      {
+        "id": "rule_1779bf245d6bff",
+        "decisionFamily": "reviewOutcome",
+        "kind": "decision",
+        "predicate": {
+          "and": [
+            {
+              ">": [
+                {
+                  "var": "uboOwnershipPct"
+                },
+                25
+              ]
+            },
+            {
+              "==": [
+                {
+                  "var": "uboVerified"
+                },
+                false
+              ]
+            }
+          ]
+        },
+        "effect": {
+          "type": "recommend",
+          "action": "enhancedReview"
+        },
+        "priority": 10,
+        "overrides": [],
+        "evidence": [
+          {
+            "kind": "expert_quote",
+            "utteranceId": "2c379ed8-8ada-4622-86a1-9cc4069acbc6",
+            "exactQuote": "Anything over 25% that isn't verified goes to enhanced review.",
+            "t0Ms": 14980,
+            "t1Ms": 23653,
+            "frameIds": [
+              "8c98410d-e886-4b83-8d89-fcc8750f7458",
+              "2c8785b1-2f4f-4feb-a857-03616e811acd"
+            ],
+            "eventIds": [],
+            "relation": "supports",
+            "provenance": "human_voice"
+          }
+        ],
+        "confirmedBy": [
+          {
+            "expertId": "expert-cad2596d-53dd-427d-aa45-d73d91bd7844",
+            "at": 1791076815087,
+            "method": "explicit_statement",
+            "ledgerEntryId": "2c379ed8-8ada-4622-86a1-9cc4069acbc6"
+          }
+        ],
+        "revision": 1,
+        "schemaVersion": 1,
+        "expertId": "expert-cad2596d-53dd-427d-aa45-d73d91bd7844"
+      },
+      {
+        "id": "rule_171a5b41cd4ac8",
+        "decisionFamily": "reviewOutcome",
+        "kind": "decision",
+        "predicate": {
+          "and": [
+            {
+              ">": [
+                {
+                  "var": "uboOwnershipPct"
+                },
+                25
+              ]
+            },
+            {
+              "==": [
+                {
+                  "var": "uboVerified"
+                },
+                false
+              ]
+            }
+          ]
+        },
+        "effect": {
+          "type": "recommend",
+          "action": "enhancedReview"
+        },
+        "priority": 10,
+        "overrides": [],
+        "evidence": [
+          {
+            "kind": "expert_quote",
+            "utteranceId": "3bc2bba6-d14e-4011-b3c6-ab078aaf2584",
+            "exactQuote": "If the largest owner holds more than 25% and isn't verified, it goes to enhanced review.",
+            "t0Ms": 37045,
+            "t1Ms": 43480,
+            "frameIds": [
+              "8c98410d-e886-4b83-8d89-fcc8750f7458",
+              "2c8785b1-2f4f-4feb-a857-03616e811acd"
+            ],
+            "eventIds": [],
+            "relation": "supports",
+            "provenance": "human_voice"
+          }
+        ],
+        "confirmedBy": [
+          {
+            "expertId": "expert-cad2596d-53dd-427d-aa45-d73d91bd7844",
+            "at": 1791076836820,
+            "method": "explicit_statement",
+            "ledgerEntryId": "3bc2bba6-d14e-4011-b3c6-ab078aaf2584"
+          }
+        ],
+        "revision": 1,
+        "schemaVersion": 1,
+        "expertId": "expert-cad2596d-53dd-427d-aa45-d73d91bd7844"
+      },
+      {
+        "id": "rule_1e5796de1f0929",
+        "decisionFamily": "reviewOutcome",
+        "kind": "guardrail",
+        "predicate": {
+          "and": [
+            {
+              "==": [
+                {
+                  "var": "jurisdictionRisk"
+                },
+                "high"
+              ]
+            },
+            {
+              "<": [
+                {
+                  "var": "accountAgeMonths"
+                },
+                24
+              ]
+            }
+          ]
+        },
+        "effect": {
+          "type": "forbid",
+          "action": "approve"
+        },
+        "priority": 40,
+        "overrides": [],
+        "evidence": [
+          {
+            "kind": "expert_quote",
+            "utteranceId": "99cbb2c0-306d-4f8e-b46c-410c64124c53",
+            "exactQuote": "Never approve a customer from a high-risk country at desk level unless they've banked with us for two years with verified funds.",
+            "t0Ms": 62965,
+            "t1Ms": 70053,
+            "frameIds": [
+              "1930dce7-c904-4009-956d-b8bfd3d59adb"
+            ],
+            "eventIds": [],
+            "relation": "supports",
+            "provenance": "human_voice"
+          }
+        ],
+        "confirmedBy": [
+          {
+            "expertId": "expert-cad2596d-53dd-427d-aa45-d73d91bd7844",
+            "at": 1791076865066,
+            "method": "explicit_statement",
+            "ledgerEntryId": "99cbb2c0-306d-4f8e-b46c-410c64124c53"
+          }
+        ],
+        "revision": 1,
+        "schemaVersion": 1,
+        "expertId": "expert-cad2596d-53dd-427d-aa45-d73d91bd7844"
+      },
+      {
+        "id": "rule_03e987e9b68836",
+        "decisionFamily": "reviewOutcome",
+        "kind": "guardrail",
+        "predicate": {
+          "and": [
+            {
+              "==": [
+                {
+                  "var": "jurisdictionRisk"
+                },
+                "high"
+              ]
+            },
+            {
+              "!=": [
+                {
+                  "var": "sourceOfFunds"
+                },
+                "verified"
+              ]
+            }
+          ]
+        },
+        "effect": {
+          "type": "forbid",
+          "action": "approve"
+        },
+        "priority": 40,
+        "overrides": [],
+        "evidence": [
+          {
+            "kind": "expert_quote",
+            "utteranceId": "99cbb2c0-306d-4f8e-b46c-410c64124c53",
+            "exactQuote": "Never approve a customer from a high-risk country at desk level unless they've banked with us for two years with verified funds.",
+            "t0Ms": 62965,
+            "t1Ms": 70053,
+            "frameIds": [
+              "1930dce7-c904-4009-956d-b8bfd3d59adb"
+            ],
+            "eventIds": [],
+            "relation": "supports",
+            "provenance": "human_voice"
+          }
+        ],
+        "confirmedBy": [
+          {
+            "expertId": "expert-cad2596d-53dd-427d-aa45-d73d91bd7844",
+            "at": 1791076865066,
+            "method": "explicit_statement",
+            "ledgerEntryId": "99cbb2c0-306d-4f8e-b46c-410c64124c53"
+          }
+        ],
+        "revision": 1,
+        "schemaVersion": 1,
+        "expertId": "expert-cad2596d-53dd-427d-aa45-d73d91bd7844"
+      }
+    ]
+  }
+}

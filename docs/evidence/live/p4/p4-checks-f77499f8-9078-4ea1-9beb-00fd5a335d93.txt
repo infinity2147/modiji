@@ -1,0 +1,15 @@
+P4 checks — session f77499f8-9078-4ea1-9beb-00fd5a335d93 (expert speech: synthetic voice input, ElevenLabs TTS)
+threshold-style rule or candidate: true (confirmed threshold rules: 1; stated threshold candidates: 2; hypothesis threshold candidates: 0)
+guardrail/exception confirmed: true (1)
+unresolved concept surfaced: true (complianceSignOff [concept proposer], registryExtractAgeMonths [answer.parsed])
+every promoted rule passes evidence validation: true (2 rule.confirmed)
+answers parsed (answer.parsed): 3
+
+rule rule_1e58bdad60bc40 [decision] effect={"type":"recommend","action":"enhancedReview"} method=explicit_statement provenance=human_voice frames=1 valid=true
+  predicate={"and":[{">":[{"var":"uboOwnershipPct"},25]},{"==":[{"var":"uboVerified"},false]}]}
+  quote="Anything over 25% that isn't verified goes to enhanced review"
+rule rule_0db2a2b89d2203 [guardrail] effect={"type":"require_approval","role":"compliance_officer"} method=explicit_statement provenance=human_voice frames=1 valid=true
+  predicate={"==":[{"var":"pep"},true]}
+  quote="Never approve a politically exposed person without compliance sign-off."
+
+Production rulebook after the run: revision 23, 23 rules

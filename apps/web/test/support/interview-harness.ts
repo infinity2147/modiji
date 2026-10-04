@@ -8,12 +8,17 @@ import { expect } from "vitest";
 import {
   ANSWER_PARSER_SYSTEM,
   CONCEPT_PROPOSER_SYSTEM,
+  LOCALIZER_SYSTEM,
   REPHRASER_SYSTEM,
+  TRANSLATOR_SYSTEM,
   engineConfig,
+  type ExpertLanguage,
   type LedgerEntry,
   type LlmAnswer,
   type LlmConceptProposal,
+  type LlmLocalizedQuestion,
   type LlmRephrase,
+  type LlmTranslation,
 } from "@vashistha/core";
 import { createClaude, createLedger, openDatabase, type ClaudeClient, type Ledger } from "@vashistha/core/server";
 import { kycCases, type KycCase } from "@vashistha/core/domains/kyc";
@@ -46,9 +51,21 @@ export type FakeModel = {
   concepts?: (user: string) => LlmConceptProposal;
   /** Default: echo the template text and target feature (accepted unchanged). */
   rephrase?: (user: string) => LlmRephrase;
+  /** Utterance translation (non-English answers, plan §7.11). */
+  translate?: (user: string) => LlmTranslation;
+  /** Questions in the expert's language (plan §7.11). */
+  localize?: (user: string) => LlmLocalizedQuestion;
 };
 
-export type ModelCall = { kind: "answer" | "concepts" | "rephrase"; system: string; user: string };
+export type ModelCall = { kind: "answer" | "concepts" | "rephrase" | "translate" | "localize"; system: string; user: string };
+
+const PROMPT_KINDS: readonly [string, ModelCall["kind"]][] = [
+  [ANSWER_PARSER_SYSTEM, "answer"],
+  [CONCEPT_PROPOSER_SYSTEM, "concepts"],
+  [REPHRASER_SYSTEM, "rephrase"],
+  [TRANSLATOR_SYSTEM, "translate"],
+  [LOCALIZER_SYSTEM, "localize"],
+];
 
 function message(text: string): Message {
   return {
@@ -93,16 +110,17 @@ function fakeClient(model: FakeModel, calls: ModelCall[]): ClaudeClient {
     messages: {
       create: (params) => {
         const { system, user } = textOf(params);
-        const kind = system.startsWith(ANSWER_PARSER_SYSTEM)
-          ? "answer"
-          : system.startsWith(CONCEPT_PROPOSER_SYSTEM)
-            ? "concepts"
-            : system.startsWith(REPHRASER_SYSTEM)
-              ? "rephrase"
-              : undefined;
+        const kind = PROMPT_KINDS.find(([prefix]) => system.startsWith(prefix))?.[1];
         if (kind === undefined) return Promise.reject(new Error("unexpected prompt"));
         calls.push({ kind, system, user });
-        const respond = kind === "answer" ? model.answer : kind === "concepts" ? model.concepts : (model.rephrase ?? echoRephrase);
+        const responders: Record<ModelCall["kind"], ((user: string) => unknown) | undefined> = {
+          answer: model.answer,
+          concepts: model.concepts,
+          rephrase: model.rephrase ?? echoRephrase,
+          translate: model.translate,
+          localize: model.localize,
+        };
+        const respond = responders[kind];
         if (respond === undefined) return Promise.reject(new Error(`no fake ${kind} response configured`));
         return Promise.resolve(message(JSON.stringify(respond(user))));
       },
@@ -122,7 +140,8 @@ export type InterviewHarness = {
   advance: (ms: number) => void;
   /** Simulates a process restart: in-memory interview and CaseDesk state are lost, the ledger is not. */
   restart: () => void;
-  session: (mode: "expert" | "novice") => Promise<string>;
+  /** Creates a session; an expert session may name its expert and their language (plan §7.10–7.11). */
+  session: (mode: "expert" | "novice", expert?: { name: string; language: ExpertLanguage }) => Promise<string>;
   /** Opens the case, sets the risk rating, checks and commits `action`; waits for the engine step. */
   work: (sessionId: string, caseId: string, action: string, riskRating?: "low" | "medium" | "high") => Promise<string>;
   /** Appends a `client` / `frame.received` entry (what perception will upload). */
@@ -205,8 +224,8 @@ export function createInterviewHarness(): InterviewHarness {
       casedesk.store = deps.casedesk;
       casedesk.interview = interviewHooks(deps);
     },
-    session: async (mode) => {
-      const r = await reply(await handleCreateSession(jsonRequest("/api/sessions", { mode, caseSet: "training" }), casedesk));
+    session: async (mode, expert) => {
+      const r = await reply(await handleCreateSession(jsonRequest("/api/sessions", { mode, caseSet: "training", ...(expert && { expert }) }), casedesk));
       expect(r.status).toBe(201);
       return (r.body as { sessionId: string }).sessionId;
     },

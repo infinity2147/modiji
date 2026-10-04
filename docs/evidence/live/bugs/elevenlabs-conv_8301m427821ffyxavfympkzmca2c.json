@@ -1,0 +1,129 @@
+{
+  "label": "synthetic voice input (ElevenLabs TTS) for all user audio turns",
+  "conversation_id": "conv_8301m427821ffyxavfympkzmca2c",
+  "status": "failed",
+  "metadata_error": {
+    "code": 1002,
+    "reason": "custom_llm_error: LLM Cascade Error: TimeoutError",
+    "error_type": "llm_error"
+  },
+  "termination_reason": "custom_llm generation failed",
+  "transcript": [
+    {
+      "role": "user",
+      "time_in_call_secs": 11,
+      "source_medium": "text",
+      "interrupted": false,
+      "message": "⟦ctl:<redacted>⟧",
+      "tool_calls": []
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 12,
+      "source_medium": null,
+      "interrupted": true,
+      "message": "...",
+      "tool_calls": []
+    },
+    {
+      "role": "user",
+      "time_in_call_secs": 12,
+      "source_medium": "text",
+      "interrupted": false,
+      "message": "⟦ctl:<redacted>⟧",
+      "tool_calls": []
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 13,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "If country risk were \"low\" instead of medium, what would you decide?",
+      "tool_calls": []
+    },
+    {
+      "role": "user",
+      "time_in_call_secs": 19,
+      "source_medium": "audio",
+      "interrupted": false,
+      "message": "The largest owner holds 35% and isn't verified. Anything over 25% that isn't verified goes to enhanced review.",
+      "tool_calls": []
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 27,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": [
+        "skip_turn"
+      ]
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 27,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": []
+    },
+    {
+      "role": "user",
+      "time_in_call_secs": 29,
+      "source_medium": "text",
+      "interrupted": false,
+      "message": "⟦ctl:<redacted>⟧",
+      "tool_calls": []
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 30,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "If the entity type were \"trust\" rather than company, what would your decision be?",
+      "tool_calls": []
+    },
+    {
+      "role": "user",
+      "time_in_call_secs": 38,
+      "source_medium": "audio",
+      "interrupted": false,
+      "message": "For a company or a trust, I look at the largest owner. For an individual, the owner threshold doesn't apply.",
+      "tool_calls": []
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 45,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": [
+        "skip_turn"
+      ]
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 45,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": []
+    },
+    {
+      "role": "user",
+      "time_in_call_secs": 50,
+      "source_medium": "text",
+      "interrupted": false,
+      "message": "⟦ctl:<redacted>⟧",
+      "tool_calls": []
+    },
+    {
+      "role": "user",
+      "time_in_call_secs": 55,
+      "source_medium": "text",
+      "interrupted": false,
+      "message": "⟦ctl:<redacted>⟧",
+      "tool_calls": []
+    }
+  ]
+}

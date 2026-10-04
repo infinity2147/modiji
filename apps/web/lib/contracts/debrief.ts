@@ -263,7 +263,7 @@ export const WorkMapResponseSchema = z.strictObject({
 });
 export type WorkMapResponse = z.infer<typeof WorkMapResponseSchema>;
 
-/** GET /api/rulebook — the confirmed rulebook in force (all expert sessions). */
+/** GET /api/rulebook — the confirmed rulebook in force: the team rulebook (all expert sessions; decision rules of open disagreements held back). */
 export const RulebookResponseSchema = z.strictObject({
   revision: z.int().nonnegative(),
   rules: z.array(ConfirmedRuleSchema),

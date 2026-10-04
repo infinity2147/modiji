@@ -3,7 +3,7 @@ import { mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { expect } from "vitest";
-import { ConfirmedRuleSchema, engineConfig, RuleConfirmedPayloadSchema, type ConfirmedRule, type LedgerEntry } from "@vashistha/core";
+import { ConfirmedRuleSchema, engineConfig, legacyExpertId, RuleConfirmedPayloadSchema, type ConfirmedRule, type LedgerEntry } from "@vashistha/core";
 import { CLAUDE_MODELS, createClaude, createLedger, openDatabase, type ClaudeClient, type Ledger, type OpenedDatabase } from "@vashistha/core/server";
 import { kycCases } from "@vashistha/core/domains/kyc";
 import { ORACLE_MARKER } from "@vashistha/core/domains/kyc/oracle";
@@ -84,7 +84,7 @@ export async function reply(r: Response): Promise<Reply> {
 }
 
 /** Fixture rules: a numeric decision rule (owner share over 25% unverified → request documents) and a guardrail (never approve a PEP). */
-function fixtureRule(id: string, input: { predicate: unknown; effect: unknown; kind: ConfirmedRule["kind"]; utteranceId: string; quote: string; moment: string }): ConfirmedRule {
+function fixtureRule(id: string, input: { predicate: unknown; effect: unknown; kind: ConfirmedRule["kind"]; utteranceId: string; quote: string; moment: string; expertId: string }): ConfirmedRule {
   return ConfirmedRuleSchema.parse({
     id,
     decisionFamily: "reviewOutcome",
@@ -96,10 +96,10 @@ function fixtureRule(id: string, input: { predicate: unknown; effect: unknown; k
     evidence: [
       { kind: "expert_quote", utteranceId: input.utteranceId, exactQuote: input.quote, t0Ms: 1_000, t1Ms: 4_000, frameIds: [input.moment], eventIds: [], relation: "supports", provenance: "human_voice" },
     ],
-    confirmedBy: [{ expertId: "expert-x", at: T0, method: "explicit_statement", ledgerEntryId: input.utteranceId }],
+    confirmedBy: [{ expertId: input.expertId, at: T0, method: "explicit_statement", ledgerEntryId: input.utteranceId }],
     revision: 1,
     schemaVersion: 1,
-    expertId: "expert-x",
+    expertId: input.expertId,
   });
 }
 
@@ -142,9 +142,11 @@ export function seed(ledger: Ledger, { screenFrames = true }: { screenFrames?: b
   const utter = (text: string): LedgerEntry => at("utterance.transcript", "voice", { conversationId: "conv-1", text, t0Ms: 1_000, t1Ms: 4_000, frameIds: [] });
   const docs = utter(DOCS_QUOTE);
   const pep = utter(PEP_QUOTE);
+  // The session's own expert (no name at start: `expert-<sessionId>`), so the debrief reads these rules as theirs.
+  const expertId = legacyExpertId(session.id);
   const rules = [
-    fixtureRule("rule-docs", { predicate: { and: [{ ">": [{ var: "uboOwnershipPct" }, 25] }, { "==": [{ var: "uboVerified" }, false] }] }, effect: { type: "recommend", action: "requestDocuments" }, kind: "decision", utteranceId: docs.id, quote: DOCS_QUOTE, moment: moments[0] ?? "" }),
-    fixtureRule("rule-pep", { predicate: { "==": [{ var: "pep" }, true] }, effect: { type: "forbid", action: "approve" }, kind: "guardrail", utteranceId: pep.id, quote: PEP_QUOTE, moment: moments[2] ?? "" }),
+    fixtureRule("rule-docs", { predicate: { and: [{ ">": [{ var: "uboOwnershipPct" }, 25] }, { "==": [{ var: "uboVerified" }, false] }] }, effect: { type: "recommend", action: "requestDocuments" }, kind: "decision", utteranceId: docs.id, quote: DOCS_QUOTE, moment: moments[0] ?? "", expertId }),
+    fixtureRule("rule-pep", { predicate: { "==": [{ var: "pep" }, true] }, effect: { type: "forbid", action: "approve" }, kind: "guardrail", utteranceId: pep.id, quote: PEP_QUOTE, moment: moments[2] ?? "", expertId }),
   ];
   for (const [i, rule] of rules.entries()) at("rule.confirmed", "engine", RuleConfirmedPayloadSchema.parse({ rule }), [[docs.id, pep.id][i] ?? ""]);
   return session.id;

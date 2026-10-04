@@ -35,6 +35,7 @@ const STAGE_OF_KIND: Readonly<Record<string, LineageStage>> = {
   "agent.utterance": "question",
   "teachback.generated": "question",
   "utterance.transcript": "answer",
+  "utterance.translated": "answer",
   "answer.parsed": "answer",
   "expert.statement": "answer",
   "rule.confirmed": "confirmed_rule",

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { ActionIdSchema, EpochMsSchema, FeatureIdSchema, IdSchema, SchemaVersionSchema, SymbolIdSchema, ValueSchema } from "./primitives";
+import { ExpertLanguageSchema } from "./expert";
 import { PredicateSchema } from "./predicate";
 
 /** A complete assignment of feature values (a concrete case), e.g. a solver witness or a counterfactual. */
@@ -84,6 +85,13 @@ export const QuestionSchema = z.strictObject({
   sessionId: IdSchema,
   kind: QuestionKindSchema,
   text: z.string().trim().min(1).max(600),
+  /**
+   * P10: when `text` is rendered in the expert's language (a model translation of the precomputed
+   * English question), the English original it was translated from. The gate still authorises, and
+   * the agent still speaks, exactly `text`.
+   */
+  textEnglish: z.string().trim().min(1).max(600).optional(),
+  language: ExpertLanguageSchema.optional(),
   decisionFamily: SymbolIdSchema.optional(),
   target: z.strictObject({
     caseId: z.string().optional(),

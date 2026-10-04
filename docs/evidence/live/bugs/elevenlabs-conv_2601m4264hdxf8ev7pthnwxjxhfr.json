@@ -1,0 +1,221 @@
+{
+  "label": "synthetic voice input (ElevenLabs TTS) for all user audio turns",
+  "conversation_id": "conv_2601m4264hdxf8ev7pthnwxjxhfr",
+  "status": "done",
+  "metadata_error": null,
+  "termination_reason": "Client disconnected: 1000",
+  "transcript": [
+    {
+      "role": "user",
+      "time_in_call_secs": 12,
+      "source_medium": "text",
+      "interrupted": false,
+      "message": "⟦ctl:<redacted>⟧",
+      "tool_calls": []
+    },
+    {
+      "role": "user",
+      "time_in_call_secs": 1,
+      "source_medium": "audio",
+      "interrupted": false,
+      "message": "Let me jot down the ownership details while I read through this file.",
+      "tool_calls": []
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 13,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": [
+        "skip_turn"
+      ]
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 13,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": []
+    },
+    {
+      "role": "user",
+      "time_in_call_secs": 16,
+      "source_medium": "text",
+      "interrupted": false,
+      "message": "⟦ctl:<redacted>⟧",
+      "tool_calls": []
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 16,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "If the entity type were \"trust\" instead of company, what would you decide?",
+      "tool_calls": []
+    },
+    {
+      "role": "user",
+      "time_in_call_secs": 22,
+      "source_medium": "audio",
+      "interrupted": false,
+      "message": "For a company or a trust, I look at the largest owner. For an individual, the owner threshold doesn't apply.",
+      "tool_calls": []
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 29,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": [
+        "skip_turn"
+      ]
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 29,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": []
+    },
+    {
+      "role": "user",
+      "time_in_call_secs": 31,
+      "source_medium": "text",
+      "interrupted": false,
+      "message": "⟦ctl:<redacted>⟧",
+      "tool_calls": []
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 32,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "If the country risk were \"high\" instead of medium, what would you decide?",
+      "tool_calls": []
+    },
+    {
+      "role": "user",
+      "time_in_call_secs": 38,
+      "source_medium": "audio",
+      "interrupted": false,
+      "message": "No, the country doesn't drive this one. It's the unverified owner holding 35%.",
+      "tool_calls": []
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 44,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": [
+        "skip_turn"
+      ]
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 44,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": []
+    },
+    {
+      "role": "user",
+      "time_in_call_secs": 45,
+      "source_medium": "audio",
+      "interrupted": false,
+      "message": "Let me jot down the ownership details while I read through this file.",
+      "tool_calls": []
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 51,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": [
+        "skip_turn"
+      ]
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 51,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": []
+    },
+    {
+      "role": "user",
+      "time_in_call_secs": 60,
+      "source_medium": "text",
+      "interrupted": false,
+      "message": "⟦ctl:<redacted>⟧",
+      "tool_calls": []
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 60,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "What led you to approve onboarding here, and what would have changed your mind?",
+      "tool_calls": []
+    },
+    {
+      "role": "user",
+      "time_in_call_secs": 67,
+      "source_medium": "audio",
+      "interrupted": false,
+      "message": "They've banked with us for three years, and their source of funds is verified, so the high-risk country on its own doesn't send them to enhanced review.",
+      "tool_calls": []
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 76,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": [
+        "skip_turn"
+      ]
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 76,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": []
+    },
+    {
+      "role": "user",
+      "time_in_call_secs": 90,
+      "source_medium": "audio",
+      "interrupted": false,
+      "message": "Let me jot down the ownership details while I read through this file.",
+      "tool_calls": []
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 100,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": [
+        "skip_turn"
+      ]
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 100,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": []
+    }
+  ]
+}

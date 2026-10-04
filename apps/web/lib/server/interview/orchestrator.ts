@@ -18,8 +18,11 @@ import {
   contentId,
   isContradiction,
   isLiveQuestionKind,
+  legacyExpertId,
   promoteToConfirmedRule,
+  type AnsweredUtterance,
   type EngineConfig,
+  type ExpertLanguage,
   type LedgerEntry,
   type ParsedAnswer,
   type Question,
@@ -41,7 +44,8 @@ import {
   type QuestionRecord,
 } from "./engine-state";
 import { entry, type EntryContext } from "./ledger";
-import { parseAnswer, proposeConcepts, rephraseQuestion } from "./llm";
+import { quoteLanguageFields, utteranceLanguage } from "./language";
+import { REASONING_MODEL, localizeQuestion, parseAnswer, proposeConcepts, rephraseQuestion, translateUtterance } from "./llm";
 import { planQueue } from "./questions";
 
 export type InterviewDeps = {
@@ -58,11 +62,6 @@ export type InterviewDeps = {
 
 function describeError(error: unknown): string {
   return error instanceof Error ? `${error.name}: ${error.message}` : String(error);
-}
-
-/** The single expert of a capture session (plan §7.10 adds a second one per session). */
-export function sessionExpertId(sessionId: string): string {
-  return `expert-${sessionId}`;
 }
 
 /** Runs `task` after every earlier task of the session has settled. */
@@ -164,6 +163,7 @@ async function requeue(
   const fresh = await rephrased(
     deps,
     planned.filter((q) => !wasLive.has(q.id)),
+    before.expert?.language ?? "en",
   );
 
   const live = queuedQuestions(engineState(deps, sessionId)).filter((r) => isLiveQuestionKind(r.question.kind));
@@ -180,19 +180,26 @@ async function requeue(
   ]);
 }
 
-async function rephrased(deps: InterviewDeps, questions: readonly Question[]): Promise<Question[]> {
+/**
+ * The questions as they will be spoken: rephrased by Sonnet (English, checked by `acceptRephrase`),
+ * then — for an expert who speaks another language — translated into it (`localizeQuestion`, which
+ * keeps the English as `textEnglish` and falls back to the English question). Without a model the
+ * template questions stand.
+ */
+async function rephrased(deps: InterviewDeps, questions: readonly Question[], language: ExpertLanguage): Promise<Question[]> {
   const { claude } = deps;
   if (claude === null) return [...questions];
   return Promise.all(
     questions.map(async (q) => {
+      let english = q;
       try {
         const decision = await rephraseQuestion(claude, q);
-        if (decision.accepted) return { ...q, text: decision.text };
-        deps.log.info(`[interview] kept the template wording of ${q.id}: ${decision.reason}`);
+        if (decision.accepted) english = { ...q, text: decision.text };
+        else deps.log.info(`[interview] kept the template wording of ${q.id}: ${decision.reason}`);
       } catch (error) {
         deps.log.warn(`[interview] rephrasing ${q.id} failed; template wording kept: ${describeError(error)}`);
       }
-      return q;
+      return localizeQuestion(claude, english, language, deps.log);
     }),
   );
 }
@@ -220,8 +227,9 @@ function utteranceFrames(ledger: Pick<Ledger, "list">, sessionId: string, privac
 }
 
 /**
- * Records a final expert transcript (`voice` / `utterance.transcript`). When it answers an asked
- * question and a parser is available, the answer is parsed (Sonnet), recorded as `answer.parsed`,
+ * Records a final expert transcript (`voice` / `utterance.transcript`) with its language (detected by
+ * code, `utteranceLanguage`); a non-English one is then translated (`translate`) before anything reads
+ * it. When it answers an asked question and a parser is available, the answer is parsed (Sonnet), recorded as `answer.parsed`,
  * applied by the engine, explicit statements are promoted, and the queue is regenerated. Without a
  * parser the utterance is recorded and the answer stays unparsed (`unparsedAnswers`), never guessed.
  */
@@ -232,6 +240,7 @@ export function recordUtterance(deps: InterviewDeps, sessionId: string, body: Po
     if (body.questionId !== undefined && record?.asked === undefined)
       throw new ApiFailure(409, "question_not_asked", `question ${body.questionId} was not asked in this session`);
     const ctx: EntryContext = { sessionId, occurredAt: deps.now(), traceId: randomUUID(), privacyEpoch: body.privacyEpoch };
+    const language = utteranceLanguage(body.text, { client: body.language, expert: state.expert?.language });
     // The ledger re-checks epoch and off-record atomically (409 stale_epoch / off_record on a race).
     const utterance = deps.ledger.append(
       entry(ctx, "utterance.transcript", "voice", record?.asked ? [record.asked.entryId] : [], {
@@ -240,28 +249,82 @@ export function recordUtterance(deps: InterviewDeps, sessionId: string, body: Po
         t0Ms: body.t0Ms,
         t1Ms: body.t1Ms,
         frameIds: utteranceFrames(deps.ledger, sessionId, body.privacyEpoch, body.t1Ms - body.t0Ms),
+        ...(language !== "en" && { language }),
       }),
     );
-    if (record === undefined) return { utteranceId: utterance.id };
+    const translation = language === "en" ? undefined : await translate(deps, { sessionId, utteranceId: utterance.id, text: body.text, language, traceId: ctx.traceId });
+    const recorded: PostUtteranceResponse = {
+      utteranceId: utterance.id,
+      ...(language !== "en" && {
+        language,
+        translation: translation === undefined ? { status: "pending" as const } : { status: "translated" as const, text: translation },
+      }),
+    };
+    if (record === undefined) return recorded;
     if (deps.claude === null) {
       deps.log.info(`[interview] no answer parser configured; answer ${utterance.id} to ${record.question.id} recorded unparsed`);
-      return { utteranceId: utterance.id };
+      return recorded;
     }
-    const parsed = await interpretAnswer(deps, deps.claude, { sessionId, record, utterance: utterance.id, body, traceId: ctx.traceId });
-    return parsed === undefined ? { utteranceId: utterance.id } : { utteranceId: utterance.id, parsed };
+    const parsed = await interpretAnswer(deps, deps.claude, {
+      sessionId,
+      record,
+      utterance: { id: utterance.id, text: body.text, t0Ms: body.t0Ms, t1Ms: body.t1Ms, language, ...(translation !== undefined && { translation }) },
+      traceId: ctx.traceId,
+    });
+    return parsed === undefined ? recorded : { ...recorded, parsed };
   });
+}
+
+/**
+ * Translation of a non-English utterance (plan §7.11), as its own `utterance.translated` entry (source
+ * `engine`, parent the utterance): the transcript entry stays exactly what the voice channel heard, and
+ * the model's product carries the engine's provenance. Runs before the answer is parsed, in the
+ * session's serial queue, bounded by the translator's deadline. Without a model, or when the
+ * translation fails or does not verify, nothing is written: the utterance keeps its original words and
+ * its translation stays pending (`translationPending`) — never fabricated. Returns the English text.
+ */
+async function translate(
+  deps: InterviewDeps,
+  input: { sessionId: string; utteranceId: string; text: string; language: Exclude<ExpertLanguage, "en">; traceId: string },
+): Promise<string | undefined> {
+  if (deps.claude === null) {
+    deps.log.info(`[interview] no model configured; ${input.language} utterance ${input.utteranceId} kept untranslated (translation pending)`);
+    return undefined;
+  }
+  let result;
+  try {
+    result = await translateUtterance(deps.claude, { text: input.text, language: input.language });
+  } catch (error) {
+    deps.log.warn(`[interview] translating utterance ${input.utteranceId} failed; translation pending: ${describeError(error)}`);
+    return undefined;
+  }
+  if (!result.ok) {
+    deps.log.warn(`[interview] translation of utterance ${input.utteranceId} rejected (${result.reason}); translation pending`);
+    return undefined;
+  }
+  deps.ledger.append(
+    entry(entryContext(deps, input.sessionId, input.traceId), "utterance.translated", "engine", [input.utteranceId], {
+      utteranceId: input.utteranceId,
+      language: input.language,
+      translation: result.translation,
+      segments: result.segments,
+      model: REASONING_MODEL,
+    }),
+  );
+  return result.translation;
 }
 
 async function interpretAnswer(
   deps: InterviewDeps,
   claude: Claude,
-  input: { sessionId: string; record: QuestionRecord; utterance: string; body: PostUtteranceRequest; traceId: string },
+  input: { sessionId: string; record: QuestionRecord; utterance: AnsweredUtterance; traceId: string },
 ): Promise<ParsedAnswer | undefined> {
-  const { sessionId, record, body } = input;
+  const { sessionId, record } = input;
+  const utteranceId = input.utterance.id;
   const state = engineState(deps, sessionId);
   const family = questionFamily(state, record.question);
   if (family === undefined) {
-    deps.log.warn(`[interview] no decision family for question ${record.question.id}; answer ${input.utterance} left unparsed`);
+    deps.log.warn(`[interview] no decision family for question ${record.question.id}; answer ${utteranceId} left unparsed`);
     return undefined;
   }
   let conversion;
@@ -269,19 +332,19 @@ async function interpretAnswer(
     conversion = await parseAnswer(claude, {
       decisionFamily: family.model.family.id,
       question: record.question,
-      utterance: { id: input.utterance, text: body.text, t0Ms: body.t0Ms, t1Ms: body.t1Ms },
+      utterance: input.utterance,
       set: family.set,
       domain: family.model.domain,
       pendingConcepts: state.undefinedConcepts,
     });
   } catch (error) {
-    deps.log.warn(`[interview] answer parser failed; answer ${input.utterance} left unparsed: ${describeError(error)}`);
+    deps.log.warn(`[interview] answer parser failed; answer ${utteranceId} left unparsed: ${describeError(error)}`);
     return undefined;
   }
   for (const r of conversion.rejected) deps.log.info(`[interview] parser output rejected (${r.item}): ${r.reason}`);
 
   const ctx = entryContext(deps, sessionId, input.traceId);
-  const parsedEntry = deps.ledger.append(entry(ctx, "answer.parsed", "engine", [input.utterance, record.queuedEntryId], conversion.answer));
+  const parsedEntry = deps.ledger.append(entry(ctx, "answer.parsed", "engine", [utteranceId, record.queuedEntryId], conversion.answer));
   const after = engineState(deps, sessionId);
   const outcome = after.answers.get(parsedEntry.id);
   if (outcome?.status !== "applied") {
@@ -300,7 +363,7 @@ async function interpretAnswer(
     }),
   );
   promoteStatements(deps, ctx, { answer: conversion.answer, answerEntryId: parsedEntry.id, decisionFamily: outcome.decisionFamily });
-  if (record.question.kind === "why_probe") await proposeNewConcepts(deps, claude, ctx, { family: applied, utterance: input.utterance });
+  if (record.question.kind === "why_probe") await proposeNewConcepts(deps, claude, ctx, { family: applied, utterance: utteranceId });
   await requeue(deps, sessionId, outcome.decisionFamily, { withWhyProbe: false, parentIds: [parsedEntry.id, updated.id], traceId: input.traceId });
   return conversion.answer;
 }
@@ -323,7 +386,7 @@ function promoteStatements(deps: InterviewDeps, ctx: EntryContext, input: { answ
     deps.log.info(`[interview] ${answer.statedRules.length} stated rule(s) in ${answer.utteranceId} not promoted: no frame on record for the utterance`);
     return;
   }
-  const expertId = sessionExpertId(ctx.sessionId);
+  const expertId = state.expert?.id ?? legacyExpertId(ctx.sessionId);
   answer.statedRules.forEach((rule, index) => {
     const result = promoteToConfirmedRule({
       ruleId: contentId("rule", canonicalJson({ utteranceId: answer.utteranceId, index })),
@@ -343,6 +406,8 @@ function promoteStatements(deps: InterviewDeps, ctx: EntryContext, input: { answ
           eventIds: [],
           relation: "supports",
           provenance: "human_voice",
+          // The original words are the evidence; a non-English quote also carries its language and English rendering.
+          ...quoteLanguageFields(utterance, rule.exactQuote),
         },
       ],
       confirmation: { expertId, at: ctx.occurredAt, method: "explicit_statement", ledgerEntryId: answer.utteranceId },

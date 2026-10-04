@@ -22,8 +22,9 @@ import { z3SelfTest } from "@vashistha/solver";
 import { createAuthorizationStore } from "./authorizations";
 import { createCaseDeskStore } from "./casedesk/session";
 import { createDebriefStore } from "./debrief/deps";
-import { createLedgerRulebook } from "./debrief/rulebook-store";
+import { createDisagreementHolds, createExpertDirectory, createLedgerRulebook, teamRulebookView } from "./debrief/rulebook-store";
 import { createWitnessSolver } from "./debrief/solver";
+import { createDisagreementSolver } from "./disagreements/solver";
 import { createInterviewStore } from "./interview/engine-state";
 import { createPerception } from "./perception/init";
 import { createRateLimiter } from "./rate-limit";
@@ -117,7 +118,8 @@ export function createRuntime(source: Readonly<Record<string, string | undefined
       : createClaude({ apiKey: env.ANTHROPIC_API_KEY, forbiddenMarkers: ORACLE_MARKERS });
   if (env.LLM_CALLS === "off") console.info("> LLM_CALLS=off: model calls disabled (no Anthropic client)");
   const rulebookAllModels = createLedgerRulebook(opened.sqlite);
-  const rulebookState = rulebookViewWithinModel(KYC_DOMAIN, rulebookAllModels);
+  const team = teamRulebookView(rulebookAllModels, createDisagreementHolds(opened.sqlite));
+  const rulebookState = rulebookViewWithinModel(KYC_DOMAIN, team);
   const runtime: Runtime = {
     env,
     ledger,
@@ -128,6 +130,7 @@ export function createRuntime(source: Readonly<Record<string, string | undefined
     rulebookRevision: () => rulebookState().revision,
     rulebookState,
     rulebookAllModels,
+    experts: { directory: createExpertDirectory(opened.sqlite), team, solver: createDisagreementSolver(), store: { tail: Promise.resolve() } },
     casedesk: createCaseDeskStore(),
     // LLM_CALLS=off subsumes the vision-only switch, so the vision state reports `disabled` rather than `no_api_key`.
     perception: createPerception({ source: env.LLM_CALLS === "off" ? { ...source, VISION_EXTRACTION: "off" } : source, ledger, claude }),

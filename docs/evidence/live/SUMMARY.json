@@ -1,0 +1,855 @@
+{
+  "label": "synthetic voice input (ElevenLabs TTS)",
+  "runs": [
+    {
+      "file": "/home/24b4530/modiji/docs/evidence/live/p3/run-a-typing-da9b8e52-07ac-4180-bee0-0bba455da897.json",
+      "sessionId": "da9b8e52-07ac-4180-bee0-0bba455da897",
+      "conversationIds": [
+        "conv_2601m4264hdxf8ev7pthnwxjxhfr"
+      ],
+      "questionsAuthorized": 4,
+      "questionsSpoken": 3,
+      "interruptions": 0,
+      "interruptionDetail": [],
+      "talkOver": [],
+      "authorizationLatency": [
+        2,
+        0,
+        1,
+        1
+      ],
+      "authorizeRtt": [
+        521,
+        267,
+        268,
+        272
+      ],
+      "validToControl": [
+        526,
+        270,
+        270,
+        274
+      ],
+      "firstAudio": [
+        716,
+        653,
+        790
+      ],
+      "firstAudioEvent": [
+        539,
+        547,
+        593
+      ],
+      "firstText": [
+        1567,
+        1718,
+        1743
+      ],
+      "controlNeverEvidence": true,
+      "lostAuthorizations": [
+        "q_1ecda21a7ee745"
+      ],
+      "refusedAuthorizations": [
+        "context_changed"
+      ],
+      "serverAuthorizeTimings": [
+        {
+          "requestToRow": 118,
+          "rowToIssue": 252,
+          "rtt": 521
+        },
+        {
+          "requestToRow": 115,
+          "rowToIssue": 5,
+          "rtt": 267
+        },
+        {
+          "requestToRow": 115,
+          "rowToIssue": 4,
+          "rtt": 268
+        },
+        {
+          "requestToRow": 114,
+          "rowToIssue": 10,
+          "rtt": 272
+        }
+      ],
+      "vadByGain": []
+    },
+    {
+      "file": "/home/24b4530/modiji/docs/evidence/live/p3/run-b-pause-94cf3b7b-e6dd-457c-a038-8908a4b6e885.json",
+      "sessionId": "94cf3b7b-e6dd-457c-a038-8908a4b6e885",
+      "conversationIds": [
+        "conv_7501m42697w2fjs9fr7j7spz6pfa"
+      ],
+      "questionsAuthorized": 4,
+      "questionsSpoken": 4,
+      "interruptions": 0,
+      "interruptionDetail": [],
+      "talkOver": [
+        "agent first",
+        "agent first",
+        "agent first"
+      ],
+      "authorizationLatency": [
+        0,
+        1,
+        0,
+        3
+      ],
+      "authorizeRtt": [
+        274,
+        267,
+        269,
+        271
+      ],
+      "validToControl": [
+        275,
+        269,
+        270,
+        276
+      ],
+      "firstAudio": [
+        729,
+        609,
+        736,
+        686
+      ],
+      "firstAudioEvent": [
+        546,
+        493,
+        553,
+        573
+      ],
+      "firstText": [
+        1770,
+        1556,
+        2798,
+        1872
+      ],
+      "controlNeverEvidence": true,
+      "lostAuthorizations": [],
+      "refusedAuthorizations": [
+        "question_not_queued"
+      ],
+      "serverAuthorizeTimings": [
+        {
+          "requestToRow": 126,
+          "rowToIssue": 3,
+          "rtt": 274
+        },
+        {
+          "requestToRow": 124,
+          "rowToIssue": 0,
+          "rtt": 267
+        },
+        {
+          "requestToRow": 124,
+          "rowToIssue": 0,
+          "rtt": 269
+        },
+        {
+          "requestToRow": 127,
+          "rowToIssue": 0,
+          "rtt": 271
+        }
+      ],
+      "vadByGain": []
+    },
+    {
+      "file": "/home/24b4530/modiji/docs/evidence/live/p3/run-c-scrolling-4dfb1645-5772-47fe-bf92-3e3babd6d2fc.json",
+      "sessionId": "4dfb1645-5772-47fe-bf92-3e3babd6d2fc",
+      "conversationIds": [
+        "conv_8101m426grvvfk199fvbrddddmq9"
+      ],
+      "questionsAuthorized": 5,
+      "questionsSpoken": 5,
+      "interruptions": 0,
+      "interruptionDetail": [],
+      "talkOver": [],
+      "authorizationLatency": [
+        0,
+        0,
+        15,
+        0,
+        0
+      ],
+      "authorizeRtt": [
+        268,
+        373,
+        270,
+        283,
+        271
+      ],
+      "validToControl": [
+        270,
+        373,
+        286,
+        284,
+        271
+      ],
+      "firstAudio": [
+        808,
+        647,
+        682,
+        768,
+        688
+      ],
+      "firstAudioEvent": [
+        612,
+        572,
+        588,
+        562,
+        574
+      ],
+      "firstText": [
+        1710,
+        2940,
+        1766,
+        1964,
+        1978
+      ],
+      "controlNeverEvidence": true,
+      "lostAuthorizations": [],
+      "refusedAuthorizations": [],
+      "serverAuthorizeTimings": [
+        {
+          "requestToRow": 126,
+          "rowToIssue": 0,
+          "rtt": 268
+        },
+        {
+          "requestToRow": 125,
+          "rowToIssue": 1,
+          "rtt": 373
+        },
+        {
+          "requestToRow": 127,
+          "rowToIssue": 1,
+          "rtt": 270
+        },
+        {
+          "requestToRow": 137,
+          "rowToIssue": 0,
+          "rtt": 283
+        },
+        {
+          "requestToRow": 127,
+          "rowToIssue": 1,
+          "rtt": 271
+        }
+      ],
+      "vadByGain": []
+    },
+    {
+      "file": "/home/24b4530/modiji/docs/evidence/live/p3/run-d-noisy-e047ef8b-3680-4cb3-b48c-735ae5920449.json",
+      "sessionId": "e047ef8b-3680-4cb3-b48c-735ae5920449",
+      "conversationIds": [
+        "conv_4201m426pjgsfvqtwhqqv4haq7p2"
+      ],
+      "questionsAuthorized": 4,
+      "questionsSpoken": 3,
+      "interruptions": 3,
+      "interruptionDetail": [
+        "authorization 2207 ms into a speech window",
+        "authorization 409 ms into a speech window",
+        "agent audio 3198 ms into a speech window"
+      ],
+      "talkOver": [
+        "expert first"
+      ],
+      "authorizationLatency": [
+        0,
+        1,
+        0,
+        0
+      ],
+      "authorizeRtt": [
+        362,
+        2639,
+        260,
+        259
+      ],
+      "validToControl": [
+        364,
+        2641,
+        260,
+        260
+      ],
+      "firstAudio": [
+        688,
+        724,
+        731
+      ],
+      "firstAudioEvent": [
+        522,
+        532,
+        598
+      ],
+      "firstText": [
+        1871,
+        1672,
+        1788
+      ],
+      "controlNeverEvidence": true,
+      "lostAuthorizations": [
+        "q_1d23e17f60a152"
+      ],
+      "refusedAuthorizations": [
+        "question_not_queued"
+      ],
+      "serverAuthorizeTimings": [
+        {
+          "requestToRow": 125,
+          "rowToIssue": 0,
+          "rtt": 362
+        },
+        {
+          "requestToRow": 1023,
+          "rowToIssue": 1471,
+          "rtt": 2639
+        },
+        {
+          "requestToRow": 120,
+          "rowToIssue": 1,
+          "rtt": 260
+        },
+        {
+          "requestToRow": 118,
+          "rowToIssue": 0,
+          "rtt": 259
+        }
+      ],
+      "vadByGain": [
+        {
+          "text": "Okay.",
+          "gain": 0.12,
+          "maxVad": 0.9825195074081421
+        },
+        {
+          "text": "Mm-hm.",
+          "gain": 0.2,
+          "maxVad": 0.9932264685630798
+        },
+        {
+          "text": "Right.",
+          "gain": 0.3,
+          "maxVad": 0.9953250885009766
+        },
+        {
+          "text": "Yeah.",
+          "gain": 0.4,
+          "maxVad": 0.9962738752365112
+        },
+        {
+          "text": "Hmm.",
+          "gain": 0.15,
+          "maxVad": 0.9413402080535889
+        },
+        {
+          "text": "Okay.",
+          "gain": 0.25,
+          "maxVad": 0.9946886301040649
+        },
+        {
+          "text": "Mm-hm.",
+          "gain": 0.12,
+          "maxVad": 0.9933305978775024
+        },
+        {
+          "text": "Right.",
+          "gain": 0.2,
+          "maxVad": 0.9826107025146484
+        },
+        {
+          "text": "Yeah.",
+          "gain": 0.3,
+          "maxVad": 0.9964497089385986
+        },
+        {
+          "text": "Hmm.",
+          "gain": 0.4,
+          "maxVad": 0.728136420249939
+        },
+        {
+          "text": "Okay.",
+          "gain": 0.15,
+          "maxVad": 0.5833792686462402
+        },
+        {
+          "text": "Mm-hm.",
+          "gain": 0.25,
+          "maxVad": 0.7794711589813232
+        },
+        {
+          "text": "Right.",
+          "gain": 0.12,
+          "maxVad": 0.00002294778823852539
+        },
+        {
+          "text": "Yeah.",
+          "gain": 0.2,
+          "maxVad": 0.3087701201438904
+        },
+        {
+          "text": "Hmm.",
+          "gain": 0.3,
+          "maxVad": 0.0004527866840362549
+        },
+        {
+          "text": "Okay.",
+          "gain": 0.4,
+          "maxVad": 0.9538408517837524
+        },
+        {
+          "text": "Mm-hm.",
+          "gain": 0.15,
+          "maxVad": 0.21970978379249573
+        },
+        {
+          "text": "Right.",
+          "gain": 0.25,
+          "maxVad": 0.7375450134277344
+        },
+        {
+          "text": "Yeah.",
+          "gain": 0.12,
+          "maxVad": 0.000008821487426757812
+        },
+        {
+          "text": "Hmm.",
+          "gain": 0.2,
+          "maxVad": 0.049806296825408936
+        },
+        {
+          "text": "Okay.",
+          "gain": 0.3,
+          "maxVad": 0.9339789152145386
+        },
+        {
+          "text": "Mm-hm.",
+          "gain": 0.4,
+          "maxVad": 0.9872165322303772
+        },
+        {
+          "text": "Right.",
+          "gain": 0.15,
+          "maxVad": 0.635086715221405
+        },
+        {
+          "text": "Yeah.",
+          "gain": 0.25,
+          "maxVad": 0.6059757471084595
+        }
+      ]
+    },
+    {
+      "file": "/home/24b4530/modiji/docs/evidence/live/p3/run-e-budget-e0ca4cd6-0101-4cc0-9014-33a0720adbeb.json",
+      "sessionId": "e0ca4cd6-0101-4cc0-9014-33a0720adbeb",
+      "conversationIds": [
+        "conv_9701m426yhjxef8bcmz7w20msady"
+      ],
+      "questionsAuthorized": 5,
+      "questionsSpoken": 5,
+      "interruptions": 0,
+      "interruptionDetail": [],
+      "talkOver": [],
+      "authorizationLatency": [
+        0,
+        0,
+        0,
+        1,
+        0
+      ],
+      "authorizeRtt": [
+        416,
+        274,
+        967,
+        264,
+        263
+      ],
+      "validToControl": [
+        419,
+        275,
+        967,
+        266,
+        263
+      ],
+      "firstAudio": [
+        848,
+        684,
+        729,
+        684,
+        697
+      ],
+      "firstAudioEvent": [
+        632,
+        526,
+        524,
+        535,
+        523
+      ],
+      "firstText": [
+        1606,
+        1964,
+        1816,
+        1810,
+        2802
+      ],
+      "controlNeverEvidence": true,
+      "lostAuthorizations": [],
+      "refusedAuthorizations": [],
+      "serverAuthorizeTimings": [
+        {
+          "requestToRow": 121,
+          "rowToIssue": 0,
+          "rtt": 416
+        },
+        {
+          "requestToRow": 122,
+          "rowToIssue": 0,
+          "rtt": 274
+        },
+        {
+          "requestToRow": 230,
+          "rowToIssue": 595,
+          "rtt": 967
+        },
+        {
+          "requestToRow": 121,
+          "rowToIssue": 0,
+          "rtt": 264
+        },
+        {
+          "requestToRow": 119,
+          "rowToIssue": 0,
+          "rtt": 263
+        }
+      ],
+      "vadByGain": []
+    },
+    {
+      "file": "/home/24b4530/modiji/docs/evidence/live/p4/p4-run-f77499f8-9078-4ea1-9beb-00fd5a335d93.json",
+      "sessionId": "f77499f8-9078-4ea1-9beb-00fd5a335d93",
+      "conversationIds": [
+        "conv_5301m4287g82ebzt3ajs7sx5efej"
+      ],
+      "questionsAuthorized": 5,
+      "questionsSpoken": 5,
+      "interruptions": 0,
+      "interruptionDetail": [],
+      "talkOver": [],
+      "authorizationLatency": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "authorizeRtt": [
+        271,
+        260,
+        260,
+        14854,
+        270
+      ],
+      "validToControl": [
+        273,
+        261,
+        261,
+        271
+      ],
+      "firstAudio": [
+        702,
+        653,
+        659,
+        1331
+      ],
+      "firstAudioEvent": [
+        551,
+        575,
+        570,
+        1133
+      ],
+      "firstText": [
+        1987,
+        1715,
+        1791,
+        2649
+      ],
+      "controlNeverEvidence": true,
+      "lostAuthorizations": [],
+      "refusedAuthorizations": [],
+      "serverAuthorizeTimings": [
+        {
+          "requestToRow": 120,
+          "rowToIssue": 7,
+          "rtt": 271
+        },
+        {
+          "requestToRow": 118,
+          "rowToIssue": 4,
+          "rtt": 260
+        },
+        {
+          "requestToRow": 118,
+          "rowToIssue": 3,
+          "rtt": 260
+        },
+        {
+          "requestToRow": 12343,
+          "rowToIssue": 2367,
+          "rtt": 14854
+        },
+        {
+          "requestToRow": 118,
+          "rowToIssue": 5,
+          "rtt": 270
+        }
+      ],
+      "vadByGain": []
+    },
+    {
+      "file": "/home/24b4530/modiji/docs/evidence/live/p4/attempt-1-conversation-failed/p4-run-f4f88cde-7b1c-4ac6-892b-9dbe5279f192.json",
+      "sessionId": "f4f88cde-7b1c-4ac6-892b-9dbe5279f192",
+      "conversationIds": [
+        "conv_8301m427821ffyxavfympkzmca2c"
+      ],
+      "questionsAuthorized": 5,
+      "questionsSpoken": 3,
+      "interruptions": 0,
+      "interruptionDetail": [],
+      "talkOver": [
+        "agent first"
+      ],
+      "authorizationLatency": [
+        0,
+        0,
+        2,
+        1,
+        0
+      ],
+      "authorizeRtt": [
+        4910,
+        965,
+        278,
+        265,
+        265
+      ],
+      "validToControl": [
+        4913,
+        966,
+        281,
+        266,
+        265
+      ],
+      "firstAudio": [
+        1162,
+        599
+      ],
+      "firstAudioEvent": [
+        174,
+        502
+      ],
+      "firstText": [
+        245,
+        2006
+      ],
+      "controlNeverEvidence": true,
+      "lostAuthorizations": [
+        "q_14467ca8af0067",
+        "q_13e57fd230d73f"
+      ],
+      "refusedAuthorizations": [],
+      "serverAuthorizeTimings": [
+        {
+          "requestToRow": 125,
+          "rowToIssue": 4647,
+          "rtt": 4910
+        },
+        {
+          "requestToRow": 122,
+          "rowToIssue": 701,
+          "rtt": 965
+        },
+        {
+          "requestToRow": 133,
+          "rowToIssue": 1,
+          "rtt": 278
+        },
+        {
+          "requestToRow": 126,
+          "rowToIssue": 1,
+          "rtt": 265
+        },
+        {
+          "requestToRow": 126,
+          "rowToIssue": 1,
+          "rtt": 265
+        }
+      ],
+      "vadByGain": []
+    },
+    {
+      "file": "/home/24b4530/modiji/docs/evidence/live/p4/attempt-2-stop-rule-in-second-asr-segment/p4-run-1368ae76-e5c3-482d-b817-e68ff3e5b8f1.json",
+      "sessionId": "1368ae76-e5c3-482d-b817-e68ff3e5b8f1",
+      "conversationIds": [
+        "conv_9301m427mr77fajbq8hn2cpx25v9"
+      ],
+      "questionsAuthorized": 5,
+      "questionsSpoken": 5,
+      "interruptions": 0,
+      "interruptionDetail": [],
+      "talkOver": [],
+      "authorizationLatency": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "authorizeRtt": [
+        841,
+        285,
+        272,
+        261,
+        257
+      ],
+      "validToControl": [
+        844,
+        286,
+        272,
+        261,
+        258
+      ],
+      "firstAudio": [
+        829,
+        671,
+        700,
+        671,
+        649
+      ],
+      "firstAudioEvent": [
+        680,
+        556,
+        565,
+        564,
+        554
+      ],
+      "firstText": [
+        1928,
+        1727,
+        2021,
+        1753,
+        1716
+      ],
+      "controlNeverEvidence": true,
+      "lostAuthorizations": [],
+      "refusedAuthorizations": [],
+      "serverAuthorizeTimings": [
+        {
+          "requestToRow": 119,
+          "rowToIssue": 579,
+          "rtt": 841
+        },
+        {
+          "requestToRow": 120,
+          "rowToIssue": 1,
+          "rtt": 285
+        },
+        {
+          "requestToRow": 118,
+          "rowToIssue": 1,
+          "rtt": 272
+        },
+        {
+          "requestToRow": 121,
+          "rowToIssue": 1,
+          "rtt": 261
+        },
+        {
+          "requestToRow": 118,
+          "rowToIssue": 0,
+          "rtt": 257
+        }
+      ],
+      "vadByGain": []
+    },
+    {
+      "file": "/home/24b4530/modiji/docs/evidence/live/p4/attempt-3-single-sentence-stop-rules/p4-run-cad2596d-53dd-427d-aa45-d73d91bd7844.json",
+      "sessionId": "cad2596d-53dd-427d-aa45-d73d91bd7844",
+      "conversationIds": [
+        "conv_0001m427xr96egjt9d9s1yk6yh2z"
+      ],
+      "questionsAuthorized": 4,
+      "questionsSpoken": 4,
+      "interruptions": 0,
+      "interruptionDetail": [],
+      "talkOver": [],
+      "authorizationLatency": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "authorizeRtt": [
+        260,
+        260,
+        270,
+        260
+      ],
+      "validToControl": [
+        265,
+        261,
+        270,
+        261
+      ],
+      "firstAudio": [
+        795,
+        605,
+        665,
+        753
+      ],
+      "firstAudioEvent": [
+        599,
+        526,
+        554,
+        525
+      ],
+      "firstText": [
+        1922,
+        2431,
+        1693,
+        1701
+      ],
+      "controlNeverEvidence": true,
+      "lostAuthorizations": [],
+      "refusedAuthorizations": [
+        "question_not_queued"
+      ],
+      "serverAuthorizeTimings": [
+        {
+          "requestToRow": 120,
+          "rowToIssue": 0,
+          "rtt": 260
+        },
+        {
+          "requestToRow": 121,
+          "rowToIssue": 1,
+          "rtt": 260
+        },
+        {
+          "requestToRow": 122,
+          "rowToIssue": 1,
+          "rtt": 270
+        },
+        {
+          "requestToRow": 120,
+          "rowToIssue": 0,
+          "rtt": 260
+        }
+      ],
+      "vadByGain": []
+    }
+  ]
+}

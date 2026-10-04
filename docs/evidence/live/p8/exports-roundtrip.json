@@ -1,0 +1,92 @@
+{
+  "target": "https://vashistha-production.up.railway.app",
+  "rulebookRevision": 23,
+  "sessions": [
+    {
+      "sessionId": "f77499f8-9078-4ea1-9beb-00fd5a335d93",
+      "workMapRules": 23,
+      "stopRules": [
+        {
+          "id": "rule_03e987e9b68836",
+          "effect": {
+            "type": "forbid",
+            "action": "approve"
+          },
+          "quote": "Never approve a customer from a high-risk country at desk level unless they've banked with us for two years with verified funds."
+        },
+        {
+          "id": "rule_0db2a2b89d2203",
+          "effect": {
+            "type": "require_approval",
+            "role": "compliance_officer"
+          },
+          "quote": "Never approve a politically exposed person without compliance sign-off."
+        },
+        {
+          "id": "rule_1e5796de1f0929",
+          "effect": {
+            "type": "forbid",
+            "action": "approve"
+          },
+          "quote": "Never approve a customer from a high-risk country at desk level unless they've banked with us for two years with verified funds."
+        }
+      ],
+      "workMapRevision": 23,
+      "procedureRevision": 23,
+      "rulebookRevision": 23,
+      "jsonByteRoundTrip": true,
+      "notInRulebook": [],
+      "differsFromRulebook": [],
+      "procedureRules": 23,
+      "procedureEqualsWorkMap": true,
+      "procedureEqualsRulebookProjection": true,
+      "quotesInProcedureText": true,
+      "rulebookRulesNotInWorkMap": []
+    },
+    {
+      "sessionId": "cad2596d-53dd-427d-aa45-d73d91bd7844",
+      "workMapRules": 23,
+      "stopRules": [
+        {
+          "id": "rule_03e987e9b68836",
+          "effect": {
+            "type": "forbid",
+            "action": "approve"
+          },
+          "quote": "Never approve a customer from a high-risk country at desk level unless they've banked with us for two years with verified funds."
+        },
+        {
+          "id": "rule_0db2a2b89d2203",
+          "effect": {
+            "type": "require_approval",
+            "role": "compliance_officer"
+          },
+          "quote": "Never approve a politically exposed person without compliance sign-off."
+        },
+        {
+          "id": "rule_1e5796de1f0929",
+          "effect": {
+            "type": "forbid",
+            "action": "approve"
+          },
+          "quote": "Never approve a customer from a high-risk country at desk level unless they've banked with us for two years with verified funds."
+        }
+      ],
+      "workMapRevision": 23,
+      "procedureRevision": 23,
+      "rulebookRevision": 23,
+      "jsonByteRoundTrip": true,
+      "notInRulebook": [],
+      "differsFromRulebook": [],
+      "procedureRules": 23,
+      "procedureEqualsWorkMap": true,
+      "procedureEqualsRulebookProjection": true,
+      "quotesInProcedureText": true,
+      "rulebookRulesNotInWorkMap": []
+    }
+  ],
+  "mcp": {
+    "compared": 55,
+    "mismatches": []
+  }
+}

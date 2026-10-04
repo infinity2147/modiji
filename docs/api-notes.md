@@ -449,3 +449,36 @@ Source: `docs/evidence/preflight-2026-10-03T21-51-17.182Z.json` (preflight GREEN
   - Sonnet 5.5: 1.5 s for a short completion.
   - Opus 5.5: 1.8 s for a short completion.
 - **Docker image:** builds and runs on Railway. The healthcheck passes, and DB, `/data` and Z3 are healthy behind the volume, so the `setpriv` drop to `node` works on the root-owned volume.
+
+## 16. Any language: Hindi → English (P10 Part B, plan §7.11) — verified 2026-10-04
+Sources: installed `@elevenlabs/elevenlabs-js` 2.70 serialization types (`LanguagePresetInput`, `ConversationConfigClientOverrideInput`, `AgentConfigOverrideInput`, `LanguageDetectionToolConfig`), `@elevenlabs/client` 1.x `BaseConnection.d.ts` + `utils/overrides.js`, the agent WebSocket AsyncAPI spec, `eleven-agents/customization/tools/system-tools/language-detection.md`.
+
+- **`language_presets` shape — VERIFIED (types):** `conversation_config.language_presets: { "<lang>": { overrides: ConversationConfigClientOverride, first_message_translation?: { source_hash, text } | null, soft_timeout_translation?: … } }`. `overrides.agent` is `{ first_message?, language?, max_conversation_duration_message?, prompt? }`.
+  - Our interviewer (agents/interviewer.json v3) sets `"hi": { "overrides": { "agent": { "first_message": "" } } }`. The preset only adds Hindi as a supported language. It must not give the agent anything to say on its own: no first message, no translated first message, no prompt replacement. With a custom LLM the wrapper would speak it, bypassing the gate. `checkAgentInvariants` enforces this for every preset on read-back.
+  - The tutor has no presets (it speaks English).
+- **`language_detection` system tool — VERIFIED (docs):** the *LLM* calls it (`{reason, language}`) to switch language. Our custom LLM never calls tools other than `skip_turn` / `set_off_record`, so in our setup it is inert. It stays enabled (`params.only_at_conversation_start` optional, default false).
+- **Session language = the client override — VERIFIED (types/spec), live behaviour PENDING:** the WebSocket spec documents `conversation_initiation_client_data.conversation_config_override.agent.language` as "Language of the agent — used for ASR and TTS". The browser SDK sends `overrides.agent.language` as exactly that field.
+  - The interviewer spec allows it: `platform_settings.overrides.conversation_config_override.agent.language: true`. `first_message` and `prompt.llm` stay false.
+  - A Hindi expert's session starts with `overrides: { agent: { language: "hi" } }` (`useInterviewLoop({ language })`).
+  - Whether Scribe realtime transcribes Hindi speech into Devanagari *without* the override (agent language "en") is UNVERIFIED.
+- **`user_transcript` carries no language — VERIFIED:** `UserTranscriptionEvent` is `{ user_transcript, event_id }` (types and AsyncAPI). Language is therefore decided by our code (`detectLanguage`, packages/core/src/language), using this precedence:
+  1. Devanagari letters make up ≥ 20 % of all letters → `hi`.
+  2. A conservative romanised-Hindi marker list → `hi`. Without a prior this needs ≥ 2 distinct markers covering ≥ 20 % of words; with a Hindi prior, 1 marker.
+  3. Otherwise → `en`.
+
+  The prior is the utterance POST's optional `language` (the browser session's ASR language), else the session expert's declared language. It never overrides the text.
+- **Translation storage:** a separate ledger kind, `utterance.translated` (source `engine`, parent the `utterance.transcript`). Its payload is `{utteranceId, language, translation, segments:[{original, english}], model}`.
+  - Every `original` is verified by code to be verbatim in the utterance, in order, and together covering every word.
+  - It is written before the answer is parsed, bounded by a 15 s deadline.
+  - No model, or a failed or unverifiable translation → no entry. The translation then stays "pending" and is never fabricated.
+  - `utterance.transcript` keeps only `language` (absent = English).
+- **TTS for synthetic expert speech — VERIFIED live:** `POST /v1/text-to-speech/{voice}?output_format=pcm_16000` with `{text, model_id:"eleven_multilingual_v2"}` returns raw 16-bit mono PCM. The interviewer's `conversation_config.asr.user_input_audio_format` (GET agent) is `pcm_16000`. 7.1 s of Hindi speech came back for the scripted answer (`docs/evidence/p10/hindi-tts.json`, `hindi-run-synthetic-voice.wav`; labelled synthetic voice input).
+- **Server chain with real Sonnet 5.5 — VERIFIED locally:** production build of this tree, `pnpm live:hindi --target http://127.0.0.1:<port> --transcript script` (`docs/evidence/p10/hindi-local-scripted.{json,txt}`). It verified:
+  - Hindi question with the English original alongside;
+  - utterance language `hi`;
+  - verified translation;
+  - parser quotes taken from the original Hindi;
+  - `forbid approve when jurisdictionRisk == high` with a Hindi `exactQuote` plus English `translation`;
+  - `/mcp` `check_action` citing both.
+
+  The ElevenLabs ASR leg (`--transcript asr`) and the agents v3 sync are pending the lead's go-ahead, since they share the production agents.

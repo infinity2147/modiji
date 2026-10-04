@@ -101,6 +101,9 @@ export function DebriefView({ sessionId }: { sessionId: string }) {
             <Button asChild variant="outline" size="sm">
               <Link href={`/sandbox?session=${encodeURIComponent(sessionId)}&set=training&mode=expert`}>CaseDesk</Link>
             </Button>
+            <Button asChild variant="outline" size="sm">
+              <Link href="/experts">Two experts</Link>
+            </Button>
             <Button asChild size="sm">
               <Link href={`/workmap/${encodeURIComponent(sessionId)}`}>Work Map</Link>
             </Button>
@@ -156,7 +159,7 @@ export function DebriefView({ sessionId }: { sessionId: string }) {
   );
 }
 
-function TeachBackPanel({ state, busy, generate, act }: { state: DebriefState; busy: boolean; generate: () => void; act: (b: ExpertActionRequest) => Promise<void> }) {
+export function TeachBackPanel({ state, busy, generate, act }: { state: DebriefState; busy: boolean; generate: () => void; act: (b: ExpertActionRequest) => Promise<void> }) {
   const tb = state.teachBack;
   const awaiting = tb !== null && tb.current && tb.confirmedEntryId === null;
   return (
@@ -192,7 +195,7 @@ function TeachBackPanel({ state, busy, generate, act }: { state: DebriefState; b
   );
 }
 
-function DecisionsCard({ state }: { state: DebriefState }) {
+export function DecisionsCard({ state }: { state: DebriefState }) {
   return (
     <Card aria-label="Observed decisions">
       <CardHeader>
@@ -214,7 +217,7 @@ function DecisionsCard({ state }: { state: DebriefState }) {
   );
 }
 
-function GapsCard({ state }: { state: DebriefState }) {
+export function GapsCard({ state }: { state: DebriefState }) {
   return (
     <Card aria-label="Gaps">
       <CardHeader>
@@ -240,7 +243,7 @@ function GapsCard({ state }: { state: DebriefState }) {
   );
 }
 
-function ProposalsCard({ state, act }: { state: DebriefState; act: (b: ExpertActionRequest) => Promise<void> }) {
+export function ProposalsCard({ state, act }: { state: DebriefState; act: (b: ExpertActionRequest) => Promise<void> }) {
   const [open, setOpen] = useState<string | null>(null);
   return (
     <Card aria-label="Proposed rules">

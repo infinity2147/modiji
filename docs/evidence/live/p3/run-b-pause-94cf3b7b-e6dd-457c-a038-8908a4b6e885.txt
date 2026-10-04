@@ -1,0 +1,42 @@
+P3 run B — long pause, then resumes mid-answer (LIVE, production)
+Label: expert speech is synthetic voice input (ElevenLabs TTS).
+Target: https://vashistha-production.up.railway.app
+Session: 94cf3b7b-e6dd-457c-a038-8908a4b6e885
+ElevenLabs conversation(s): conv_7501m42697w2fjs9fr7j7spz6pfa
+
+Questions authorized by the gate (ledger gate.authorized): 4
+Custom-LLM speak decisions: 4 · skip_turn decisions: 15
+Agent audio turns measured on the WebRTC track: 4
+Expert lines spoken: 10 · expert utterances ledgered: 10
+Keystrokes: 0 · wheel (scroll input) events: 0 · scroll events (incl. programmatic): 70
+Questions queued / dropped: 18 / 8
+
+INTERRUPTIONS (authorization or agent audio onset inside [speech, +1.2 s], [keystroke, +1.5 s], [wheel scroll, +1.5 s]): 0
+Talk-over (agent audio overlapping expert speech, either direction): 3
+  agent started first: expert 1791075103019..1791075114082 (answer-part-2), agent 1791075102900..1791075103941
+  agent started first: expert 1791075117638..1791075125816 (answer-part-2), agent 1791075116460..1791075118822
+  agent started first: expert 1791075131864..1791075135627 (resume), agent 1791075128900..1791075132700
+
+Authorization latency (decidedAt − becameValidAt, ledger): n=4 p50=0 ms p95=3 ms max=3 ms
+gate/authorize round trip (browser → production → browser): n=4 p50=269 ms p95=274 ms max=274 ms
+Conditions valid → control message sent: n=4 p50=270 ms p95=276 ms max=276 ms
+Control messages sent: 4 · not followed by agent speech: 0
+First audio (control message sent → agent audio on the track): n=4 p50=686 ms p95=736 ms max=736 ms
+Control message sent → first ElevenLabs audio event on the data channel: n=4 p50=546 ms p95=573 ms max=573 ms
+Control message sent → agent_response text: n=4 p50=1770 ms p95=2798 ms max=2798 ms
+
+Control turns never evidence: OK {"ok":true,"controlMessagesLedgered":4,"controlInTranscripts":0,"controlInAgentUtterances":0,"controlEchoedToBrowserAsUserTranscript":0,"controlPostedAsUtterance":0,"controlEntriesNotSystemControl":0,"ruleEvidenceCitingControl":0}
+
+Agent turns (as heard):
+  1791075091800..1791075096160 "What led you to send this to enhanced review, and what would have changed your mind?"
+  1791075102900..1791075103941 "If country ..."
+  1791075116460..1791075118822 "If the entity type were "individual" instead of company, with the largest beneficial owner share at 100%, what would you decide?"
+  1791075128900..1791075132700 "If the source of funds were "unverified" instead of verified, what would you decide?"
+
+Questions and scripted answers (synthetic voice input, ElevenLabs TTS):
+  [NS-2026-0101] Q: "What led you to send this to enhanced review, and what would have changed your mind?"
+      A (why_probe): "The largest owner holds thirty-five percent and isn't verified. Anything over twenty-five percent that isn't verified goes to enhanced review."
+  [NS-2026-0101] Q: "If country ..."
+      A (country_on_owner_case): "No, the country doesn't drive this one. It's the unverified owner holding thirty-five percent."
+  [NS-2026-0102] Q: "If the source of funds were "unverified" instead of verified, what would you decide?"
+      A (funds): "Verified source of funds is what makes the long relationship count. Without it I'd want enhanced review."

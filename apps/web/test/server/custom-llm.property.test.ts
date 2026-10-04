@@ -255,5 +255,5 @@ describe("custom-LLM wrapper invariant (property)", () => {
       }),
       RUNS,
     );
-  });
+  }, 60_000); // 400 runs take ~2 s alone, but more than the 5 s default when the whole suite runs in parallel
 });

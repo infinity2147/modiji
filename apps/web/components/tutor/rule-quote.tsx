@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Ban, Film, ImageOff, Quote, VolumeX } from "lucide-react";
+import { Ban, Film, ImageOff, Languages, Quote, VolumeX } from "lucide-react";
+import { EXPERT_LANGUAGE_LABELS, MACHINE_TRANSLATION_LABEL, type ExpertLanguage } from "@vashistha/core";
 import type { TutorRule } from "@/lib/contracts/tutor";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -61,16 +62,40 @@ export function ReplayDialog({ rule, open, onOpenChange }: { rule: TutorRule | u
 }
 
 export function ExpertWords({ rule }: { rule: TutorRule }) {
+  const { language, translation } = rule.quote;
   return (
     <figure className="grid gap-1 rounded-md border bg-muted/40 p-3">
       <blockquote className="flex gap-2 text-[13px] leading-relaxed">
         <Quote aria-hidden className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
-        <p className="font-medium text-foreground" data-testid="expert-quote">
+        <p className="font-medium text-foreground" data-testid="expert-quote" lang={language}>
           “{rule.quote.text}”
         </p>
       </blockquote>
+      {language !== undefined && language !== "en" && <QuoteTranslation language={language} translation={translation} />}
       <figcaption className="pl-5.5 text-[11px] text-muted-foreground">{rule.quote.attribution}</figcaption>
     </figure>
+  );
+}
+
+/**
+ * The English machine translation of a quote in another language (plan §7.11), always labelled as such:
+ * the expert's original words above it are the evidence. Shared by the tutor and the Work Map.
+ */
+export function QuoteTranslation({ language, translation }: { language: ExpertLanguage; translation: string | undefined }) {
+  return (
+    <div className="grid gap-0.5 pl-5.5 text-[12px] leading-relaxed" data-testid="quote-translation">
+      <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
+        <Languages aria-hidden className="size-3 shrink-0" />
+        Said in {EXPERT_LANGUAGE_LABELS[language]} · {MACHINE_TRANSLATION_LABEL}
+      </p>
+      {translation === undefined ? (
+        <p className="text-muted-foreground italic">No translation on record yet: read the original words above.</p>
+      ) : (
+        <p lang="en" className="text-foreground/90">
+          “{translation}”
+        </p>
+      )}
+    </div>
   );
 }
 

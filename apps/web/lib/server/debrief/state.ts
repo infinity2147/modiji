@@ -18,10 +18,12 @@ import {
   decisionCell,
   describePredicate,
   evaluatePredicate,
+  expertRulebook,
   explainObserved,
   featurePhrase,
   featuresReferenced,
   findFeature,
+  legacyExpertId,
   formatValue,
   observedDecisions,
   parseLedgerPayload,
@@ -71,9 +73,9 @@ export function kycCaseFeatures(caseId: string, edits: Readonly<Record<string, u
   return caseFeatures(found, riskRating === undefined ? {} : { riskRating });
 }
 
-/** The expert of a capture session; the same id the interview engine uses (interview/orchestrator.ts `sessionExpertId`). */
-export function expertIdOf(sessionId: string): string {
-  return `expert-${sessionId}`;
+/** The expert of a capture session (named at session start, else the session's own legacy id); the interview engine uses the same. */
+export function expertIdOf(loaded: LoadedSession): string {
+  return loaded.info.expert?.id ?? legacyExpertId(loaded.session.id);
 }
 
 export type FoundWitness = { witness: Witness; entry: LedgerEntry };
@@ -127,7 +129,8 @@ async function currentWitnesses(
   if (families.length === 0) return { witnesses: [], truncated: false };
   const { domain, schemaVersion } = model;
   // Keyed by the feature list too: two sessions can be at the same version with different concepts.
-  const key = canonicalJson({ revision: book.revision, families, schemaVersion, features: domain.features });
+  // Keyed by the rules themselves: per-expert books renumber their revisions, so two experts' books can share one.
+  const key = canonicalJson({ rules: book.rules.map((r) => [r.id, r.revision]), families, schemaVersion, features: domain.features });
   let pending = deps.store.witnesses.get(key);
   if (pending === undefined) {
     pending = deps.solver({ domain, rules: book.rules, families, schemaVersion });
@@ -149,7 +152,8 @@ export async function snapshot(deps: DebriefDeps, sessionId: string): Promise<Sn
   const entries = deps.ledger.evidence(loaded.session.id);
   const engine = engineState({ ledger: deps.ledger, store: deps.interview, config: deps.engineConfig }, loaded.session.id);
   const { domain, schemaVersion } = engine.schema.model;
-  const book = rulebookWithinModel(domain, deps.rulebook());
+  // The session expert's own rulebook (plan §7.10): rules they authored or confirmed, never another expert's.
+  const book = rulebookWithinModel(domain, expertRulebook(deps.rulebook(), expertIdOf(loaded)));
   // Observed decisions carry the session's concept values (backfilled, or Unknown) next to the case features.
   const decisions = observedDecisions({ domain, entries, caseFeatures: kycCaseFeatures }).map((d) => ({
     ...d,
@@ -163,13 +167,17 @@ export async function snapshot(deps: DebriefDeps, sessionId: string): Promise<Sn
   const boundaryConfirmed = new Map<string, LedgerEntry>();
   const teachBacks: LedgerEntry[] = [];
   const teachBackConfirmations = new Map<string, string>();
+  // Disagreements between two experts (plan §7.10) are recorded in their sessions but belong to the
+  // reconciliation flow (lib/server/disagreements), not to this expert's debrief.
+  const disagreements = new Set<string>();
   for (const e of entries) {
     if (e.kind === "witness.found") {
       const witness = parseLedgerPayload(e, "witness.found");
-      if (!found.has(witness.id)) found.set(witness.id, { witness, entry: e });
+      if (witness.kind === "disagreement") disagreements.add(witness.id);
+      else if (!found.has(witness.id)) found.set(witness.id, { witness, entry: e });
     } else if (e.kind === "witness.resolved") {
       const resolution = parseLedgerPayload(e, "witness.resolved");
-      resolutions.set(resolution.witnessId, { resolution, entry: e });
+      if (!disagreements.has(resolution.witnessId)) resolutions.set(resolution.witnessId, { resolution, entry: e });
     } else if (e.kind === "expert.statement") {
       const s = parseLedgerPayload(e, "expert.statement");
       if (s.intent === "confirm_boundary" && s.target.witnessId !== undefined) boundaryConfirmed.set(s.target.witnessId, e);
@@ -185,7 +193,7 @@ export async function snapshot(deps: DebriefDeps, sessionId: string): Promise<Sn
   const teachBackQuestions = new Map<string, QuestionRecord>();
   for (const record of engine.questions.values()) {
     const { kind, target } = record.question;
-    if (kind === "witness" && target.witnessId !== undefined) questions.set(target.witnessId, record);
+    if (kind === "witness" && target.witnessId !== undefined && !disagreements.has(target.witnessId)) questions.set(target.witnessId, record);
     if (kind === "teach_back") teachBackQuestions.set(record.question.id, record);
   }
 

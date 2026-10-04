@@ -6,7 +6,7 @@
  */
 import "server-only";
 import { z } from "zod";
-import { IdSchema, type ActionId, type ConfirmedRule, type FeatureId, type LedgerEntry } from "@vashistha/core";
+import { ExpertSchema, IdSchema, legacyExpertId, type ActionId, type ConfirmedRule, type Expert, type FeatureId, type LedgerEntry } from "@vashistha/core";
 import type { Ledger, Session } from "@vashistha/core/server";
 import { CaseSetSchema, KYC_DOMAIN, type CaseSet } from "@vashistha/core/domains/kyc";
 import { ReviewEditsSchema, SessionModeSchema, type SessionMode } from "../../contracts/casedesk";
@@ -33,9 +33,22 @@ export const SessionStartedPayloadSchema = z.strictObject({
   caseSet: CaseSetSchema,
   domainId: z.literal(KYC_DOMAIN.id),
   schemaVersion: z.literal(CASEDESK_SCHEMA_VERSION),
+  expert: ExpertSchema.optional(),
 });
 
-export type CaseDeskSessionInfo = { mode: SessionMode; caseSet: CaseSet; startedEntryId: string };
+/**
+ * Who the session's expert is. Expert sessions name theirs at start (plan §7.10); an expert session
+ * from before that, or one started without a name, is its own expert (`legacyExpertId`), speaking
+ * English. Novice sessions have no expert.
+ */
+export type SessionExpert = Expert & { named: boolean };
+
+export function sessionExpert(sessionId: string, mode: SessionMode, expert: Expert | undefined): SessionExpert | undefined {
+  if (mode !== "expert") return undefined;
+  return expert === undefined ? { id: legacyExpertId(sessionId), name: "Expert", language: "en", named: false } : { ...expert, named: true };
+}
+
+export type CaseDeskSessionInfo = { mode: SessionMode; caseSet: CaseSet; startedEntryId: string; expert: SessionExpert | undefined };
 
 /** Per-process CaseDesk state; one instance lives on the runtime. */
 export type CaseDeskStore = {
@@ -84,7 +97,7 @@ export function sessionInfo(ledger: Ledger, store: CaseDeskStore, sessionId: str
   const [first] = ledger.list(sessionId, { limit: 1 });
   if (first?.source !== "engine" || first.kind !== "session.started") return undefined;
   const payload = SessionStartedPayloadSchema.parse(first.payload);
-  const info: CaseDeskSessionInfo = { mode: payload.mode, caseSet: payload.caseSet, startedEntryId: first.id };
+  const info: CaseDeskSessionInfo = { mode: payload.mode, caseSet: payload.caseSet, startedEntryId: first.id, expert: sessionExpert(sessionId, payload.mode, payload.expert) };
   store.sessions.set(sessionId, info);
   return info;
 }

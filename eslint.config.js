@@ -3,7 +3,7 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["**/node_modules/**", "**/.next/**", "**/.next-*/**", "**/dist/**", "**/coverage/**", "**/drizzle/**", "**/next-env.d.ts", "**/public/tesseract/**"] },
+  { ignores: ["**/node_modules/**", "**/test-results/**", "**/playwright-report/**", "**/.next/**", "**/.next-*/**", "**/dist/**", "**/coverage/**", "**/drizzle/**", "**/next-env.d.ts", "**/public/tesseract/**"] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {

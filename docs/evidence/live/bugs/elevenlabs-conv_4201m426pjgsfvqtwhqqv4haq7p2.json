@@ -1,0 +1,533 @@
+{
+  "label": "synthetic voice input (ElevenLabs TTS) for all user audio turns",
+  "conversation_id": "conv_4201m426pjgsfvqtwhqqv4haq7p2",
+  "status": "done",
+  "metadata_error": null,
+  "termination_reason": "Client disconnected: 1000",
+  "transcript": [
+    {
+      "role": "user",
+      "time_in_call_secs": 1,
+      "source_medium": "audio",
+      "interrupted": false,
+      "message": "Okay.",
+      "tool_calls": []
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 2,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": [
+        "skip_turn"
+      ]
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 2,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": []
+    },
+    {
+      "role": "user",
+      "time_in_call_secs": 3,
+      "source_medium": "audio",
+      "interrupted": false,
+      "message": "Mm-hmm.",
+      "tool_calls": []
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 4,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": [
+        "skip_turn"
+      ]
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 4,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": []
+    },
+    {
+      "role": "user",
+      "time_in_call_secs": 5,
+      "source_medium": "audio",
+      "interrupted": false,
+      "message": "Right.",
+      "tool_calls": []
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 6,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": [
+        "skip_turn"
+      ]
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 6,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": []
+    },
+    {
+      "role": "user",
+      "time_in_call_secs": 9,
+      "source_medium": "audio",
+      "interrupted": false,
+      "message": "Yeah.",
+      "tool_calls": []
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 9,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": [
+        "skip_turn"
+      ]
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 9,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": []
+    },
+    {
+      "role": "user",
+      "time_in_call_secs": 10,
+      "source_medium": "audio",
+      "interrupted": false,
+      "message": "Hmm.",
+      "tool_calls": []
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 11,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": [
+        "skip_turn"
+      ]
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 12,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": []
+    },
+    {
+      "role": "user",
+      "time_in_call_secs": 12,
+      "source_medium": "audio",
+      "interrupted": false,
+      "message": "Okay.",
+      "tool_calls": []
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 13,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": [
+        "skip_turn"
+      ]
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 13,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": []
+    },
+    {
+      "role": "user",
+      "time_in_call_secs": 14,
+      "source_medium": "audio",
+      "interrupted": false,
+      "message": "Mm-hmm.",
+      "tool_calls": []
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 15,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": [
+        "skip_turn"
+      ]
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 15,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": []
+    },
+    {
+      "role": "user",
+      "time_in_call_secs": 16,
+      "source_medium": "audio",
+      "interrupted": false,
+      "message": "Right.",
+      "tool_calls": []
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 17,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": [
+        "skip_turn"
+      ]
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 17,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": []
+    },
+    {
+      "role": "user",
+      "time_in_call_secs": 19,
+      "source_medium": "text",
+      "interrupted": false,
+      "message": "⟦ctl:<redacted>⟧",
+      "tool_calls": []
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 19,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "What led you to send this to enhanced review? And what would have changed your mind?",
+      "tool_calls": []
+    },
+    {
+      "role": "user",
+      "time_in_call_secs": 26,
+      "source_medium": "audio",
+      "interrupted": false,
+      "message": "The largest owner holds 35% and isn't verified.",
+      "tool_calls": []
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 30,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": [
+        "skip_turn"
+      ]
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 30,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": []
+    },
+    {
+      "role": "user",
+      "time_in_call_secs": 30,
+      "source_medium": "audio",
+      "interrupted": false,
+      "message": "Anything over 25% that isn't verified goes to enhanced review.",
+      "tool_calls": []
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 35,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": [
+        "skip_turn"
+      ]
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 35,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": []
+    },
+    {
+      "role": "user",
+      "time_in_call_secs": 39,
+      "source_medium": "text",
+      "interrupted": false,
+      "message": "⟦ctl:<redacted>⟧",
+      "tool_calls": []
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 39,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "If the country risk were \"low\" instead of medium, what would you decide?",
+      "tool_calls": []
+    },
+    {
+      "role": "user",
+      "time_in_call_secs": 47,
+      "source_medium": "audio",
+      "interrupted": false,
+      "message": "No, the country doesn't drive this one.",
+      "tool_calls": []
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 49,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": [
+        "skip_turn"
+      ]
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 49,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": []
+    },
+    {
+      "role": "user",
+      "time_in_call_secs": 50,
+      "source_medium": "audio",
+      "interrupted": false,
+      "message": "It's the unverified owner holding 35%.",
+      "tool_calls": []
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 53,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": [
+        "skip_turn"
+      ]
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 53,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": []
+    },
+    {
+      "role": "user",
+      "time_in_call_secs": 53,
+      "source_medium": "audio",
+      "interrupted": false,
+      "message": "Yeah.",
+      "tool_calls": []
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 54,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": [
+        "skip_turn"
+      ]
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 54,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": []
+    },
+    {
+      "role": "user",
+      "time_in_call_secs": 62,
+      "source_medium": "text",
+      "interrupted": false,
+      "message": "⟦ctl:<redacted>⟧",
+      "tool_calls": []
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 62,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "What led you to approve onboarding here, and what would have changed your mind?",
+      "tool_calls": []
+    },
+    {
+      "role": "user",
+      "time_in_call_secs": 67,
+      "source_medium": "audio",
+      "interrupted": false,
+      "message": "Okay.",
+      "tool_calls": []
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 68,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": [
+        "skip_turn"
+      ]
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 68,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": []
+    },
+    {
+      "role": "user",
+      "time_in_call_secs": 70,
+      "source_medium": "text",
+      "interrupted": false,
+      "message": "⟦ctl:<redacted>⟧",
+      "tool_calls": []
+    },
+    {
+      "role": "user",
+      "time_in_call_secs": 69,
+      "source_medium": "audio",
+      "interrupted": false,
+      "message": "They've banked with us for three years, and their source of funds is verified, so the high-risk country on its own doesn't send them to enhanced review.",
+      "tool_calls": []
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 77,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": [
+        "skip_turn"
+      ]
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 77,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": []
+    },
+    {
+      "role": "user",
+      "time_in_call_secs": 94,
+      "source_medium": "audio",
+      "interrupted": false,
+      "message": "Right.",
+      "tool_calls": []
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 94,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": [
+        "skip_turn"
+      ]
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 94,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": []
+    },
+    {
+      "role": "user",
+      "time_in_call_secs": 100,
+      "source_medium": "audio",
+      "interrupted": false,
+      "message": "Okay.",
+      "tool_calls": []
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 101,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": [
+        "skip_turn"
+      ]
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 101,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": []
+    },
+    {
+      "role": "user",
+      "time_in_call_secs": 102,
+      "source_medium": "audio",
+      "interrupted": false,
+      "message": "Mm-hmm.",
+      "tool_calls": []
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 103,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": [
+        "skip_turn"
+      ]
+    },
+    {
+      "role": "agent",
+      "time_in_call_secs": 103,
+      "source_medium": null,
+      "interrupted": false,
+      "message": "",
+      "tool_calls": []
+    }
+  ]
+}

@@ -1,0 +1,113 @@
+Product bugs and design gaps found by the LIVE runs (production, commit 1da6e3c). No product code was changed.
+Expert speech in every run: synthetic voice input (ElevenLabs TTS). Evidence paths are relative to docs/evidence/live/.
+
+#1  An authorized question is silently lost when its control message lands in an unfinalized user turn.  [HIGH]
+  What happened (run A, da9b8e52):
+  - The gate authorized q_1ecda21a7ee745, the why-probe and best question at 2.95 bits, and sent the control message.
+  - The custom LLM answered skip_turn with reason not_control_message.
+  - ElevenLabs had kept the expert's audio turn open: the speech ended 7.45 s before the control message, but its
+    user_transcript arrived 0.91 s AFTER it.
+  - The browser sent user_activity every ~1 s while the expert typed, which apparently held the turn open.
+  - The same LLM request therefore ended with the user's audio transcript after the control message.
+  - bugs/elevenlabs-conv_2601m4264hdxf8ev7pthnwxjxhfr.json shows the "⟦ctl⟧" text turn and the audio turn together in one user turn.
+  Consequences:
+  - the question counts as asked;
+  - it spent live budget;
+  - it is never re-asked.
+  Second case (run D, q_1d23e17f60a152): a control message was sent 409 ms into the expert's answer and was swallowed the same way.
+  Proposed fix:
+  (a) Gate: add a condition that no user turn is pending. After VAD speech, wait for the final user_transcript (or a 2 s cap) before authorizing.
+  (b) Don't send sendUserActivity() after the expert has stopped speaking, or within a few seconds of a control message.
+  (c) Server: when a session's nonce expires unspoken, re-queue the question and refund its budget slot.
+
+#2  The client gate's hold lapses during a slow gate/authorize, so two control messages go out back-to-back.  [HIGH]
+  Evidence, P4 attempt 1 (f4f88cde):
+  - authorize RTT was 4910 ms, and the next authorization was decided 23 ms after the first returned;
+  - two control messages went out 989 ms apart;
+  - ElevenLabs interrupted its own first response;
+  - agent.utterance "..." was tagged to q_05c6f5a996cf0b, and the real question was recorded without a questionId.
+  The same happened in attempt 4 (f77499f8): control messages 273 ms apart after a 14.85 s RTT.
+  Root cause (packages/core/src/gate/controller.ts): authorize() sets the hold until now + authorizationTtlMs at decision
+  time, and nothing guards an in-flight issue().
+  Proposed fix:
+  - hold the floor while issue() is in flight;
+  - on settle, hold until the server's expiresAt or the end of the agent's turn;
+  - server: refuse a new authorization while the session has an unspent, unexpired nonce.
+
+#3  Only the first ASR segment after a question is treated as the answer.  [HIGH: stop-rules lost]
+  Evidence, P4 attempt 2 (1368ae76): ElevenLabs split each answer at the sentence boundary. These two second segments
+  were recorded untagged (no parent, no answer.parsed), so they never reached the parser:
+  - utterance 7b6bca2e: "…but never approve a customer from a high-risk country at desk level unless…";
+  - utterance 71d477d7: "Never approve a politically exposed person without compliance sign-off."
+  Root cause: lib/client/voice/bridge.ts clears `asked` after the first user message.
+  Proposed fix:
+  - tag every user segment with the questionId until the next agent turn or authorization;
+  - server: parse the concatenated answer, or re-parse when a segment arrives.
+
+#4  Refused authorizations (409) consume live budget.  [MEDIUM]
+  Evidence:
+  - refusals: run A (context_changed), runs B and D (question_not_queued), P4 attempt 3 (question_not_queued);
+  - every run made exactly 5 authorize calls;
+  - in attempt 3 the HUD shows "waiting: Budget 475.0 s" with 4 asked and a 5.62-bit why-probe queued
+    (p4/attempt-3-*/p4-run-*-final.png).
+  Root cause: reduceGate("authorized") appends to `asked` at decision time and onError never rolls it back.
+  Proposed fix: on 409, feed a "refused" input that removes the entry and clears the hold, or count the budget from the server's asked list.
+
+#5  Explicitly stated rules are dropped when the answer's parse confidence is below 0.5.  [MEDIUM]
+  Evidence, P4 attempt 4 (f77499f8):
+  - answer.parsed for utterance 7b637c63 contains 2 forbid(approve) guardrails with the exact quote;
+  - its confidence was 0.4, so the answer was low_confidence;
+  - orchestrator.ts returns early on that status, before promoteStatements;
+  - no rule.confirmed.
+  The same sentence was promoted in attempt 3, where it answered a why-probe.
+  Proposed fix: promote explicit statements independently of whether the answer applied to the asked question (they carry
+  their own quote and frames), or have the parser give a per-rule confidence.
+
+#6  The server event loop stalls for seconds.  [HIGH: caused a failed conversation]
+  Evidence:
+  - in-handler gaps between the gate.authorized row timestamp and nonce issuance: 252, 579, 595, 701, 1471, 2367, 4647 ms;
+  - request → row up to 12,343 ms (attempt 4);
+  - one utterance POST took 24.3 s;
+  - a cold Work Map export (20.2 s) blocked separate /api/health requests for 10.5 s and 5.3 s (bugs/event-loop-stall-probe.txt, probe 2).
+  Consequence, attempt 1:
+  - ElevenLabs' custom-LLM requests reached us ~8 s after the control messages;
+  - the 4 s nonces had expired (expired, then unknown_nonce once pruned);
+  - ElevenLabs ended the conversation with "custom_llm_error: LLM Cascade Error: TimeoutError"
+    (bugs/elevenlabs-conv_8301m427821ffyxavfympkzmca2c.json).
+  Probable cause (not verified; no server logs from here): synchronous engine/Z3 work on the main thread.
+  - Requeue builds dozens of "witness" questions.
+  - The Work Map runs coverage.
+  - Both get heavier as the shared rulebook grows (#9).
+  Proposed fix:
+  - run the engine fold, Z3 and the Work Map in a worker_thread;
+  - keep /api/llm and gate/authorize on an unblocked loop;
+  - add event-loop delay (perf_hooks.monitorEventLoopDelay) to /api/health/deep;
+  - measure the nonce TTL from control-message send.
+  Correction: an early probe suggested MCP check_action took 5.6 s server-side. That delay was client-side (raw JSON-RPC: 0.49 s).
+
+#7  Design gap, VAD blind spots (run D, three interruptions).
+  - Murmurs that ElevenLabs VAD scores below 0.4 are invisible to the gate: 6 of 24 short utterances (max VAD 0.000–0.309).
+  - VAD trails speech onset by 300–600 ms.
+  Proposed fix:
+  - add a local, zero-latency input-level signal to userSpeaking (SDK getInputVolume() or an AnalyserNode on the mic);
+  - and/or wait ~500 ms after deciding and re-check before sending the control message.
+
+#8  Design gap, a 1.2 s silence threshold during mid-answer pauses (run B, three talk-overs).
+  - The agent began new questions during 3.5 s and 6 s pauses, and the expert resumed over them.
+  - ElevenLabs barge-in cut the agent off.
+  - The bridge then tagged the resumed answer to the new question (wrong attribution).
+  Proposed fix: once an answer has started, require a longer silence (≈2.5–3 s) or the final user_transcript.
+
+#9  The shared rulebook accumulates duplicates.
+  - Production is at revision 23: 23 rules, 9 distinct, 14 copies of "> 25 % unverified → enhanced review".
+  - Each expert session re-promotes the same statement.
+  Proposed fix: dedupe on (family, predicate, effect) and merge evidence, or use per-expert rulebooks
+  (in progress in the working tree, per git status).
+
+#10 Vision proposes concepts from screen chrome.
+  - "screeningSourceOfFundsDocuments" and "caseStructure" came from section headings on the synthetic screen (attempt 1).
+  - This is the over-proposal already known from PROGRESS P2.
+
+#11 Observation: the gate's keystroke sensor only listens in the case area.
+  - Keystrokes with focus on <body> are not sensed.
+  - Found by the first run-A attempt (superseded, session cfa8cfb6), where the test typed with nothing focused.

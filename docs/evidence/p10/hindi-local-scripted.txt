@@ -1,0 +1,27 @@
+P10 Hindi→English run — SYNTHETIC VOICE INPUT — the expert's speech is ElevenLabs text-to-speech, not a person
+target http://127.0.0.1:3917 · session a32f5c34-815c-45f6-824b-45f4a05b2d77 · 2026-10-04T00:47:44.690Z → 2026-10-04T00:48:01.364Z
+transcript source: scripted text (no ASR)
+
+2026-10-04T00:47:44.855Z  session: a32f5c34-815c-45f6-824b-45f4a05b2d77 expert {"id":"priya-sharma-synthetic","name":"Priya Sharma (synthetic)","language":"hi"}
+2026-10-04T00:47:44.998Z  decision: NS-2026-0102 → enhancedReview: committed
+2026-10-04T00:47:45.186Z  frame: redacted frame 3ea90e2c-da9a-4f43-81fc-a192007087bf (docs/evidence/p1/case-1.png)
+2026-10-04T00:47:49.242Z  question: why_probe: आपने इस केस को एन्हांस्ड रिव्यू में क्यों भेजा, और किस बात से आपका फैसला बदल सकता था? (English: What pushed you to send this one to enhanced review, and what would have changed your mind?)
+2026-10-04T00:47:49.264Z  transcript: scripted (no ASR): अगर देश हाई-रिस्क लिस्ट पर है, तो मैं डेस्क लेवल पर अप्रूव नहीं करती। ऐसे केस में पहले एन्हांस्ड रिव्यू होता है।
+2026-10-04T00:48:01.300Z  utterance: 615bdf03-217c-47c0-9587-b7e09b0a4628: language hi, translation {"status":"translated","text":"If the country is on the high-risk list, then I do not approve at the desk level. In such a case, an enhanced review happens first."}
+
+PASS  utterance recorded as Hindi
+      hi
+PASS  English translation stored
+      {"status":"translated","text":"If the country is on the high-risk list, then I do not approve at the desk level. In such a case, an enhanced review happens first."}
+PASS  parser quoted the original Hindi words
+      ["अगर देश हाई-रिस्क लिस्ट पर है, तो मैं डेस्क लेवल पर अप्रूव नहीं करती।","ऐसे केस में पहले एन्हांस्ड रिव्यू होता है।"]
+PASS  utterance.translated entry (source engine, parent the utterance)
+      ddaadf81-ac24-4de3-92cf-a78c177c9ad7
+PASS  confirmed rule: forbid approve when jurisdictionRisk == high
+      {"==":[{"var":"jurisdictionRisk"},"high"]}
+PASS  rule evidence: Hindi exactQuote + English translation
+      {"exactQuote":"अगर देश हाई-रिस्क लिस्ट पर है, तो मैं डेस्क लेवल पर अप्रूव नहीं करती।","translation":"If the country is on the high-risk list, then I do not approve at the desk level."}
+PASS  MCP check_action cites the Hindi quote with its English translation
+      Blocked by rule rule_0914e71701fc8e: "अगर देश हाई-रिस्क लिस्ट पर है, तो मैं डेस्क लेवल पर अप्रूव नहीं करती।" [in Hindi (हिन्दी); English translation (machine, not authoritative): "If the country is on the high-risk list, then I do not approve at the desk level."] (expert priya-sharma-synthetic, 0:00.0–0:05.0). Do not take "approve" (Approve onboarding) on this case.
+FAIL  tutor shows the rule with its English translation
+      {"text":"अगर देश हाई-रिस्क लिस्ट पर है, तो मैं डेस्क लेवल पर अप्रूव नहीं करती।","attribution":"The expert, by voice","replay":{"frameUrl":"/api/media/a32f5c34-815c-45f6-824b-45f4a05b2d77/frames/a4f61fa5-41a8-477e-9c25-6db0b3089e99.png","frameNote":null,"screen":[],"audioNote":"Audio playback unavailable: conversation audio is not stored, only the transcript quote."}}

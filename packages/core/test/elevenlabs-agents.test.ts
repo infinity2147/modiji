@@ -79,6 +79,17 @@ describe("agent specs in /agents", () => {
     expect(diffDesiredVsActual(render(spec), actual)).toEqual([]);
   });
 
+  it("interviewer: a Hindi language preset that says nothing, a client language override, language detection; tutor stays English", () => {
+    const interviewer = render(specs.interviewer).conversation_config as Record<string, unknown>;
+    expect(interviewer.language_presets).toEqual({ hi: { overrides: { agent: { first_message: "" } } } });
+    expect(JSON.stringify(interviewer)).toContain('"system_tool_type":"language_detection"');
+    const overrides = render(specs.interviewer).platform_settings.overrides as { conversation_config_override: { agent: Record<string, unknown> } };
+    expect(overrides.conversation_config_override.agent).toMatchObject({ first_message: false, language: true, prompt: { llm: false } });
+    const tutor = render(specs.tutor);
+    expect(tutor.conversation_config.language_presets).toBeUndefined();
+    expect((tutor.conversation_config.agent as { language: string }).language).toBe("en");
+  });
+
   it("does not mutate the spec when rendering", () => {
     const before = structuredClone(specs.interviewer);
     render(specs.interviewer);
@@ -95,7 +106,7 @@ describe("AgentSpecSchema", () => {
   });
 
   it("rejects a model id out of step with name and version", () => {
-    const r = AgentSpecSchema.safeParse({ ...raw(), version: 3 });
+    const r = AgentSpecSchema.safeParse({ ...raw(), version: specs.interviewer.version + 1 });
     expect(r.success).toBe(false);
     expect(r.error?.issues.map((i) => i.path.join("."))).toContain(
       "body.conversation_config.agent.prompt.custom_llm.model_id",
@@ -220,6 +231,10 @@ describe("checkAgentInvariants", () => {
     [`${o}.conversation_config_override.agent.first_message`, true],
     [`${o}.conversation_config_override.agent.prompt.llm`, true],
     ["platform_settings.auth.enable_auth", false],
+    ["conversation_config.language_presets.hi.overrides.agent.first_message", "नमस्ते!"],
+    ["conversation_config.language_presets.hi.overrides.agent.prompt", { prompt: "Say hello in Hindi." }],
+    ["conversation_config.language_presets.hi.first_message_translation", { source_hash: "x", text: "नमस्ते!" }],
+    ["conversation_config.language_presets", "hi"],
   ];
 
   it.each(violations)("flags %s = %j as exactly one problem", (path, value) => {

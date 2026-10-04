@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { AlertCircle, ArrowRight, Loader2 } from "lucide-react";
+import { EXPERT_LANGUAGES, EXPERT_LANGUAGE_LABELS, ExpertLanguageSchema, type ExpertLanguage } from "@vashistha/core";
 import type { CaseSet } from "@vashistha/core/domains/kyc";
 import { createSession, describeError } from "@/lib/client/api";
 import { sessionHref } from "@/lib/client/session-url";
@@ -80,6 +81,8 @@ export function Launcher({ notice }: { notice?: string | undefined }) {
   const router = useRouter();
   const [mode, setMode] = useState<SessionMode>("expert");
   const [caseSet, setCaseSet] = useState<Exclude<CaseSet, "bench">>("training");
+  const [expertName, setExpertName] = useState("");
+  const [expertLanguage, setExpertLanguage] = useState<ExpertLanguage>("en");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string>();
 
@@ -87,7 +90,9 @@ export function Launcher({ notice }: { notice?: string | undefined }) {
     event.preventDefault();
     setPending(true);
     setError(undefined);
-    createSession((input, init) => fetch(input, init), { mode, caseSet }).then(
+    const name = expertName.trim();
+    const expert = mode === "expert" && name !== "" ? { expert: { name, language: expertLanguage } } : {};
+    createSession((input, init) => fetch(input, init), { mode, caseSet, ...expert }).then(
       (session) => router.push(sessionHref({ sessionId: session.sessionId, caseSet: session.caseSet, mode: session.mode })),
       (failure: unknown) => {
         setPending(false);
@@ -117,6 +122,49 @@ export function Launcher({ notice }: { notice?: string | undefined }) {
               onChange={setCaseSet}
               label={(v) => SET_LABELS[v]}
             />
+            {mode === "expert" && (
+              <fieldset className="grid gap-3 sm:col-span-2 sm:grid-cols-2">
+                <legend className="mb-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">Expert</legend>
+                <Label htmlFor="expert-name" className="grid gap-1.5 font-normal">
+                  <span className="text-sm font-medium">Your name</span>
+                  <input
+                    id="expert-name"
+                    name="expertName"
+                    value={expertName}
+                    maxLength={60}
+                    autoComplete="name"
+                    placeholder="e.g. Asha Rao"
+                    onChange={(e) => setExpertName(e.target.value)}
+                    className="h-9 rounded-md border bg-background px-3 text-sm shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+                  />
+                  <span className="text-xs leading-snug text-muted-foreground">
+                    Sessions under one name share one rulebook. Leave empty for a one-off session.
+                  </span>
+                </Label>
+                <Label htmlFor="expert-language" className="grid gap-1.5 font-normal">
+                  <span className="text-sm font-medium">You will speak</span>
+                  <select
+                    id="expert-language"
+                    name="expertLanguage"
+                    value={expertLanguage}
+                    onChange={(e) => {
+                      const next = ExpertLanguageSchema.safeParse(e.target.value);
+                      if (next.success) setExpertLanguage(next.data);
+                    }}
+                    className="h-9 rounded-md border bg-background px-3 text-sm shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+                  >
+                    {EXPERT_LANGUAGES.map((l) => (
+                      <option key={l} value={l}>
+                        {EXPERT_LANGUAGE_LABELS[l]}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="text-xs leading-snug text-muted-foreground">
+                    Questions are asked in this language; your words are kept as spoken, with an English translation.
+                  </span>
+                </Label>
+              </fieldset>
+            )}
           </CardContent>
           {(notice ?? error) && (
             <div className="grid gap-2 px-4 pb-4">

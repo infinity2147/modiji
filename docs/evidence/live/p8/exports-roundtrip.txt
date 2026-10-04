@@ -1,0 +1,21 @@
+P8 exports round trip — https://vashistha-production.up.railway.app — production rulebook revision 23 (23 rules)
+
+Session f77499f8-9078-4ea1-9beb-00fd5a335d93: Work Map 23 rules (3 stop-rules), revision 23; Procedure 23 rules, revision 23
+  JSON import→export byte-identical: true
+  every Work Map rule in /api/rulebook: true · deep-equal: true
+  Procedure block == Work Map rules: true · == rulebook projection: true · every expert quote in the Procedure text: true
+  rulebook rules not in this session's Work Map: 0 (the Work Map is per session/expert)
+  stop-rule rule_03e987e9b68836 {"type":"forbid","action":"approve"}: "Never approve a customer from a high-risk country at desk level unless they've banked with us for two years with verified funds."
+  stop-rule rule_0db2a2b89d2203 {"type":"require_approval","role":"compliance_officer"}: "Never approve a politically exposed person without compliance sign-off."
+  stop-rule rule_1e5796de1f0929 {"type":"forbid","action":"approve"}: "Never approve a customer from a high-risk country at desk level unless they've banked with us for two years with verified funds."
+
+Session cad2596d-53dd-427d-aa45-d73d91bd7844: Work Map 23 rules (3 stop-rules), revision 23; Procedure 23 rules, revision 23
+  JSON import→export byte-identical: true
+  every Work Map rule in /api/rulebook: true · deep-equal: true
+  Procedure block == Work Map rules: true · == rulebook projection: true · every expert quote in the Procedure text: true
+  rulebook rules not in this session's Work Map: 0 (the Work Map is per session/expert)
+  stop-rule rule_03e987e9b68836 {"type":"forbid","action":"approve"}: "Never approve a customer from a high-risk country at desk level unless they've banked with us for two years with verified funds."
+  stop-rule rule_0db2a2b89d2203 {"type":"require_approval","role":"compliance_officer"}: "Never approve a politically exposed person without compliance sign-off."
+  stop-rule rule_1e5796de1f0929 {"type":"forbid","action":"approve"}: "Never approve a customer from a high-risk country at desk level unless they've banked with us for two years with verified funds."
+
+MCP check_action vs local checkAction over /api/rulebook: 55/55 agree

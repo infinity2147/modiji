@@ -8,13 +8,16 @@
 import { z } from "zod";
 import {
   IdSchema,
+  MACHINE_TRANSLATION_LABEL,
   PredicateSchema,
   RuleEffectSchema,
   RuleKindSchema,
   SymbolIdSchema,
   type ConfirmedRule,
   type DomainConfig,
+  type ExpertQuoteEvidence,
   type RuleEffect,
+  languageLabel,
 } from "@vashistha/core";
 import { formatClock } from "../cite";
 import { inline, renderPredicate } from "./render-predicate";
@@ -91,9 +94,22 @@ function renderRule(rule: ConfirmedRule, domain: DomainConfig): string[] {
     `- **Why:** the expert (${inline(rule.expertId)}, ${formatClock(quote.t0Ms)}–${formatClock(quote.t1Ms)}) said:`,
     "",
     // Every quote line is blockquoted, so no quote can open or close the fenced block below.
-    ...quote.exactQuote.split("\n").map((line) => (line === "" ? ">" : `> ${line}`)),
+    ...blockquote(quote.exactQuote),
     "",
+    ...translationLines(quote),
   ];
+}
+
+function blockquote(text: string): string[] {
+  return text.split("\n").map((line) => (line === "" ? ">" : `> ${line}`));
+}
+
+/** A non-English quote: its language and the labelled English machine translation (blockquoted too), or that none is on record. */
+function translationLines(quote: ExpertQuoteEvidence): string[] {
+  if (quote.language === undefined || quote.language === "en") return [];
+  const language = inline(languageLabel(quote.language));
+  if (quote.translation === undefined) return [`- **${MACHINE_TRANSLATION_LABEL}:** none on record (the expert spoke ${language}).`, ""];
+  return [`- **${MACHINE_TRANSLATION_LABEL}** of the expert's words in ${language}:`, "", ...blockquote(quote.translation), ""];
 }
 
 function rulesBlock(block: ProcedureRules): string {

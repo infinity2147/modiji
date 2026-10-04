@@ -225,7 +225,31 @@ export function checkAgentInvariants(agent: unknown, options: AgentInvariantOpti
   notTrue(`${clientOverride}.first_message`, "a client could make the agent speak");
   notTrue(`${clientOverride}.prompt.llm`, "a client could replace the custom LLM");
   equals("platform_settings.auth.enable_auth", true);
+  problems.push(...languagePresetProblems(valueAt(agent, ["conversation_config", "language_presets"])));
   return problems;
+}
+
+const isBlank = (v: unknown): boolean => v === undefined || v === null || v === "";
+
+/**
+ * A language preset (plan §7.11, api-notes §3.1) switches ASR/TTS language only. It must not give the
+ * agent something to say on its own (a first message, or its translation) nor replace the prompt —
+ * with a custom LLM the wrapper would speak it, bypassing the gate.
+ */
+function languagePresetProblems(presets: unknown): string[] {
+  if (presets === undefined || presets === null) return [];
+  if (!isRecord(presets)) return [`conversation_config.language_presets is ${show(presets)}; expected an object`];
+  return Object.entries(presets).flatMap(([language, preset]) => {
+    const at = `conversation_config.language_presets.${language}`;
+    const problems: string[] = [];
+    const firstMessage = valueAt(preset, ["overrides", "agent", "first_message"]);
+    if (!isBlank(firstMessage)) problems.push(`${at}.overrides.agent.first_message is ${show(firstMessage)}; expected "" or absent (the agent never speaks unprompted)`);
+    const prompt = valueAt(preset, ["overrides", "agent", "prompt"]);
+    if (prompt !== undefined && prompt !== null) problems.push(`${at}.overrides.agent.prompt is ${show(prompt)}; expected absent (a preset must not replace the prompt)`);
+    const translated = valueAt(preset, ["first_message_translation", "text"]);
+    if (!isBlank(translated)) problems.push(`${at}.first_message_translation.text is ${show(translated)}; expected "" or absent`);
+    return problems;
+  });
 }
 
 /**

@@ -1,0 +1,15 @@
+P4 checks — session 1368ae76-e5c3-482d-b817-e68ff3e5b8f1 (expert speech: synthetic voice input, ElevenLabs TTS)
+threshold-style rule or candidate: true (confirmed threshold rules: 1; stated threshold candidates: 1; hypothesis threshold candidates: 0)
+guardrail/exception confirmed: false (0)
+unresolved concept surfaced: false ()
+every promoted rule passes evidence validation: true (2 rule.confirmed)
+answers parsed (answer.parsed): 5
+
+rule rule_1841412ed4a1d8 [decision] effect={"type":"recommend","action":"enhancedReview"} method=explicit_statement provenance=human_voice frames=2 valid=true
+  predicate={"and":[{">":[{"var":"uboOwnershipPct"},25]},{"==":[{"var":"uboVerified"},false]}]}
+  quote="Anything over 25% that isn't verified goes to enhanced review."
+rule rule_0e6d5f56f47b3a [escalation] effect={"type":"recommend","action":"escalateCompliance"} method=explicit_statement provenance=human_voice frames=1 valid=true
+  predicate={"==":[{"var":"pep"},true]}
+  quote="She's a politically exposed person, so it goes to the compliance officer."
+
+Production rulebook after the run: revision 17, 17 rules

@@ -2,6 +2,7 @@ import { z } from "zod";
 import { APPROVAL_ROLES, ParsedAnswerSchema, StatedRuleSchema, type ParsedAnswer, type StatedRule, type StatedRuleEffect } from "../../schemas/engine";
 import { ActionIdSchema, IdSchema } from "../../schemas/primitives";
 import type { DomainConfig } from "../../schemas/domain";
+import type { ExpertLanguage } from "../../schemas/expert";
 import { typecheckPredicate } from "../../logic/typecheck";
 import { containsQuote } from "../describe";
 import { LlmConceptSchema, toProposedConcepts } from "./concepts";
@@ -50,13 +51,24 @@ Rules:
     approvalRole = who signs off (${APPROVAL_ROLES.join(", ")}), kind "guardrail".
   * otherwise polarity "recommend" with the action to take, approvalRole null, kind "decision",
     "exception" (an exception to another rule) or "escalation" (the action escalates the case).
+  * one answer may state several rules: a prohibition plus what to do instead ("I never approve those;
+    they go to enhanced review") is two stated rules — a "forbid" and a "recommend" — each quoting its
+    own words. Never fold a prohibition into the recommendation.
 - newConcepts: notions the expert relied on that no listed feature captures; quote them verbatim.
 - answeredAction: for a "what would you decide" question, the action id the expert chose; otherwise null.
 - confidence: low when the answer is hedged, off-topic or ambiguous.
+- The expert may answer in another language. Then <expert_answer> holds their original words and
+  <english_translation> a machine translation, given only to help you understand them: read both, but
+  copy exactQuote and evidenceQuote character for character from <expert_answer>, in its own script —
+  never from the translation, never transliterated. A quote that is not in the original is rejected.
 Never invent features, actions, thresholds or quotes. Everything you return is verified by code.`;
 
-/** The answered utterance as transcribed (no `system_control` traffic). Its span bounds every quote. */
-export type AnsweredUtterance = { id: string; text: string; t0Ms: number; t1Ms: number };
+/**
+ * The answered utterance as transcribed (no `system_control` traffic). Its span bounds every quote.
+ * `text` is always the expert's original words; for a non-English answer, `translation` (when one was
+ * verified) is its English machine translation, shown to the parser for meaning only.
+ */
+export type AnsweredUtterance = { id: string; text: string; t0Ms: number; t1Ms: number; language?: ExpertLanguage; translation?: string };
 
 export function buildAnswerParserPrompt(input: {
   domain: PromptDomain;
@@ -73,9 +85,19 @@ export function buildAnswerParserPrompt(input: {
       "<candidates>",
       renderCandidates(input.candidates),
       "</candidates>",
-      `<expert_answer>${input.utterance.text}</expert_answer>`,
+      ...expertAnswer(input.utterance),
     ].join("\n"),
   };
+}
+
+function expertAnswer(u: AnsweredUtterance): string[] {
+  if (u.language === undefined || u.language === "en") return [`<expert_answer>${u.text}</expert_answer>`];
+  return [
+    `<expert_answer language="${u.language}">${u.text}</expert_answer>`,
+    u.translation === undefined
+      ? "<english_translation>unavailable: read the original</english_translation>"
+      : `<english_translation note="machine translation, for meaning only; never quote it">${u.translation}</english_translation>`,
+  ];
 }
 
 export type AnswerConversion = { answer: ParsedAnswer; rejected: { item: string; reason: string }[] };
@@ -83,8 +105,8 @@ export type AnswerConversion = { answer: ParsedAnswer; rejected: { item: string;
 /**
  * Code-side conversion to the engine's `ParsedAnswer`: condition lists become predicates that must
  * type-check against the domain, actions must be domain actions, the polarity becomes the stated
- * rule's effect and kind (`statedShape`), every quote must be verbatim in the utterance (its
- * timestamps are the utterance span — the quote lies within it), concepts go through
+ * rule's effect and kind (`statedShape`), every quote must be verbatim in the utterance's original
+ * text — never in its translation (its timestamps are the utterance span — the quote lies within it), concepts go through
  * `toProposedConcepts`. Anything that fails is returned in `rejected` with a reason. Family-level
  * checks (the action belongs to the asked family) happen in `applyAnswer` and promotion.
  */

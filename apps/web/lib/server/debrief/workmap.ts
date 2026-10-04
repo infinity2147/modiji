@@ -146,6 +146,47 @@ function moments(snap: Snapshot, wm: WorkMap): WorkMapResponse["moments"] {
   );
 }
 
+/** The Work Map input of a snapshot (pure; shared by the live route and the verified replay). */
+export function workMapInput(snap: Snapshot, coverage: WorkMap["coverage"], id: string, now: number): Parameters<typeof buildWorkMap>[0] {
+  return {
+    id,
+    domain: snap.domain,
+    entries: snap.entries,
+    rules: snap.book.rules,
+    revision: snap.book.revision,
+    coverage,
+    // The case as the expert saw it, plus the session's confirmed concepts (backfilled or Unknown) for that decision.
+    caseFeatures: (caseId: string, edits: Readonly<Record<string, unknown>>) => {
+      const features = kycCaseFeatures(caseId, edits);
+      return features === undefined ? undefined : { ...snap.decisions.findLast((d) => d.caseId === caseId)?.features, ...features };
+    },
+    expertId: expertIdOf(snap.loaded),
+    schemaVersion: snap.schemaVersion,
+    now,
+  };
+}
+
+/** The route's response around a built Work Map (pure). */
+function workMapResponse(
+  deps: Pick<DebriefDeps, "mcpBearerRequired">,
+  snap: Snapshot,
+  workMap: WorkMap,
+  proseOrigin: "llm" | "template",
+  generatedEntryId: string,
+): WorkMapResponse {
+  const entryOf = ruleEntries(snap.book);
+  return {
+    workMap,
+    proseOrigin,
+    exportPath: `${WORKMAP_DIR}/${workMap.id}.json`,
+    generatedEntryId,
+    moments: moments(snap, workMap),
+    ruleText: Object.fromEntries(workMap.rules.map((r) => [r.id, { ...ruleText(snap.domain, r), entryId: entryOf.get(r.id) ?? generatedEntryId }])),
+    voiceSession: snap.entries.some((e) => e.kind === "utterance.transcript"),
+    mcp: { path: "/mcp", tool: "check_action", bearerRequired: deps.mcpBearerRequired, rulebookRevision: snap.book.revision },
+  };
+}
+
 export async function sessionWorkMap(deps: DebriefDeps, sessionId: string): Promise<WorkMapResponse> {
   const snap = await snapshot(deps, sessionId);
   const coverage = coverageOf(snap);
@@ -156,22 +197,7 @@ export async function sessionWorkMap(deps: DebriefDeps, sessionId: string): Prom
   let workMap = recorded === undefined ? undefined : await readSaved(deps.dataDir, mediaPath);
   let proseOrigin = recorded === undefined ? undefined : parseLedgerPayload(recorded, "workmap.generated").proseOrigin;
   if (workMap === undefined || proseOrigin === undefined) {
-    const base = {
-      id,
-      domain: snap.domain,
-      entries: snap.entries,
-      rules: snap.book.rules,
-      revision: snap.book.revision,
-      coverage,
-      // The case as the expert saw it, plus the session's confirmed concepts (backfilled or Unknown) for that decision.
-      caseFeatures: (caseId: string, edits: Readonly<Record<string, unknown>>) => {
-        const features = kycCaseFeatures(caseId, edits);
-        return features === undefined ? undefined : { ...snap.decisions.findLast((d) => d.caseId === caseId)?.features, ...features };
-      },
-      expertId: expertIdOf(snap.loaded.session.id),
-      schemaVersion: snap.schemaVersion,
-      now: recorded?.occurredAt ?? deps.now(),
-    };
+    const base = workMapInput(snap, coverage, id, recorded?.occurredAt ?? deps.now());
     const cached = deps.store.prose.get(id);
     const prose = cached ?? (await writeProse(deps, buildWorkMap(base)));
     deps.store.prose.set(id, prose);
@@ -181,24 +207,31 @@ export async function sessionWorkMap(deps: DebriefDeps, sessionId: string): Prom
     await writeFile(join(deps.dataDir, "media", mediaPath), deps.exports.workMapJson(workMap), "utf8");
   }
 
-  const entryOf = ruleEntries(snap.book);
   let generatedEntryId = recorded?.id;
   if (generatedEntryId === undefined) {
+    const entryOf = ruleEntries(snap.book);
     const parents = [...snap.decisions.map((d) => d.entry.id), ...workMap.rules.flatMap((r) => entryOf.get(r.id) ?? [])];
     const ctx = { sessionId: snap.loaded.session.id, occurredAt: workMap.generatedAt, traceId: id, privacyEpoch: snap.loaded.session.privacyEpoch };
     generatedEntryId = deps.ledger.append(
       entry(ctx, "workmap.generated", "engine", [...new Set(parents)], { workMapId: id, rulebookRevision: snap.book.revision, mediaPath, proseOrigin }),
     ).id;
   }
+  return workMapResponse(deps, snap, workMap, proseOrigin, generatedEntryId);
+}
 
-  return {
-    workMap,
-    proseOrigin,
-    exportPath: mediaPath,
-    generatedEntryId,
-    moments: moments(snap, workMap),
-    ruleText: Object.fromEntries(workMap.rules.map((r) => [r.id, { ...ruleText(snap.domain, r), entryId: entryOf.get(r.id) ?? generatedEntryId }])),
-    voiceSession: snap.entries.some((e) => e.kind === "utterance.transcript"),
-    mcp: { path: "/mcp", tool: "check_action", bearerRequired: deps.mcpBearerRequired, rulebookRevision: snap.book.revision },
-  };
+/**
+ * The Work Map as the verified replay shows it (plan §10): the same snapshot, `buildWorkMap` and response
+ * as the route, but it never calls a model, writes a file or appends to a ledger. Step titles and the
+ * summary are the deterministic templates (`proseOrigin: "template"`, labelled in the UI); the recorded
+ * `workmap.generated` entry is cited when the run generated this exact Work Map.
+ */
+export async function readOnlyWorkMap(deps: DebriefDeps, sessionId: string): Promise<WorkMapResponse> {
+  const snap = await snapshot(deps, sessionId);
+  const coverage = coverageOf(snap);
+  const id = workMapId(snap, coverage);
+  const recorded = snap.entries.find((e) => e.kind === "workmap.generated" && parseLedgerPayload(e, "workmap.generated").workMapId === id);
+  const base = workMapInput(snap, coverage, id, recorded?.occurredAt ?? deps.now());
+  const prose = templateProse(buildWorkMap(base));
+  const workMap = buildWorkMap({ ...base, titles: prose.titles, summary: prose.summary });
+  return workMapResponse(deps, snap, workMap, prose.origin, recorded?.id ?? snap.loaded.info.startedEntryId);
 }

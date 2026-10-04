@@ -91,7 +91,7 @@ export function handleLineage(request: Request, sessionId: string, deps: Debrief
   });
 }
 
-/** GET /api/rulebook — the confirmed rulebook in force (every expert session). */
+/** GET /api/rulebook — the confirmed rulebook in force: the team rulebook (every expert session; decision rules of open disagreements held back). */
 export function handleGetRulebook(deps: Pick<DebriefDeps, "rulebook" | "log">): Promise<Response> {
   return respond(deps.log, () => {
     const { rules, revision } = deps.rulebook();

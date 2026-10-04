@@ -4,7 +4,7 @@
  * is computed by code from the expert's confirmed rulebook; quotes are the expert's exact words.
  */
 import { z } from "zod";
-import { ActionIdSchema, GuardrailResultSchema, IdSchema, MasteryLevelSchema, RuleKindSchema } from "@vashistha/core";
+import { ActionIdSchema, ExpertLanguageSchema, GuardrailResultSchema, IdSchema, MasteryLevelSchema, RuleKindSchema } from "@vashistha/core";
 import { KycCaseSchema } from "@vashistha/core/domains/kyc";
 import { ReviewEditsSchema } from "./casedesk";
 
@@ -25,8 +25,12 @@ export const ReplayMomentSchema = z.strictObject({
 export type ReplayMoment = z.infer<typeof ReplayMomentSchema>;
 
 export const ExpertQuoteViewSchema = z.strictObject({
-  /** Verbatim. */
+  /** Verbatim: the expert's original words, in the language they spoke. */
   text: z.string().min(1),
+  /** The language of `text` when it is not English (plan §7.11; absent = English). */
+  language: ExpertLanguageSchema.optional(),
+  /** Its English machine translation (not authoritative), when one is on record. */
+  translation: z.string().min(1).optional(),
   /** "The expert, by voice" / "The expert, typed during the debrief". */
   attribution: z.string().min(1),
   replay: ReplayMomentSchema,

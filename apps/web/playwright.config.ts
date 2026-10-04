@@ -24,6 +24,8 @@ const onDemand = process.argv.some((arg) => ON_DEMAND.test(arg));
 
 export default defineConfig({
   testDir: "./e2e",
+  // LIVE runs against the deployed service (real voice and models) have their own config: e2e/live/.
+  testIgnore: "**/live/**",
   fullyParallel: false,
   workers: 1,
   forbidOnly: Boolean(process.env.CI),

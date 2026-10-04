@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from "react";
-import type { ActionId, GuardrailResult } from "@vashistha/core";
+import type { ActionId, ExpertLanguage, GuardrailResult } from "@vashistha/core";
 import type { KycCase } from "@vashistha/core/domains/kyc";
 import { ApiError, describeError, listCases, type FetchFn } from "@/lib/client/api";
 import { createDomEventEmitter, type DomChannelStatus, type DomEventEmitter } from "@/lib/client/dom-events";
@@ -22,7 +22,7 @@ const browserFetch: FetchFn = (input, init) => fetch(input, init);
 export type LoadState =
   | { status: "loading" }
   | { status: "error"; message: string }
-  | { status: "ready"; cases: readonly KycCase[]; privacy: PrivacyBase };
+  | { status: "ready"; cases: readonly KycCase[]; privacy: PrivacyBase; expertLanguage: ExpertLanguage };
 
 export type Draft = { riskRating: RiskRating; outcome: ActionId | undefined };
 
@@ -101,7 +101,7 @@ export function useWorkspace(ref: SessionRef, sensors: RefObject<GateSensors | n
         if (privacy.offRecord) emitter.suspend();
         setChannel(emitter.status());
         setDecisions(session.decisions);
-        setLoad({ status: "ready", cases, privacy });
+        setLoad({ status: "ready", cases, privacy, expertLanguage: session.expertLanguage });
         emitter.emit({ kind: "navigate" });
       },
       (error: unknown) => {

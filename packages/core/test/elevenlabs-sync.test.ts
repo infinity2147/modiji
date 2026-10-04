@@ -202,7 +202,7 @@ describe("syncAgents apply", () => {
       `listSecrets ${SECRET_NAME}`,
       "listClientTools set_off_record",
       `getTool ${report.tools[0]?.toolId}`,
-      `updateAgent ${ids.interviewer} vashistha-interviewer v2 (scripts/agents.ts)`,
+      `updateAgent ${ids.interviewer} vashistha-interviewer v3 (scripts/agents.ts)`,
       `getAgent ${ids.interviewer}`,
       `updateAgent ${ids.tutor} vashistha-tutor v2 (scripts/agents.ts)`,
       `getAgent ${ids.tutor}`,

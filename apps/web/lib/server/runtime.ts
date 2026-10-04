@@ -4,12 +4,14 @@
  * Next's route bundles never load SQLite, Drizzle or Z3 themselves: everything from
  * `@vashistha/core/server` is imported here as a type only.
  */
-import type { ConfirmedRule, Rulebook } from "@vashistha/core";
+import type { ConfirmedRule, Rulebook, TeamRulebook } from "@vashistha/core";
 import type { Claude, ElevenLabsClient, Ledger, ServerEnv } from "@vashistha/core/server";
 import type { AuthorizationStore } from "./authorizations";
 import type { CaseDeskStore } from "./casedesk/session";
 import type { DebriefExports, DebriefModels, DebriefStore } from "./debrief/deps";
+import type { ExpertRecord } from "./debrief/rulebook-store";
 import type { WitnessSolver } from "./debrief/solver";
+import type { DisagreementSolver } from "./disagreements/deps";
 import type { InterviewStore } from "./interview/engine-state";
 import type { PerceptionService } from "./perception/service";
 import type { RateLimiter } from "./rate-limit";
@@ -30,8 +32,10 @@ export type Runtime = {
    */
   claude: Claude | null;
   /**
-   * The confirmed rulebook in force now: `rulebookFromLedger` over the `rule.*` entries of every expert
-   * session, recomputed only when the ledger has grown. `rulebook()` / `rulebookRevision()` read it.
+   * The confirmed rulebook in force now — the TEAM rulebook (plan §7.10): `rulebookFromLedger` over the
+   * `rule.*` entries of every expert session, minus the decision rules held back by open disagreements
+   * between experts (`teamRulebook`; guardrails are never held back), recomputed only when the ledger
+   * has grown. `rulebook()` / `rulebookRevision()` read it.
    */
   rulebook: () => readonly ConfirmedRule[];
   rulebookRevision: () => number;
@@ -43,6 +47,8 @@ export type Runtime = {
    * concepts confirmed in an expert session; the debrief narrows it to its session's feature model.
    */
   rulebookAllModels: () => Rulebook;
+  /** Two experts (plan §7.10): the expert directory, the team rulebook with its holds, and the Z3 disagreement search. */
+  experts: { directory: () => ExpertRecord[]; team: () => TeamRulebook; solver: DisagreementSolver; store: { tail: Promise<void> } };
   /** CaseDesk session facts and per-session frame order. */
   casedesk: CaseDeskStore;
   /** Derived hypothesis-engine state per session (a cache over the ledger) and its serial work queues. */

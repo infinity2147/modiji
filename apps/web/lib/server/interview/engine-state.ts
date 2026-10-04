@@ -27,6 +27,7 @@ import {
   rulebookFromLedger,
   type AnswerApplication,
   type EngineConfig,
+  type ExpertLanguage,
   type FamilyKnowledge,
   type FamilyModel,
   type FeatureId,
@@ -40,12 +41,14 @@ import {
   type Rulebook,
   type SessionSchema,
   type TranscriptLine,
+  type TranslationSegment,
 } from "@vashistha/core";
 import type { Ledger } from "@vashistha/core/server";
 import { caseFeatures, findKycCase } from "@vashistha/core/domains/kyc";
 import type { z } from "zod";
 import { ReviewEditsSchema, type SessionMode } from "../../contracts/casedesk";
 import type { EngineStateResponseSchema } from "../../contracts/interview";
+import { sessionExpert, type SessionExpert } from "../casedesk/session";
 import { sessionSchema } from "../schema/session-schema";
 
 /** Candidates shown per family on the HUD and in `hypotheses.updated`. */
@@ -78,10 +81,18 @@ export type QuestionRecord = {
 
 export type UtteranceRecord = {
   entryId: string;
+  /** The expert's original words (the evidence), in `language`. */
   text: string;
   t0Ms: number;
   t1Ms: number;
   frameIds: string[];
+  /** Detected when recorded (plan §7.11); "en" for utterances recorded without one. */
+  language: ExpertLanguage;
+  /**
+   * The verified English machine translation (`utterance.translated`), for non-English utterances.
+   * Undefined while pending: no model, or the translation failed or was rejected (see `translationPending`).
+   */
+  translation: { entryId: string; text: string; segments: TranslationSegment[] } | undefined;
   /** The asked question this utterance answers (its parent `gate.authorized` entry). */
   questionId: string | undefined;
   /** An `answer.parsed` entry exists for it. */
@@ -93,6 +104,8 @@ export type AnswerOutcome = Pick<AnswerApplication, "status" | "statedRules" | "
 export type EngineState = {
   sessionId: string;
   mode: SessionMode | undefined;
+  /** The session's expert (expert sessions; read from `session.started`, plan §7.10). */
+  expert: SessionExpert | undefined;
   /** Sequence of the last entry folded (-1 before any). */
   lastSequence: number;
   families: Map<string, FamilyState>;
@@ -153,6 +166,7 @@ function initialState(sessionId: string, config: EngineConfig, schema: SessionSc
   return {
     sessionId,
     mode: undefined,
+    expert: undefined,
     lastSequence: -1,
     families,
     lastFamily: undefined,
@@ -204,9 +218,12 @@ export function questionFamily(state: EngineState, question: Question): FamilySt
 
 function applyEntry(state: EngineState, e: LedgerEntry, config: EngineConfig): void {
   switch (e.kind) {
-    case "session.started":
-      state.mode = parseLedgerPayload(e, "session.started").mode;
+    case "session.started": {
+      const started = parseLedgerPayload(e, "session.started");
+      state.mode = started.mode;
+      state.expert = sessionExpert(state.sessionId, started.mode, started.expert);
       return;
+    }
     case "case.decision":
       return applyDecision(state, e, config);
     case "answer.parsed":
@@ -241,8 +258,27 @@ function applyEntry(state: EngineState, e: LedgerEntry, config: EngineConfig): v
     case "utterance.transcript": {
       const u = parseLedgerPayload(e, "utterance.transcript");
       const questionId = e.parentIds.map((id) => state.questionByEntry.get(id)).find((id) => id !== undefined);
-      state.utterances.set(e.id, { entryId: e.id, text: u.text, t0Ms: u.t0Ms, t1Ms: u.t1Ms, frameIds: u.frameIds, questionId, parsed: false });
+      state.utterances.set(e.id, {
+        entryId: e.id,
+        text: u.text,
+        t0Ms: u.t0Ms,
+        t1Ms: u.t1Ms,
+        frameIds: u.frameIds,
+        language: u.language ?? "en",
+        translation: undefined,
+        questionId,
+        parsed: false,
+      });
       state.transcript.push({ speaker: "expert", text: u.text });
+      return;
+    }
+    case "utterance.translated": {
+      const t = parseLedgerPayload(e, "utterance.translated");
+      const utterance = state.utterances.get(t.utteranceId);
+      if (utterance === undefined) throw new Error(`translation of unknown utterance ${t.utteranceId}`);
+      if (utterance.language !== t.language) throw new Error(`translation from ${t.language} of a ${utterance.language} utterance`);
+      // The first verified translation stands; a later one (a retry) never rewrites what readers saw.
+      utterance.translation ??= { entryId: e.id, text: t.translation, segments: t.segments };
       return;
     }
     case "agent.utterance":
@@ -336,6 +372,11 @@ export function queuedQuestions(state: EngineState): QuestionRecord[] {
 
 export function askedQuestions(state: EngineState): QuestionRecord[] {
   return [...state.questions.values()].filter((r) => r.status === "asked");
+}
+
+/** A non-English utterance with no verified translation on record yet (shown as "translation pending"). */
+export function translationPending(u: Pick<UtteranceRecord, "language" | "translation">): boolean {
+  return u.language !== "en" && u.translation === undefined;
 }
 
 /** Answers recorded while no parser was available (or it failed): utterances to an asked question with no `answer.parsed`. */

@@ -1,0 +1,23 @@
+# P8 LIVE agent demo — real Claude (packages/mcp-guardrails/demo/agent-blocked.ts, no --scripted)
+# started 2026-10-04T01:28:06Z against https://vashistha-production.up.railway.app/mcp (bearer: MCP_BEARER_TOKEN, not printed)
+# production rulebook revision before: 23 with 23 rules
+
+MCP server https://vashistha-production.up.railway.app/mcp: tools [check_action]
+Case NS-2026-0201 (heldout): Marchetti-Sato Textile Imports Ltd, company in Harrow Bay
+
+  → check_action {"proposedAction":"approve","context":{"case":{"entityType":"company","customerStatus":"new","accountAgeMonths":0,"jurisdictionRisk":"high","uboOwnershipPct":30,"uboVerified":true,"pep":false,"sanctionsHit":false,"adverseMedia":false,"sourceOfFunds":"verified","expectedMonthlyVolume":65000,"riskRating":"unrated"}}}
+  ← forbid (rulebook revision 23): Blocked by rule rule_1e5796de1f0929: "Never approve a customer from a high-risk country at desk level unless they've banked with us for two years with verified funds." (expert expert-cad2596d-53dd-427d-aa45-d73d91bd7844, 1:02.9–1:10.0). Do not take "approve" (Approve onboarding) on this case.
+Claude (claude-opus-5-5): I didn't approve NS-2026-0201. The rulebook check blocked it.
+
+The tool said: Blocked by rule rule_1e5796de1f0929: "Never approve a customer from a high-risk country at desk level unless they've banked with us for two years with verified funds." Do not take "approve" (Approve onboarding) on this case.
+
+Marchetti-Sato Textile Imports Ltd is based in Harrow Bay, which is on Northstar's high-risk country list. Its funds are verified, but it's a new customer with 0 months of history, so it falls short of the two years the rule requires.
+
+The rest of the case is clean: no sanctions or adverse media hits, no politically exposed owners, owner IDs verified and documents received. The only thing blocking approval is the country.
+
+The usual next steps would be enhanced review or escalation to a compliance officer. I haven't run either through the check yet, so I can do that if you want to go ahead with one.
+
+BLOCKED: "Never approve a customer from a high-risk country at desk level unless they've banked with us for two years with verified funds."
+
+RESULT: blocked by rule_1e5796de1f0929. Expert quote: "Never approve a customer from a high-risk country at desk level unless they've banked with us for two years with verified funds."
+# exit=0

@@ -31,7 +31,7 @@ const TONE_STYLE: Record<TickerTone, string> = {
 const TIME = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 
 /** Live ledger tail as human lines, each labelled with its source; control traffic is visibly not evidence. */
-export function EventTicker({ ledger }: { ledger: LedgerTailState }) {
+export function EventTicker({ ledger, caption = "live ledger" }: { ledger: LedgerTailState; caption?: string }) {
   const lines = useMemo(() => tickerLines(ledger.entries, VISIBLE_LINES), [ledger.entries]);
   const listRef = useRef<HTMLOListElement>(null);
   const last = lines.at(-1)?.id;
@@ -45,7 +45,7 @@ export function EventTicker({ ledger }: { ledger: LedgerTailState }) {
     <section aria-labelledby="ticker-title" className="flex min-h-0 flex-col">
       <div className="flex items-baseline justify-between px-3 pt-2 pb-1">
         <h2 id="ticker-title" className="text-xs font-semibold">
-          Event ticker <span className="font-normal text-muted-foreground">· live ledger</span>
+          Event ticker <span className="font-normal text-muted-foreground">· {caption}</span>
         </h2>
         {ledger.error !== undefined && (
           <p role="status" className="text-[11px] text-destructive">

@@ -1,0 +1,21 @@
+P4 checks — session cad2596d-53dd-427d-aa45-d73d91bd7844 (expert speech: synthetic voice input, ElevenLabs TTS)
+threshold-style rule or candidate: true (confirmed threshold rules: 3; stated threshold candidates: 3; hypothesis threshold candidates: 0)
+guardrail/exception confirmed: true (2)
+unresolved concept surfaced: false ()
+every promoted rule passes evidence validation: true (4 rule.confirmed)
+answers parsed (answer.parsed): 4
+
+rule rule_1779bf245d6bff [decision] effect={"type":"recommend","action":"enhancedReview"} method=explicit_statement provenance=human_voice frames=2 valid=true
+  predicate={"and":[{">":[{"var":"uboOwnershipPct"},25]},{"==":[{"var":"uboVerified"},false]}]}
+  quote="Anything over 25% that isn't verified goes to enhanced review."
+rule rule_171a5b41cd4ac8 [decision] effect={"type":"recommend","action":"enhancedReview"} method=explicit_statement provenance=human_voice frames=2 valid=true
+  predicate={"and":[{">":[{"var":"uboOwnershipPct"},25]},{"==":[{"var":"uboVerified"},false]}]}
+  quote="If the largest owner holds more than 25% and isn't verified, it goes to enhanced review."
+rule rule_1e5796de1f0929 [guardrail] effect={"type":"forbid","action":"approve"} method=explicit_statement provenance=human_voice frames=1 valid=true
+  predicate={"and":[{"==":[{"var":"jurisdictionRisk"},"high"]},{"<":[{"var":"accountAgeMonths"},24]}]}
+  quote="Never approve a customer from a high-risk country at desk level unless they've banked with us for two years with verified funds."
+rule rule_03e987e9b68836 [guardrail] effect={"type":"forbid","action":"approve"} method=explicit_statement provenance=human_voice frames=1 valid=true
+  predicate={"and":[{"==":[{"var":"jurisdictionRisk"},"high"]},{"!=":[{"var":"sourceOfFunds"},"verified"]}]}
+  quote="Never approve a customer from a high-risk country at desk level unless they've banked with us for two years with verified funds."
+
+Production rulebook after the run: revision 21, 21 rules

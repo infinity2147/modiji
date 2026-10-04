@@ -1,0 +1,70 @@
+LIVE acceptance runs — production — expert speech is synthetic voice input (ElevenLabs TTS)
+
+P3 — five scripted typing/talking runs (gate + voice)
+  run-a-typing-d session da9b8e52-07ac-4180-bee0-0bba455da897 conv conv_2601m4264hdxf8ev7pthnwxjxhfr
+    questions authorized 4, spoken 3; INTERRUPTIONS 0; talk-over 0
+    auth latency p50 1 · p95 2 · max 2 ms (n=4); authorize RTT p50 268 · p95 521 · max 521 ms (n=4); first audio p50 716 · p95 790 · max 790 ms (n=3)
+    control never evidence true; authorized-but-never-spoken 1; refused authorizations (each spent a budget slot) context_changed
+  run-b-pause-94 session 94cf3b7b-e6dd-457c-a038-8908a4b6e885 conv conv_7501m42697w2fjs9fr7j7spz6pfa
+    questions authorized 4, spoken 4; INTERRUPTIONS 0; talk-over 3 (agent first, agent first, agent first)
+    auth latency p50 0 · p95 3 · max 3 ms (n=4); authorize RTT p50 269 · p95 274 · max 274 ms (n=4); first audio p50 686 · p95 736 · max 736 ms (n=4)
+    control never evidence true; authorized-but-never-spoken 0; refused authorizations (each spent a budget slot) question_not_queued
+  run-c-scrollin session 4dfb1645-5772-47fe-bf92-3e3babd6d2fc conv conv_8101m426grvvfk199fvbrddddmq9
+    questions authorized 5, spoken 5; INTERRUPTIONS 0; talk-over 0
+    auth latency p50 0 · p95 15 · max 15 ms (n=5); authorize RTT p50 271 · p95 373 · max 373 ms (n=5); first audio p50 688 · p95 808 · max 808 ms (n=5)
+    control never evidence true; authorized-but-never-spoken 0; refused authorizations (each spent a budget slot) none
+  run-d-noisy-e0 session e047ef8b-3680-4cb3-b48c-735ae5920449 conv conv_4201m426pjgsfvqtwhqqv4haq7p2
+    questions authorized 4, spoken 3; INTERRUPTIONS 3 (authorization 2207 ms into a speech window; authorization 409 ms into a speech window; agent audio 3198 ms into a speech window); talk-over 1 (expert first)
+    auth latency p50 0 · p95 1 · max 1 ms (n=4); authorize RTT p50 260 · p95 2639 · max 2639 ms (n=4); first audio p50 724 · p95 731 · max 731 ms (n=3)
+    control never evidence true; authorized-but-never-spoken 1; refused authorizations (each spent a budget slot) question_not_queued
+  run-e-budget-e session e0ca4cd6-0101-4cc0-9014-33a0720adbeb conv conv_9701m426yhjxef8bcmz7w20msady
+    questions authorized 5, spoken 5; INTERRUPTIONS 0; talk-over 0
+    auth latency p50 0 · p95 1 · max 1 ms (n=5); authorize RTT p50 274 · p95 967 · max 967 ms (n=5); first audio p50 697 · p95 848 · max 848 ms (n=5)
+    control never evidence true; authorized-but-never-spoken 0; refused authorizations (each spent a budget slot) none
+  TOTAL interruptions across the 5 runs: 3 (threshold 0)
+  Gate decision latency (decidedAt − becameValidAt), all 5 runs: p50 0 · p95 3 · max 15 ms (n=22) (bound 250 ms)
+  Including the gate/authorize round trip to production: p50 274 · p95 967 · max 2641 ms (n=22) (conditions valid → control message sent)
+  First audio (control message sent → agent audio on the WebRTC track): p50 697 · p95 808 · max 848 ms (n=20)
+  First audio event on the data channel: p50 547 · p95 612 · max 632 ms (n=20) · first agent_response text: p50 1788 · p95 2802 · max 2940 ms (n=20)
+  Questions authorized 22, spoken 20
+
+Run D — VAD (ElevenLabs vad_score, max within the clip +0.6 s) per short utterance and playback gain:
+  gain 0.12 "Okay." max VAD 0.983
+  gain 0.20 "Mm-hm." max VAD 0.993
+  gain 0.30 "Right." max VAD 0.995
+  gain 0.40 "Yeah." max VAD 0.996
+  gain 0.15 "Hmm." max VAD 0.941
+  gain 0.25 "Okay." max VAD 0.995
+  gain 0.12 "Mm-hm." max VAD 0.993
+  gain 0.20 "Right." max VAD 0.983
+  gain 0.30 "Yeah." max VAD 0.996
+  gain 0.40 "Hmm." max VAD 0.728
+  gain 0.15 "Okay." max VAD 0.583
+  gain 0.25 "Mm-hm." max VAD 0.779
+  gain 0.12 "Right." max VAD 0.000  ← below the gate's 0.4 threshold: invisible to the gate
+  gain 0.20 "Yeah." max VAD 0.309  ← below the gate's 0.4 threshold: invisible to the gate
+  gain 0.30 "Hmm." max VAD 0.000  ← below the gate's 0.4 threshold: invisible to the gate
+  gain 0.40 "Okay." max VAD 0.954
+  gain 0.15 "Mm-hm." max VAD 0.220  ← below the gate's 0.4 threshold: invisible to the gate
+  gain 0.25 "Right." max VAD 0.738
+  gain 0.12 "Yeah." max VAD 0.000  ← below the gate's 0.4 threshold: invisible to the gate
+  gain 0.20 "Hmm." max VAD 0.050  ← below the gate's 0.4 threshold: invisible to the gate
+  gain 0.30 "Okay." max VAD 0.934
+  gain 0.40 "Mm-hm." max VAD 0.987
+  gain 0.15 "Right." max VAD 0.635
+  gain 0.25 "Yeah." max VAD 0.606
+
+Additional gate data from the P4 runs:
+  session f77499f8-9078-4ea1-9beb-00fd5a335d93: authorized 5, spoken 5, interruptions 0, talk-over 0, lost 0, refused none, first audio p50 659 · p95 1331 · max 1331 ms (n=4)
+  session f4f88cde-7b1c-4ac6-892b-9dbe5279f192: authorized 5, spoken 3, interruptions 0, talk-over 1, lost 2, refused none, first audio p50 599 · p95 1162 · max 1162 ms (n=2)
+  session 1368ae76-e5c3-482d-b817-e68ff3e5b8f1: authorized 5, spoken 5, interruptions 0, talk-over 0, lost 0, refused none, first audio p50 671 · p95 829 · max 829 ms (n=5)
+  session cad2596d-53dd-427d-aa45-d73d91bd7844: authorized 4, spoken 4, interruptions 0, talk-over 0, lost 0, refused question_not_queued, first audio p50 665 · p95 795 · max 795 ms (n=4)
+
+Server-side authorize timings (request → gate.authorized row timestamp → nonce issued; from the nonce's expiresAt − 4 s TTL):
+  session da9b8e52: request→row 118 ms, row→issue 252 ms, total RTT 521 ms
+  session e047ef8b: request→row 1023 ms, row→issue 1471 ms, total RTT 2639 ms
+  session e0ca4cd6: request→row 230 ms, row→issue 595 ms, total RTT 967 ms
+  session f77499f8: request→row 12343 ms, row→issue 2367 ms, total RTT 14854 ms
+  session f4f88cde: request→row 125 ms, row→issue 4647 ms, total RTT 4910 ms
+  session f4f88cde: request→row 122 ms, row→issue 701 ms, total RTT 965 ms
+  session 1368ae76: request→row 119 ms, row→issue 579 ms, total RTT 841 ms

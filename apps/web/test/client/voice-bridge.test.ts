@@ -6,7 +6,7 @@ import { controlledFetch, jsonResponse, scriptedFetch, tick } from "./fake-fetch
 
 const CONTROL = formatControlMessage("nonce_0123456789abcdefghij");
 
-function setup(fetchFn = scriptedFetch(() => jsonResponse({ utteranceId: "u-1" })).fetch) {
+function setup(fetchFn = scriptedFetch(() => jsonResponse({ utteranceId: "u-1" })).fetch, language?: "en" | "hi") {
   let now = 1_700_000_000_000;
   const privacy: PrivacyBase = { offRecord: false, epoch: 2 };
   const gateCalls: string[] = [];
@@ -23,6 +23,7 @@ function setup(fetchFn = scriptedFetch(() => jsonResponse({ utteranceId: "u-1" }
     privacy: () => privacy,
     vadThreshold: 0.4,
     onOffRecordPhrase: () => offRecordPhrases.push(now),
+    ...(language !== undefined && { language }),
   });
   return { bridge, privacy, gateCalls, offRecordPhrases, advance: (ms: number) => (now += ms) };
 }
@@ -164,5 +165,21 @@ describe("off-record phrase", () => {
     await tick();
     expect(offRecordPhrases).toEqual([]);
     expect(bridge.transcript().map((t) => t.role)).toEqual(["agent", "user"]);
+  });
+});
+
+describe("session language (plan §7.11)", () => {
+  it("a Hindi session sends its language with each utterance as a detection prior; English sessions send none", async () => {
+    for (const language of ["hi", "en", undefined] as const) {
+      const net = scriptedFetch(() => jsonResponse({ utteranceId: "u-1", language: "hi", translation: { status: "pending" } }));
+      const { bridge } = setup(net.fetch, language);
+      bridge.connected("conv-1");
+      bridge.message({ role: "user", message: "अगर देश हाई-रिस्क लिस्ट पर है तो मैं अप्रूव नहीं करती।" });
+      await tick();
+      const body = net.requests[0]?.body as Record<string, unknown>;
+      expect(body.text).toBe("अगर देश हाई-रिस्क लिस्ट पर है तो मैं अप्रूव नहीं करती।");
+      if (language === "hi") expect(body.language).toBe("hi");
+      else expect(body).not.toHaveProperty("language");
+    }
   });
 });

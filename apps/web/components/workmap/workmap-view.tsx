@@ -20,6 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { exportUrl, getWorkMap } from "@/components/debrief/api";
 import { CoveragePanel } from "@/components/debrief/coverage-panel";
 import { LineageProvider, TraceButton, useTrace } from "@/components/lineage/lineage-trace";
+import { QuoteTranslation } from "@/components/tutor/rule-quote";
 import { RuleGraph } from "./rule-graph";
 
 function actionLabel(id: string): string {
@@ -55,13 +56,14 @@ export function WorkMapView({ sessionId }: { sessionId: string }) {
           </p>
         )}
         {data === null && error === null && <p className="text-muted-foreground">Building the Work Map…</p>}
-        {data !== null && <Body data={data} sessionId={sessionId} />}
+        {data !== null && <WorkMapBody data={data} sessionId={sessionId} />}
       </main>
     </LineageProvider>
   );
 }
 
-function Body({ data, sessionId }: { data: WorkMapResponse; sessionId: string }) {
+/** The Work Map's content; the verified replay renders it without the exports (`exports={false}`: they are live downloads). */
+export function WorkMapBody({ data, sessionId, exports = true }: { data: WorkMapResponse; sessionId: string; exports?: boolean }) {
   const { workMap } = data;
   const trace = useTrace();
   const proseLabel = data.proseOrigin === "llm" ? "titles & summary: Opus (non-authoritative)" : "titles & summary: template (LLM unavailable)";
@@ -91,7 +93,7 @@ function Body({ data, sessionId }: { data: WorkMapResponse; sessionId: string })
               <RuleGraph rules={workMap.rules} text={data.ruleText} onTrace={(r) => trace?.trace(data.ruleText[r.id]?.entryId ?? data.generatedEntryId, `rule ${r.id}`)} />
             </CardContent>
           </Card>
-          <Exports data={data} sessionId={sessionId} />
+          {exports && <Exports data={data} sessionId={sessionId} />}
         </div>
       </div>
     </>
@@ -169,7 +171,12 @@ function StepCard({ step, data, proseLabel }: { step: WorkMapStep; data: WorkMap
                   <Play />
                 </Button>
               </span>
-              <blockquote className="flex-1 border-l-2 pl-2 italic">“{q.exactQuote}”</blockquote>
+              <div className="flex-1 space-y-1">
+                <blockquote className="border-l-2 pl-2 italic" lang={q.language}>
+                  “{q.exactQuote}”
+                </blockquote>
+                {q.language !== undefined && q.language !== "en" && <QuoteTranslation language={q.language} translation={q.translation} />}
+              </div>
               <TraceButton entryId={q.utteranceId} label="expert quote" />
             </div>
           ))}

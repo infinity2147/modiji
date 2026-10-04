@@ -47,35 +47,56 @@ export function HudBar({ gate, voiceLive }: { gate: GateSnapshot | null; voiceLi
     !voiceLive && queued > 0 && !gate.offRecord
       ? `${queued} question${queued === 1 ? "" : "s"} queued · voice not connected, nothing will be asked`
       : hud.reason;
+  return <HudDisplay status={hud.status} judge={hud.judge} value={hud.value} reason={reason} />;
+}
 
+/**
+ * The HUD's presentation, shared by the live gate (`HudBar`) and the verified replay, which derives it
+ * from recorded entries. `judge: null` (replay only): the live timing signals of this moment were not recorded.
+ */
+export function HudDisplay({
+  status,
+  judge,
+  value,
+  reason,
+}: {
+  status: HudStatus;
+  judge: readonly HudRow[] | null;
+  value: { level: number; text: string } | null;
+  reason: string;
+}) {
   return (
     <section aria-label="Speech gate" className="flex min-h-11 flex-wrap items-center gap-x-4 gap-y-1 px-4 py-1.5 text-slate-100">
       <motion.span
-        key={hud.status}
+        key={status}
         role="status"
-        aria-label={`Gate status: ${hud.status}`}
+        aria-label={`Gate status: ${status}`}
         initial={{ opacity: 0.4, scale: 0.94 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.2 }}
-        className={cn("rounded px-2 py-0.5 font-mono text-xs font-semibold tracking-wider", STATUS_STYLE[hud.status])}
+        className={cn("rounded px-2 py-0.5 font-mono text-xs font-semibold tracking-wider", STATUS_STYLE[status])}
       >
-        {hud.status}
+        {status}
       </motion.span>
-      <ul aria-label="Gate conditions" className="flex items-center gap-1">
-        {hud.judge.map((row) => (
-          <ConditionChip key={row.key} row={row} />
-        ))}
-      </ul>
+      {judge === null ? (
+        <span className="text-xs text-slate-400">Typing · Speaking · Screen: not recorded</span>
+      ) : (
+        <ul aria-label="Gate conditions" className="flex items-center gap-1">
+          {judge.map((row) => (
+            <ConditionChip key={row.key} row={row} />
+          ))}
+        </ul>
+      )}
       <div className="flex items-center gap-2 text-xs" aria-label="Question value">
         <span className="text-slate-300">Question value</span>
         <span aria-hidden className="relative h-2 w-24 overflow-hidden rounded-full bg-slate-700">
           <motion.span
             className="absolute inset-y-0 left-0 rounded-full bg-sky-400"
-            animate={{ width: `${(hud.value?.level ?? 0) * 100}%` }}
+            animate={{ width: `${(value?.level ?? 0) * 100}%` }}
             transition={{ duration: 0.3 }}
           />
         </span>
-        <span className="font-mono tabular-nums">{hud.value?.text ?? "—"}</span>
+        <span className="font-mono tabular-nums">{value?.text ?? "—"}</span>
       </div>
       <p className="min-w-0 flex-1 truncate text-xs text-slate-300" title={reason}>
         <span className="text-slate-400">Reason: </span>

@@ -5,6 +5,7 @@
  */
 import { z } from "zod";
 import {
+  ExpertLanguageSchema,
   GateAuthorizationSchema,
   IdSchema,
   MasteryLevelSchema,
@@ -57,9 +58,23 @@ export const PostUtteranceRequestSchema = z.strictObject({
   /** The question this utterance answers, if one was just asked. */
   questionId: IdSchema.optional(),
   privacyEpoch: z.int().nonnegative(),
+  /**
+   * The language the browser's voice session runs in (the ASR language it started the conversation
+   * with). A prior only: the server decides the utterance's language from the text (plan §7.11).
+   */
+  language: ExpertLanguageSchema.optional(),
 });
 export const PostUtteranceResponseSchema = z.strictObject({
   utteranceId: IdSchema,
+  /** Non-English utterances only: the language the server detected (absent = English). */
+  language: ExpertLanguageSchema.optional(),
+  /**
+   * Non-English utterances only: the English machine translation (not authoritative), or `pending`
+   * when no verified translation exists (no model, or it failed) — the original words stand alone.
+   */
+  translation: z
+    .discriminatedUnion("status", [z.strictObject({ status: z.literal("translated"), text: z.string().min(1) }), z.strictObject({ status: z.literal("pending") })])
+    .optional(),
   /** Present once the answer parser has run (it runs synchronously when a question was pending). */
   parsed: ParsedAnswerSchema.optional(),
 });

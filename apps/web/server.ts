@@ -32,9 +32,13 @@ registerHooks({
 async function main(): Promise<void> {
   const { createRuntime } = await import("./lib/server/runtime-init");
   const { MCP_PATH, createMcpEndpoint } = await import("./lib/server/debrief/mcp");
+  const { createReplayService } = await import("./lib/server/replay/service");
+  const { registerReplay } = await import("./lib/server/replay/registry");
   // Variables already set in the environment win over the file (process.loadEnvFile never overrides).
   if (process.env.NODE_ENV !== "production" && existsSync(ROOT_ENV_FILE)) process.loadEnvFile(ROOT_ENV_FILE);
   const { runtime, close: closeRuntime } = createRuntime(process.env);
+  // Verified replay (plan §10): recorded runs from DATA_DIR/replays, derived read-only with the runtime's Z3 and exports.
+  registerReplay(createReplayService({ dataDir: runtime.env.DATA_DIR, engines: { solver: runtime.debrief.solver, exports: runtime.debrief.exports } }));
   const port = runtime.env.PORT;
   const dev = runtime.env.NODE_ENV !== "production";
   const httpServer = createServer();

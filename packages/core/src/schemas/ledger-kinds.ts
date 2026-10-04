@@ -8,10 +8,12 @@ import {
   FeatureBackfilledPayloadSchema,
   SchemaVersionBumpedPayloadSchema,
 } from "./concepts";
+import { ExpertLanguageSchema, ExpertSchema } from "./expert";
 import { ParsedAnswerSchema, ProposedConceptSchema, QuestionSchema, WitnessResolutionSchema, WitnessSchema, MasteryLevelSchema } from "./engine";
 import { GuardrailResultSchema } from "./guardrail";
 import type { LedgerEntry, LedgerSource } from "./ledger";
 import { ScreenEventSchema } from "./signals";
+import { UtteranceTranslatedPayloadSchema } from "./translation";
 
 /**
  * Registry of ledger entry kinds: which sources may write each kind and the payload schema. Writers
@@ -39,6 +41,8 @@ const kinds = {
       caseSet: z.string().min(1),
       domainId: SymbolIdSchema,
       schemaVersion: SchemaVersionSchema,
+      /** Expert capture sessions since P10: who the expert is and the language they speak (plan §7.10–7.11). */
+      expert: ExpertSchema.optional(),
     }),
   },
   "screen.event": { sources: ["dom", "vision"], payload: ScreenEventSchema },
@@ -109,11 +113,16 @@ const kinds = {
       t1Ms: z.int().nonnegative(),
       /** Redacted frames on screen while the expert spoke (nearest preceding frame at minimum). */
       frameIds: z.array(IdSchema),
-      language: z.string().min(2).optional(),
-      /** English translation when the expert spoke another language (P10); quotes keep the original. */
-      translation: z.string().optional(),
+      /**
+       * P10: the language the expert spoke, detected by code when the utterance is recorded (absent =
+       * English). `text` is always the original words; its English translation, a model product, is a
+       * separate `utterance.translated` entry so that provenance (voice vs engine) stays per entry.
+       */
+      language: ExpertLanguageSchema.optional(),
     }),
   },
+  /** Machine translation of a non-English `utterance.transcript` (its parent); display only, never evidence of its own. */
+  "utterance.translated": { sources: ["engine"], payload: UtteranceTranslatedPayloadSchema },
   /** What the agent said (never evidence). */
   "agent.utterance": {
     sources: ["engine"],
@@ -171,6 +180,8 @@ const kinds = {
         "confirm_boundary",
         "confirm_teachback",
         "confirm_stop_rule",
+        /** Two experts (plan §7.10): this expert's decision on a disagreement case (`target.witnessId`, `target.action`). */
+        "answer_disagreement",
       ]),
       target: z.strictObject({
         ruleId: IdSchema.optional(),

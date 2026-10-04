@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "name": "vashistha-interviewer",
   "role": "interviewer",
   "clientTools": [
@@ -30,7 +30,7 @@
           "llm": "custom-llm",
           "custom_llm": {
             "url": "{{PUBLIC_BASE_URL}}/api/llm",
-            "model_id": "vashistha-interviewer-v2",
+            "model_id": "vashistha-interviewer-v3",
             "api_key": { "secret_id": "{{CUSTOM_LLM_SECRET_ID}}" },
             "api_type": "chat_completions"
           },
@@ -98,6 +98,9 @@
           "compliance officer"
         ]
       },
+      "language_presets": {
+        "hi": { "overrides": { "agent": { "first_message": "" } } }
+      },
       "conversation": {
         "max_duration_seconds": 3600,
         "client_events": [
@@ -121,7 +124,7 @@
       "overrides": {
         "custom_llm_extra_body": true,
         "conversation_config_override": {
-          "agent": { "first_message": false, "prompt": { "llm": false } }
+          "agent": { "first_message": false, "language": true, "prompt": { "llm": false } }
         }
       }
     }

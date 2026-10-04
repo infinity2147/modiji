@@ -117,3 +117,20 @@ describe("latency percentiles", () => {
     expect(percentiles([40, 10, 30, 20])).toEqual({ p50: 20, p95: 40, n: 4 });
   });
 });
+
+describe("any language on the ticker (plan §7.11)", () => {
+  it("shows the expert's original words with their language, and the translation labelled as machine-made", () => {
+    const hindi = "अगर देश हाई-रिस्क लिस्ट पर है तो मैं अप्रूव नहीं करती।";
+    const said = entry("utterance.transcript", "voice", { conversationId: "conv-1", text: hindi, t0Ms: 0, t1Ms: 3000, frameIds: [], language: "hi" });
+    const translated = entry(
+      "utterance.translated",
+      "engine",
+      { utteranceId: said.id, language: "hi", translation: "If the country is on the high-risk list, I do not approve.", segments: [{ original: hindi, english: "If the country is on the high-risk list, I do not approve." }], model: "claude-sonnet-5-5" },
+      { parentIds: [said.id] },
+    );
+    expect(text([said, translated])).toEqual([
+      `Expert (hi): “${hindi}”`,
+      "English translation (machine, not authoritative): “If the country is on the high-risk list, I do not approve.”",
+    ]);
+  });
+});

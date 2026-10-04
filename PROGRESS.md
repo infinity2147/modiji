@@ -422,3 +422,182 @@ All 4 permitted live passes were used. Thresholds, fixture, matching window and 
 4. **Revise the P2 thresholds or allow 2 requests in flight** (team call; roughly halves queue wait).
 
 The product is unaffected for the demo: the tutor and the Save interlock use the disclosed DOM channel (D3), and vision is measured independently, as the plan intends.
+
+---
+
+## P10 — Stretch: two experts, then Hindi → English (D4)
+
+**Started:** 2026-10-04
+
+**Goal (plan §7.10, §7.11, §11 P10).**
+- Two experts: align their sessions, encode both rulebooks, let Z3 find a valid case where they disagree, ask each expert, and turn the resolution into a revision that carries both experts' quotes.
+- Any language: a Hindi-speaking expert is interviewed in Hindi. Rules stay language-neutral. Quotes are stored in the original language with an English translation, and the tutor speaks English.
+- Acceptance: the disagreement witness is shown, and a Hindi→English run is completed.
+
+### Expert identity
+- `POST /api/sessions` takes an optional `expert: {name, language}`, for expert mode only. The launcher has "Your name" and "You will speak" fields.
+- The expert id is the slug of the name, so "Asha Rao" becomes `asha-rao`. Sessions under one name share one rulebook.
+- It is stored in `session.started.expert` as `{id, name, language}`.
+- Backwards compatible: a session without a named expert is its own expert (`expert-<sessionId>`, the old id), speaking English. Every reader handles the legacy case: `sessionExpert` and `EngineState.expert`.
+
+### Rulebook policy with two or more experts
+- **Global fold, unchanged:** `rulebookFromLedger` over the `rule.*` entries of every expert session, in ledger order.
+- **Per-expert rulebook:** `expertRulebook(book, expertId)` is a view of the global fold. It contains the rules whose author is the expert or whom the expert confirmed (`ruleExperts`: `expertId` ∪ `confirmedBy[].expertId`).
+  - The view has its own revision count, so teach-backs go stale only on that expert's changes.
+  - Each session's debrief reads only its own expert's rulebook, so another expert's rules can't be revised from a different debrief.
+- **Team rulebook:** `teamRulebook(book, holds)`, in core `engine/team.ts`, holds every expert's rules except one category, held back while a disagreement is open:
+  - rules of the disagreement's family;
+  - whose effect is a decision (`recommend` or `route`);
+  - that belong to either disagreeing expert;
+  - and whose predicate is not false on the disagreement case.
+- `forbid` and `require_approval` rules are **never** held back.
+- The interlock, tutor, MCP `check_action` and `GET /api/rulebook` all read the team rulebook (`runtime.rulebook*`).
+- **Safety is monotonic.** `checkAction` lets only guardrails constrain an action, and a held-back decision rule can affect a guardrail only through an override edge. Removing an overrider makes the guardrail's force `p ∧ ¬(o…)` truer, so an open disagreement can only make checks stricter:
+  - a forbid from either expert always applies;
+  - a sign-off is never lifted;
+  - `insufficient_information` never becomes `allow`.
+  - A property test covers this, including an exception that overrides a forbid: holding it back re-enables the forbid.
+- **When a disagreement is "open":** from its `witness.found` to its `witness.resolved`, in ledger append order (`createDisagreementHolds`). The rulebook revision counts rule events only; holds are reported separately (`team.held`).
+
+### Reconciliation flow
+Code is in `lib/server/disagreements/`; routes are `/api/disagreements` and `/api/disagreements/answer`.
+- **`POST /api/disagreements {experts:[a,b], decisionFamily}`** runs one reconciliation step:
+  1. Resolve open disagreements that both experts answered the same way.
+  2. Run `findDisagreements` (Z3) over both experts' rulebooks, in the base feature model and within the domain constraints.
+  3. Close (`witness.resolved` in both sessions) any disagreement the solver no longer finds.
+  4. Record each new one as `witness.found` (source solver) in each expert's **latest** session, with a `witness` question for that expert.
+  - The step is idempotent, and writes are serialised across the pair.
+- **Where it lives:** the experts' latest sessions, not a new session type.
+  - That expert's own interview or debrief voice loop asks the question, and the answer is ordinary evidence of their session.
+  - Each session's debrief ignores disagreement witnesses.
+- **Questions:** the plain-language decision cell plus the two decisions, for example "Customer status existing, relationship age at least 24 months, country risk high — approve onboarding or send to enhanced review?". For a Hindi-speaking expert the text is in Hindi (`localizeQuestion`), with `textEnglish` kept alongside.
+- **Answers:**
+  - Typed: `POST /api/disagreements/answer {…, witnessId, expertId, decision, quote}` writes an `expert.statement` with intent `answer_disagreement` in that expert's session. It needs a redacted frame.
+  - Spoken: the utterance answering that question, through the answer parser's `answeredAction`. A Hindi answer keeps its original words, plus its `utterance.translated` English rendering.
+  - The latest answer counts.
+- **Resolution, when both experts answer with the same action y:**
+  - If one expert's rulebook already decides y on the case, its deciding rule R gets a `rule.revised` (revision + 1):
+    - `confirmedBy` gains both experts' confirmations, so R joins the other expert's rulebook;
+    - the evidence starts with both experts' exact quotes (`supports`), followed by the first quote of every rule R now overrides (`contradicts`);
+    - `overrides` gains the other expert's deciding rules.
+  - Otherwise, a new decision rule for the case's decision cell gets a `rule.confirmed`, confirmed by both and overriding both experts' deciding rules.
+  - Every quote passes the same ledger validation as a promotion: a real utterance or statement, a real `frame.received`, and a real confirmation entry.
+  - Different answers leave the disagreement open, still held back from the team rulebook, and shown as "still disagree".
+
+### The "Two experts" view
+`/experts?a=&b=&family=`, linked from the debrief header. It shows:
+- both rulebooks side by side, in plain-language predicates, with "also confirmed by" and "held back" marks;
+- the Z3 case in domain labels, with each rulebook's decision now and when found;
+- each expert's question (Hindi plus its English original), their answer and quote (original, plus a translation labelled "English translation (machine, not authoritative)");
+- the resolution diff (before → after: experts and overrides);
+- the team rulebook in force.
+- Empty states are honest: fewer than two experts, no pair chosen, no disagreement recorded yet.
+- The page polls, and runs a step when a spoken answer completes an agreement.
+
+### Hindi → English
+Built by a delegated sub-agent; details in `docs/api-notes.md` §16.
+- **Detection:** code-only (`detectLanguage`).
+  - Devanagari letters ≥ 20% → `hi`.
+  - A conservative romanised-Hindi function-word heuristic → `hi`.
+  - Otherwise `en`.
+  - The prior (the client's ASR language, else the expert's declared language) only lowers the romanised-Hindi bar; it never overrides the text.
+- **Translation:** Sonnet, structured, as a separate `utterance.translated` entry (source engine, parent the utterance).
+  - Its `segments` are checked by code to be verbatim, in order, and to cover every word.
+  - With no model or an unverifiable translation, nothing is written and the translation stays pending. Nothing is fabricated.
+- **Parser:** it reads the English for meaning, but every `exactQuote` must be verbatim in the ORIGINAL (`containsQuote`).
+  - `ExpertQuoteEvidence` gains optional `language` and `translation`; the quote's English is derived from the segments it overlaps.
+- **Questions:** live interview questions, debrief witness/teach-back questions and disagreement questions are translated into Hindi for a Hindi expert, with `textEnglish` kept. The deterministic fallback is the English question. The gate and wrapper invariant is unchanged.
+- **Display:** the tutor, Work Map, MCP `check_action` citation and Procedure export show the original plus the labelled machine translation.
+- The English tutor voices only the labelled translation, never the Hindi words. When no translation is on record, it points to the screen.
+- **Agent:** the interviewer is v3, with `language_presets.hi` (`first_message` "") and the client language override allowed. Invariants were extended. The tutor stays English.
+
+### Results
+- **Unit and integration tests:**
+  - `packages/core/test/engine.team.test.ts`: per-expert views, holds, the forbid enforced while experts disagree, and the monotonic-safety property (seed 20261004, 400 runs).
+  - `apps/web/test/server/two-experts.test.ts`, 9 tests through the public handlers:
+    - named sessions and directory;
+    - Z3 witness found, valid under every domain constraint, recorded in both sessions and asked;
+    - held-back rules, with Priya's forbid still enforced (with her quote);
+    - both answers → `rule.revised` with BOTH quotes, Asha's exception quote as `contradicts`, both experts in `confirmedBy` → `witness.resolved` in both sessions → rerun finds nothing;
+    - different answers stay open;
+    - refusals;
+    - each debrief reads only its own rules;
+    - a spoken Hindi answer is quoted in Hindi with its translation;
+    - agreement on a third action → a new rule confirmed by both.
+  - `apps/web/test/server/tutor-language.test.ts`, plus the Part B tests listed in api-notes §16.
+- **Witness found** (unit and e2e): `{customerStatus: existing, accountAgeMonths: 24, jurisdictionRisk: high, …}`, decided Asha → approve, Priya → enhanced review. That is the long-standing high-risk exception.
+- **e2e:** `apps/web/e2e/two-experts.spec.ts` (public APIs, frames uploaded, LLM_CALLS=off). Screenshots are `docs/evidence/p10/two-experts-disagreement.png` and `two-experts-resolved.png`.
+- **Hindi:** the local production build with real Sonnet (scripted transcript) is at `docs/evidence/p10/hindi-local-scripted.{json,txt}`, and the synthetic TTS audio is `hindi-run-synthetic-voice.wav` / `hindi-tts.json`.
+- **The live ASR run (`docs/evidence/p10/hindi-run.{json,txt}`) is pending.** It needs the redeploy of this tree and `pnpm agents:sync` (interviewer v3). Then run `pnpm live:hindi`.
+
+### Open issues
+1. A disagreement is searched on request (`POST /api/disagreements`, or the page's button), not after every rule change. Until a search records it, nothing is held back.
+2. The search runs in the base feature model; rules over session-confirmed concepts are left out of it.
+3. Typed Hindi quotes (debrief forms) are not detected or translated. Only spoken utterances are.
+
+---
+
+## P11 — Verified replay mode (2026-10-04)
+
+**Goal.** Plan §10–12: replay a genuine run through the same UI if the network fails. The replay is labelled and sourced from a real run, and is never mocked. Spec and integrity scheme: `docs/replay.md`.
+
+### Status: acceptance met locally; the demo bundle of the live acceptance run is still to export
+
+**Built.**
+- `pnpm replay:export` (`scripts/replay-export.ts`) uses public read APIs only and prefers IPv4. It writes an immutable bundle:
+  - the complete ledgers of the linked sessions;
+  - the cases;
+  - the server views at export;
+  - the redacted frames;
+  - audio only with `--audio`, and only if ElevenLabs has it.
+  
+  Integrity is a sha256 for every file plus a hash chain over all entries in timeline order: `link_i = sha256(link_{i-1} ‖ canonicalJson(entry_i))`. The bundle id ends in the chain head. The export also:
+  - refuses if the run grew during export;
+  - warns when the live rulebook holds rules from sessions outside the bundle;
+  - can write the small manifest copy for git (`--manifest-copy docs/replay`).
+- `pnpm replay:import` uploads a bundle through the guarded import endpoint (`PUT|POST /api/replays/:id/import…`, bearer `CUSTOM_LLM_SECRET`). The server re-verifies the bundle before moving it into `DATA_DIR/replays` and never overwrites one.
+- `/replay` and `/replay/<id>`:
+  - The page re-verifies the bundle on every load. On a mismatch it refuses with the reason.
+  - A persistent banner reads "VERIFIED REPLAY — recorded run … integrity ✓ (n entries, chain …)", with a "Try live" link.
+  - Controls: play, pause, seek by entry, speed 0.5–32×, and an option to shorten idle gaps.
+  - The same components render the replay: CaseDesk, tutor cards, debrief, Work Map, HUD, ticker and compliance strip.
+- **Derivations.** Every replayed view comes from the recorded entries, using the live code:
+  - client: `tickerLines`, `computeCompliance`, `summariseLedger`;
+  - server: `snapshot`/`debriefState`, the new `readOnlyWorkMap`, `tutorState`.
+  
+  The server functions run over a scratch in-memory SQLite holding the first n entries verbatim. Its ledger refuses writes, there is no model client, and Z3 runs as it does live. The HUD comes from the recorded gate entries; live timing signals are not recorded, and the HUD says so. At the end of the recording, the replay cross-checks its views against the views the server returned at export.
+- **Shared edits (kept minimal).**
+  - `HudBar` is split into `HudDisplay`.
+  - `EventTicker` takes a `caption`.
+  - The debrief cards and `WorkMapBody` are now exported.
+  - `workmap.ts` is split into the pure `workMapInput`/`workMapResponse` plus `readOnlyWorkMap`.
+  - `server.ts` registers the replay service.
+  - `/api/health` reports `commit` (`RAILWAY_GIT_COMMIT_SHA`/`GIT_COMMIT`, else null).
+
+**Measured.**
+- `apps/web/test/server/replay.test.ts` and `test/client/replay.test.ts`: 16 tests. They cover:
+  - chain definition and determinism;
+  - export → bundle → verify, and immutability;
+  - tampering (one byte in an entry → file hash; a forged hash → chain; one byte in a frame → refused and no longer served);
+  - guarded import;
+  - **parity**:
+    - the replayed debrief equals the live `GET /debrief`, coverage included, except `llmAvailable`;
+    - the tutor view, ticker lines, compliance strip and CaseDesk equal the live ones, both at the end and at the moment of the intervention;
+  - read-only derivation.
+- Full `vitest run`: 1385 passed, 1 todo.
+- `e2e/replay.spec.ts`, isolated (`NEXT_DIST_DIR=.next-p11 E2E_PORT=4411`): 1/1 passed in 12 s. The test:
+  1. makes a genuine run through public APIs (LLM_CALLS=off);
+  2. exports it (101 entries, 3 frames);
+  3. opens the replay and checks the banner shows integrity ✓;
+  4. plays, with ticker and strip in step;
+  5. seeks to the intervention (strip earned) and back (un-earned);
+  6. shows the debrief, the Work Map, and the end-of-run cross-check (debrief ✓, tutor ✓);
+  7. tampers one frame byte → refused with the reason, then restores it → plays again.
+  
+  Screenshots: `docs/evidence/p11/replay-*.png`. Export log: `docs/evidence/p11/replay-export.log`.
+
+**Open issues.**
+1. The demo bundle has not been exported yet; it needs the session ids of the live acceptance run. The command is in `docs/replay.md`.
+2. Work Map titles and summary are the labelled templates in replay; the recorded model prose is not stored in any public API.
+3. Lineage trace buttons are hidden in replay (the trace route reads the live ledger).
+4. Audio is opt-in (`--audio`) and depends on ElevenLabs retention (30 days on our agents).

@@ -127,6 +127,8 @@ function WorkspaceBody({ session }: { session: SessionRef }) {
     sessionId: session.sessionId,
     mode: session.mode,
     privacyInit: ws.load.status === "ready" ? ws.load.privacy : undefined,
+    // The interviewer listens and speaks in the expert's declared language (plan §7.11).
+    ...(ws.load.status === "ready" && { language: ws.load.expertLanguage }),
     capture: ws.capture,
     // Reported by the Screen capture card (components/capture): true only while frames are being captured.
     screenShared,

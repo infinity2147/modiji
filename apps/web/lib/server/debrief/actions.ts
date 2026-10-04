@@ -35,12 +35,15 @@ import {
   type LedgerReader,
   type NonQuoteLink,
   type PromotionResult,
+  type Question,
   type StatedRule,
   type Witness,
 } from "@vashistha/core";
 import type { ExpertActionRequest } from "../../contracts/debrief";
 import { ApiFailure } from "../casedesk/http";
 import { requireOnRecord } from "../casedesk/session";
+import { quoteLanguageFields } from "../interview/language";
+import { localizeQuestion } from "../interview/llm";
 import { entry, type EntryContext, type PayloadInput } from "../interview/ledger";
 import type { DebriefDeps } from "./deps";
 import { witnessQuestion } from "./questions";
@@ -198,7 +201,7 @@ type NewRule = {
 };
 
 function newRule(deps: DebriefDeps, snap: Snapshot, input: NewRule): ConfirmedRule {
-  const expertId = expertIdOf(snap.loaded.session.id);
+  const expertId = expertIdOf(snap.loaded);
   const predicate = "candidate" in input.source ? input.source.candidate.predicate : input.source.predicate;
   const action = "candidate" in input.source ? input.source.candidate.predictedAction : input.source.action;
   const shape: RuleShape = { id: input.ruleId, decisionFamily: input.family, kind: "decision", predicate, effect: { type: "recommend", action }, priority: DEBRIEF_RULE_PRIORITY, overrides: [] };
@@ -242,7 +245,7 @@ function revisedRule(
   const family = familyOf(old.decisionFamily);
   const nominal = old.effect.type === "recommend" || old.effect.type === "forbid" ? old.effect.action : family.actions[0];
   if (nominal === undefined) throw new ApiFailure(400, "unknown_family", `family ${family.id} has no actions`);
-  const expertId = expertIdOf(snap.loaded.session.id);
+  const expertId = expertIdOf(snap.loaded);
   const check = promoted(
     promoteToConfirmedRule({
       ruleId: old.id,
@@ -283,8 +286,8 @@ function statedQuotes(snap: Snapshot, candidate: CandidateRule, moment: [string,
     const stated = outcome?.statedRules.find((s) => s.status === "candidate" && s.candidateId === candidate.id);
     if (stated === undefined) return [];
     const { utteranceId } = parseLedgerPayload(e, "answer.parsed");
-    const frames = snap.engine.utterances.get(utteranceId)?.frameIds ?? [];
-    const [first, ...rest] = frames;
+    const utterance = snap.engine.utterances.get(utteranceId);
+    const [first, ...rest] = utterance?.frameIds ?? [];
     const quote: ExpertQuoteEvidence = {
       kind: "expert_quote",
       utteranceId,
@@ -295,9 +298,20 @@ function statedQuotes(snap: Snapshot, candidate: CandidateRule, moment: [string,
       eventIds: [],
       relation: "supports",
       provenance: "human_voice",
+      // A quote in another language keeps the original words; its machine translation is attached for display.
+      ...quoteLanguageFields(utterance, stated.rule.exactQuote),
     };
     return [quote];
   });
+}
+
+/**
+ * The question as the session's expert hears it (plan §7.11): translated into their language by the
+ * interview's localizer (`textEnglish` keeps the English original); unchanged for English, without a
+ * model, or when the translation is rejected. Only this stored text is ever authorised and spoken.
+ */
+function inExpertLanguage(deps: DebriefDeps, snap: Snapshot, question: Question): Promise<Question> {
+  return localizeQuestion(deps.claude, question, snap.engine.expert?.language ?? "en", deps.log);
 }
 
 // ── Solver rerun ──
@@ -318,7 +332,7 @@ async function resolveVanished(deps: DebriefDeps, before: Snapshot, w: Writer, r
  * open one that has none live, and drops queued questions whose witness is closed or gone. (The
  * interview engine's requeue supersedes only live-interview kinds, never these.)
  */
-function recordAndAsk(deps: DebriefDeps, snap: Snapshot, w: Writer): void {
+async function recordAndAsk(deps: DebriefDeps, snap: Snapshot, w: Writer): Promise<void> {
   const sessionId = snap.loaded.session.id;
   const contextVersion = deps.authorizations.getContextVersion(sessionId);
   const ruleEntryIds = ruleEntries(snap.book);
@@ -332,7 +346,7 @@ function recordAndAsk(deps: DebriefDeps, snap: Snapshot, w: Writer): void {
     if (!isOpen(snap, wit)) continue;
     const record = snap.questions.get(wit.id);
     if (record?.status === "queued" || record?.status === "asked") continue;
-    w.append("question.queued", "engine", [found.id], witnessQuestion(snap, wit, { createdAt: deps.now(), contextVersion, parentIds: [found.id] }));
+    w.append("question.queued", "engine", [found.id], await inExpertLanguage(deps, snap, witnessQuestion(snap, wit, { createdAt: deps.now(), contextVersion, parentIds: [found.id] })));
   }
   for (const [witnessId, record] of snap.questions) {
     if (record.status !== "queued") continue;
@@ -377,7 +391,18 @@ function applyVoiceAnswer(deps: DebriefDeps, snap: Snapshot, w: Writer, utteranc
     deps.log.info(`[debrief] voice answer ${utterance.id} not applied: no redacted screen frame is on record for it`);
     return undefined;
   }
-  const quote: ExpertQuoteEvidence = { kind: "expert_quote", utteranceId: utterance.id, exactQuote: record.text, t0Ms: record.t0Ms, t1Ms: record.t1Ms, frameIds: moment, eventIds: [], relation: "supports", provenance: "human_voice" };
+  const quote: ExpertQuoteEvidence = {
+    kind: "expert_quote",
+    utteranceId: utterance.id,
+    exactQuote: record.text,
+    t0Ms: record.t0Ms,
+    t1Ms: record.t1Ms,
+    frameIds: moment,
+    eventIds: [],
+    relation: "supports",
+    provenance: "human_voice",
+    ...quoteLanguageFields(record, record.text),
+  };
   const rule = newRule(deps, snap, {
     ruleId: contentId("rule", canonicalJson({ utterance: utterance.id, witness: wit.id })),
     family: wit.decisionFamily,
@@ -396,7 +421,7 @@ async function rebuild(deps: DebriefDeps, sessionId: string, w: Writer): Promise
     const change = applyVoiceAnswer(deps, snap, w, utterance);
     snap = change === undefined ? await snapshot(deps, sessionId) : await resolveVanished(deps, snap, w, change.entry, "rule_added");
   }
-  recordAndAsk(deps, snap, w);
+  await recordAndAsk(deps, snap, w);
   return snap;
 }
 
@@ -432,7 +457,7 @@ async function teachBack(deps: DebriefDeps, snap: Snapshot, w: Writer): Promise<
     "question.queued",
     "engine",
     [tb.id],
-    QuestionSchema.parse({
+    await inExpertLanguage(deps, snap, QuestionSchema.parse({
       id: contentId("q", canonicalJson({ s: sessionId, k: "teach_back", t: tb.id })),
       sessionId,
       kind: "teach_back",
@@ -444,7 +469,7 @@ async function teachBack(deps: DebriefDeps, snap: Snapshot, w: Writer): Promise<
       createdAt: deps.now(),
       contextVersion: deps.authorizations.getContextVersion(sessionId),
       parentIds: [tb.id],
-    }),
+    })),
   );
 }
 
@@ -613,8 +638,8 @@ export function applyExpertAction(deps: DebriefDeps, sessionId: string, req: Exp
               overrides: [],
               evidence: [typedQuote(statementId, req.quote, frames)],
               links: decisionLinks(momentDecision === undefined ? [] : [momentDecision]),
-              confirmation: { expertId: expertIdOf(sessionId), at: deps.now(), method: "debrief", ledgerEntryId: statementId },
-              expertId: expertIdOf(sessionId),
+              confirmation: { expertId: expertIdOf(snap.loaded), at: deps.now(), method: "debrief", ledgerEntryId: statementId },
+              expertId: expertIdOf(snap.loaded),
               schemaVersion: snap.schemaVersion,
               ledger,
             }),
@@ -637,7 +662,7 @@ export function applyExpertAction(deps: DebriefDeps, sessionId: string, req: Exp
     }
 
     const after = change === undefined ? await snapshot(deps, sessionId) : await resolveVanished(deps, snap, w, change.entry, change.kind);
-    recordAndAsk(deps, after, w);
+    await recordAndAsk(deps, after, w);
     if (regenerateTeachBack) await teachBack(deps, await snapshot(deps, sessionId), w);
     return { statementId: statementEntry.id, derivedIds: w.ids.filter((id) => id !== statementEntry.id) };
   });

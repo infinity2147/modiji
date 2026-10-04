@@ -1,0 +1,12 @@
+P4 checks — session f4f88cde-7b1c-4ac6-892b-9dbe5279f192 (expert speech: synthetic voice input, ElevenLabs TTS)
+threshold-style rule or candidate: true (confirmed threshold rules: 1; stated threshold candidates: 1; hypothesis threshold candidates: 0)
+guardrail/exception confirmed: false (0)
+unresolved concept surfaced: true (screeningSourceOfFundsDocuments, caseStructure)
+every promoted rule passes evidence validation: true (1 rule.confirmed)
+answers parsed (answer.parsed): 2
+
+rule rule_0825544f35bccb [decision] effect={"type":"recommend","action":"enhancedReview"} method=explicit_statement provenance=human_voice frames=2 valid=true
+  predicate={"and":[{">":[{"var":"uboOwnershipPct"},25]},{"==":[{"var":"uboVerified"},false]}]}
+  quote="Anything over 25% that isn't verified goes to enhanced review."
+
+Production rulebook after the run: revision 15, 15 rules

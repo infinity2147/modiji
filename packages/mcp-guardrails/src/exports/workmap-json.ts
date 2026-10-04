@@ -5,7 +5,8 @@
  */
 import { WorkMapSchema, type WorkMap } from "@vashistha/core";
 
-type Json = string | number | boolean | null | Json[] | { [key: string]: Json };
+/** JSON values as zod outputs them: optional object fields may be absent (undefined), and are dropped. */
+type Json = string | number | boolean | null | Json[] | { [key: string]: Json | undefined };
 
 function canonical(value: Json): Json {
   if (Array.isArray(value)) return value.map(canonical);

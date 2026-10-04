@@ -18,9 +18,9 @@ const RULE_EVENT_SOURCES: readonly string[] = ["engine", "expert"];
 export type RuleField = Exclude<keyof ConfirmedRule, "id">;
 
 export type RulebookEvent =
-  | { kind: "confirmed"; ledgerEntryId: string; ruleId: string; rulebookRevision: number }
+  | { kind: "confirmed"; ledgerEntryId: string; ruleId: string; rulebookRevision: number; rule: ConfirmedRule }
   | { kind: "revised"; ledgerEntryId: string; ruleId: string; rulebookRevision: number; before: ConfirmedRule; after: ConfirmedRule; fields: RuleField[]; reason: string }
-  | { kind: "retired"; ledgerEntryId: string; ruleId: string; rulebookRevision: number; reason: string };
+  | { kind: "retired"; ledgerEntryId: string; ruleId: string; rulebookRevision: number; before: ConfirmedRule; reason: string };
 
 export type Rulebook = {
   /** Current rules, in order of first confirmation. */
@@ -61,7 +61,7 @@ export function rulebookFromLedger(entries: readonly Pick<LedgerEntry, "id" | "s
       else {
         live.set(p.data.rule.id, p.data.rule);
         used.add(p.data.rule.id);
-        history.push({ kind: "confirmed", ledgerEntryId: e.id, ruleId: p.data.rule.id, rulebookRevision: ++revision });
+        history.push({ kind: "confirmed", ledgerEntryId: e.id, ruleId: p.data.rule.id, rulebookRevision: ++revision, rule: p.data.rule });
       }
     } else if (e.kind === RULE_EVENT_KINDS.revised) {
       const p = RuleRevisedPayloadSchema.safeParse(e.payload);
@@ -77,15 +77,44 @@ export function rulebookFromLedger(entries: readonly Pick<LedgerEntry, "id" | "s
       }
     } else {
       const p = RuleRetiredPayloadSchema.safeParse(e.payload);
+      const before = p.success ? live.get(p.data.ruleId) : undefined;
       if (!p.success) reject(e, `invalid payload: ${z.prettifyError(p.error)}`);
-      else if (!live.has(p.data.ruleId)) reject(e, `rule ${p.data.ruleId} is not live`);
+      else if (before === undefined) reject(e, `rule ${p.data.ruleId} is not live`);
       else {
         live.delete(p.data.ruleId);
-        history.push({ kind: "retired", ledgerEntryId: e.id, ruleId: p.data.ruleId, rulebookRevision: ++revision, reason: p.data.reason });
+        history.push({ kind: "retired", ledgerEntryId: e.id, ruleId: p.data.ruleId, rulebookRevision: ++revision, before, reason: p.data.reason });
       }
     }
   }
   return { rules: [...live.values()], revision, history, rejected };
+}
+
+/**
+ * The experts a rule belongs to (plan §7.10): its author and every expert who confirmed it. A rule two
+ * experts reconciled carries both, so it is in both experts' rulebooks.
+ */
+export function ruleExperts(rule: Pick<ConfirmedRule, "expertId" | "confirmedBy">): string[] {
+  return [...new Set([rule.expertId, ...rule.confirmedBy.map((c) => c.expertId)])];
+}
+
+/**
+ * One expert's rulebook, a view of the folded (global) rulebook: the live rules the expert belongs to
+ * (`ruleExperts`), and the history of the events that touched such a rule — a confirmation of one, a
+ * revision whose before or after version is theirs, a retirement of one. The view renumbers its own
+ * revisions (1..n), so one expert's rulebook revision moves only when their rules change. Rejected
+ * events are the global book's (a rejected event never belonged to anyone's rulebook).
+ */
+export function expertRulebook(book: Rulebook, expertId: string): Rulebook {
+  const mine = (r: ConfirmedRule): boolean => ruleExperts(r).includes(expertId);
+  const touched = book.history.filter((h) =>
+    h.kind === "confirmed" ? mine(h.rule) : h.kind === "revised" ? mine(h.before) || mine(h.after) : mine(h.before),
+  );
+  return {
+    rules: book.rules.filter(mine),
+    revision: touched.length,
+    history: touched.map((h, i) => ({ ...h, rulebookRevision: i + 1 })),
+    rejected: book.rejected,
+  };
 }
 
 export type RuleDiff = {

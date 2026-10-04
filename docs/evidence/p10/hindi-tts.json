@@ -1,0 +1,41 @@
+{
+  "label": "SYNTHETIC VOICE INPUT — the expert's speech is ElevenLabs text-to-speech, not a person",
+  "startedAt": "2026-10-04T00:43:53.760Z",
+  "target": "https://vashistha-production.up.railway.app",
+  "transcriptSource": "ElevenLabs agent ASR (Scribe realtime) of the synthetic speech",
+  "scriptedText": "अगर देश हाई-रिस्क लिस्ट पर है, तो मैं डेस्क लेवल पर अप्रूव नहीं करती। ऐसे केस में पहले एन्हांस्ड रिव्यू होता है।",
+  "steps": [
+    {
+      "at": "2026-10-04T00:43:54.227Z",
+      "step": "agent",
+      "detail": "vashistha-interviewer-v2; presets []; client language override NOT allowed (sync agents v3); input pcm_16000"
+    },
+    {
+      "at": "2026-10-04T00:43:55.861Z",
+      "step": "tts",
+      "detail": "eleven_multilingual_v2 → 7059 ms of pcm_16000"
+    }
+  ],
+  "checks": [
+    {
+      "name": "tts produced audio",
+      "ok": true,
+      "detail": "225884 bytes"
+    }
+  ],
+  "agent": {
+    "modelId": "vashistha-interviewer-v2",
+    "languagePresets": [],
+    "clientLanguageOverrideAllowed": false,
+    "userInputAudioFormat": "pcm_16000"
+  },
+  "tts": {
+    "label": "SYNTHETIC VOICE INPUT — the expert's speech is ElevenLabs text-to-speech, not a person",
+    "model": "eleven_multilingual_v2",
+    "voiceId": "XrExE9yKIg1WjnnlVkGX",
+    "outputFormat": "pcm_16000",
+    "durationMs": 7059,
+    "wav": "hindi-run-synthetic-voice.wav"
+  },
+  "finishedAt": "2026-10-04T00:43:55.862Z"
+}

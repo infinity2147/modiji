@@ -17,7 +17,10 @@
     "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm test:bundle",
     "db:generate": "pnpm --filter @vashistha/core db:generate",
     "agents:sync": "pnpm --filter @vashistha/web exec tsx ../../scripts/agents.ts",
-    "preflight": "pnpm --filter @vashistha/web exec tsx ../../scripts/preflight.ts"
+    "preflight": "pnpm --filter @vashistha/web exec tsx ../../scripts/preflight.ts",
+    "live:hindi": "pnpm --filter @vashistha/web exec tsx ../../scripts/live-hindi-run.ts",
+    "replay:export": "pnpm --filter @vashistha/web exec tsx ../../scripts/replay-export.ts",
+    "replay:import": "pnpm --filter @vashistha/web exec tsx ../../scripts/replay-import.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

@@ -120,7 +120,14 @@ export function replayMoment(ledger: Pick<Ledger, "get">, quote: ExpertQuoteEvid
 
 export function quoteView(ledger: Pick<Ledger, "get">, rule: ConfirmedRule): ExpertQuoteView {
   const quote = primaryQuote(rule);
-  return { text: quote.exactQuote, attribution: attribution(quote), replay: replayMoment(ledger, quote) };
+  const foreign = quote.language !== undefined && quote.language !== "en" ? quote.language : undefined;
+  return {
+    text: quote.exactQuote,
+    ...(foreign !== undefined && { language: foreign }),
+    ...(foreign !== undefined && quote.translation !== undefined && { translation: quote.translation }),
+    attribution: attribution(quote),
+    replay: replayMoment(ledger, quote),
+  };
 }
 
 function featureList(features: readonly FeatureId[]): string {
@@ -131,9 +138,9 @@ function featureList(features: readonly FeatureId[]): string {
   return names.length <= 1 ? (names[0] ?? "the missing details") : `${names.slice(0, -1).join(", ")} and ${names.at(-1) ?? ""}`;
 }
 
-/** First of the candidates within the word budget; the last one is the fallback. */
-function within(candidates: readonly [string, ...string[]]): string {
-  return candidates.find((c) => wordCount(c) <= MAX_INTERVENTION_WORDS) ?? candidates[candidates.length - 1] ?? candidates[0];
+/** First of the candidates (`preferred` first) within the word budget; the last one is the fallback. */
+function within(candidates: readonly [string, ...string[]], preferred: readonly string[] = []): string {
+  return [...preferred, ...candidates].find((c) => wordCount(c) <= MAX_INTERVENTION_WORDS) ?? candidates[candidates.length - 1] ?? candidates[0];
 }
 
 /**
@@ -141,6 +148,16 @@ function within(candidates: readonly [string, ...string[]]): string {
  * at most ~40 words. The quote is never shortened: when it does not fit, the plain wording goes first,
  * and when even the quote alone is too long, the novice is pointed to the quote on screen.
  */
+/**
+ * How the (English) tutor voices the expert's words: verbatim when they spoke English; for another
+ * language, the labelled machine translation (the original is on screen), or nothing when no
+ * translation is on record — the tutor never reads a quote in a language it does not speak.
+ */
+function spokenQuote(quote: ExpertQuoteEvidence): string[] {
+  if (quote.language === undefined || quote.language === "en") return [`The expert said: "${quote.exactQuote}"`];
+  return quote.translation === undefined ? [] : [`The expert said, in machine translation: "${quote.translation}"`];
+}
+
 export function interventionText(input: {
   rule: ConfirmedRule;
   trigger: "guardrail_violation" | "insufficient_information";
@@ -148,15 +165,11 @@ export function interventionText(input: {
   missingFeatures: readonly FeatureId[];
 }): string {
   const { rule, trigger } = input;
-  const quote = primaryQuote(rule).exactQuote;
   const plain =
     trigger === "guardrail_violation"
       ? `Careful — ${thenText(rule)} when ${whenText(rule)}.`
       : `Careful — before you ${actionPhrase(KYC_DOMAIN, input.proposedAction)}, check ${featureList(input.missingFeatures)}: the expert's rule depends on it.`;
-  return within([
-    `${plain} The expert said: "${quote}"`,
-    `Careful — the expert said: "${quote}"`,
-    `${plain} The expert's words are on your screen.`,
-    `Careful — ${thenText(rule)} here. The expert's words are on your screen.`,
-  ]);
+  const quoted = spokenQuote(primaryQuote(rule)).flatMap((said) => [`${plain} ${said}`, `Careful — ${said.charAt(0).toLowerCase()}${said.slice(1)}`]);
+  const fallback = `Careful — ${thenText(rule)} here. The expert's words are on your screen.`;
+  return within([`${plain} The expert's words are on your screen.`, fallback], quoted);
 }

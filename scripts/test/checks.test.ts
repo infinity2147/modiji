@@ -142,7 +142,7 @@ describe("agents", () => {
   it("passes when both agents match the spec, the invariants and the current secret", async () => {
     const r = await checkAgents({ ...ctx, createElevenLabs: () => client() });
     expect(r.detail).toBe(
-      "interviewer (vashistha-interviewer-v2), tutor (vashistha-tutor-v2): invariants hold, spec matches, client tools match, secret reference current",
+      "interviewer (vashistha-interviewer-v3), tutor (vashistha-tutor-v2): invariants hold, spec matches, client tools match, secret reference current",
     );
     expect(r.status).toBe("pass");
     expect(r.facts).toMatchObject({ interviewer: { clientTools: [`set_off_record=${TOOL_ID}`] } });
@@ -253,7 +253,7 @@ describe("public-llm", () => {
     const r = await result;
     expect(r.detail).toMatch(/^401 without\/with wrong bearer; unauthorised → skip_turn/);
     expect(r.status).toBe("pass");
-    expect(r.facts).toMatchObject({ model: "vashistha-interviewer-v2", skipTurn: { ok: true, reason: "not_control_message" }, speech: { ok: true }, replay: { ok: true } });
+    expect(r.facts).toMatchObject({ model: "vashistha-interviewer-v3", skipTurn: { ok: true, reason: "not_control_message" }, speech: { ok: true }, replay: { ok: true } });
     const chat = server.requests.filter((q) => q.path === "/api/llm/chat/completions");
     expect(chat.map((q) => q.authorized)).toEqual([false, false, true, true, true]);
   });

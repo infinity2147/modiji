@@ -11,7 +11,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useConversation, useConversationClientTool } from "@elevenlabs/react";
 import { z } from "zod";
-import { DEFAULT_GATE_CONFIG, SET_OFF_RECORD_TOOL, systemClock, type AgentRole } from "@vashistha/core";
+import { DEFAULT_GATE_CONFIG, SET_OFF_RECORD_TOOL, systemClock, type AgentRole, type ExpertLanguage } from "@vashistha/core";
 import type { SessionMode } from "../../contracts/casedesk";
 import { describeError, type FetchFn } from "../api";
 import { createGateSession, type GateSession, type GateSnapshot } from "../gate/gate-session";
@@ -106,8 +106,16 @@ export function useInterviewLoop(options: {
    * redacted frame of the screen at the moment of the expert's quote. The tutor does not need it.
    */
   screenShared: boolean;
+  /**
+   * The expert's declared language (plan §7.11; default English). A non-English session starts the
+   * interviewer with that language (`overrides.agent.language`, which ElevenLabs uses for ASR and TTS —
+   * allowed by the agent spec, api-notes §16), and each utterance carries it as a detection prior. The
+   * tutor always speaks English.
+   */
+  language?: ExpertLanguage;
 }): InterviewLoop {
   const { sessionId, mode, privacyInit, screenShared } = options;
+  const language: ExpertLanguage = mode === "expert" ? (options.language ?? "en") : "en";
   const agent = AGENT_FOR_MODE[mode];
   const [loop, setLoop] = useState<Loop | null>(null);
   const [privacy, setPrivacy] = useState<PrivacyController | null>(null);
@@ -177,6 +185,7 @@ export function useInterviewLoop(options: {
       privacy: () => privacyRef.current?.state() ?? { offRecord: true, epoch: -1 },
       vadThreshold: DEFAULT_GATE_CONFIG.vadSpeakingThreshold,
       onOffRecordPhrase: () => void privacyRef.current?.goOffRecord(),
+      language,
     });
     const gate = createGateSession({
       sessionId,
@@ -204,7 +213,7 @@ export function useInterviewLoop(options: {
         // Already ended.
       }
     };
-  }, [sessionId, agent, loaded, cues]);
+  }, [sessionId, agent, loaded, cues, language]);
 
   // The privacy controller exists once the session's privacy state is known.
   const offRecordAtLoad = privacyInit?.offRecord;
@@ -275,11 +284,12 @@ export function useInterviewLoop(options: {
         conversationRef.current.startSession({
           conversationToken: result.token.token,
           customLlmExtraBody: { sessionId },
+          ...(language !== "en" && { overrides: { agent: { language } } }),
         });
       },
       (error: unknown) => setVoice({ state: "error", message: describeError(error) }),
     );
-  }, [agent, sessionId]);
+  }, [agent, sessionId, language]);
 
   const disconnect = useCallback(() => {
     conversationRef.current.endSession();
