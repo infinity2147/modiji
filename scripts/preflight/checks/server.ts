@@ -125,12 +125,16 @@ export async function checkServerDeep(ctx: Ctx): Promise<CheckOutcome> {
 export async function checkSandbox(ctx: Omit<Ctx, "env">): Promise<CheckOutcome> {
   const target = httpTarget(ctx.target);
   if (!target.ok) return { status: "fail", detail: target.error };
-  const r = await httpRequest(ctx, joinUrl(target.baseUrl, "/sandbox"));
-  const facts: Facts = { status: r.status, bytes: r.text.length, ms: r.ms };
+  // Accounts: the workbench needs a signed-in account, so an anonymous visitor is redirected to the sign-in page.
+  // That redirect proves both that the route is up and that the gate is on; the sign-in page itself must serve.
+  const gate = await httpRequest(ctx, joinUrl(target.baseUrl, "/sandbox"));
+  const login = await httpRequest(ctx, joinUrl(target.baseUrl, "/login"));
+  const facts: Facts = { sandboxStatus: gate.status, sandboxLocation: gate.location, loginStatus: login.status, ms: gate.ms + login.ms };
   const problems: string[] = [];
-  if (r.status !== 200) problems.push(`HTTP ${r.status}`);
-  if (!r.contentType.startsWith("text/html")) problems.push(`content-type ${r.contentType || "missing"}, expected text/html`);
-  if (!r.text.includes("CaseDesk")) problems.push(`page does not contain "CaseDesk"`);
-  if (problems.length > 0) return { status: "fail", detail: `/sandbox: ${problems.join("; ")}`, facts };
-  return { status: "pass", detail: `/sandbox 200 text/html with "CaseDesk" (${r.ms} ms)`, facts };
+  const redirectsToLogin = gate.status >= 300 && gate.status < 400 && new URL(gate.location, target.baseUrl).pathname === "/login";
+  if (!redirectsToLogin) problems.push(`/sandbox: expected a redirect to /login for an anonymous visitor, got HTTP ${gate.status}${gate.location ? ` to ${gate.location}` : ""}`);
+  if (login.status !== 200) problems.push(`/login: HTTP ${login.status}`);
+  else if (!login.contentType.startsWith("text/html")) problems.push(`/login: content-type ${login.contentType || "missing"}, expected text/html`);
+  if (problems.length > 0) return { status: "fail", detail: problems.join("; "), facts };
+  return { status: "pass", detail: `/sandbox redirects anonymous visitors to /login (HTTP ${gate.status}); /login 200 text/html (${gate.ms + login.ms} ms)`, facts };
 }

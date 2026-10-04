@@ -43,17 +43,18 @@ export async function checkToken(
     problems.push(`public endpoint: ${target.error}`);
   } else {
     try {
+      // Accounts: every token costs agent minutes, so the public endpoint now requires a signed-in account.
+      // Minting itself is proven above with the server-side key; here the gate must refuse an anonymous caller.
       const r = await httpRequest(ctx, joinUrl(target.baseUrl, "/api/voice/token?agent=interviewer"));
       const body = parseJsonObject(r.text);
-      if (typeof body?.token === "string") ctx.secrets.add(body.token);
-      if (r.status !== 200) {
-        const error = typeof body?.error === "string" ? ` (${body.error})` : "";
-        problems.push(`GET /api/voice/token?agent=interviewer returned HTTP ${r.status}${error}`);
-      } else if (typeof body?.token !== "string" || body.token === "" || typeof body.conversationId !== "string") {
-        problems.push("GET /api/voice/token?agent=interviewer: body is not { token, conversationId }");
+      if (typeof body?.token === "string") {
+        ctx.secrets.add(body.token);
+        problems.push("GET /api/voice/token?agent=interviewer minted a token for an anonymous caller");
+      } else if (r.status !== 401) {
+        problems.push(`GET /api/voice/token?agent=interviewer without a login: expected HTTP 401, got ${r.status}`);
       } else {
-        facts.public = { conversationId: body.conversationId, ms: r.ms };
-        lines.push(`public /api/voice/token ${r.ms} ms`);
+        facts.public = { status: r.status, ms: r.ms };
+        lines.push(`public /api/voice/token refuses anonymous callers (401, ${r.ms} ms)`);
       }
     } catch (error) {
       problems.push(`public endpoint: ${describeError(error)}`);

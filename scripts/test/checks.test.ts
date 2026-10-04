@@ -211,7 +211,7 @@ describe("agents", () => {
 });
 
 describe("token", () => {
-  it("mints tokens for both agents and through the public endpoint, registering every token as a secret", async () => {
+  it("mints tokens for both agents, and the public endpoint refuses an anonymous caller; every minted token is registered as a secret", async () => {
     const ctx = makeContext();
     const minted: string[] = [];
     const eleven = fakeElevenLabs();
@@ -230,16 +230,17 @@ describe("token", () => {
       },
     });
     expect(r.status).toBe("pass");
-    expect(r.detail).toMatch(/^interviewer token \d+ ms; tutor token \d+ ms; public \/api\/voice\/token \d+ ms$/);
+    expect(r.detail).toMatch(/^interviewer token \d+ ms; tutor token \d+ ms; public \/api\/voice\/token refuses anonymous callers \(401, \d+ ms\)$/);
     for (const token of minted) expect(ctx.secrets.text(`x ${token}`)).toBe("x [redacted]");
-    expect(JSON.stringify(r.facts)).toContain("conv_public_1");
+    expect(r.facts).toMatchObject({ public: { status: 401 } });
   });
 
-  it("fails when the public endpoint does not mint", async () => {
-    const ctx = makeContext({ fetch: fakeServer({ voiceTokenStatus: 502 }).fetch });
+  it("fails when the public endpoint mints a token for an anonymous caller (no accounts gate)", async () => {
+    const ctx = makeContext({ fetch: fakeServer({ accountsOff: true }).fetch });
     const r = await checkToken(ctx);
     expect(r.status).toBe("fail");
-    expect(r.detail).toContain("returned HTTP 502 (upstream_error)");
+    expect(r.detail).toContain("minted a token for an anonymous caller");
+    expect(ctx.secrets.text(JSON.stringify(r))).not.toContain("public-token-");
   });
 });
 
@@ -363,11 +364,15 @@ describe("server-deep and sandbox", () => {
     await expect(checkServerDeep(makeContext({ cliTarget: "https://elsewhere.example" }))).rejects.toThrow("GET /api/health: fetch failed");
   });
 
-  it("sandbox passes on HTML containing CaseDesk and fails otherwise", async () => {
-    expect((await checkSandbox(makeContext())).status).toBe("pass");
-    const r = await checkSandbox(makeContext({ fetch: fakeServer({ sandboxHtml: "<p>Not found</p>" }).fetch }));
-    expect(r).toMatchObject({ status: "fail", detail: '/sandbox: page does not contain "CaseDesk"' });
+  it("sandbox passes when an anonymous visitor is redirected to a working /login, and fails without the gate", async () => {
+    const ok = await checkSandbox(makeContext());
+    expect(ok.status).toBe("pass");
+    expect(ok.detail).toMatch(/^\/sandbox redirects anonymous visitors to \/login \(HTTP 302\); \/login 200 text\/html/);
+    const open = await checkSandbox(makeContext({ fetch: fakeServer({ accountsOff: true }).fetch }));
+    expect(open.status).toBe("fail");
+    expect(open.detail).toContain("expected a redirect to /login for an anonymous visitor, got HTTP 200");
   });
+
 });
 
 describe("permissions", () => {

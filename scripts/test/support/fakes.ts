@@ -129,8 +129,8 @@ export type FakeServerBehaviour = {
   gc?: { count: number; totalPauseMs: number; maxPauseMs: number; sinceMs: number };
   /** CPU-throttle counters `/api/health/deep` reports; `null` means the cgroup exposes none; omitted by default. */
   cpuThrottle?: { nrPeriods: number; nrThrottled: number; throttledMs: number } | null;
-  sandboxHtml?: string;
-  voiceTokenStatus?: number;
+  /** Behave like a server without accounts: the workbench and the voice-token endpoint answer anonymous callers. */
+  accountsOff?: boolean;
 };
 
 /** An in-memory deployment implementing the server contract (health, deep, sandbox, authorize, custom LLM, token). */
@@ -146,6 +146,7 @@ export function fakeServer(behaviour: FakeServerBehaviour = {}, wallClock: () =>
     const authorized = headers.get("authorization") === `Bearer ${SECRET}`;
     requests.push({ method, path: `${url.pathname}${url.search}`, authorized });
     const json = (body: unknown, status = 200) => Response.json(body, { status });
+    const html = (body: string) => new Response(body, { headers: { "content-type": "text/html; charset=utf-8" } });
 
     if (!url.href.startsWith(BASE_URL) && !url.href.startsWith("http://127.0.0.1")) throw new TypeError("fetch failed");
     switch (`${method} ${url.pathname}`) {
@@ -172,11 +173,12 @@ export function fakeServer(behaviour: FakeServerBehaviour = {}, wallClock: () =>
         return json(body, ok ? 200 : 503);
       }
       case "GET /sandbox":
-        return new Response(behaviour.sandboxHtml ?? "<!doctype html><title>CaseDesk</title><h1>CaseDesk</h1>", {
-          headers: { "content-type": "text/html; charset=utf-8" },
-        });
+        if (behaviour.accountsOff) return html("<!doctype html><title>CaseDesk</title><h1>CaseDesk</h1>");
+        return new Response(null, { status: 302, headers: { location: `${BASE_URL}/login?next=%2Fsandbox` } });
+      case "GET /login":
+        return html("<!doctype html><title>Sign in</title><h1>Sign in</h1>");
       case "GET /api/voice/token":
-        if (behaviour.voiceTokenStatus !== undefined) return json({ error: "upstream_error" }, behaviour.voiceTokenStatus);
+        if (!behaviour.accountsOff) return json({ error: "unauthorized" }, 401);
         return json({ token: `public-token-${randomBytes(12).toString("hex")}`, conversationId: "conv_public_1" });
       case "POST /api/preflight/authorize": {
         if (!authorized) return json({ error: "unauthorized" }, 401);

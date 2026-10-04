@@ -4,7 +4,7 @@
  */
 import type { PreflightContext } from "./types";
 
-export type HttpResult = { status: number; contentType: string; text: string; ms: number };
+export type HttpResult = { status: number; contentType: string; location: string; text: string; ms: number };
 
 export class CheckFailure extends Error {
   override readonly name: string = "CheckFailure";
@@ -58,6 +58,7 @@ export async function httpRequest(
     return {
       status: response.status,
       contentType: response.headers.get("content-type") ?? "",
+      location: response.headers.get("location") ?? "",
       text,
       ms: Math.round(ctx.now() - started),
     };
