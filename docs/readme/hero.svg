@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="420" viewBox="0 0 1280 420" role="img" aria-labelledby="t d">
+  <title id="t">Sage — The AI Apprentice</title>
+  <desc id="d">Sage captures an expert's judgment while they work, maps it, and teaches it to the next hire. LLMs infer. Experts confirm. Code enforces.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F6F8F2"/>
+      <stop offset="1" stop-color="#E6EDDF"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="leafA" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#4A6645"/>
+      <stop offset="1" stop-color="#6E8C67"/>
+    </linearGradient>
+    <linearGradient id="leafB" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#7C9A78"/>
+      <stop offset="1" stop-color="#A3B88F"/>
+    </linearGradient>
+    <linearGradient id="leafC" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#93AE85"/>
+      <stop offset="1" stop-color="#BFCDA6"/>
+    </linearGradient>
+    <!-- one leaf, base at the origin, pointing along +x -->
+    <g id="leaf">
+      <path d="M0 0 C 18 -22 58 -26 86 0 C 58 26 18 22 0 0 Z"/>
+    </g>
+    <path id="rib" d="M2 0 C 30 -2 58 -1 82 0" fill="none" stroke="#F3F5EF" stroke-opacity="0.55" stroke-width="1.6" stroke-linecap="round"/>
+    <clipPath id="frame"><rect width="1280" height="420" rx="18"/></clipPath>
+  </defs>
+
+  <g clip-path="url(#frame)">
+    <rect width="1280" height="420" fill="url(#bg)"/>
+
+    <!-- faint large leaf watermark, bottom right -->
+    <g transform="translate(1135 470) rotate(-128) scale(4.2)" fill="#8BA888" fill-opacity="0.13">
+      <use href="#leaf"/>
+    </g>
+    <g transform="translate(1250 360) rotate(-150) scale(2.6)" fill="#A3B18A" fill-opacity="0.14">
+      <use href="#leaf"/>
+    </g>
+
+    <!-- emblem: a sprig of sage in a soft disc -->
+    <circle cx="190" cy="196" r="150" fill="url(#glow)"/>
+    <circle cx="190" cy="196" r="118" fill="#FFFFFF" stroke="#D8E0CF" stroke-width="2"/>
+    <circle cx="190" cy="196" r="104" fill="none" stroke="#E7EDE1" stroke-width="1.5" stroke-dasharray="2 6" stroke-linecap="round"/>
+    <g transform="translate(190 196) scale(0.84) translate(-192 -194)">
+      <path d="M150 300 C 168 252 182 212 196 176 C 208 146 220 118 232 92" fill="none" stroke="#55724F" stroke-width="5" stroke-linecap="round"/>
+      <!-- leaves, bottom to top, alternating sides -->
+      <g transform="translate(166 258) rotate(-162) scale(0.92)" fill="url(#leafA)"><use href="#leaf"/><use href="#rib"/></g>
+      <g transform="translate(172 244) rotate(-20) scale(0.95)" fill="url(#leafA)"><use href="#leaf"/><use href="#rib"/></g>
+      <g transform="translate(186 204) rotate(-168) scale(0.78)" fill="url(#leafB)"><use href="#leaf"/><use href="#rib"/></g>
+      <g transform="translate(194 186) rotate(-28) scale(0.80)" fill="url(#leafB)"><use href="#leaf"/><use href="#rib"/></g>
+      <g transform="translate(208 150) rotate(-176) scale(0.60)" fill="url(#leafC)"><use href="#leaf"/><use href="#rib"/></g>
+      <g transform="translate(214 136) rotate(-36) scale(0.62)" fill="url(#leafC)"><use href="#leaf"/><use href="#rib"/></g>
+      <g transform="translate(231 95) rotate(-72) scale(0.48)" fill="url(#leafC)"><use href="#leaf"/></g>
+      <!-- an ochre bud: the one thing that needs attention -->
+      <circle cx="152" cy="296" r="6" fill="#D9A441"/>
+    </g>
+
+    <!-- wordmark -->
+    <g font-family="-apple-system, 'Segoe UI', Inter, Helvetica, Arial, sans-serif">
+      <text x="352" y="92" font-size="15" font-weight="700" letter-spacing="3.2" fill="#55724F">A VOICE AGENT THAT LEARNS ON THE JOB</text>
+      <text x="346" y="186" font-size="104" font-weight="800" letter-spacing="-3" fill="#22301F">Sage</text>
+      <text x="352" y="228" font-size="22" fill="#3F4F3A">
+        <tspan font-weight="700" fill="#55724F">The AI Apprentice</tspan><tspan> — captures an expert's judgment while they work,</tspan>
+      </text>
+      <text x="352" y="258" font-size="22" fill="#3F4F3A">maps it, and teaches it to the next hire</text>
+
+      <!-- motto -->
+      <rect x="352" y="282" width="440" height="42" rx="21" fill="#F8EDD3" stroke="#E4C27A" stroke-width="1.5"/>
+      <text x="572" y="309" font-size="18" font-weight="700" text-anchor="middle">
+        <tspan fill="#9A6B15">LLMs infer.</tspan><tspan fill="#22301F" dx="8">Experts confirm.</tspan><tspan fill="#55724F" dx="8">Code enforces.</tspan>
+      </text>
+
+      <!-- three-step strip -->
+      <g transform="translate(352 352)" font-size="14">
+        <rect x="0" y="0" width="868" height="40" rx="10" fill="#FFFFFF" fill-opacity="0.75" stroke="#D8E0CF"/>
+        <g transform="translate(18 20)">
+          <circle cx="10" cy="0" r="10" fill="#55724F"/>
+          <text x="10" y="5" font-size="12" font-weight="700" fill="#FFFFFF" text-anchor="middle">1</text>
+          <text x="28" y="5.5" fill="#22301F"><tspan font-weight="700">Capture</tspan><tspan fill="#5B6853"> · asks why at a natural pause</tspan></text>
+        </g>
+        <path d="M300 20 h22 m-6 -5 l6 5 l-6 5" fill="none" stroke="#8BA888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <g transform="translate(338 20)">
+          <circle cx="10" cy="0" r="10" fill="#55724F"/>
+          <text x="10" y="5" font-size="12" font-weight="700" fill="#FFFFFF" text-anchor="middle">2</text>
+          <text x="28" y="5.5" fill="#22301F"><tspan font-weight="700">Map</tspan><tspan fill="#5B6853"> · rules the expert confirmed</tspan></text>
+        </g>
+        <path d="M584 20 h22 m-6 -5 l6 5 l-6 5" fill="none" stroke="#8BA888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <g transform="translate(622 20)">
+          <circle cx="10" cy="0" r="10" fill="#D9A441"/>
+          <text x="10" y="5" font-size="12" font-weight="700" fill="#3A2A06" text-anchor="middle">3</text>
+          <text x="28" y="5.5" fill="#22301F"><tspan font-weight="700">Teach</tspan><tspan fill="#5B6853"> · tutors the next hire</tspan></text>
+        </g>
+      </g>
+    </g>
+
+    <!-- voice ripple near the wordmark: a quiet nod to the voice agent -->
+    <g transform="translate(1150 120)" fill="none" stroke="#55724F" stroke-linecap="round">
+      <path d="M0 -18 v36" stroke-width="5" stroke-opacity="0.85"/>
+      <path d="M14 -30 v60" stroke-width="5" stroke-opacity="0.7"/>
+      <path d="M28 -12 v24" stroke-width="5" stroke-opacity="0.55"/>
+      <path d="M42 -24 v48" stroke-width="5" stroke-opacity="0.4"/>
+      <path d="M56 -6 v12" stroke-width="5" stroke-opacity="0.3"/>
+      <path d="M-14 -8 v16" stroke-width="5" stroke-opacity="0.55"/>
+    </g>
+  </g>
+</svg>

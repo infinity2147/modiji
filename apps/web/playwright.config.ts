@@ -23,12 +23,15 @@ process.env.E2E_DATA_DIR ??= mkdtempSync(join(tmpdir(), "vashistha-e2e-"));
 const DATA_ROOT = process.env.E2E_DATA_DIR;
 
 /**
- * The perception fixture recorder (`@record`) and the OCR latency measurement (`@measure`) run only
+ * The perception fixture recorder (`@record`), the OCR latency measurement (`@measure`) and the README screenshots (`@readme`) run only
  * when asked for, e.g. `playwright test --grep @record`. The test list is built in this (runner)
  * process, so only its command line matters. A spec whose tests are all on demand gets no server otherwise.
  */
-const ON_DEMAND = /@record|@measure/;
-const onDemand = process.argv.some((arg) => ON_DEMAND.test(arg));
+const ON_DEMAND = /@record|@measure|@readme/;
+// Workers re-load this file with their own command line; the variable carries the runner's choice to them,
+// or an on-demand spec's project would be missing in the worker.
+const onDemand = process.env.E2E_ON_DEMAND === "1" || process.argv.some((arg) => ON_DEMAND.test(arg));
+if (onDemand) process.env.E2E_ON_DEMAND = "1";
 
 const specs = readdirSync(TEST_DIR)
   .filter((file) => file.endsWith(".spec.ts"))
