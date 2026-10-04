@@ -1,7 +1,10 @@
 /**
- * Unseen practice cases (plan §7.7): Z3 boundary cases (`practiceCases`) for the weakest rules of
+ * Unseen practice cases (plan §7.7): Z3 cases (`practiceCases`) at the edge of the weakest rules of
  * the novice's ladder, each turned into a complete synthetic KYC case, and cases a judge enters by
- * hand. Both are recorded as `case.generated` in the session (source `engine` for the solver's,
+ * hand. Per rule the solver gives its boundary cases (just below / at / just above a numeric
+ * threshold, origin `boundary_practice`) and then contrast cases (one condition of the rule pivotal,
+ * the rule firing or just missing because of it, origin `contrast_practice`), so rules made only of
+ * yes/no and category conditions get practice cases too. Both are recorded as `case.generated` in the session (source `engine` for the solver's,
  * `client` for a judge's) and are then worked like any other case of the session.
  *
  * From witness to case: the witness is a complete valid assignment. The generator is pinned to it on
@@ -24,6 +27,7 @@ import {
   type Assignment,
   type ConfirmedRule,
   type FeatureId,
+  type LedgerPayload,
   type MasteryLevel,
 } from "@vashistha/core";
 import {
@@ -40,13 +44,15 @@ import { JudgeFeaturesSchema, type JudgeFeatures } from "../../contracts/tutor";
 import { ApiFailure } from "../casedesk/http";
 import { CASEDESK_SCHEMA_VERSION, type LoadedSession } from "../casedesk/session";
 import { entry } from "../interview/ledger";
-import type { BoundaryWitness, TutorDeps } from "./deps";
+import type { PracticeWitness, TutorDeps } from "./deps";
 import { taughtRules } from "./rules";
 import { entryContext, ruleEntryIds } from "./session";
 import { tutorRecord } from "./state";
 
 /** Practice cases made per request. */
 export const PRACTICE_BATCH = 3;
+/** The solver's largest `count` (witnesses.ts MAX_LIMIT); past it a long session simply runs out of new cases. */
+const SOLVER_MAX_COUNT = 1000;
 /** Reserved id ranges (cases.ts uses 01xx–03xx and 4000+): practice NS-2026-1000…1999, judge NS-2026-2000…2999. */
 const PRACTICE_FIRST_ID = 1000;
 const JUDGE_FIRST_ID = 2000;
@@ -126,29 +132,43 @@ export function weakestRules(rules: readonly ConfirmedRule[], levels: ReadonlyMa
 
 export type PracticeResult = { cases: KycCase[]; note: string | null };
 
+type SolverOrigin = Extract<LedgerPayload<"case.generated">["origin"], { kind: "boundary_practice" | "contrast_practice" }>;
+
+/** The solver-made origins (judge cases are not practice witnesses). */
+function isSolverOrigin(origin: LedgerPayload<"case.generated">["origin"]): origin is SolverOrigin {
+  return origin.kind === "boundary_practice" || origin.kind === "contrast_practice";
+}
+
+/** The ledger origin of a practice case built from `witness`. */
+function originOf(witness: PracticeWitness): SolverOrigin {
+  return witness.kind === "boundary"
+    ? { kind: "boundary_practice", witnessId: witness.id, ruleId: witness.ruleId, feature: witness.feature, threshold: witness.threshold, side: witness.side }
+    : { kind: "contrast_practice", witnessId: witness.id, ruleId: witness.ruleId, feature: witness.feature, fires: witness.fires };
+}
+
 export async function generatePractice(deps: TutorDeps, loaded: LoadedSession): Promise<PracticeResult> {
   const sessionId = loaded.session.id;
   const book = deps.rulebook();
   const weakest = weakestRules(taughtRules(book.rules), tutorRecord(deps.ledger, sessionId).mastery);
   if (weakest.length === 0)
     return { cases: [], note: book.rules.length === 0 ? "The expert has not confirmed any rules yet." : "Every rule is mastered (heuristic estimate)." };
-  const usedBefore = [...tutorRecord(deps.ledger, sessionId).generated.values()].filter((g) => g.payload.origin.kind === "boundary_practice").length;
+  const usedBefore = [...tutorRecord(deps.ledger, sessionId).generated.values()].filter((g) => isSolverOrigin(g.payload.origin)).length;
   const witnesses = await deps.practice({
     domain: KYC_DOMAIN,
     rules: book.rules,
     ruleIds: weakest.map((r) => r.id),
-    count: usedBefore + PRACTICE_BATCH,
+    count: Math.min(usedBefore + PRACTICE_BATCH, SOLVER_MAX_COUNT),
     schemaVersion: CASEDESK_SCHEMA_VERSION,
   });
 
   // Re-read after the solver: everything from here to the append is synchronous.
   const record = tutorRecord(deps.ledger, sessionId);
-  const usedWitnesses = new Set([...record.generated.values()].flatMap((g) => (g.payload.origin.kind === "boundary_practice" ? [g.payload.origin.witnessId] : [])));
+  const usedWitnesses = new Set([...record.generated.values()].flatMap((g) => (isSolverOrigin(g.payload.origin) ? [g.payload.origin.witnessId] : [])));
   const ids = [...record.generated.keys()];
   const pinned = pinnedFeatures(book.rules);
   const ruleEntries = ruleEntryIds(book);
   const ctx = entryContext(deps, loaded);
-  const made: { kycCase: KycCase; witness: BoundaryWitness }[] = [];
+  const made: { kycCase: KycCase; witness: PracticeWitness }[] = [];
   const skipped: string[] = [];
   for (const witness of witnesses) {
     if (made.length === PRACTICE_BATCH) break;
@@ -166,17 +186,22 @@ export async function generatePractice(deps: TutorDeps, loaded: LoadedSession): 
       entry(ctx, "case.generated", "engine", [loaded.info.startedEntryId, ...[ruleEntries.get(witness.ruleId)].filter((id) => id !== undefined)], {
         domainId: KYC_DOMAIN.id,
         case: kycCase,
-        origin: { kind: "boundary_practice", witnessId: witness.id, ruleId: witness.ruleId, feature: witness.feature, threshold: witness.threshold, side: witness.side },
+        origin: originOf(witness),
       }),
     ),
   );
   for (const reason of skipped) deps.log.warn(`[tutor] practice witness skipped: ${reason}`);
+  const unbuilt = `${skipped.length} solver case${skipped.length === 1 ? "" : "s"} could not be built as a KYC case`;
   const note =
     made.length === PRACTICE_BATCH
       ? null
-      : made.length === 0 && witnesses.length === 0
-        ? "The rules you have not mastered have no numeric thresholds, so the solver finds no boundary cases. Enter a case by hand instead."
-        : `Made ${made.length} of ${PRACTICE_BATCH}: the solver has no further distinct boundary cases for these rules.`;
+      : witnesses.length === 0
+        ? "The solver finds no valid case where the rules you have not mastered decide the outcome. Enter a case by hand instead."
+        : made.length === 0
+          ? skipped.length === 0
+            ? "You have already practised every distinct case the solver finds for the rules you have not mastered. Enter a case by hand instead."
+            : `${unbuilt}. Enter a case by hand instead.`
+          : `Made ${made.length} of ${PRACTICE_BATCH}: ${skipped.length === 0 ? "the solver has no further distinct cases for these rules" : unbuilt}.`;
   return { cases: made.map((m) => m.kycCase), note };
 }
 

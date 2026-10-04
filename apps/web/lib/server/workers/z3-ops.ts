@@ -5,8 +5,10 @@
  */
 import { z } from "zod";
 import {
+  AssignmentSchema,
   ConfirmedRuleSchema,
   DomainConfigSchema,
+  FeatureIdSchema,
   IdSchema,
   SchemaVersionSchema,
   SymbolIdSchema,
@@ -23,6 +25,17 @@ const SELF_TEST_TIMEOUT_MS = 30_000;
 const RulesSchema = z.array(ConfirmedRuleSchema).readonly();
 const DisagreementWitnessSchema = WitnessSchema.and(z.object({ kind: z.literal("disagreement") }));
 const BoundaryWitnessSchema = WitnessSchema.and(z.object({ kind: z.literal("boundary") }));
+/** The solver-local `ContrastWitness` of `@vashistha/solver` (not one of core's witness kinds). */
+const ContrastWitnessSchema = z.strictObject({
+  kind: z.literal("contrast"),
+  id: IdSchema,
+  decisionFamily: SymbolIdSchema,
+  assignment: AssignmentSchema,
+  schemaVersion: SchemaVersionSchema,
+  ruleId: IdSchema,
+  feature: FeatureIdSchema,
+  fires: z.boolean(),
+});
 
 export const Z3_OPS = {
   witnesses: {
@@ -50,7 +63,7 @@ export const Z3_OPS = {
       count: z.int(),
       schemaVersion: SchemaVersionSchema,
     }),
-    output: z.array(BoundaryWitnessSchema),
+    output: z.array(z.union([BoundaryWitnessSchema, ContrastWitnessSchema])),
     timeoutMs: SEARCH_TIMEOUT_MS,
   },
   selfTest: {

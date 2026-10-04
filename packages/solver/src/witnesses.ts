@@ -1,7 +1,7 @@
 /**
  * Solver queries (plan §7.5, §7.7, §7.10, §9). Each runs on a fresh solver in the shared Z3 context,
  * asserts the domain's typed bounds and `domainConstraints`, and returns schema-valid witnesses with
- * deterministic ids. Every witness is re-verified with the Kleene evaluator over the decoded
+ * deterministic ids (the tutor's contrast cases are a solver-local kind, see `ContrastWitness`). Every witness is re-verified with the Kleene evaluator over the decoded
  * assignment (domain constraints, and the property the query claims, via the reference semantics in
  * semantics.ts); a disagreement throws, since it would be a solver bug.
  *
@@ -14,16 +14,18 @@ import {
   SchemaVersionSchema,
   WitnessSchema,
   evaluatePredicate,
+  featuresReferenced,
   typecheckPredicate,
   type Assignment,
   type DecisionFamily,
   type DomainConfig,
+  type FeatureId,
   type FeatureLookup,
   type Predicate,
   type Witness,
 } from "@vashistha/core";
 import type { Bool, Context, Solver } from "z3-solver";
-import { Encoding, leaves, stepAt, thresholdAtoms, type ThresholdAtom } from "./encode";
+import { Encoding, leaves, stepAt, thresholdAtoms } from "./encode";
 import { add, rationalOf, toNumber, type Rational } from "./numbers";
 import {
   SolverInputError,
@@ -46,9 +48,33 @@ export type ConflictWitness = Extract<Witness, { kind: "conflict" }>;
 export type BoundaryWitness = Extract<Witness, { kind: "boundary" }>;
 export type DisagreementWitness = Extract<Witness, { kind: "disagreement" }>;
 
+/**
+ * A practice case at the edge of a rule without (or beyond) a numeric threshold (`findContrasts`):
+ * a valid case where the rule is not overridden, one condition of the rule on `feature` is pivotal
+ * (flipping it flips the rule), and the rule `fires` on the case or just misses because of that
+ * condition. Solver-local: not one of core's `WitnessSchema` kinds, since it is never a gap in the
+ * rulebook, only a case to practise on.
+ */
+export type ContrastWitness = {
+  kind: "contrast";
+  id: string;
+  decisionFamily: string;
+  assignment: Assignment;
+  schemaVersion: number;
+  ruleId: string;
+  /** The feature of the pivotal condition; for a rule none of whose conditions can be pivotal, the first feature it reads. */
+  feature: FeatureId;
+  /** The rule fires on the case (its predicate holds and no overrider fires); false: it does not fire, by that condition. */
+  fires: boolean;
+};
+/** What `practiceCases` returns: boundary cases first, then contrast cases. */
+export type PracticeWitness = BoundaryWitness | ContrastWitness;
+
 type Common = { domain: DomainConfig; schemaVersion: number; limit?: number };
 export type FamilyQuery = Common & { rules: readonly SolverRule[]; family: string };
 export type BoundaryQuery = Common & { rules: readonly SolverRule[]; ruleId: string };
+/** `avoid`: cases already shown for the rule (e.g. its boundary cases); witnesses lie in other decision cells. */
+export type ContrastQuery = BoundaryQuery & { avoid?: readonly Assignment[] };
 export type DisagreementQuery = Common & {
   rulesA: readonly SolverRule[];
   rulesB: readonly SolverRule[];
@@ -59,7 +85,7 @@ export type DisagreementQuery = Common & {
 export type PracticeQuery = { domain: DomainConfig; rules: readonly SolverRule[]; ruleIds: readonly string[]; count: number; schemaVersion: number };
 export type EquivalenceResult = { equivalent: true } | { equivalent: false; counterexample: Assignment };
 
-export const DEFAULT_LIMITS = { unresolved: 5, conflict: 10, boundary: 30, disagreement: 5 } as const;
+export const DEFAULT_LIMITS = { unresolved: 5, conflict: 10, boundary: 30, disagreement: 5, contrast: 10 } as const;
 const MAX_LIMIT = 1000;
 
 /**
@@ -182,7 +208,7 @@ export async function findBoundaries(q: BoundaryQuery): Promise<BoundaryWitness[
         const assignment = await enc.solveCanonical(solver).finally(() => solver.pop());
         if (assignment === undefined) continue;
         const lookup = enc.verify(assignment);
-        if (assignment[atom.feature] !== js || !isPivotal(rule.predicate, atom, lookup) || overriders.some((o) => holdsIn(o.predicate, lookup)))
+        if (assignment[atom.feature] !== js || !isPivotal(rule.predicate, atom.path, lookup) || overriders.some((o) => holdsIn(o.predicate, lookup)))
           soundnessFailure("boundary", assignment);
         out.push(
           witness<BoundaryWitness>({
@@ -252,26 +278,77 @@ export async function findDisagreements(q: DisagreementQuery): Promise<Disagreem
 }
 
 /**
- * Unseen practice cases for the tutor (plan §7.7): boundary cases of the given rules (weakest first),
- * interleaved round-robin across rules, distinct assignments, at most `count`.
+ * Contrast cases of a rule, for conditions a boundary search cannot reach (boolean and enum
+ * comparisons, `in` lists, feature-to-feature comparisons) and then for its numeric comparisons too.
+ * For each leaf condition of the rule's predicate (first occurrence of each distinct leaf; non-numeric
+ * leaves first, then threshold comparisons, each in predicate order) and each of `fires` true/false:
+ * a valid case where no overrider of the rule fires, that leaf is pivotal (forcing it true vs false
+ * changes the predicate, the same query as `findBoundaries`) and the predicate holds iff `fires`.
+ *
+ * Variety: each witness lies in a different practice cell, and none in the cell of an `avoid` case. A
+ * cell is the truth values of every leaf of every rule (as in `findUnresolved`) and of the domain
+ * constraints coupled to the features the rulebook reads, and the value of every boolean and enum
+ * feature among those (`practiceScope`); it is finite, so the search ends. Round 1 gives every (leaf, fires) its canonical
+ * case; later rounds give each another case in a new cell (the same contrast with another value or
+ * other conditions changed), until `limit` or every pair is exhausted. So the list for a larger limit
+ * extends the list for a smaller one.
+ *
+ * Fallback: when no condition of the rule can be pivotal in any such case (its predicate is constant on
+ * the non-overridden valid cases), plain cases where the rule fires / does not fire, not overridden,
+ * attributed to the first feature the rule reads.
  */
-export async function practiceCases(q: PracticeQuery): Promise<BoundaryWitness[]> {
-  const count = parseLimit(q.count);
-  const perRule: BoundaryWitness[][] = [];
-  for (const ruleId of q.ruleIds)
-    perRule.push(await findBoundaries({ domain: q.domain, rules: q.rules, ruleId, schemaVersion: q.schemaVersion, limit: MAX_LIMIT }));
-  const out: BoundaryWitness[] = [];
-  const seen = new Set<string>();
-  for (let i = 0; out.length < count && perRule.some((ws) => i < ws.length); i++)
-    for (const ws of perRule) {
-      const w = ws[i];
-      if (w === undefined || out.length >= count) continue;
-      const key = canonicalJson(w.assignment);
-      if (seen.has(key)) continue;
-      seen.add(key);
+export async function findContrasts(q: ContrastQuery): Promise<ContrastWitness[]> {
+  const { limit } = options(q, DEFAULT_LIMITS.contrast);
+  const out: ContrastWitness[] = [];
+  const stream = contrasts(q);
+  try {
+    for await (const w of stream) {
       out.push(w);
+      if (out.length >= limit) break;
     }
+  } finally {
+    await stream.return(undefined);
+  }
   return out;
+}
+
+/**
+ * Unseen practice cases for the tutor (plan §7.7). Per rule (weakest first): its boundary cases, then
+ * its contrast cases in other decision cells, so a rule with no numeric threshold still gets cases.
+ * Interleaved round-robin across rules, distinct assignments, at most `count`. Contrast cases are
+ * computed lazily, only as far as the round-robin reads, and the result for a larger `count` extends
+ * the result for a smaller one, so a caller can skip the witnesses it has already used.
+ */
+export async function practiceCases(q: PracticeQuery): Promise<PracticeWitness[]> {
+  const count = parseLimit(q.count);
+  const streams: AsyncGenerator<PracticeWitness, void>[] = [];
+  try {
+    for (const ruleId of q.ruleIds) {
+      const query = { domain: q.domain, rules: q.rules, ruleId, schemaVersion: q.schemaVersion };
+      const boundaries = await findBoundaries({ ...query, limit: MAX_LIMIT });
+      streams.push(chain<PracticeWitness>(boundaries, contrasts({ ...query, avoid: boundaries.map((w) => w.assignment) })));
+    }
+    const out: PracticeWitness[] = [];
+    const seen = new Set<string>();
+    let live = streams;
+    while (out.length < count && live.length > 0) {
+      const next: AsyncGenerator<PracticeWitness, void>[] = [];
+      for (const stream of live) {
+        if (out.length >= count) break;
+        const item = await stream.next();
+        if (item.done === true) continue;
+        next.push(stream);
+        const key = canonicalJson(item.value.assignment);
+        if (seen.has(key)) continue;
+        seen.add(key);
+        out.push(item.value);
+      }
+      live = next;
+    }
+    return out;
+  } finally {
+    for (const stream of streams) await stream.return(undefined);
+  }
 }
 
 /** Logical equivalence of two predicates over all valid cases (bench metric, plan §9), with a counterexample. */
@@ -292,6 +369,112 @@ export async function equivalent(q: { domain: DomainConfig; a: Predicate; b: Pre
 // ---------------------------------------------------------------------------------------------
 
 const UNRESOLVED_KEY = "unresolved";
+
+/** One contrast query: `path` undefined is the fallback (rule fires / does not fire, no pivotal leaf). */
+type ContrastPair = { path: string | undefined; feature: FeatureId; fires: boolean };
+
+/** The contrast cases of `q.ruleId` in `findContrasts` order, unbounded (cells are finite, so it ends). Holds a solver until finished or returned. */
+async function* contrasts(q: ContrastQuery): AsyncGenerator<ContrastWitness, void> {
+  const { schemaVersion } = options(q, 1);
+  const book = prepareRulebook(q.domain, q.rules);
+  const rule = book.byId.get(q.ruleId);
+  if (rule === undefined) throw new SolverInputError([`unknown rule "${q.ruleId}"`]);
+  const overriders = book.overriders.get(rule.id) ?? [];
+  const thresholdPaths = new Set(thresholdAtoms(rule.predicate, q.domain).map((a) => a.path));
+  const distinct = uniqueBy(leaves(rule.predicate), (l) => canonicalJson(l.leaf));
+  const targets = [...distinct.filter((l) => !thresholdPaths.has(l.path)), ...distinct.filter((l) => thresholdPaths.has(l.path))].flatMap(
+    (l): ContrastPair[] => {
+      const [feature] = featuresReferenced(l.leaf);
+      return feature === undefined ? [] : [true, false].map((fires) => ({ path: l.path, feature, fires }));
+    },
+  );
+  const [firstFeature] = featuresReferenced(rule.predicate);
+  if (firstFeature === undefined) return;
+  const all = book.rules.map((r) => r.predicate);
+  const { ctx } = await getZ3();
+  const solver = new ctx.Solver();
+  try {
+    const enc = new Encoding(ctx, q.domain, all);
+    const scope = practiceScope(q.domain, all);
+    const coupled = q.domain.domainConstraints.filter((c) => featuresReferenced(c).some((f) => scope.has(f)));
+    const cell = uniqueLeaves([...all, ...coupled, ...valueLeaves(q.domain, scope)]);
+    const predicate = enc.encode(rule.predicate);
+    solver.add(...enc.constraints, ctx.Not(ctx.Or(...overriders.map((o) => enc.encode(o.predicate)))));
+    for (const a of q.avoid ?? []) {
+      const known = cell.filter((leaf) => featuresReferenced(leaf).every((f) => Object.hasOwn(a, f)));
+      if (known.length > 0) solver.add(enc.blockCell(known, enc.lookup(a)));
+    }
+    let found = 0;
+    const rounds = async function* (pairs: readonly ContrastPair[]): AsyncGenerator<ContrastWitness, void> {
+      for (let live = pairs; live.length > 0; ) {
+        const next: ContrastPair[] = [];
+        for (const pair of live) {
+          const { path, feature, fires } = pair;
+          solver.push();
+          solver.add(fires ? predicate : ctx.Not(predicate));
+          if (path !== undefined)
+            solver.add(ctx.Xor(enc.encode(rule.predicate, { path, value: true }), enc.encode(rule.predicate, { path, value: false })));
+          const assignment = await enc.solveCanonical(solver).finally(() => solver.pop());
+          if (assignment === undefined) continue;
+          const lookup = enc.verify(assignment);
+          if (
+            holdsIn(rule.predicate, lookup) !== fires ||
+            (path !== undefined && !isPivotal(rule.predicate, path, lookup)) ||
+            overriders.some((o) => holdsIn(o.predicate, lookup))
+          )
+            soundnessFailure("contrast", assignment);
+          // Every later witness of this rule lies in another decision cell.
+          solver.add(enc.blockCell(cell, lookup));
+          next.push(pair);
+          found++;
+          yield contrastWitness({ kind: "contrast", decisionFamily: rule.decisionFamily, assignment, schemaVersion, ruleId: rule.id, feature, fires });
+        }
+        live = next;
+      }
+    };
+    yield* rounds(targets);
+    if (found === 0) yield* rounds([true, false].map((fires) => ({ path: undefined, feature: firstFeature, fires })));
+  } finally {
+    solver.release();
+  }
+}
+
+/**
+ * The features a practice case shows as decided by the rulebook: those its predicates read, closed under
+ * the domain constraints that couple features (as the tutor pins them when it builds the case). Other
+ * features are drawn at random for the case, so varying them in a witness would add nothing.
+ */
+function practiceScope(domain: DomainConfig, predicates: readonly Predicate[]): Set<FeatureId> {
+  const scope = new Set(predicates.flatMap(featuresReferenced));
+  const groups = domain.domainConstraints.map(featuresReferenced);
+  for (let grew = true; grew; ) {
+    grew = false;
+    for (const group of groups)
+      if (group.some((f) => scope.has(f)) && group.some((f) => !scope.has(f))) {
+        for (const f of group) scope.add(f);
+        grew = true;
+      }
+  }
+  return scope;
+}
+
+/** `f == v` for every value v of each boolean and enum feature in `scope`: practice cells tell "medium" from "low". */
+function valueLeaves(domain: DomainConfig, scope: ReadonlySet<FeatureId>): Predicate[] {
+  return domain.features.flatMap((f): Predicate[] => {
+    if (!scope.has(f.id)) return [];
+    if (f.type === "boolean") return [{ "==": [{ var: f.id }, true] }];
+    return f.type === "enum" ? f.values.map((value): Predicate => ({ "==": [{ var: f.id }, value] })) : [];
+  });
+}
+
+async function* chain<T>(first: readonly T[], rest: AsyncGenerator<T, void>): AsyncGenerator<T, void> {
+  try {
+    yield* first;
+    yield* rest;
+  } finally {
+    await rest.return(undefined);
+  }
+}
 
 function outcomeOf(book: Rulebook, family: DecisionFamily, lookup: FeatureLookup): Outcome | undefined {
   const eff = effectiveDecision(book, family, lookup);
@@ -330,9 +513,9 @@ function holdsIn(p: Predicate, lookup: FeatureLookup): boolean {
   return evaluatePredicate(p, lookup).truth === true;
 }
 
-/** Re-check of pivotality with the evaluator: the predicate with the atom forced true differs from it forced false. */
-function isPivotal(p: Predicate, atom: ThresholdAtom, lookup: FeatureLookup): boolean {
-  return forcedTruth(p, atom.path, true, lookup) !== forcedTruth(p, atom.path, false, lookup);
+/** Re-check of pivotality with the evaluator: the predicate with the leaf at `path` forced true differs from it forced false. */
+function isPivotal(p: Predicate, path: string, lookup: FeatureLookup): boolean {
+  return forcedTruth(p, path, true, lookup) !== forcedTruth(p, path, false, lookup);
 }
 
 function forcedTruth(p: Predicate, target: string, value: boolean, lookup: FeatureLookup, path = ""): boolean {
@@ -375,12 +558,21 @@ function canonicalJson(value: unknown): string {
 
 type WitnessBody<W extends Witness> = Omit<W, "id">;
 
-/** Adds the deterministic id (hash of every field: kind, family, assignment and the kind's own fields) and validates. */
+/** The deterministic id: a hash of every field (kind, family, assignment and the kind's own fields). */
+function witnessId(body: { kind: string }): string {
+  return `w_${body.kind}_${createHash("sha256").update(canonicalJson(body)).digest("hex").slice(0, 24)}`;
+}
+
+/** Adds the deterministic id and validates. */
 function witness<W extends Witness>(body: WitnessBody<W>): W {
-  const digest = createHash("sha256").update(canonicalJson(body)).digest("hex").slice(0, 24);
-  const w = { ...body, id: `w_${body.kind}_${digest}` } as W;
+  const w = { ...body, id: witnessId(body) } as W;
   WitnessSchema.parse(w);
   return w;
+}
+
+/** Adds the deterministic id (contrast witnesses are solver-local, so there is no core schema to validate against). */
+function contrastWitness(body: Omit<ContrastWitness, "id">): ContrastWitness {
+  return { ...body, id: witnessId(body) };
 }
 
 function soundnessFailure(what: string, assignment: Assignment): never {

@@ -1,6 +1,6 @@
 /**
  * The cases of a CaseDesk session: its case set, plus the synthetic cases generated for it
- * (`case.generated`: tutor practice cases at a rule boundary, judge-entered cases). Generated cases
+ * (`case.generated`: tutor practice cases at a rule boundary or contrast, judge-entered cases). Generated cases
  * exist only in the session that recorded them; the ledger is their only store.
  */
 import "server-only";

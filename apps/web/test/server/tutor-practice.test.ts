@@ -1,9 +1,9 @@
-/** P6 unseen cases: solver boundary practice cases and judge-entered cases, valid and workable in their session only. */
+/** P6 unseen cases: solver practice cases (boundary and contrast) and judge-entered cases, valid and workable in their session only. */
 import { describe, expect, it } from "vitest";
 import { AssignmentSchema, evaluatePredicate, parseLedgerPayload, recordLookup } from "@vashistha/core";
 import { KYC_DOMAIN, KycCaseSchema, caseFeatures, kycCases, largestOwner } from "@vashistha/core/domains/kyc";
 import { ListCasesResponseSchema } from "../../lib/contracts/casedesk";
-import { PracticeResponseSchema } from "../../lib/contracts/tutor";
+import { PracticeResponseSchema, TutorStateSchema } from "../../lib/contracts/tutor";
 import { caseFromAssignment, pinnedFeatures } from "../../lib/server/tutor/practice";
 import { createTutorHarness, demoRules } from "../support/tutor-harness";
 
@@ -28,9 +28,9 @@ function satisfiesDomain(c: unknown): boolean {
 }
 
 describe("practice cases", () => {
-  it("are boundary cases of the weakest rules: schema-valid, constraint-satisfying, pinned to the witness, recorded with provenance", async () => {
+  it("are boundary cases of a numeric rule first: schema-valid, constraint-satisfying, pinned to the witness, recorded with provenance", async () => {
     const h = createTutorHarness();
-    const ruleEntries = await h.seedRules(demoRules());
+    const ruleEntries = await h.seedRules([demoRules()[2]!]); // largest owner > 25 % and unverified → request documents
     const sessionId = await h.session();
     const r = await h.practice(sessionId);
     expect(r.status).toBe(201);
@@ -52,10 +52,57 @@ describe("practice cases", () => {
       expect({ below: 24.9, at: 25, above: 25.1 }[payload.origin.kind === "boundary_practice" ? payload.origin.side : "at"]).toBe(share);
     }
 
-    // A second request adds no duplicate: the solver has no further distinct boundary cases here.
+    // A second request adds no duplicate: the boundary cases are used up, so contrast cases of the same
+    // rule follow (one condition pivotal, the rule firing or just missing), each in a new decision cell.
     const again = PracticeResponseSchema.parse((await h.practice(sessionId)).body);
-    expect(again.cases).toEqual([]);
-    expect(again.note).toMatch(/no further distinct boundary cases/);
+    expect(again.cases.map((c) => c.id)).toEqual(["NS-2026-1003", "NS-2026-1004", "NS-2026-1005"]);
+    const origins = h.entries(sessionId, ["case.generated"]).map((e) => parseLedgerPayload(e, "case.generated").origin);
+    expect(origins.slice(3).map((o) => o.kind)).toEqual(["contrast_practice", "contrast_practice", "contrast_practice"]);
+    expect(new Set(origins.map((o) => ("witnessId" in o ? o.witnessId : ""))).size).toBe(6);
+  });
+
+  it("rules with only yes/no and category conditions get contrast cases: the rule fires or just misses, as the solver verified", async () => {
+    const h = createTutorHarness();
+    const rules = demoRules();
+    const ruleEntries = await h.seedRules(rules);
+    const sessionId = await h.session();
+    // Weakest first, round-robin: the high-risk/new rules (no threshold) lead.
+    const { cases, note } = PracticeResponseSchema.parse((await h.practice(sessionId)).body);
+    expect(note).toBeNull();
+    expect(cases).toHaveLength(3);
+    const generated = h.entries(sessionId, ["case.generated"]).map((e) => ({ entry: e, payload: parseLedgerPayload(e, "case.generated") }));
+    const contrasts = generated.filter((g) => g.payload.origin.kind === "contrast_practice");
+    expect(contrasts.length).toBeGreaterThanOrEqual(1);
+    for (const { entry, payload } of contrasts) {
+      const origin = payload.origin;
+      if (origin.kind !== "contrast_practice") throw new Error("unreachable");
+      const rule = rules.find((r) => r.id === origin.ruleId)!;
+      expect(entry.parentIds).toContain(ruleEntries.get(rule.id));
+      expect(satisfiesDomain(payload.case)).toBe(true);
+      const lookup = recordLookup(caseFeatures(KycCaseSchema.parse(payload.case)));
+      expect(evaluatePredicate(rule.predicate, lookup).truth).toBe(origin.fires);
+      expect(["jurisdictionRisk", "customerStatus", "sanctionsHit", "uboOwnershipPct", "uboVerified"]).toContain(origin.feature);
+    }
+    // The tutor state labels them, and a further request keeps adding cases.
+    const views = TutorStateSchema.parse((await h.state(sessionId)).body).cases;
+    expect(views.filter((v) => v.origin === "contrast_practice").map((v) => v.caseId)).toEqual(contrasts.map((g) => KycCaseSchema.parse(g.payload.case).id));
+    const more = PracticeResponseSchema.parse((await h.practice(sessionId)).body);
+    expect(more.cases).toHaveLength(3);
+  });
+
+  it("a correct answer on a contrast case counts as correct at a boundary on the ladder", async () => {
+    const h = createTutorHarness();
+    await h.seedRules([demoRules()[0]!]); // high-risk country and new customer → enhanced review (no threshold)
+    const sessionId = await h.session();
+    const level = () => h.entries(sessionId, ["mastery.updated"]).map((e) => parseLedgerPayload(e, "mastery.updated").to).at(-1);
+    const judged = await h.judge(sessionId, { ...JUDGE, customerStatus: "new", accountAgeMonths: 0, jurisdictionRisk: "high" });
+    await h.predict(sessionId, (judged.body as { case: { id: string } }).case.id, "enhancedReview");
+    expect(level()).toBe("independent_once");
+    PracticeResponseSchema.parse((await h.practice(sessionId)).body);
+    const askable = TutorStateSchema.parse((await h.state(sessionId)).body).cases.filter((c) => c.origin === "contrast_practice" && c.prompt.ask);
+    expect(askable.length).toBeGreaterThanOrEqual(1);
+    await h.predict(sessionId, askable[0]!.caseId, "enhancedReview");
+    expect(level()).toBe("boundary_correct");
   });
 
   it("are available to their session (queue listing, DOM events, interlock, commit) and to no other", async () => {
@@ -81,8 +128,26 @@ describe("practice cases", () => {
     const h = createTutorHarness();
     const sessionId = await h.session();
     expect(PracticeResponseSchema.parse((await h.practice(sessionId)).body)).toMatchObject({ cases: [], note: "The expert has not confirmed any rules yet." });
-    await h.seedRules([demoRules()[0]!]); // no numeric threshold
-    expect(PracticeResponseSchema.parse((await h.practice(sessionId)).body).note).toMatch(/no numeric thresholds/);
+    // A single yes/no rule: contrast cases (match / no match, with the other case conditions varied) until
+    // the solver's distinct cases are used up, then an honest note instead of a duplicate.
+    await h.seedRules([demoRules()[3]!]);
+    const made: string[] = [];
+    let last = PracticeResponseSchema.parse((await h.practice(sessionId)).body);
+    for (let i = 0; last.cases.length === 3 && i < 30; i++) {
+      made.push(...last.cases.map((c) => c.id));
+      last = PracticeResponseSchema.parse((await h.practice(sessionId)).body);
+    }
+    made.push(...last.cases.map((c) => c.id));
+    // At least a match and a no-match; richer domains (more category values) give more.
+    expect(made.length).toBeGreaterThanOrEqual(2);
+    expect(last.cases.length).toBeLessThan(3);
+    expect(last.note).toMatch(last.cases.length === 0 ? /already practised every distinct case/ : /no further distinct cases/);
+    const origins = h.entries(sessionId, ["case.generated"]).map((e) => parseLedgerPayload(e, "case.generated").origin);
+    expect(origins.every((o) => o.kind === "contrast_practice" && o.ruleId === "rule-sanctions" && o.feature === "sanctionsHit")).toBe(true);
+    expect(new Set(origins.map((o) => (o.kind === "contrast_practice" ? o.fires : null)))).toEqual(new Set([true, false]));
+    const again = PracticeResponseSchema.parse((await h.practice(sessionId)).body);
+    expect(again.cases).toEqual([]);
+    expect(again.note).toMatch(/already practised every distinct case/);
   });
 
   it("witness → case pins every feature the rulebook reads (closed under coupling constraints) and checks the result", () => {

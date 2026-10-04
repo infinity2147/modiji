@@ -362,7 +362,7 @@ function ruleChange(snap: Snapshot): RuleChange | null {
     ruleId: last.ruleId,
     ledgerEntryId: last.ledgerEntryId,
     fields: last.kind === "revised" ? last.fields : [],
-    before: last.kind === "revised" ? view(last.before) : null,
+    before: last.kind === "confirmed" ? null : view(last.before),
     after: last.kind === "revised" ? view(last.after) : live === undefined ? null : view(live),
     reason: last.kind === "confirmed" ? null : last.reason,
   };

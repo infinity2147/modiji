@@ -7,6 +7,7 @@
 import "server-only";
 import {
   RuleConfirmedPayloadSchema,
+  RuleRetiredPayloadSchema,
   RuleRevisedPayloadSchema,
   isLedgerKind,
   lineage,
@@ -83,6 +84,10 @@ export function entrySummary(e: LedgerEntry): string {
       const { rule } = RuleRevisedPayloadSchema.parse(parseLedgerPayload(e, "rule.revised"));
       const t = ruleText(DOMAIN, rule);
       return `Revised rule (r${rule.revision}): when ${t.when}, ${t.then}`;
+    }
+    case "rule.retired": {
+      const { ruleId, reason } = RuleRetiredPayloadSchema.parse(parseLedgerPayload(e, "rule.retired"));
+      return `Deleted rule ${ruleId} (${reason})`;
     }
     case "teachback.generated":
       return `Teach-back (${parseLedgerPayload(e, "teachback.generated").origin === "llm" ? "Opus prose" : "template"})`;

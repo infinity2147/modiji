@@ -20,10 +20,12 @@ import {
   equivalent,
   findBoundaries,
   findConflicts,
+  findContrasts,
   findDisagreements,
   findUnresolved,
   practiceCases,
   prepareRulebook,
+  type ContrastWitness,
   type SolverRule,
 } from "../src/index";
 
@@ -259,13 +261,115 @@ describe("findBoundaries", () => {
 
   it("practice cases interleave the weakest rules round-robin", async () => {
     const ws = await practiceCases({ ...base, rules: FIXTURE, ruleIds: ["ubo", "longstanding"], count: 4 });
-    expect(ws.map((w) => [w.ruleId, w.side])).toEqual([
+    expect(ws.map((w) => [w.ruleId, w.kind === "boundary" ? w.side : w.kind])).toEqual([
       ["ubo", "below"],
       ["longstanding", "below"],
       ["ubo", "at"],
       ["longstanding", "at"],
     ]);
-    for (const w of ws) expectValidKycCase(w);
+    for (const w of ws) if (w.kind === "boundary") expectValidKycCase(w);
+  });
+});
+
+/** The leaf conditions of an `and` of comparisons that are false on `a`. */
+const falseConjuncts = (p: Predicate, a: Assignment): Predicate[] => ("and" in p ? p.and : [p]).filter((c) => !holds(c, a));
+
+function expectSoundContrast(w: ContrastWitness, rules: readonly SolverRule[]): void {
+  expect(w.kind).toBe("contrast");
+  expect(w.id).toMatch(/^w_contrast_[0-9a-f]{24}$/);
+  const { id, decisionFamily, assignment, schemaVersion } = w;
+  expectValidKycCase({ kind: "unresolved", id, decisionFamily, assignment, schemaVersion }); // the base fields are schema-valid, the case valid
+  const target = rules.find((r) => r.id === w.ruleId)!;
+  expect(holds(target.predicate, w.assignment)).toBe(w.fires);
+  const book = prepareRulebook(KYC_DOMAIN, rules);
+  for (const o of rules.filter((r) => r.overrides.includes(w.ruleId))) expect(holds(o.predicate, w.assignment)).toBe(false);
+  expect(book.byId.get(w.ruleId)).toBeDefined();
+}
+
+describe("findContrasts / practice cases without numeric thresholds", () => {
+  // Boolean, enum and `in` conditions only: no threshold, so no boundary cases.
+  const PEP_COMPANY = rule(
+    "pepCompany",
+    { and: [{ "==": [v("pep"), true] }, { in: [v("entityType"), ["company", "trust"]] }, { "!=": [v("sourceOfFunds"), "verified"] }] },
+    recommend("escalateCompliance"),
+    80,
+  );
+  const BOOK = [PEP_COMPANY, HIGH, LONG, SANCTIONS];
+
+  it("each condition is pivotal in a valid, non-overridden case where the rule fires and one where it just misses", async () => {
+    const ws = await findContrasts({ ...base, rules: BOOK, ruleId: "pepCompany", limit: 6 });
+    // Round 1: (pep, fires), (pep, misses), (entityType, …), (sourceOfFunds, …) — every witness in its own decision cell.
+    expect(ws.map((w) => [w.feature, w.fires])).toEqual([
+      ["pep", true],
+      ["pep", false],
+      ["entityType", true],
+      ["entityType", false],
+      ["sourceOfFunds", true],
+      ["sourceOfFunds", false],
+    ]);
+    for (const w of ws) {
+      expectSoundContrast(w, BOOK);
+      // In an `and`, a condition is pivotal iff every other conjunct holds.
+      const off = falseConjuncts(PEP_COMPANY.predicate, w.assignment);
+      if (w.fires) expect(off).toEqual([]);
+      else expect(off.map((c) => Object.values(c)[0][0].var)).toEqual([w.feature]);
+    }
+    expect(new Set(ws.map((w) => JSON.stringify(w.assignment))).size).toBe(ws.length);
+    expect(new Set(ws.map((w) => w.id)).size).toBe(ws.length);
+  });
+
+  it("an overridden rule is practised only where it is not overridden", async () => {
+    const ws = await findContrasts({ ...base, rules: BOOK, ruleId: "highrisk", limit: 8 });
+    expect(ws.length).toBeGreaterThanOrEqual(2);
+    expect(ws.slice(0, 2).map((w) => [w.feature, w.fires])).toEqual([
+      ["jurisdictionRisk", true],
+      ["jurisdictionRisk", false],
+    ]);
+    for (const w of ws) {
+      expectSoundContrast(w, BOOK);
+      expect(holds(LONG.predicate, w.assignment)).toBe(false);
+    }
+    // Later rounds: the same contrast in other decision cells (other rules' conditions changed).
+    expect(new Set(ws.map((w) => JSON.stringify(w.assignment))).size).toBe(ws.length);
+  });
+
+  it("practiceCases returns verified contrast cases when the weakest rules have no thresholds; longer lists extend shorter ones", async () => {
+    const three = await practiceCases({ ...base, rules: BOOK, ruleIds: ["pepCompany", "sanctions"], count: 3 });
+    expect(three).toHaveLength(3);
+    expect(three.map((w) => [w.kind, w.ruleId])).toEqual([
+      ["contrast", "pepCompany"],
+      ["contrast", "sanctions"],
+      ["contrast", "pepCompany"],
+    ]);
+    for (const w of three) expectSoundContrast(w as ContrastWitness, BOOK);
+    const nine = await practiceCases({ ...base, rules: BOOK, ruleIds: ["pepCompany", "sanctions"], count: 9 });
+    expect(nine.slice(0, 3)).toEqual(three);
+    expect(nine.length).toBeGreaterThan(3);
+    expect(new Set(nine.map((w) => JSON.stringify(w.assignment))).size).toBe(nine.length);
+    for (const w of nine) if (w.kind === "contrast") expectSoundContrast(w, BOOK);
+    expect(await practiceCases({ ...base, rules: BOOK, ruleIds: ["pepCompany", "sanctions"], count: 9 })).toEqual(nine);
+  });
+
+  it("a rule's boundary cases come first, then contrast cases in other cells", async () => {
+    const ws = await practiceCases({ ...base, rules: FIXTURE, ruleIds: ["ubo"], count: 6 });
+    expect(ws.map((w) => (w.kind === "boundary" ? w.side : `${w.feature}:${w.fires}`)).slice(0, 4)).toEqual(["below", "at", "above", "entityType:true"]);
+    for (const w of ws) if (w.kind === "contrast") expectSoundContrast(w, FIXTURE);
+    expect(new Set(ws.map((w) => JSON.stringify(w.assignment))).size).toBe(ws.length);
+  });
+
+  it("falls back to fires / does not fire when no condition can be pivotal, and rejects unknown rules", async () => {
+    // Where `twice` is not overridden, pep is true and both (equal) conditions hold: neither is pivotal.
+    const twice = rule("twice", { or: [{ "==": [v("pep"), true] }, { "==": [v("pep"), true] }] }, recommend("escalateCompliance"), 10);
+    const unless = rule("unless", { "==": [v("pep"), false] }, recommend("approve"), 20, { overrides: ["twice"], kind: "exception" });
+    const ws = await findContrasts({ ...base, rules: [twice, unless], ruleId: "twice" });
+    expect(ws.length).toBeGreaterThanOrEqual(1);
+    // Only "fires" exists; later cases vary the other conditions of the case (entity type, customer status, …).
+    for (const w of ws) {
+      expect([w.feature, w.fires, at(w.assignment, "pep")]).toEqual(["pep", true, true]);
+      expectSoundContrast(w, [twice, unless]);
+    }
+    expect(new Set(ws.map((w) => JSON.stringify(w.assignment))).size).toBe(ws.length);
+    await expect(findContrasts({ ...base, rules: FIXTURE, ruleId: "missing" })).rejects.toThrow(SolverInputError);
   });
 });
 

@@ -695,6 +695,33 @@ export function applyExpertAction(deps: DebriefDeps, sessionId: string, req: Exp
         w.append("teachback.confirmed", "engine", [tb.entry.id, statementEntry.id], { utteranceId: statementEntry.id, rulebookRevision: tb.rulebookRevision });
         break;
       }
+      case "retire_rule": {
+        // A deletion leaves `change` undefined: witnesses that vanish with the rule are not answered
+        // by it, so the debrief shows them as superseded rather than resolved.
+        const old = snap.book.rules.find((r) => r.id === req.ruleId);
+        if (old === undefined) throw new ApiFailure(404, "rule_not_found", `no live rule ${req.ruleId}`);
+        const entryIds = ruleEntries(snap.book);
+        // This expert's rules that override the deleted one lose the dangling id (later revisions validate overrides against live rules).
+        const overriders = snap.book.rules.filter((r) => r.id !== old.id && r.overrides.includes(old.id));
+        const plans = overriders.map((r) => {
+          const moment = requireMoment(snap, explainedBy(snap, r).length > 0 ? explainedBy(snap, r) : familyDecisionIds(snap, r.decisionFamily));
+          const next: Revision = { predicate: r.predicate, priority: r.priority, overrides: r.overrides.filter((id) => id !== old.id && snap.book.rules.some((l) => l.id === id)).sort() };
+          const make = (statementId: string, ledger: LedgerReader): ConfirmedRule =>
+            revisedRule(deps, snap, { old: r, change: next, quote: typedQuote(statementId, req.quote, moment), confirmationEntryId: statementId, method: "debrief", ledger });
+          return { ruleId: r.id, make };
+        });
+        for (const { make } of plans) make(PENDING_STATEMENT, pending);
+        statementEntry = statement([entryIds.get(old.id)], { text: req.quote, intent: "retire_rule", target: { ruleId: old.id } });
+        const revisions = plans.map(({ ruleId, make }) =>
+          w.append("rule.revised", "engine", [statementEntry.id, entryIds.get(ruleId)], {
+            rule: make(statementEntry.id, deps.ledger),
+            reason: `override of deleted rule ${old.id} dropped: "${req.quote}"`,
+          }),
+        );
+        // Written last, so the rulebook's latest change (the debrief's diff card) is the deletion itself.
+        w.append("rule.retired", "engine", [statementEntry.id, entryIds.get(old.id), ...revisions.map((e) => e.id)], { ruleId: old.id, reason: `expert deleted: "${req.quote}"` });
+        break;
+      }
     }
 
     const after = change === undefined ? await snapshot(deps, sessionId) : await resolveVanished(deps, snap, w, change.entry, change.kind);

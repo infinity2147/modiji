@@ -198,6 +198,8 @@ const kinds = {
         "confirm_candidate",
         "add_rule_for_witness",
         "revise_rule",
+        /** The expert deletes a confirmed rule (`target.ruleId`); the engine records `rule.retired`. */
+        "retire_rule",
         "acknowledge_witness",
         "confirm_boundary",
         "confirm_teachback",
@@ -290,6 +292,18 @@ const kinds = {
           feature: FeatureIdSchema,
           threshold: z.number(),
           side: z.enum(["at", "below", "above"]),
+        }),
+        /**
+         * A practice case where one condition of the rule is pivotal (any condition: yes/no and category
+         * ones too, so rules without a numeric threshold get practice), and the rule `fires` on the case
+         * or just misses because of that condition.
+         */
+        z.strictObject({
+          kind: z.literal("contrast_practice"),
+          witnessId: IdSchema,
+          ruleId: IdSchema,
+          feature: FeatureIdSchema,
+          fires: z.boolean(),
         }),
         z.strictObject({ kind: z.literal("judge") }),
       ]),
