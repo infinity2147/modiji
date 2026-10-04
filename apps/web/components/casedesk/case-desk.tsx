@@ -15,7 +15,7 @@ export function CaseDesk({ viewer }: { viewer: Viewer }) {
     <div className="flex h-dvh min-h-0 flex-col overflow-hidden">
       <TopBar session={session} viewer={viewer} />
       {session ? (
-        <Workspace key={session.sessionId} session={session} />
+        <Workspace key={session.sessionId} session={session} role={viewer.role} />
       ) : (
         <Launcher viewer={viewer} notice={ref === "invalid" ? "The session link is malformed. Start a new session." : undefined} />
       )}

@@ -45,17 +45,38 @@ function Steps({ items }: { items: string[] }) {
   );
 }
 
-function TraineeHome({ viewer }: { viewer: Viewer }) {
+function TraineeHome({ viewer, rules }: { viewer: Viewer; rules: number }) {
   return (
     <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
       <div className="grid content-start gap-5">
-        <NextStep
-          eyebrow="NEXT STEP"
-          title="Practise one case with your coach"
-          body="Predict the outcome, make your decision, and get coached before you save. It takes about five minutes."
-        >
-          <StartCard mode="novice" caseSet="practice" label="Start practising" />
-        </NextStep>
+        {rules === 0 ? (
+          <section aria-label="Next step" data-testid="coach-not-ready" className="grid gap-4 rounded-3xl bg-highlight-soft p-8 ring-1 ring-highlight/50">
+            <span className="w-fit rounded-full bg-highlight px-3.5 py-1.5 text-xs font-bold tracking-wider text-highlight-foreground">NOT READY YET</span>
+            <h2 className="font-heading text-3xl leading-tight font-bold tracking-tight">Your coach has nothing to teach yet</h2>
+            <p className="max-w-lg text-base leading-relaxed text-foreground/80">
+              The coach teaches from rules an expert has confirmed in their own words, and no expert has confirmed any yet. Until then there is
+              nothing to learn and nothing to check when you save.
+            </p>
+            <ol className="grid gap-2 text-sm font-semibold">
+              <li className="rounded-2xl bg-card/70 px-4 py-3">1. An expert signs in, captures a few cases and confirms their rules in the debrief.</li>
+              <li className="rounded-2xl bg-card/70 px-4 py-3">2. This page then shows your coach as ready and tells you where to start.</li>
+            </ol>
+            <div className="flex flex-wrap items-center gap-3">
+              <Link href="/replay" className="inline-flex h-12 items-center gap-2 rounded-full bg-primary px-7 text-base font-semibold text-primary-foreground">
+                Watch a recorded run <ArrowRight className="size-4" aria-hidden />
+              </Link>
+              <StartCard mode="novice" caseSet="practice" label="Look around anyway" tone="light" />
+            </div>
+          </section>
+        ) : (
+          <NextStep
+            eyebrow="NEXT STEP"
+            title="Practise one case with your coach"
+            body={`Your coach has ${rules} expert rule${rules === 1 ? "" : "s"} to teach. Predict the outcome, make your decision, and get coached before you save. It takes about five minutes.`}
+          >
+            <StartCard mode="novice" caseSet="practice" label="Start practising" />
+          </NextStep>
+        )}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">How a practice case works</CardTitle>
@@ -207,7 +228,7 @@ export default async function HomePage() {
         <h1 className="font-heading text-3xl font-bold tracking-tight">Welcome, {viewer.displayName}</h1>
         <p className="text-base text-muted-foreground">Here is your next step. Everything else can wait.</p>
       </header>
-      {viewer.role === "trainee" && <TraineeHome viewer={viewer} />}
+      {viewer.role === "trainee" && <TraineeHome viewer={viewer} rules={getRuntime().rulebook().length} />}
       {viewer.role === "expert" && <ExpertHome viewer={viewer} />}
       {viewer.role === "admin" && <AdminHome />}
     </main>

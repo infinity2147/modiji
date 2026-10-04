@@ -27,9 +27,25 @@ test("a trainee sees one next step, locked expert tools with the reason, and sta
   await expect(nav.getByText("Needs the expert role")).toBeVisible();
   await expect(nav.getByRole("link", { name: "Accounts" })).toHaveCount(0);
   await expect(nav.getByLabel("Signed in as")).toContainText("Trainee");
+  // No expert has confirmed a rule on this server: Home says so plainly, instead of inviting a practice that teaches nothing.
+  await expect(page.getByTestId("coach-not-ready")).toContainText("Your coach has nothing to teach yet");
+  await expect(page.getByRole("button", { name: "Start practising" })).toHaveCount(0);
   await page.screenshot({ path: "test-results/home-trainee.png", fullPage: true });
-  await page.getByRole("button", { name: "Start practising" }).click();
+  await page.getByRole("button", { name: "Look around anyway" }).click();
   await expect(page).toHaveURL(/\/sandbox\?session=[^&]+&set=practice&mode=novice$/);
+
+  // The trainee is guided: the first case is already open, the coach says what to do, and the expert instruments are not here.
+  const guide = page.getByTestId("trainee-guide");
+  await expect(guide).toHaveAttribute("data-stage", "no_rules");
+  await expect(guide).toContainText("Your coach has nothing to teach yet");
+  await expect(page.getByRole("heading", { level: 2, name: /^[A-Z]/ }).first()).toBeVisible();
+  await expect(page.getByRole("article")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Share screen" })).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "Speech gate" })).toHaveCount(0);
+  await expect(page.getByRole("list", { name: "Compliance" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Enter a judge case" })).toHaveCount(0);
+  await expect(page.getByText("Voice coach")).toBeVisible();
+  await page.screenshot({ path: "test-results/trainee-workspace.png", fullPage: true });
 });
 
 test("an expert starts a capture session from Home and finds their sessions there", async ({ page }) => {

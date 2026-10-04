@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import type { UserRole } from "@vashistha/core";
 import type { KycCase } from "@vashistha/core/domains/kyc";
 import Link from "next/link";
 import { ConversationProvider } from "@elevenlabs/react";
@@ -19,6 +20,7 @@ import { JudgeView } from "@/components/judge/judge-view";
 import { OffRecordBanner } from "@/components/voice/off-record";
 import { VoicePanel } from "@/components/voice/voice-panel";
 import { NoviceReview } from "@/components/tutor/novice-review";
+import { TraineeGuide, guideStage } from "@/components/tutor/trainee-guide";
 import { TutorPanels } from "@/components/tutor/tutor-panels";
 import { CaseDetail } from "./case-detail";
 import { CaseQueue } from "./case-queue";
@@ -112,15 +114,15 @@ function NoviceReviewSlot({
  * HUD, event ticker, compliance strip) in the full-width row underneath. The voice conversation lives
  * in `ConversationProvider`; everything else works without it.
  */
-export function Workspace({ session }: { session: SessionRef }) {
+export function Workspace({ session, role }: { session: SessionRef; role: UserRole }) {
   return (
     <ConversationProvider>
-      <WorkspaceBody session={session} />
+      <WorkspaceBody session={session} role={role} />
     </ConversationProvider>
   );
 }
 
-function WorkspaceBody({ session }: { session: SessionRef }) {
+function WorkspaceBody({ session, role }: { session: SessionRef; role: UserRole }) {
   const sensors = useRef<GateSensors | null>(null);
   const ws = useWorkspace(session, sensors);
   const [screenShared, setScreenShared] = useState(false);
@@ -159,6 +161,17 @@ function WorkspaceBody({ session }: { session: SessionRef }) {
   useEffect(() => {
     if (ledgerSize > 0) refreshTutor();
   }, [ledgerSize, refreshTutor]);
+
+  // A trainee should never face an empty screen: the first open case is opened for them.
+  const loadedCases = ws.load.status === "ready" ? ws.load.cases : undefined;
+  const nothingSelected = ws.selectedCase === undefined;
+  const openCase = ws.openCase;
+  const decidedIds = ws.decisions;
+  useEffect(() => {
+    if (!novice || !loadedCases || !nothingSelected) return;
+    const first = loadedCases.find((c) => !decidedIds.has(c.id)) ?? loadedCases[0];
+    if (first) openCase(first.id);
+  }, [novice, loadedCases, nothingSelected, decidedIds, openCase]);
 
   if (ws.load.status === "error") {
     return (
@@ -226,7 +239,26 @@ function WorkspaceBody({ session }: { session: SessionRef }) {
         </main>
 
         <div className="flex min-h-0 flex-col gap-2 overflow-y-auto border-l bg-muted/30 p-3 *:shrink-0 [grid-area:review]">
-          <VoicePanel loop={loop} />
+          {novice && ws.load.status === "ready" && (
+            <TraineeGuide
+              stage={guideStage({ state: tutor.state, hasSelected: selected !== undefined, decided: ws.decisions.size, total: ws.load.cases.length })}
+              rules={tutor.state?.rules.length ?? 0}
+              decided={ws.decisions.size}
+              total={ws.load.cases.length}
+            />
+          )}
+          {novice ? (
+            <details className="group rounded-2xl border bg-card">
+              <summary className="cursor-pointer list-none px-4 py-3 text-sm font-semibold marker:hidden">
+                Voice coach <span className="font-normal text-muted-foreground">(optional: text coaching is already on)</span>
+              </summary>
+              <div className="border-t p-2">
+                <VoicePanel loop={loop} />
+              </div>
+            </details>
+          ) : (
+            <VoicePanel loop={loop} />
+          )}
           {selected && (
             <NoviceReviewSlot novice={novice} tutor={tutor} kycCase={selected} draft={ws.draftFor(selected)} locked={stopped || offRecord}>
               <ReviewPanel
@@ -246,14 +278,13 @@ function WorkspaceBody({ session }: { session: SessionRef }) {
               />
             </NoviceReviewSlot>
           )}
-          {novice && ws.load.status === "ready" && <TutorPanels tutor={tutor} onCases={ws.addCases} />}
+          {novice && ws.load.status === "ready" && <TutorPanels tutor={tutor} onCases={ws.addCases} canEnterJudgeCase={role === "admin"} />}
           {ws.load.status === "ready" && <ChannelStatus channel={ws.channel} />}
-          {ws.load.status === "ready" && <ScreenCaptureCard sessionId={session.sessionId} cases={ws.load.cases} onSharingChange={setScreenShared} />}
+          {!novice && ws.load.status === "ready" && <ScreenCaptureCard sessionId={session.sessionId} cases={ws.load.cases} onSharingChange={setScreenShared} />}
         </div>
 
-        <div className="min-h-0 [grid-area:strip]">
-          <JudgeView sessionId={session.sessionId} loop={loop} />
-        </div>
+        {/* The gate HUD, event ticker and compliance strip are expert and judge instruments: a trainee works without them. */}
+        <div className="min-h-0 [grid-area:strip]">{(!novice || role === "admin") && <JudgeView sessionId={session.sessionId} loop={loop} />}</div>
       </div>
       <InterlockDialog prompt={ws.prompt} onResolve={ws.resolvePrompt} onDismiss={ws.dismissPrompt} />
     </PrivacyContext>
