@@ -25,6 +25,7 @@ import { CaseQueue } from "./case-queue";
 import { InterlockDialog } from "./interlock-dialog";
 import { ReviewPanel } from "./review-panel";
 import { useWorkspace, type Draft } from "./use-workspace";
+import { WorkflowTracker, expertSteps, noviceSteps } from "./workflow-tracker";
 
 function channelText(channel: DomChannelStatus): string {
   switch (channel.state) {
@@ -185,6 +186,15 @@ function WorkspaceBody({ session }: { session: SessionRef }) {
     <PrivacyContext value={loop.privacy}>
       <OffRecordBanner state={loop.privacyState} />
       <ChannelStopped channel={ws.channel} />
+      {ws.load.status === "ready" && (
+        <WorkflowTracker
+          steps={
+            novice
+              ? noviceSteps({ opened: ws.selectedCase !== undefined, decided: ws.selectedCase !== undefined && ws.decisions.has(ws.selectedCase.id) })
+              : expertSteps({ decided: ws.decisions.size, total: ws.load.cases.length, queued: loop.gate?.queue.length ?? 0, sessionId: session.sessionId })
+          }
+        />
+      )}
       <div ref={caseArea} className="grid min-h-0 flex-1 grid-cols-[18rem_minmax(0,1fr)_20rem] grid-rows-[minmax(0,1fr)_auto] [grid-template-areas:'queue_detail_review'_'strip_strip_strip'] 2xl:grid-cols-[20rem_minmax(0,1fr)_22rem]">
         <div className="flex min-h-0 flex-col [grid-area:queue]">
           {ws.load.status === "ready" ? (

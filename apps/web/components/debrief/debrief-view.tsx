@@ -9,7 +9,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence } from "framer-motion";
-import { Check, RefreshCw, X } from "lucide-react";
+import { ArrowRight, Check, RefreshCw, X } from "lucide-react";
 import { describeError } from "@/lib/client/api";
 import type { DebriefState, ExpertActionRequest } from "@/lib/contracts/debrief";
 import { Badge } from "@/components/ui/badge";
@@ -130,6 +130,7 @@ export function DebriefView({ sessionId, readOnly }: { sessionId: string; readOn
             {error}
           </p>
         )}
+        {state !== null && readOnly === undefined && <NextAction state={state} />}
         {state === null ? (
           <p className="text-muted-foreground">Loading the debrief…</p>
         ) : (
@@ -172,6 +173,34 @@ export function DebriefView({ sessionId, readOnly }: { sessionId: string; readOn
         )}
       </main>
     </LineageProvider>
+  );
+}
+
+/** The one thing to do next, as a banner: the first of open cases, unconfirmed rules, teach-back, then done. */
+function NextAction({ state }: { state: DebriefState }) {
+  const openCases = state.witnesses.filter((w) => w.current && (w.status === "open" || w.status === "queued" || w.status === "asked")).length;
+  const tb = state.teachBack;
+  const closed = state.coverage.closed;
+  const next = state.decisions.length === 0
+    ? { eyebrow: "NEXT STEP", title: "Capture a few cases first", body: "The debrief starts once you have decided some cases in a capture session. Open CaseDesk above and work them." }
+    : closed
+    ? { eyebrow: "ALL CHECKS MET", title: "Your rules are confirmed and covered", body: "Nothing is left that your rulebook cannot decide, under the current feature model." }
+    : openCases > 0
+      ? { eyebrow: "NEEDS YOUR ANSWER", title: `${openCases} case${openCases === 1 ? "" : "s"} your rules cannot decide`, body: "Answer in the Counterexamples card below, in your own words." }
+      : state.rules.length === 0 || state.proposals.length > 0
+        ? { eyebrow: "NEXT STEP", title: "Confirm the proposed rules", body: "Suggestions only: nothing is enforced until you confirm each one in your own words." }
+        : tb === null || tb.confirmedEntryId === null
+          ? { eyebrow: "NEXT STEP", title: "Check the teach-back", body: "Write it, read it, and confirm it or correct any rule it got wrong." }
+          : { eyebrow: "NEXT STEP", title: "Resolve what is left", body: "Open the cards below to finish the remaining checks." };
+  return (
+    <section aria-label="What to do next" data-testid="debrief-next" className="flex flex-wrap items-center gap-4 rounded-3xl bg-primary px-6 py-5 text-primary-foreground">
+      <span className="rounded-full bg-highlight px-3.5 py-1.5 text-xs font-bold tracking-wider text-highlight-foreground">{next.eyebrow}</span>
+      <div className="grid min-w-0 flex-1 gap-0.5">
+        <h2 className="font-heading text-xl font-bold tracking-tight">{next.title}</h2>
+        <p className="text-sm text-primary-foreground/85">{next.body}</p>
+      </div>
+      <ArrowRight aria-hidden className="size-5 text-highlight" />
+    </section>
   );
 }
 

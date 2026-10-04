@@ -17,21 +17,25 @@ export function TopBar({ session, viewer }: { session?: SessionRef | undefined; 
       </Link>
       <span aria-hidden className="h-4 w-px bg-slate-700" />
       <h1 className="text-sm font-medium text-slate-300">CaseDesk</h1>
-      <span className="rounded border border-amber-400/40 bg-amber-400/10 px-1.5 py-0.5 text-[11px] font-medium text-amber-200">
+      <span className="rounded border border-amber-400/40 bg-amber-400/10 px-1.5 py-0.5 text-[11px] font-medium whitespace-nowrap text-amber-200">
         Synthetic data — fictional policy
       </span>
 
       <div className="ml-auto flex items-center gap-3 text-xs">
-        <p className="flex items-center gap-1.5 text-slate-400">
-          <Eye aria-hidden className="size-3.5" />
-          Sensing (disclosed): DOM events · typing &amp; scroll timing · screen-frame case id read on-device by OCR · microphone only when voice is on
+        <p
+          className="flex items-center gap-1.5 text-slate-400"
+          title="Sensing (disclosed): DOM events · typing & scroll timing · screen-frame case id read on-device by OCR · microphone only when voice is on"
+        >
+          <Eye aria-hidden className="size-3.5 shrink-0" />
+          <span className="hidden 2xl:inline">Sensing (disclosed): DOM events · typing &amp; scroll timing · screen-frame case id read on-device by OCR · microphone only when voice is on</span>
+          <span className="2xl:hidden">Sensing disclosed (hover)</span>
         </p>
         {session && (
           <>
             <span aria-hidden className="h-4 w-px bg-slate-700" />
             <p
               aria-label="Session"
-              className="flex items-center gap-2 rounded-md border border-slate-700 bg-slate-800 px-2 py-1 text-slate-200"
+              className="flex items-center gap-2 rounded-md border border-slate-700 bg-slate-800 px-2 py-1 whitespace-nowrap text-slate-200"
             >
               <span className="font-medium">{MODE_LABELS[session.mode]}</span>
               <span aria-hidden className="text-slate-500">·</span>

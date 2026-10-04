@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { AlertCircle, Highlighter, Loader2, Mic, MicOff, PhoneOff, Radio, Volume2 } from "lucide-react";
+import { AlertCircle, Check, Highlighter, Hourglass, Loader2, Mic, MicOff, PhoneOff, Radio, Volume2 } from "lucide-react";
 import type { InterviewLoop, VoiceStatus } from "@/lib/client/voice/use-interview";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -66,6 +66,23 @@ export function VoicePanel({ loop }: { loop: InterviewLoop }) {
       </CardHeader>
       <CardContent className="grid gap-3 py-3">
         <OffRecordControl state={loop.privacyState} />
+
+        {loop.gate !== null && (
+          <section aria-label="Why it is quiet" className="grid gap-2 rounded-2xl bg-muted/70 p-3">
+            <h3 className="text-xs font-bold">
+              {loop.gate.hud.status === "ASKING" ? "Your assistant is asking now" : loop.gate.hud.status === "WAITING" ? "Waiting for a good moment" : "Listening, and staying quiet"}
+            </h3>
+            <ul className="grid gap-1 text-xs">
+              {loop.gate.hud.judge.map((row) => (
+                <li key={row.key} className="flex items-center gap-2">
+                  {row.ok ? <Check aria-hidden className="size-3.5 text-primary" /> : <Hourglass aria-hidden className="size-3.5 text-highlight" />}
+                  <span className={row.ok ? "text-muted-foreground" : "font-semibold"}>{row.ok ? row.label : `${row.label}: ${row.text}`}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="text-[11px] leading-snug text-muted-foreground">It only speaks when you pause, and only when the answer would teach it something.</p>
+          </section>
+        )}
 
         {voice.state === "not_configured" ? (
           <Alert>
@@ -137,7 +154,7 @@ export function VoicePanel({ loop }: { loop: InterviewLoop }) {
           ) : (
             <ol ref={logRef} role="log" aria-live="polite" className="grid max-h-48 gap-1.5 overflow-y-auto pr-1 text-[12px]">
               {loop.transcript.map((turn) => (
-                <li key={turn.id} className={turn.role === "agent" ? "rounded-md bg-sky-50 px-2 py-1" : "rounded-md bg-muted px-2 py-1"}>
+                <li key={turn.id} className={turn.role === "agent" ? "rounded-xl bg-highlight-soft px-2.5 py-1.5" : "rounded-xl bg-muted px-2.5 py-1.5"}>
                   <span className="font-medium">{turn.role === "agent" ? "Agent" : loop.agent === "interviewer" ? "Expert" : "You"}: </span>
                   {turn.text}
                 </li>

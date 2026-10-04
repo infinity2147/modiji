@@ -56,7 +56,7 @@ export function CaseQueue({
           aria-valuemin={0}
           aria-valuemax={cases.length}
           aria-valuenow={decided}
-          className="mt-2 h-1 overflow-hidden rounded-full bg-muted"
+          className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted"
         >
           <motion.div
             className="h-full rounded-full bg-primary"
@@ -66,7 +66,7 @@ export function CaseQueue({
           />
         </div>
       </div>
-      <ul aria-label="Cases" className="min-h-0 flex-1 divide-y overflow-y-auto">
+      <ul aria-label="Cases" className="min-h-0 flex-1 space-y-2 overflow-y-auto p-3">
         {cases.map((kycCase) => {
           const decision = decisions.get(kycCase.id);
           const selected = kycCase.id === selectedId;
@@ -77,12 +77,11 @@ export function CaseQueue({
                 aria-current={selected ? "true" : undefined}
                 onClick={() => onOpen(kycCase.id)}
                 className={cn(
-                  "relative grid w-full gap-1 px-4 py-3 text-left transition-colors outline-none hover:bg-muted/60 focus-visible:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
-                  selected && "bg-accent hover:bg-accent",
+                  "relative grid w-full gap-1 rounded-2xl border bg-card px-4 py-3 text-left transition-colors outline-none hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring",
+                  selected && "border-2 border-primary bg-card hover:bg-card",
                 )}
               >
-                {selected && <span aria-hidden className="absolute inset-y-0 left-0 w-0.5 bg-primary" />}
-                <span className="flex items-center justify-between gap-2">
+                                <span className="flex items-center justify-between gap-2">
                   <span className="font-mono text-xs text-muted-foreground">{kycCase.id}</span>
                   <DecisionStatus decision={decision} animate={lastCommitted === kycCase.id} />
                 </span>

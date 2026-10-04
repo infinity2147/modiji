@@ -4,10 +4,11 @@ import { cn } from "@/lib/utils";
 export type Tone = "neutral" | "info" | "success" | "warning" | "danger";
 
 const TONES: Record<Tone, { pill: string; dot: string }> = {
-  neutral: { pill: "bg-slate-100 text-slate-700 ring-slate-200", dot: "bg-slate-400" },
-  info: { pill: "bg-sky-50 text-sky-800 ring-sky-200", dot: "bg-sky-500" },
-  success: { pill: "bg-emerald-50 text-emerald-800 ring-emerald-200", dot: "bg-emerald-500" },
-  warning: { pill: "bg-amber-50 text-amber-800 ring-amber-200", dot: "bg-amber-500" },
+  neutral: { pill: "bg-muted text-muted-foreground ring-border", dot: "bg-muted-foreground/60" },
+  // "Open" and in-progress states draw the eye in amber, as in the design.
+  info: { pill: "bg-highlight-soft text-[#5A3800] ring-highlight/50", dot: "bg-highlight" },
+  success: { pill: "bg-secondary text-primary ring-primary/25", dot: "bg-primary" },
+  warning: { pill: "bg-highlight-soft text-[#5A3800] ring-highlight/50", dot: "bg-highlight" },
   danger: { pill: "bg-red-50 text-red-800 ring-red-200", dot: "bg-red-500" },
 };
 
@@ -16,7 +17,7 @@ export function Pill({ tone, children, className }: { tone: Tone; children: Reac
   return (
     <span
       className={cn(
-        "inline-flex h-5 shrink-0 items-center gap-1.5 rounded-full px-2 text-[11px] leading-none font-medium whitespace-nowrap ring-1 ring-inset",
+        "inline-flex h-6 shrink-0 items-center gap-1.5 rounded-full px-2.5 text-[11px] leading-none font-medium whitespace-nowrap ring-1 ring-inset",
         TONES[tone].pill,
         className,
       )}
