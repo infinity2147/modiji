@@ -1,12 +1,20 @@
 import type { ReactNode } from "react";
-import { Building2, FileText, Handshake, Landmark, ShieldAlert, Users, type LucideIcon } from "lucide-react";
-import { NORTHSTAR_COUNTRY_RISK, type KycCase } from "@vashistha/core/domains/kyc";
+import { Briefcase, Building2, FileText, Handshake, Landmark, ShieldAlert, Users, type LucideIcon } from "lucide-react";
+import { NORTHSTAR_COUNTRY_RISK, NORTHSTAR_SECTOR_RISK, volumeConsistency, volumeRatio, type KycCase } from "@vashistha/core/domains/kyc";
 import { formatEur, formatIsoDate, formatPct, formatRelationshipAge } from "@/lib/client/format";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { featureTargets } from "@/lib/client/voice/question-cues";
-import { DOCUMENT_STATUS_LABELS, ENTITY_LABELS, SOURCE_OF_FUNDS_LABELS } from "./labels";
+import {
+  DOCUMENT_STATUS_LABELS,
+  ENTITY_LABELS,
+  MEDIA_SEVERITY_LABELS,
+  NAME_MATCH_LABELS,
+  OWNER_KIND_LABELS,
+  SOURCE_OF_FUNDS_LABELS,
+  VOLUME_CONSISTENCY_LABELS,
+} from "./labels";
 import { FlagPill, Pill, RiskPill, type Tone } from "./pills";
 
 function Section({
@@ -65,6 +73,58 @@ const SOF_TONE: Record<KycCase["funds"]["sourceOfFunds"], Tone> = {
   unverified: "warning",
   not_provided: "danger",
 };
+const VOLUME_TONE: Record<ReturnType<typeof volumeConsistency>, Tone> = {
+  consistent: "neutral",
+  elevated: "warning",
+  inconsistent: "danger",
+};
+const NAME_MATCH_TONE: Record<KycCase["screening"]["nameMatch"]["strength"], Tone> = {
+  none: "neutral",
+  weak: "warning",
+  strong: "danger",
+};
+
+/**
+ * What the customer does and what it declared, against what it expects to move. The reviewer sees the evidence (sector
+ * and its tier on Northstar's public list, declared turnover, expected activity, their ratio); what to do about it is
+ * the reviewer's judgment. Cases written before the business profile existed have none, and show no section.
+ */
+function BusinessSection({ kycCase }: { kycCase: KycCase }) {
+  const { business, funds, customer } = kycCase;
+  if (business === undefined) return null;
+  const ratio = volumeRatio(kycCase);
+  const band = volumeConsistency(kycCase);
+  return (
+    <Section id="sec-business" title="Business" icon={Briefcase} features={["sectorRisk", "volumeConsistency"]}>
+      <Fields>
+        <Field label="Sector" feature="sectorRisk">
+          <span className="flex flex-wrap items-center gap-2">
+            {business.sector}
+            <RiskPill tier={NORTHSTAR_SECTOR_RISK[business.sector]} />
+          </span>
+        </Field>
+        <Field label="Activity">
+          <span className="font-normal">{business.description || "—"}</span>
+        </Field>
+        <Field label={customer.entityType === "individual" ? "Declared annual income" : "Declared annual turnover"}>
+          <span className="tabular-nums">{business.declaredAnnualEur > 0 ? formatEur(business.declaredAnnualEur) : "Not declared"}</span>
+        </Field>
+        <Field label="Expected annual activity" feature="volumeConsistency">
+          <span className="flex flex-wrap items-center gap-2">
+            <span className="tabular-nums">{formatEur(funds.expectedMonthlyVolumeEur * 12)}</span>
+            {ratio !== undefined && (
+              <>
+                <span className="font-normal text-muted-foreground tabular-nums">{ratio.toFixed(2)}× declared</span>
+                <Pill tone={VOLUME_TONE[band]}>{VOLUME_CONSISTENCY_LABELS[band]}</Pill>
+              </>
+            )}
+          </span>
+        </Field>
+      </Fields>
+    </Section>
+  );
+}
+
 const DOC_TONE: Record<KycCase["documents"][number]["status"], Tone> = {
   received: "success",
   missing: "danger",
@@ -124,7 +184,9 @@ export function CaseDetail({ kycCase }: { kycCase: KycCase }) {
         </Section>
       </div>
 
-      <Section id="sec-owners" title="Beneficial owners" icon={Users} features={["uboOwnershipPct", "uboVerified", "pep"]}>
+      <BusinessSection kycCase={kycCase} />
+
+      <Section id="sec-owners" title="Beneficial owners" icon={Users} features={["uboOwnershipPct", "uboVerified", "pep", "ownershipTransparency"]}>
         <Table className="text-[13px]">
           <TableHeader>
             <TableRow className="hover:bg-transparent">
@@ -138,7 +200,14 @@ export function CaseDetail({ kycCase }: { kycCase: KycCase }) {
           <TableBody>
             {owners.map((owner) => (
               <TableRow key={`${owner.name}-${owner.role}`}>
-                <TableCell className="py-1.5 font-medium">{owner.name}</TableCell>
+                <TableCell className="py-1.5 font-medium">
+                  {owner.name}
+                  {owner.kind !== "person" && (
+                    <span className="block text-xs font-normal text-muted-foreground" {...featureTargets("ownershipTransparency")}>
+                      {OWNER_KIND_LABELS[owner.kind]} · {owner.controller ?? "Controller not disclosed."}
+                    </span>
+                  )}
+                </TableCell>
                 <TableCell className="py-1.5 text-muted-foreground">{owner.role}</TableCell>
                 <TableCell className="py-1.5 text-right tabular-nums">{formatPct(owner.sharePct)}</TableCell>
                 <TableCell className="py-1.5">
@@ -166,11 +235,28 @@ export function CaseDetail({ kycCase }: { kycCase: KycCase }) {
                 )}
               </span>
             </Field>
+            <Field label="Name similarity" feature="nameMatch">
+              <span className="grid justify-items-start gap-1">
+                <Pill tone={NAME_MATCH_TONE[screening.nameMatch.strength]}>{NAME_MATCH_LABELS[screening.nameMatch.strength]}</Pill>
+                {screening.nameMatch.strength !== "none" && (
+                  <span className="text-xs font-normal text-muted-foreground">{screening.nameMatch.detail}</span>
+                )}
+              </span>
+            </Field>
             <Field label="Adverse media" feature="adverseMedia">
               <span className="grid justify-items-start gap-1">
-                <Pill tone={screening.adverseMedia.status === "found" ? "danger" : "success"}>
-                  {screening.adverseMedia.status === "found" ? "Found" : "None"}
-                </Pill>
+                <span className="flex flex-wrap items-center gap-2">
+                  <Pill tone={screening.adverseMedia.status === "found" ? "danger" : "success"}>
+                    {screening.adverseMedia.status === "found" ? "Found" : "None"}
+                  </Pill>
+                  {screening.adverseMedia.status === "found" && (
+                    <span {...featureTargets("mediaSeverity")}>
+                      <Pill tone={screening.adverseMedia.severity === "serious" ? "danger" : "warning"}>
+                        {MEDIA_SEVERITY_LABELS[screening.adverseMedia.severity]}
+                      </Pill>
+                    </span>
+                  )}
+                </span>
                 {screening.adverseMedia.detail && (
                   <span className="text-xs font-normal text-muted-foreground">{screening.adverseMedia.detail}</span>
                 )}

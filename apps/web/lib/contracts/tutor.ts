@@ -152,6 +152,13 @@ export const JudgeFeaturesSchema = z.strictObject({
   adverseMedia: z.boolean(),
   sourceOfFunds: z.enum(["verified", "unverified", "not_provided"]),
   expectedMonthlyVolume: z.int().min(0).max(10_000_000),
+  // Judgment features: optional, so a judge case without them is generated neutral (direct ownership, consistent volume,
+  // no name match, a low or medium sector, minor media when media is found), exactly as before they existed.
+  sectorRisk: z.enum(["low", "medium", "high"]).optional(),
+  ownershipTransparency: z.enum(["direct", "layered", "nominee"]).optional(),
+  volumeConsistency: z.enum(["consistent", "elevated", "inconsistent"]).optional(),
+  mediaSeverity: z.enum(["none", "minor", "serious"]).optional(),
+  nameMatch: z.enum(["none", "weak", "strong"]).optional(),
 });
 export type JudgeFeatures = z.infer<typeof JudgeFeaturesSchema>;
 

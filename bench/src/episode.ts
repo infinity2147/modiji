@@ -25,13 +25,14 @@ export type EpisodeSpec = {
 export type EpisodeData = { stream: StreamCase[]; heldout: HeldoutCase[] };
 
 /**
- * The cases of an episode: the 3 demo training cases, then `trainingSize − 3` stratified bench
+ * The cases of an episode: the first 3 demo training cases (the core demo; the judgment cases after them exercise
+ * features the bench generator leaves neutral, so they stay out of the stream), then `trainingSize − 3` stratified bench
  * cases (seeded), then `heldoutSize` further cases of the same seeded sequence as the held-out set
  * (ids NS-2026-4000 upwards, so disjoint from the stream). Same seed ⇒ same cases for every strategy.
  */
 export function episodeData(seed: number, trainingSize: number, heldoutSize: number): EpisodeData {
   const generated = generateBenchCases(seed, trainingSize - 3 + heldoutSize).map((c) => ({ caseId: c.id, features: featuresOf(c) }));
-  const demo = kycCases("training").map((c) => ({ caseId: c.id, features: featuresOf(c) }));
+  const demo = kycCases("training").slice(0, 3).map((c) => ({ caseId: c.id, features: featuresOf(c) }));
   return { stream: [...demo, ...generated.slice(0, trainingSize - 3)], heldout: labelHeldout(generated.slice(trainingSize - 3)) };
 }
 

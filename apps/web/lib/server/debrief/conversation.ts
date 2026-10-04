@@ -50,7 +50,7 @@ import { applyConceptAction, conceptsState } from "../schema/service";
 import { applyExpertAction, generateTeachBack, isAffirmative, rebuildWitnesses, type SpokenWords } from "./actions";
 import type { DebriefDeps } from "./deps";
 import { interpretReply, type InterpretContext, type Reading } from "./interpret";
-import { DOMAIN, debriefState, kycCaseFeatures, snapshot, type Snapshot } from "./state";
+import { DOMAIN, byProposalWeight, debriefState, kycCaseFeatures, snapshot, type Snapshot } from "./state";
 import { effectPhrase } from "./text";
 
 export type ConversationDeps = { debrief: DebriefDeps; schema: SchemaDeps };
@@ -207,7 +207,7 @@ async function nextItem(deps: ConversationDeps, sessionId: string, h: History): 
     ...state.proposals.filter((p) => askedProposals.has(p.candidateId)).map((p) => shapeOf(p.decisionFamily, p.action, p.predicate)),
   ]);
   const distinct = new Map<string, DebriefState["proposals"][number]>();
-  for (const p of [...state.proposals].sort((a, b) => b.weight - a.weight)) {
+  for (const p of [...state.proposals].sort(byProposalWeight)) {
     const shape = shapeOf(p.decisionFamily, p.action, p.predicate);
     if (!distinct.has(shape)) distinct.set(shape, p);
   }

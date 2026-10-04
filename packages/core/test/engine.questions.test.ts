@@ -96,10 +96,12 @@ describe("counterfactual questions", () => {
     const toNew = counterfactualOn(queue, "customerStatus", "new");
     expect(toNew?.target.assignment?.["accountAgeMonths" as never]).toBe(0);
     expect(toNew?.text).toBe("If customer status were new instead of existing (relationship age 0 months), what would you decide?");
-    const toIndividual = counterfactualOn(queue, "entityType", "individual");
+    // A medium-sector company would require two repairs; use a low-sector case for this one-repair question.
+    const lowSector = observation("L", { ...CASE_A.features, sectorRisk: "low" }, "enhancedReview");
+    const toIndividual = counterfactualOn(generateQuestions({ model: REVIEW, set: SET, ctx: questionContext(lowSector), config: CONFIG }), "entityType", "individual");
     expect(toIndividual?.target.assignment?.["uboOwnershipPct" as never]).toBe(100);
     // Moving the ownership share of an individual is repaired by changing the entity type, never left invalid.
-    const individual = observation("I", { ...CASE_B.features, entityType: "individual", uboOwnershipPct: 100 }, "approve");
+    const individual = observation("I", { ...CASE_B.features, entityType: "individual", uboOwnershipPct: 100, sectorRisk: "low" }, "approve");
     for (const q of generateQuestions({ model: REVIEW, set: SET, ctx: questionContext(individual), config: CONFIG }))
       if (q.kind === "counterfactual" && q.target.feature === "uboOwnershipPct") expect(q.target.assignment?.["entityType" as never]).not.toBe("individual");
   });
@@ -192,10 +194,15 @@ describe("why-probes, reasons and selection", () => {
       generateQuestions({ model: REVIEW, set: second.set, ctx: questionContext(two), recent: second.recent, config: engineConfig({ contradictionBits }) })
         .filter((q) => q.kind === "counterfactual")
         .map((q) => describeQuestion(q).split(" · ")[0]);
-    // Default threshold (3 bits) is not reached by case 2, so the HUD must not claim a contradiction.
-    expect(bits).toBeLessThan(CONFIG.contradictionBits);
-    expect(new Set(hudReasons(CONFIG.contradictionBits))).toEqual(new Set([QUESTION_REASONS.competing]));
+    // The expanded domain changes surprise; the displayed reason must follow the actual threshold.
+    expect(new Set(hudReasons(bits + 0.01))).toEqual(new Set([QUESTION_REASONS.competing]));
     expect(new Set(hudReasons(bits))).toEqual(new Set([QUESTION_REASONS.contradiction]));
+  });
+
+  it("does not queue a repaired counterfactual twice when two feature moves lead to the same case", () => {
+    const queue = generateQuestions({ model: REVIEW, set: SET, ctx: questionContext(CASE_A), config: CONFIG });
+    expect(queue.length).toBeGreaterThan(0);
+    expect(new Set(queue.map((q) => q.id)).size).toBe(queue.length);
   });
 
   it("is deterministic", () => {

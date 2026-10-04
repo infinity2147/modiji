@@ -4,14 +4,19 @@ import { episodeData } from "../src/episode";
 import { SimulatedExpert } from "../src/expert";
 import { absorb, EMPTY_KNOWLEDGE, fitPolicy, observe, type Knowledge } from "../src/learner";
 import { behaviouralMetrics, rulesRecovered, SIMPLE_ORACLE_RULES } from "../src/metrics";
+import { generateKycCase, mulberry32, kycCases } from "@vashistha/core/domains/kyc";
+import { featuresOf } from "../src/domain";
 import { FAMILY_RULES } from "../src/oracle";
 
 describe("shared learner", () => {
   it("reaches the sanity ceiling from the oracle's own stated rules (vagueness 0, full why answers)", async () => {
     const data = episodeData(11, 120, 500);
-    const expert = new SimulatedExpert({ settings: { noise: 0, vagueness: 0 }, budget: data.stream.length, seed: 11 });
+    // Include judgment examples so the ceiling measures recovery of every rule, not only neutral cases.
+    const elevated = generateKycCase(mulberry32(5), { id: "NS-2026-3999", set: "practice", entityType: "company", sectorRisk: "high", volumeConsistency: "elevated", expectedMonthlyVolume: 30_000, jurisdictionRisk: "low", sourceOfFunds: "verified", uboVerified: true, pep: false, sanctionsHit: false, adverseMedia: false });
+    const stream = [...data.stream, { caseId: elevated.id, features: featuresOf(elevated) }, ...kycCases("training").map((c) => ({ caseId: c.id, features: featuresOf(c) })), ...[...kycCases("heldout"), ...kycCases("practice")].map((c) => ({ caseId: c.id, features: featuresOf(c) }))];
+    const expert = new SimulatedExpert({ settings: { noise: 0, vagueness: 0 }, budget: stream.length, seed: 11 });
     let k: Knowledge = EMPTY_KNOWLEDGE;
-    for (const c of data.stream) {
+    for (const c of stream) {
       k = observe(k, c.caseId, c.features, expert.decide(c.caseId, c.features));
       const q = { kind: "why", caseId: c.caseId } as const;
       k = absorb(k, q, expert.ask(q, { phase: "live", pause: 0 }));

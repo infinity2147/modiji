@@ -108,8 +108,11 @@ export const DOCS_QUOTE = "If the main owner holds more than a quarter and we ca
 
 export type World = { opened: OpenedDatabase; ledger: Ledger; deps: DebriefDeps; sessionId: string; calls: { system: string; user: string; model: string }[]; dataDir: string };
 
-/** `screenFrames: false` seeds a DOM-only session: the expert never shared their screen. */
-export function seed(ledger: Ledger, { screenFrames = true }: { screenFrames?: boolean } = {}): string {
+/**
+ * `screenFrames: false` seeds a DOM-only session: the expert never shared their screen. `confirmedRules: false` leaves
+ * the rulebook empty (the session as it stands when the debrief opens, before the expert has confirmed anything).
+ */
+export function seed(ledger: Ledger, { screenFrames = true, confirmedRules = true }: { screenFrames?: boolean; confirmedRules?: boolean } = {}): string {
   const session = ledger.createSession();
   const at = (kind: string, source: LedgerEntry["source"], payload: unknown, parentIds: string[] = []): LedgerEntry =>
     ledger.append({ sessionId: session.id, source, kind, occurredAt: T0, traceId: "seed", parentIds, schemaVersion: 1, privacyEpoch: 0, payload });
@@ -117,7 +120,7 @@ export function seed(ledger: Ledger, { screenFrames = true }: { screenFrames?: b
   const decide: Record<string, string> = { "NS-2026-0101": "requestDocuments", "NS-2026-0102": "approve", "NS-2026-0103": "enhancedReview" };
   let frameSeq = 0;
   const moments: string[] = [];
-  for (const c of kycCases("training")) {
+  for (const c of kycCases("training").slice(0, 3)) {
     const action = decide[c.id] ?? "approve";
     frameSeq += 1;
     const opened = at("screen.event", "dom", { id: `ev-${c.id}`, frameSeq, captureTime: T0, sessionEpoch: 0, kind: "open_case", caseId: c.id, confidence: 1, source: "dom", critical: false });
@@ -139,6 +142,7 @@ export function seed(ledger: Ledger, { screenFrames = true }: { screenFrames?: b
     const check = at("interlock.check", "engine", { caseId: c.id, action, edits: {}, result }, [started.id]);
     at("case.decision", "dom", { caseId: c.id, action, edits: {}, result }, [check.id]);
   }
+  if (!confirmedRules) return session.id;
   const utter = (text: string): LedgerEntry => at("utterance.transcript", "voice", { conversationId: "conv-1", text, t0Ms: 1_000, t1Ms: 4_000, frameIds: [] });
   const docs = utter(DOCS_QUOTE);
   const pep = utter(PEP_QUOTE);
@@ -152,7 +156,7 @@ export function seed(ledger: Ledger, { screenFrames = true }: { screenFrames?: b
   return session.id;
 }
 
-export async function world(options: { screenFrames?: boolean } = {}): Promise<World> {
+export async function world(options: { screenFrames?: boolean; confirmedRules?: boolean } = {}): Promise<World> {
   const opened = openDatabase({ memory: true });
   const ledger = createLedger(opened.db, { now: () => T0 });
   const sessionId = seed(ledger, options);

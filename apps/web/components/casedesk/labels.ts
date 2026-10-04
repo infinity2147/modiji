@@ -27,3 +27,30 @@ export const DOCUMENT_STATUS_LABELS: Record<KycCase["documents"][number]["status
   missing: "Missing",
   expired: "Expired",
 };
+
+/** How a shareholding is held, shown under a non-person owner's name. */
+export const OWNER_KIND_LABELS: Record<KycCase["owners"][number]["kind"], string> = {
+  person: "Person",
+  holding_company: "Holding company",
+  nominee: "Nominee",
+};
+
+/** Name-only similarity to a sanctions-list entry (`nameMatch`). */
+export const NAME_MATCH_LABELS: Record<KycCase["screening"]["nameMatch"]["strength"], string> = {
+  none: "None",
+  weak: "Weak (name only)",
+  strong: "Strong (date of birth and nationality align)",
+};
+
+/** Adverse-media severity, shown only when media was found (`mediaSeverity`). */
+export const MEDIA_SEVERITY_LABELS: Record<KycCase["screening"]["adverseMedia"]["severity"], string> = {
+  minor: "Minor",
+  serious: "Serious",
+};
+
+/** Expected activity against declared turnover (`volumeConsistency`, bands from the public domain description). */
+export const VOLUME_CONSISTENCY_LABELS: Record<"consistent" | "elevated" | "inconsistent", string> = {
+  consistent: "Consistent",
+  elevated: "Elevated",
+  inconsistent: "Inconsistent",
+};

@@ -5,6 +5,11 @@ import { fitPolicy } from "../src/learner";
 import { behaviouralMetrics, labelHeldout, leafCount, questionMetrics, rulesRecovered } from "../src/metrics";
 
 const CLEAN = {
+  sectorRisk: "low",
+  ownershipTransparency: "direct",
+  volumeConsistency: "consistent",
+  mediaSeverity: "none",
+  nameMatch: "none",
   entityType: "individual",
   customerStatus: "new",
   accountAgeMonths: 0,
