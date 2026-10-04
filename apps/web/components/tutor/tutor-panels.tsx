@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { AlertCircle, FlaskConical, Loader2, PlusCircle } from "lucide-react";
+import { AlertCircle, Loader2, PlusCircle } from "lucide-react";
 import type { KycCase } from "@vashistha/core/domains/kyc";
 import { describeError } from "@/lib/client/api";
 import type { Tutor } from "@/lib/client/tutor/use-tutor";
@@ -177,68 +177,42 @@ function JudgeCaseForm({ tutor, onAdded }: { tutor: Tutor; onAdded: (kycCase: Ky
   );
 }
 
-function PracticePanel({ tutor, onCases, canEnterJudgeCase }: { tutor: Tutor; onCases: (cases: readonly KycCase[]) => void; canEnterJudgeCase: boolean }) {
-  const [pending, setPending] = useState(false);
-  const [message, setMessage] = useState<{ tone: "info" | "error"; text: string }>();
-  const [judgeOpen, setJudgeOpen] = useState(false);
-
-  const generate = () => {
-    setPending(true);
-    setMessage(undefined);
-    tutor.practice().then(
-      ({ cases, note }) => {
-        setPending(false);
-        onCases(cases);
-        const made = cases.length === 0 ? "No new practice cases." : `Added ${cases.map((c) => c.id).join(", ")} to the queue.`;
-        setMessage({ tone: "info", text: note === null ? made : `${made} ${note}` });
-      },
-      (failure: unknown) => {
-        setPending(false);
-        setMessage({ tone: "error", text: describeError(failure) });
-      },
-    );
-  };
-
+/** Entering a judge's own case (admins and experts only); trainees see no panel here. */
+function JudgeCasePanel({ tutor, onCases }: { tutor: Tutor; onCases: (cases: readonly KycCase[]) => void }) {
+  const [message, setMessage] = useState<string>();
+  const [open, setOpen] = useState(false);
   return (
-    <Card className="gap-0 py-0 shadow-xs" role="region" aria-labelledby="practice-title">
+    <Card className="gap-0 py-0 shadow-xs" role="region" aria-labelledby="judge-case-title">
       <CardHeader className="border-b py-3!">
-        <h2 id="practice-title" className="text-sm font-semibold">
-          More practice
+        <h2 id="judge-case-title" className="text-sm font-semibold">
+          Judge case
         </h2>
-        <CardDescription className="text-[11px]">
-          New cases built at the edge of the rules you know least, so you meet the situations an expert finds hard.
-        </CardDescription>
+        <CardDescription className="text-[11px]">Enter a case of your own to see how the expert&apos;s rules decide it.</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-2 py-3">
-        <Button type="button" size="sm" onClick={generate} disabled={pending}>
-          {pending ? <Loader2 data-icon="inline-start" className="animate-spin" /> : <FlaskConical data-icon="inline-start" />}
-          Generate practice cases
+        <Button type="button" size="xs" variant="ghost" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
+          {open ? "Hide judge case form" : "Enter a judge case"}
         </Button>
-        {message && (
-          <p role="status" className={cn("text-[11px]", message.tone === "error" ? "text-red-700" : "text-muted-foreground")}>
-            {message.text}
-          </p>
-        )}
-        {canEnterJudgeCase && (
-          <Button type="button" size="xs" variant="ghost" onClick={() => setJudgeOpen((o) => !o)} aria-expanded={judgeOpen}>
-            {judgeOpen ? "Hide judge case form" : "Enter a judge case"}
-          </Button>
-        )}
-        {canEnterJudgeCase && judgeOpen && (
+        {open && (
           <JudgeCaseForm
             tutor={tutor}
             onAdded={(kycCase) => {
               onCases([kycCase]);
-              setMessage({ tone: "info", text: `Added ${kycCase.id} to the queue.` });
+              setMessage(`Added ${kycCase.id} to the queue.`);
             }}
           />
+        )}
+        {message !== undefined && (
+          <p role="status" className="text-[11px] text-muted-foreground">
+            {message}
+          </p>
         )}
       </CardContent>
     </Card>
   );
 }
 
-/** The tutor's side panels (novice sessions): the mastery ladder, and practice and judge cases. */
+/** The tutor's side panels (novice sessions): the mastery ladder, and (for admins and experts) judge cases. */
 export function TutorPanels({ tutor, onCases, canEnterJudgeCase = false }: { tutor: Tutor; onCases: (cases: readonly KycCase[]) => void; canEnterJudgeCase?: boolean }) {
   return (
     <>
@@ -250,7 +224,7 @@ export function TutorPanels({ tutor, onCases, canEnterJudgeCase = false }: { tut
         </Alert>
       )}
       <MasteryPanel tutor={tutor} />
-      <PracticePanel tutor={tutor} onCases={onCases} canEnterJudgeCase={canEnterJudgeCase} />
+      {canEnterJudgeCase && <JudgeCasePanel tutor={tutor} onCases={onCases} />}
     </>
   );
 }

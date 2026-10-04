@@ -75,7 +75,7 @@ export function TraineeGuide({ stage, rules, decided, total }: { stage: GuideSta
 
       {stage === "all_done" && (
         <p className="text-sm text-primary-foreground/90">
-          {decided} of {total} cases decided. Check your mastery below. More cases built around your weakest rules are under &ldquo;More practice&rdquo;.
+          {decided} of {total} cases decided. Check your mastery below.
         </p>
       )}
     </section>

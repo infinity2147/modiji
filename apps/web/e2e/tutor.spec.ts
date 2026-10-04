@@ -153,11 +153,13 @@ test("tutor: predict → reveal in the expert's words → commit → mastery →
   expect(mastery?.payload).toMatchObject({ from: "untested", to: "assisted" });
   expect(mastery?.parentIds[0]).toBe(entries.find((e) => e.kind === "case.decision")?.id);
 
-  // More practice: cases at the boundary of the weakest rules appear in the queue and can be decided.
-  await page.getByRole("button", { name: "Generate practice cases" }).click();
-  const practiceStatus = page.getByRole("region", { name: "More practice" }).getByRole("status");
-  await expect(practiceStatus).toContainText(/Added NS-2026-10\d\d/, { timeout: 30_000 });
-  const added = /NS-2026-10\d\d/.exec((await practiceStatus.textContent()) ?? "")?.[0] ?? "";
+  // Practice cases at the boundary of the weakest rules (no "More practice" card on the trainee screen any more:
+  // they are made through the tutor API) reach the queue with the session and can be decided.
+  await expect(page.getByRole("region", { name: "More practice" })).toHaveCount(0);
+  const practice = await ok<{ cases: { id: string }[] }>(await page.request.post(`/api/sessions/${sessionId}/tutor/practice`));
+  const added = practice.cases[0]?.id ?? "";
+  expect(added).toMatch(/^NS-2026-10\d\d$/);
+  await page.reload();
   await expect(queueItem(page, added)).toBeVisible();
   await shot(page, "practice-cases-in-queue.png");
   await queueItem(page, added).click();
