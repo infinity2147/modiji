@@ -10,7 +10,7 @@ import { shortId } from "@/lib/client/format";
 import type { DecisionRecord, RiskRating } from "@/lib/client/session-state";
 import { Alert, AlertAction, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -90,10 +90,10 @@ export function ReviewPanel({
   const error = saveState.status === "error" && saveState.caseId === kycCase.id ? saveState.message : undefined;
 
   return (
-    <Card className="gap-0 py-0 shadow-xs" role="region" aria-labelledby="review-title">
+    <Card className="gap-0 rounded-none border-0 bg-transparent py-0 shadow-none ring-0" role="region" aria-labelledby="review-title">
       <CardHeader className="border-b py-3!">
         <h2 id="review-title" className="font-heading leading-snug text-sm font-semibold">Review</h2>
-        <CardDescription className="font-mono text-xs">{kycCase.id}</CardDescription>
+
       </CardHeader>
 
       {decision ? (
@@ -171,13 +171,13 @@ export function ReviewPanel({
               </Alert>
             )}
           </CardContent>
-          <CardFooter className="grid gap-2 py-3">
+          <CardFooter className="grid gap-2 rounded-none border-0 bg-transparent py-3">
             <Button type="submit" disabled={inert || draft.outcome === undefined} className="w-full">
               {saving ? <Loader2 data-icon="inline-start" className="animate-spin" /> : <ShieldCheck data-icon="inline-start" />}
-              {saving ? "Checking interlock…" : "Save decision"}
+              {saving ? "Checking decision…" : "Save decision"}
             </Button>
             <p className="text-[11px] leading-snug text-muted-foreground">
-              Save runs the deterministic interlock against the confirmed rulebook before anything is committed.
+              Your decision is checked against confirmed expert rules.
             </p>
           </CardFooter>
         </form>

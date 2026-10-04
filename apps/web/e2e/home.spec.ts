@@ -24,6 +24,8 @@ test("a trainee sees one next step, locked expert tools with the reason, and sta
   await expect(page.getByRole("heading", { name: /Welcome, Lena/ })).toBeVisible();
   const nav = page.getByRole("navigation", { name: "Main" });
   await expect(nav.getByRole("link", { name: "Practice" })).toBeVisible();
+  // What a trainee cannot do sits in a quiet collapsed section, with the reason.
+  await nav.getByText("Access to other tools", { exact: true }).click();
   await expect(nav.getByText("Needs the expert role")).toBeVisible();
   await expect(nav.getByRole("link", { name: "Accounts" })).toHaveCount(0);
   await expect(nav.getByLabel("Signed in as")).toContainText("Trainee");

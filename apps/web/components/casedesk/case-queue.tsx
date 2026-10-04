@@ -1,19 +1,19 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { NORTHSTAR_COUNTRY_RISK, type KycCase } from "@vashistha/core/domains/kyc";
+import { type KycCase } from "@vashistha/core/domains/kyc";
 import { actionLabel } from "@/lib/client/domain";
 import type { DecisionRecord } from "@/lib/client/session-state";
 import { cn } from "@/lib/utils";
 import { ENTITY_LABELS } from "./labels";
-import { Pill, RiskPill } from "./pills";
+
 
 function DecisionStatus({ decision, animate }: { decision: DecisionRecord | undefined; animate: boolean }) {
-  if (!decision) return <Pill tone="info">Open</Pill>;
+  if (!decision) return <span className="text-[11px] text-muted-foreground">Open</span>;
   const pill = (
-    <Pill tone={decision.override?.kind === "escalated" ? "warning" : "success"}>
+    <span className="text-[11px] font-medium text-primary">
       {decision.override?.kind === "escalated" ? "Decided · escalated" : "Decided"}
-    </Pill>
+    </span>
   );
   if (!animate) return pill;
   return (
@@ -66,7 +66,7 @@ export function CaseQueue({
           />
         </div>
       </div>
-      <ul aria-label="Cases" className="min-h-0 flex-1 space-y-2 overflow-y-auto p-3">
+      <ul aria-label="Cases" className="min-h-0 flex-1 divide-y divide-slate-100 overflow-y-auto">
         {cases.map((kycCase) => {
           const decision = decisions.get(kycCase.id);
           const selected = kycCase.id === selectedId;
@@ -77,8 +77,8 @@ export function CaseQueue({
                 aria-current={selected ? "true" : undefined}
                 onClick={() => onOpen(kycCase.id)}
                 className={cn(
-                  "relative grid w-full gap-1 rounded-2xl border bg-card px-4 py-3 text-left transition-colors outline-none hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring",
-                  selected && "border-2 border-primary bg-card hover:bg-card",
+                  "relative grid w-full gap-1.5 border-l-2 border-transparent px-5 py-4 text-left transition-colors outline-none hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
+                  selected && "border-l-primary bg-slate-100/70 hover:bg-slate-100/70",
                 )}
               >
                                 <span className="flex items-center justify-between gap-2">
@@ -90,7 +90,7 @@ export function CaseQueue({
                   <span>{ENTITY_LABELS[kycCase.customer.entityType]}</span>
                   <span aria-hidden>·</span>
                   <span className="truncate">{kycCase.customer.country}</span>
-                  <RiskPill tier={NORTHSTAR_COUNTRY_RISK[kycCase.customer.country]} className="ml-auto" />
+
                 </span>
                 {decision && (
                   <span className="text-xs text-foreground/80">

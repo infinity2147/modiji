@@ -56,7 +56,7 @@ export function StartCard({
                 const next = ExpertLanguageSchema.safeParse(e.target.value);
                 if (next.success) setLanguage(next.data);
               }}
-              className="h-10 rounded-full border bg-background px-4 text-sm text-foreground"
+              className="h-10 rounded-md border bg-background px-4 text-sm text-foreground"
             >
               {EXPERT_LANGUAGES.map((l) => (
                 <option key={l} value={l}>
@@ -66,7 +66,7 @@ export function StartCard({
             </select>
           </label>
         )}
-        <Button size="lg" variant={tone === "light" ? "secondary" : "highlight"} disabled={pending} onClick={start}>
+        <Button size="lg" variant={tone === "light" ? "outline" : "default"} disabled={pending} onClick={start}>
           {pending ? <Loader2 data-icon="inline-start" className="animate-spin" /> : null}
           {label}
           {pending ? null : <ArrowRight data-icon="inline-end" />}

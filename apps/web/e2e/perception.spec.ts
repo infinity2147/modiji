@@ -66,6 +66,8 @@ test("share screen → change-detected, redacted frames are uploaded, stored and
   await expect(page).toHaveURL(/session=/);
   const sessionId = new URL(page.url()).searchParams.get("session") ?? "";
 
+  // An expert's interview tools (voice, screen capture) sit in one collapsed section.
+  await page.getByText("Interview tools", { exact: true }).click();
   const card = page.getByRole("region", { name: "Screen capture" });
   await expect(card).toContainText("Screen frames: change-detected, best-effort PII blur, and the case id read on-device by OCR, in your browser before upload");
   const status = card.getByRole("status", { name: "Screen capture status" });

@@ -10,7 +10,7 @@ export default async function ViewsLayout({ children }: { children: ReactNode })
   const viewer = await currentViewer();
   if (viewer === undefined) redirect("/login");
   return (
-    <div className="flex min-h-dvh flex-col md:flex-row">
+    <div className="flex min-h-dvh flex-col bg-slate-50 text-slate-800 [--font-heading:var(--font-geist-sans)] [&_[data-slot=card]]:rounded-lg [&_[data-slot=card]]:shadow-none md:flex-row">
       <SidebarNav viewer={viewer} />
       <div className="min-w-0 flex-1">{children}</div>
     </div>

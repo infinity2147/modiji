@@ -17,16 +17,16 @@ export type TrackerStep = {
  */
 export function WorkflowTracker({ steps }: { steps: TrackerStep[] }) {
   return (
-    <ol aria-label="Your progress" className="flex shrink-0 flex-wrap gap-1.5 border-b bg-card px-4 py-2.5">
+    <ol aria-label="Your progress" className="flex shrink-0 flex-wrap gap-5 border-b bg-white px-6 py-3">
       {steps.map((step, i) => {
         const body = (
           <>
             <span
               aria-hidden
               className={cn(
-                "grid size-6 shrink-0 place-items-center rounded-full text-xs font-bold",
+                "grid size-5 shrink-0 place-items-center rounded-full text-[11px] font-medium",
                 step.state === "done" && "bg-primary text-primary-foreground",
-                step.state === "active" && "bg-highlight text-highlight-foreground",
+                step.state === "active" && "bg-primary text-primary-foreground",
                 step.state === "todo" && "bg-muted text-muted-foreground",
               )}
             >
@@ -39,8 +39,8 @@ export function WorkflowTracker({ steps }: { steps: TrackerStep[] }) {
           </>
         );
         const cls = cn(
-          "flex min-w-40 flex-1 items-center gap-2.5 rounded-xl px-3.5 py-2 text-sm font-semibold",
-          step.state === "active" ? "bg-primary text-primary-foreground" : "text-muted-foreground",
+          "flex items-center gap-2 py-1 text-xs font-medium",
+          step.state === "active" ? "text-foreground" : "text-muted-foreground",
           step.href !== undefined && "hover:bg-accent hover:text-accent-foreground",
         );
         return (

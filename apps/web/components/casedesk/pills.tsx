@@ -4,10 +4,10 @@ import { cn } from "@/lib/utils";
 export type Tone = "neutral" | "info" | "success" | "warning" | "danger";
 
 const TONES: Record<Tone, { pill: string; dot: string }> = {
-  neutral: { pill: "bg-muted text-muted-foreground ring-border", dot: "bg-muted-foreground/60" },
+  neutral: { pill: "text-slate-500 ring-transparent", dot: "bg-muted-foreground/60" },
   // "Open" and in-progress states draw the eye in amber, as in the design.
-  info: { pill: "bg-highlight-soft text-[#5A3800] ring-highlight/50", dot: "bg-highlight" },
-  success: { pill: "bg-secondary text-primary ring-primary/25", dot: "bg-primary" },
+  info: { pill: "text-slate-500 ring-transparent", dot: "bg-highlight" },
+  success: { pill: "text-slate-700 ring-transparent", dot: "bg-primary" },
   warning: { pill: "bg-highlight-soft text-[#5A3800] ring-highlight/50", dot: "bg-highlight" },
   danger: { pill: "bg-red-50 text-red-800 ring-red-200", dot: "bg-red-500" },
 };
@@ -19,10 +19,11 @@ export function Pill({ tone, children, className }: { tone: Tone; children: Reac
       className={cn(
         "inline-flex h-6 shrink-0 items-center gap-1.5 rounded-full px-2.5 text-[11px] leading-none font-medium whitespace-nowrap ring-1 ring-inset",
         TONES[tone].pill,
+        tone !== "warning" && tone !== "danger" && "rounded-none px-0",
         className,
       )}
     >
-      <span aria-hidden className={cn("size-1.5 rounded-full", TONES[tone].dot)} />
+      {(tone === "warning" || tone === "danger") && <span aria-hidden className={cn("size-1.5 rounded-full", TONES[tone].dot)} />}
       {children}
     </span>
   );

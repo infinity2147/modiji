@@ -28,7 +28,7 @@ import { CaseQueue } from "./case-queue";
 import { InterlockDialog } from "./interlock-dialog";
 import { ReviewPanel } from "./review-panel";
 import { useWorkspace, type Draft } from "./use-workspace";
-import { WorkflowTracker, expertSteps, noviceSteps } from "./workflow-tracker";
+import { WorkflowTracker, expertSteps } from "./workflow-tracker";
 
 function channelText(channel: DomChannelStatus): string {
   switch (channel.state) {
@@ -171,13 +171,13 @@ function WorkspaceBody({ session, role, diagnostics }: { session: SessionRef; ro
     if (ledgerSize > 0) refreshTutor();
   }, [ledgerSize, refreshTutor]);
 
-  // A trainee should never face an empty screen: the first open case is opened for them.
+  // Open the first available case so reviewers begin with the task in front of them.
   const loadedCases = ws.load.status === "ready" ? ws.load.cases : undefined;
   const nothingSelected = ws.selectedCase === undefined;
   const openCase = ws.openCase;
   const decidedIds = ws.decisions;
   useEffect(() => {
-    if (!novice || !loadedCases || !nothingSelected) return;
+    if (!loadedCases || !nothingSelected) return;
     const first = loadedCases.find((c) => !decidedIds.has(c.id)) ?? loadedCases[0];
     if (first) openCase(first.id);
   }, [novice, loadedCases, nothingSelected, decidedIds, openCase]);
@@ -204,20 +204,17 @@ function WorkspaceBody({ session, role, diagnostics }: { session: SessionRef; ro
   }
 
   const selected = ws.selectedCase;
+  const nextCase = loadedCases?.find((c) => !ws.decisions.has(c.id) && c.id !== selected?.id);
   return (
     <PrivacyContext value={loop.privacy}>
       <OffRecordBanner state={loop.privacyState} />
       <ChannelStopped channel={ws.channel} />
-      {ws.load.status === "ready" && (
+      {!novice && ws.load.status === "ready" && (
         <WorkflowTracker
-          steps={
-            novice
-              ? noviceSteps({ opened: ws.selectedCase !== undefined, decided: ws.selectedCase !== undefined && ws.decisions.has(ws.selectedCase.id) })
-              : expertSteps({ decided: ws.decisions.size, total: ws.load.cases.length, queued: loop.gate?.queue.length ?? 0, sessionId: session.sessionId })
-          }
+          steps={expertSteps({ decided: ws.decisions.size, total: ws.load.cases.length, queued: loop.gate?.queue.length ?? 0, sessionId: session.sessionId })}
         />
       )}
-      <div ref={caseArea} className="grid min-h-0 flex-1 grid-cols-[18rem_minmax(0,1fr)_20rem] grid-rows-[minmax(0,1fr)_auto] [grid-template-areas:'queue_detail_review'_'strip_strip_strip'] 2xl:grid-cols-[20rem_minmax(0,1fr)_22rem]">
+      <div ref={caseArea} className="grid min-h-0 flex-1 grid-cols-[15rem_minmax(0,1fr)_20rem] grid-rows-[minmax(0,1fr)_auto] [grid-template-areas:'queue_detail_review'_'strip_strip_strip'] 2xl:grid-cols-[16rem_minmax(0,1fr)_21rem]">
         <div className="flex min-h-0 flex-col [grid-area:queue]">
           {ws.load.status === "ready" ? (
             <CaseQueue
@@ -232,7 +229,7 @@ function WorkspaceBody({ session, role, diagnostics }: { session: SessionRef; ro
           )}
         </div>
 
-        <main className="min-h-0 overflow-y-auto p-4 [grid-area:detail]">
+        <main className="min-h-0 overflow-y-auto bg-white px-7 py-7 [grid-area:detail]">
           {selected ? (
             <CaseDetail kycCase={selected} />
           ) : (
@@ -247,7 +244,7 @@ function WorkspaceBody({ session, role, diagnostics }: { session: SessionRef; ro
           )}
         </main>
 
-        <div className="flex min-h-0 flex-col gap-2 overflow-y-auto border-l bg-muted/30 p-3 *:shrink-0 [grid-area:review]">
+        <div className="flex min-h-0 flex-col gap-5 overflow-y-auto border-l bg-slate-50 p-5 *:shrink-0 [grid-area:review]">
           {novice && ws.load.status === "ready" && (
             <TraineeGuide
               stage={guideStage({ state: tutor.state, hasSelected: selected !== undefined, decided: ws.decisions.size, total: ws.load.cases.length })}
@@ -256,20 +253,16 @@ function WorkspaceBody({ session, role, diagnostics }: { session: SessionRef; ro
               total={ws.load.cases.length}
             />
           )}
-          {novice ? (
-            ws.load.status === "ready" && (
-              <CoachSession
-                sessionId={session.sessionId}
-                caseId={selected?.id}
-                cases={ws.load.cases}
-                loop={loop}
-                tutor={tutor}
-                ready={(tutor.state?.rules.length ?? 0) > 0 && selected !== undefined}
-                onSharingChange={setScreenShared}
-              />
-            )
-          ) : (
-            <VoicePanel loop={loop} />
+          {novice && ws.load.status === "ready" && (
+            <CoachSession
+              sessionId={session.sessionId}
+              caseId={selected?.id}
+              cases={ws.load.cases}
+              loop={loop}
+              tutor={tutor}
+              ready={(tutor.state?.rules.length ?? 0) > 0 && selected !== undefined}
+              onSharingChange={setScreenShared}
+            />
           )}
           {selected && (
             <NoviceReviewSlot novice={novice} tutor={tutor} kycCase={selected} draft={ws.draftFor(selected)} locked={stopped || offRecord} agentConnected={loop.voice.state === "connected"}>
@@ -290,9 +283,17 @@ function WorkspaceBody({ session, role, diagnostics }: { session: SessionRef; ro
               />
             </NoviceReviewSlot>
           )}
+          {selected && ws.decisions.has(selected.id) && nextCase && <Button onClick={() => ws.openCase(nextCase.id)}>Next case</Button>}
           {novice && ws.load.status === "ready" && <TutorPanels tutor={tutor} onCases={ws.addCases} canEnterJudgeCase={role === "admin"} />}
+          {/* A trainee has one way to a live coach: the pop-up. An expert's interview tools stay a collapsed section. */}
           {ws.load.status === "ready" && <ChannelStatus channel={ws.channel} />}
-          {!novice && ws.load.status === "ready" && <ScreenCaptureCard sessionId={session.sessionId} cases={ws.load.cases} onSharingChange={setScreenShared} />}
+          {novice ? null : (
+            <details className="border-t pt-3">
+              <summary className="cursor-pointer text-sm font-medium">Interview tools</summary>
+              <div className="mt-3 grid gap-3"><VoicePanel loop={loop} />
+              {ws.load.status === "ready" && <ScreenCaptureCard sessionId={session.sessionId} cases={ws.load.cases} onSharingChange={setScreenShared} />}</div>
+            </details>
+          )}
         </div>
 
         {/* The gate HUD, event ticker, compliance strip and Engineering view: engineers' and judges' evidence, never part of the work. */}

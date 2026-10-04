@@ -30,6 +30,8 @@ async function startSession(page: Page, mode: "Expert capture" | "Novice practic
   await expect(page.getByRole("region", { name: "Speech gate" })).toHaveCount(0);
   await page.goto(`${page.url()}&diagnostics=1`);
   if (mode === "Novice practice") await dismissCoach(page);
+  // An expert's interview tools (voice, off the record, screen capture) sit in one collapsed section.
+  if (mode === "Expert capture") await page.getByText("Interview tools", { exact: true }).click();
   await expect(queueItems(page).first()).toBeVisible();
   return new URL(page.url()).searchParams.get("session") ?? "";
 }

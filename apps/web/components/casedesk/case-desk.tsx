@@ -13,7 +13,7 @@ export function CaseDesk({ viewer }: { viewer: Viewer }) {
   const ref = parseSessionParams(params);
   const session = ref === "invalid" ? undefined : ref;
   return (
-    <div className="flex h-dvh min-h-0 flex-col overflow-hidden">
+    <div className="flex h-dvh min-h-0 flex-col overflow-hidden bg-white text-slate-800 [--font-heading:var(--font-geist-sans)] [--font-sans:var(--font-geist-sans)] [&_[data-slot=card]]:rounded-lg [&_[data-slot=card]]:shadow-none [&_[data-slot=button]]:rounded-md [&_[data-slot=select-trigger]]:rounded-md">
       <TopBar session={session} viewer={viewer} />
       {session ? (
         <Workspace key={session.sessionId} session={session} role={viewer.role} diagnostics={viewer.role === "admin" || params.get("diagnostics") === "1"} />

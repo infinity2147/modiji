@@ -47,8 +47,8 @@ export function SidebarNav({ viewer, badges }: { viewer: Viewer; badges?: Record
                 href={item.href}
                 aria-current={on ? "page" : undefined}
                 className={cn(
-                  "flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-semibold transition-colors",
-                  on ? "bg-primary text-primary-foreground" : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                  "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors",
+                  on ? "bg-secondary text-primary" : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                 )}
               >
                 <Icon className="size-[18px]" aria-hidden />
@@ -60,12 +60,12 @@ export function SidebarNav({ viewer, badges }: { viewer: Viewer; badges?: Record
         </div>
       ))}
       {nav.locked.length > 0 && (
-        <div className="flex flex-col gap-1 pb-2">
-          <span className="px-3 py-1.5 text-[11px] font-bold tracking-widest text-muted-foreground uppercase">Locked</span>
+        <details className="mt-3 border-t pt-3">
+          <summary className="cursor-pointer px-3 text-xs text-muted-foreground">Access to other tools</summary>
           {nav.locked.map((item) => {
             const Icon = ICONS[item.icon];
             return (
-              <span key={item.label} className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-semibold text-muted-foreground/80">
+              <span key={item.label} className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground/80">
                 <Icon className="size-[18px]" aria-hidden />
                 <span className="grid">
                   {item.label}
@@ -75,7 +75,7 @@ export function SidebarNav({ viewer, badges }: { viewer: Viewer; badges?: Record
               </span>
             );
           })}
-        </div>
+        </details>
       )}
       <div className="mt-auto flex items-center gap-3 border-t pt-4">
         <span aria-hidden className="grid size-9 shrink-0 place-items-center rounded-full bg-primary font-bold text-primary-foreground">
