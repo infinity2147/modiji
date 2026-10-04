@@ -31,6 +31,14 @@ const ms = z.int().nonnegative();
  *   covers the agent's first audio for a nonce consumed just before it expired (first audio ≈ 0.7 s
  *   after the control message, live p95 0.85 s). An authorization still unspoken by then has lapsed: the
  *   gate releases the floor and its live-budget slot (the server re-queues the question).
+ * - `coachSilenceMs` (not in the plan; tutor mode): the trainee's voice coach answers a trainee who has
+ *   finished speaking, so a `coach_turn` waits only this long after their speech (end of utterance plus a
+ *   short silence), not the expert interview's `userSilenceMs`/`answerSilenceMs`. Typing and screen motion
+ *   do not hold a coach turn back (a trainee works while they talk to their coach), and the live budget,
+ *   breakpoints and θ_ask do not apply to it (see `requiredConditions`).
+ * - `coachAnswerWindowMs` (not in the plan; tutor mode): after the coach's own turn, how long a coach turn
+ *   waits for the trainee to answer before the coach speaks again (the interviewer's `answerWindowMs` is
+ *   meant for an expert thinking about a hard question).
  * - `tickMs` ≤ 50: the controller wakes exactly when conditions can become valid and also ticks at
  *   this period as a fallback for late or early timers, keeping authorization ≤ 250 ms with margin.
  */
@@ -52,6 +60,8 @@ export const GateConfigSchema = z.strictObject({
   answerWindowMs: ms.default(5000),
   answerSilenceMs: ms.default(4000),
   transcriptWaitMs: ms.default(3000),
+  coachSilenceMs: ms.default(700),
+  coachAnswerWindowMs: ms.default(2000),
   tickMs: z.int().positive().max(50).default(50),
 });
 export type GateConfig = z.output<typeof GateConfigSchema>;

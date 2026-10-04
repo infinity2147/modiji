@@ -2,7 +2,7 @@ import type { Question } from "../schemas/engine";
 import type { GateAuthorization } from "../schemas/gate";
 import { GateConfigSchema, type GateConfig, type GateConfigInput } from "./config";
 import { createGateController, type GateClock } from "./controller";
-import type { GateMode } from "./evaluate";
+import { sendConditions, type GateMode } from "./evaluate";
 import type { GateInput } from "./state";
 
 /** Deterministic 32-bit PRNG (mulberry32), uniform in [0, 1). */
@@ -72,15 +72,18 @@ function summarizeLatency(samples: readonly number[]): LatencySummary | null {
  * Ground truth for "interruption", independent of the gate's own state: the expert was speaking at
  * `at` or stopped less than `userSilenceMs` before it — per the ground-truth `speech` spans when given,
  * and per every speech signal the gate received (speech lasts until the first silent observation) —
- * or typed within `typingIdleMs`, or the screen moved within `screenIdleMs`.
+ * or typed within `typingIdleMs`, or the screen moved within `screenIdleMs`. A tutor's coach turn answers a
+ * pause in the trainee's speech: only speech within `coachSilenceMs` counts (`speechOnly`).
  */
 function isInterruption(
   received: readonly GateInput[],
   at: number,
   cfg: GateConfig,
   speech: readonly (readonly [number, number])[],
+  speechOnly = false,
 ): boolean {
-  if (speech.some(([from, to]) => at >= from && at < to + cfg.userSilenceMs)) return true;
+  const silenceMs = speechOnly ? cfg.coachSilenceMs : cfg.userSilenceMs;
+  if (speech.some(([from, to]) => at >= from && at < to + silenceMs)) return true;
   let vad = false;
   let explicit = false;
   let local = false;
@@ -97,14 +100,8 @@ function isInterruption(
     else if (input.kind === "screen_motion") motion = Math.max(motion, input.t);
     if (wasSpeaking && !(vad || explicit || local)) speechEnd = Math.max(speechEnd, input.t);
   }
-  return (
-    vad ||
-    explicit ||
-    local ||
-    at - speechEnd < cfg.userSilenceMs ||
-    at - typing < cfg.typingIdleMs ||
-    at - motion < cfg.screenIdleMs
-  );
+  if (vad || explicit || local || at - speechEnd < silenceMs) return true;
+  return !speechOnly && (at - typing < cfg.typingIdleMs || at - motion < cfg.screenIdleMs);
 }
 
 /** Lets settled authorizations (promise reactions) run before the next simulated event. */
@@ -168,14 +165,16 @@ export async function runScript(
         ? authorization(q)
         : new Promise<GateAuthorization>((resolve) => schedule(now + issueLatencyMs, () => resolve(authorization(q)))),
     onAuthorize: (_auth, question, sample) => {
-      const polite = !(mode === "tutor" && question.kind === "intervention");
+      const send = sendConditions(mode, question);
+      const polite = send.includes("userSilent");
       authorizations.push({
         questionId: question.id,
         at: sample.decidedAt,
         becameValidAt: sample.becameValidAt,
         latencyMs: sample.decidedAt - sample.becameValidAt,
         sentAt: sample.authorizedAt,
-        interruption: polite && isInterruption(inputs.slice(0, fed), sample.decidedAt, cfg, opts.speech ?? []),
+        interruption:
+          polite && isInterruption(inputs.slice(0, fed), sample.decidedAt, cfg, opts.speech ?? [], !send.includes("typingIdle")),
       });
       const start = sample.authorizedAt + agent.firstAudioMs;
       const end = start + Math.round((question.text.split(/\s+/).length / agent.wordsPerSecond) * 1000);

@@ -48,7 +48,8 @@ import { createRuntime } from "../../lib/server/runtime-init";
 import { handleConceptAction, handleGetConcepts } from "../../lib/server/schema/handlers";
 import { schemaDeps } from "../../lib/server/schema/runtime-deps";
 import { tutorDeps } from "../../lib/server/tutor/deps";
-import { handleBriefing, handleIntent, handleJudgeCase, handlePractice, handlePrediction, handleTutorState } from "../../lib/server/tutor/handlers";
+import { handleCoachNudge } from "../../lib/server/tutor/nudges";
+import { handleBriefing, handleCoachChat, handleIntent, handleJudgeCase, handlePractice, handlePrediction, handleTutorState } from "../../lib/server/tutor/handlers";
 
 /** POST /api/sessions as the account the pre-accounts body names (see support/accounts.ts). */
 function createSessionAs(raw: unknown): Promise<Response> {
@@ -135,6 +136,8 @@ const WRITES: Record<string, (sessionId: string) => Promise<Response>> = {
   "sessions/[sessionId]/tutor/practice": (id) => handlePractice(id, tutorDeps()),
   "sessions/[sessionId]/tutor/briefing": (id) => handleBriefing(post(`/api/sessions/${id}/tutor/briefing`, {}), id, tutorDeps()),
   "sessions/[sessionId]/tutor/cases": (id) => handleJudgeCase(post(`/api/sessions/${id}/tutor/cases`, { features: JUDGE_CASE }), id, tutorDeps()),
+  "sessions/[sessionId]/tutor/nudge": (id) => handleCoachNudge(post(`/api/sessions/${id}/tutor/nudge`, { caseId: "NS-2026-0201", reason: "idle" }), id, tutorDeps()),
+  "sessions/[sessionId]/tutor/chat": (id) => handleCoachChat(post(`/api/sessions/${id}/tutor/chat`, { text: "What should I check first?" }), id, tutorDeps()),
 };
 
 /** Write routes that are not one session's: covered elsewhere (two-experts.test.ts for /api/disagreements*), or not session writes. */
@@ -155,7 +158,7 @@ const NOT_SESSION_WRITES = new Set([
 ]);
 
 /** Novice-session writes (the tutor teaches novices; an expert session answers 409 not_novice first). */
-const NOVICE_ROUTES = new Set(["sessions/[sessionId]/tutor/intent", "sessions/[sessionId]/tutor/prediction", "sessions/[sessionId]/tutor/practice", "sessions/[sessionId]/tutor/briefing", "sessions/[sessionId]/tutor/cases"]);
+const NOVICE_ROUTES = new Set(["sessions/[sessionId]/tutor/intent", "sessions/[sessionId]/tutor/prediction", "sessions/[sessionId]/tutor/practice", "sessions/[sessionId]/tutor/briefing", "sessions/[sessionId]/tutor/cases", "sessions/[sessionId]/tutor/nudge", "sessions/[sessionId]/tutor/chat"]);
 
 function routeFiles(dir: string): string[] {
   return readdirSync(dir, { withFileTypes: true }).flatMap((d) => (d.isDirectory() ? routeFiles(join(dir, d.name)) : d.name === "route.ts" ? [join(dir, d.name)] : []));

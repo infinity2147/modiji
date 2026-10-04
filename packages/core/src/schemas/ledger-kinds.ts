@@ -330,6 +330,14 @@ const kinds = {
       origin: z.enum(["llm", "template"]),
     }),
   },
+  /**
+   * The trainee typed to the voice coach (`/tutor/chat`, for a trainee without a microphone): their words,
+   * verbatim. Never evidence of an expert; the coach's reply (`tutor.coached`) cites it as `utteranceId`.
+   */
+  "tutor.chat": {
+    sources: ["client"],
+    payload: z.strictObject({ text: z.string().trim().min(1).max(1000) }),
+  },
   "mastery.updated": {
     sources: ["engine"],
     payload: z.strictObject({ ruleId: IdSchema, from: MasteryLevelSchema, to: MasteryLevelSchema }),

@@ -11,7 +11,7 @@ import type { KycCase } from "@vashistha/core/domains/kyc";
 import type { JudgeFeatures, PredictionView, TutorState } from "../../contracts/tutor";
 import { describeError, type FetchFn } from "../api";
 import type { RiskRating } from "../session-state";
-import { fetchTutorState, postBriefing, postIntent, postJudgeCase, postPractice, postPrediction } from "./api";
+import { coachChat, coachNudge, fetchTutorState, postBriefing, postIntent, postJudgeCase, postPractice, postPrediction } from "./api";
 
 const browserFetch: FetchFn = (input, init) => fetch(input, init);
 
@@ -26,6 +26,13 @@ export type Tutor = {
   judgeCase: (features: JudgeFeatures) => Promise<KycCase>;
   /** Queue the coach's spoken welcome (once per session); resolves quietly if there is nothing to say. */
   briefing: (caseId?: string) => Promise<void>;
+  /**
+   * The trainee typed to the coach: resolves with the coach's reply text (also queued for speech when the voice
+   * coach is on: `queued`). The tutor view is re-read so the conversation shows both turns.
+   */
+  chat: (text: string) => Promise<{ text: string; queued: boolean }>;
+  /** Ask the coach for a hint on a case the trainee has been quiet on; resolves with whether one was queued. */
+  nudge: (caseId: string) => Promise<boolean>;
 };
 
 export function useTutor(sessionId: string, enabled: boolean): Tutor {
@@ -97,5 +104,23 @@ export function useTutor(sessionId: string, enabled: boolean): Tutor {
     [sessionId],
   );
 
-  return { state, error, refresh, intent, predict, practice, judgeCase, briefing };
+  const chat = useCallback(
+    async (text: string) => {
+      const response = await coachChat(browserFetch, sessionId, text);
+      refresh();
+      return { text: response.text, queued: response.questionId !== null };
+    },
+    [refresh, sessionId],
+  );
+
+  const nudge = useCallback(
+    async (caseId: string) => {
+      const response = await coachNudge(browserFetch, sessionId, caseId, "idle");
+      if (response.queued) refresh();
+      return response.queued;
+    },
+    [refresh, sessionId],
+  );
+
+  return { state, error, refresh, intent, predict, practice, judgeCase, briefing, chat, nudge };
 }

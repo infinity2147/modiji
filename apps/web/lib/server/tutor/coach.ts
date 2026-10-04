@@ -36,22 +36,39 @@ export type CoachTurnInput = {
   traceId?: string;
 };
 
-/** Ids of coach turns queued and not yet spoken or dropped (folded from the ledger). */
+/**
+ * Ids of coach turns queued and not yet spoken or dropped (folded from the ledger). A turn whose authorization
+ * lapsed unspoken (`question.requeued`) is waiting again, keyed to its `question.queued` entry, so a newer turn
+ * still supersedes it.
+ */
 export function waitingCoachTurns(deps: Pick<TutorDeps, "ledger">, sessionId: string): { questionId: string; entryId: string }[] {
+  const queued = new Map<string, string>();
+  const dropped = new Set<string>();
   const waiting = new Map<string, string>();
   for (const e of deps.ledger.list(sessionId, { kinds: ["question.queued", "gate.authorized", "question.dropped", "question.requeued"] })) {
     switch (e.kind) {
       case "question.queued": {
         const q = parseLedgerPayload(e, "question.queued");
-        if (q.kind === "coach_turn") waiting.set(q.id, e.id);
+        if (q.kind !== "coach_turn") break;
+        queued.set(q.id, e.id);
+        waiting.set(q.id, e.id);
         break;
       }
       case "gate.authorized":
         waiting.delete(parseLedgerPayload(e, "gate.authorized").questionId);
         break;
-      case "question.dropped":
-        waiting.delete(parseLedgerPayload(e, "question.dropped").questionId);
+      case "question.dropped": {
+        const { questionId } = parseLedgerPayload(e, "question.dropped");
+        dropped.add(questionId);
+        waiting.delete(questionId);
         break;
+      }
+      case "question.requeued": {
+        const { questionId } = parseLedgerPayload(e, "question.requeued");
+        const entryId = queued.get(questionId);
+        if (entryId !== undefined && !dropped.has(questionId)) waiting.set(questionId, entryId);
+        break;
+      }
     }
   }
   return [...waiting].map(([questionId, entryId]) => ({ questionId, entryId }));

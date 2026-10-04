@@ -1,7 +1,7 @@
 import type { Question } from "../schemas/engine";
 import { GateAuthorizationSchema, type GateAuthorization } from "../schemas/gate";
 import { GateConfigSchema, type GateConfigInput } from "./config";
-import { CONDITION_KEYS, evaluateGate, type ConditionKey, type GateEvaluation, type GateMode } from "./evaluate";
+import { CONDITION_KEYS, conditionsFor, evaluateGate, sendConditions, type ConditionKey, type GateEvaluation, type GateMode } from "./evaluate";
 import { hudModel, type HudModel } from "./hud";
 import { GateInputSchema, holdingFloor, initialGateState, reduceGate, userSpeaking, type GateInput, type GateState } from "./state";
 
@@ -77,9 +77,6 @@ export type GateController = {
 
 const HOLD_HINT_INTERVAL_MS = 1000;
 
-/** What must still hold when an authorization arrives for its control message to be sent (politeness and privacy). */
-const SEND_CONDITIONS: readonly ConditionKey[] = ["userSilent", "screenIdle", "typingIdle", "notOffRecord"];
-
 /** Whether a typing hint may be sent: no speech, no open user turn, nothing holding the floor. */
 function holdHintAllowed(s: GateState, t: number): boolean {
   return !userSpeaking(s) && !s.userTurnOpen && !holdingFloor(s, t);
@@ -118,9 +115,9 @@ export function createGateController(opts: GateControllerOptions): GateControlle
       return;
     }
     const authorizedAt = clock.now();
-    const polite = mode === "tutor" && question.kind === "intervention" ? ["notOffRecord" as const] : SEND_CONDITIONS;
-    const conditions = evaluateGate(state, authorizedAt, mode, cfg).conditions;
-    const broken = polite.filter((k) => !conditions[k].ok);
+    // What must still hold now (politeness and privacy), judged for this question (`sendConditions`).
+    const conditions = conditionsFor(state, question, authorizedAt, mode, cfg);
+    const broken = sendConditions(mode, question).filter((k) => !conditions[k].ok);
     if (broken.length > 0) {
       state = reduceGate(state, { kind: "withdrawn", t: authorizedAt, questionId: question.id }, cfg);
       opts.onWithdraw?.(parsed.data, question, broken);

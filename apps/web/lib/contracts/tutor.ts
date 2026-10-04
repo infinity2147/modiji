@@ -95,6 +95,25 @@ export const CaseTutorViewSchema = z.strictObject({
 });
 export type CaseTutorView = z.infer<typeof CaseTutorViewSchema>;
 
+/**
+ * One turn of the trainee's conversation with the voice coach, for live captions. A trainee turn is what they said
+ * (a final transcript, original words) or typed (`/tutor/chat`); a coach turn is what the coach says or said: a
+ * reply or nudge (`coach_turn`), the welcome briefing, or a stop-rule warning. `spoken`: the gate authorized it
+ * (a coach turn), or it reached the coach by voice (a trainee turn); a typed turn and a reply not yet voiced are not.
+ */
+export const CoachTurnViewSchema = z.strictObject({
+  /** The ledger entry (trainee) or the question id (coach). */
+  id: z.string().min(1),
+  role: z.enum(["trainee", "coach"]),
+  text: z.string().min(1),
+  at: z.number(),
+  caseId: z.string().nullable(),
+  /** Why the coach spoke: reply, case_opened, off_track, prediction, committed, idle, stuck, briefing, intervention; null for a trainee turn. */
+  trigger: z.string().nullable(),
+  spoken: z.boolean(),
+});
+export type CoachTurnView = z.infer<typeof CoachTurnViewSchema>;
+
 /** GET /api/sessions/:sessionId/tutor (novice sessions). */
 export const TutorStateSchema = z.strictObject({
   sessionId: IdSchema,
@@ -102,6 +121,8 @@ export const TutorStateSchema = z.strictObject({
   masteryLabel: z.literal(MASTERY_LABEL),
   rules: z.array(TutorRuleSchema),
   cases: z.array(CaseTutorViewSchema),
+  /** The latest turns of the coach conversation (oldest first, at most 20). */
+  coach: z.array(CoachTurnViewSchema),
 });
 export type TutorState = z.infer<typeof TutorStateSchema>;
 
@@ -167,4 +188,25 @@ export const BriefingRequestSchema = z.strictObject({ caseId: z.string().min(1).
 export const BriefingResponseSchema = z.discriminatedUnion("queued", [
   z.strictObject({ queued: z.literal(true), text: z.string() }),
   z.strictObject({ queued: z.literal(false), reason: z.enum(["no_rules", "already_given"]) }),
+]);
+
+/**
+ * POST /api/sessions/:sessionId/tutor/chat — the trainee types to the coach (no microphone needed). The same
+ * conversation as speech: the reply is grounded in the confirmed rulebook and the trainee's current case, queued
+ * for speech when the voice coach is on (`questionId`), and returned as text so the UI can show it either way.
+ * `questionId` is null when nothing was queued (a newer message from the trainee superseded this reply).
+ */
+export const CoachChatRequestSchema = z.strictObject({ text: z.string().trim().min(1).max(1000) });
+export const CoachChatResponseSchema = z.strictObject({ questionId: IdSchema.nullable(), text: z.string() });
+
+/**
+ * POST /api/sessions/:sessionId/tutor/nudge — the trainee has been quiet on an open, undecided case (`idle`: the
+ * client calls after ~45 s with no activity; `stuck`: a stronger hint, the expert's rule itself). Queues one spoken
+ * hint from the confirmed rulebook, once per case per reason. `queued: false` says why not: the case is decided, the
+ * hint was already given, or the rules have nothing to say about the case.
+ */
+export const CoachNudgeRequestSchema = z.strictObject({ caseId: z.string().min(1), reason: z.enum(["idle", "stuck"]) });
+export const CoachNudgeResponseSchema = z.discriminatedUnion("queued", [
+  z.strictObject({ queued: z.literal(true), questionId: IdSchema, text: z.string() }),
+  z.strictObject({ queued: z.literal(false), reason: z.enum(["decided", "already_given", "nothing_to_say"]) }),
 ]);
