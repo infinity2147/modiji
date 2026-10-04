@@ -1,9 +1,10 @@
 /**
  * The debrief's writes (plan §7.5): witness rebuilds, expert actions, voice answers and teach-backs.
  * LLMs infer, experts confirm, code enforces: a rule enters or changes only on the expert's own
- * words — a typed `expert.statement` or a voice utterance — and only through evidence-validated
- * promotion (`promoteToConfirmedRule`). After every rulebook change the solver reruns: witnesses it no
- * longer finds are recorded as resolved by that change, new ones are recorded and asked.
+ * words — an `expert.statement` (typed, or a verbatim span of an utterance) or a voice answer — and
+ * only through evidence-validated promotion (`promoteToConfirmedRule`). After every rulebook change the
+ * solver reruns: witnesses it no longer finds are recorded as resolved by that change, new ones are
+ * recorded and asked.
  *
  * Writes for one session run strictly in order (`serially`), so each step reads the previous one's
  * entries. Every entry is registry-validated by the interview layer's `entry()` before it is appended,
@@ -21,6 +22,7 @@ import {
   canonicalJson,
   cellPredicate,
   conditionListToPredicate,
+  containsQuote,
   contentId,
   explainObserved,
   parseLedgerPayload,
@@ -43,6 +45,7 @@ import {
 import type { ExpertActionRequest } from "../../contracts/debrief";
 import { ApiFailure } from "../casedesk/http";
 import { requireOnRecord } from "../casedesk/session";
+import type { UtteranceRecord } from "../interview/engine-state";
 import { quoteLanguageFields } from "../interview/language";
 import { localizeQuestion } from "../interview/llm";
 import { entry, type EntryContext, type PayloadInput } from "../interview/ledger";
@@ -207,6 +210,41 @@ function familyOf(id: string): DecisionFamily {
 
 function typedQuote(statementId: string, text: string, moment: [string, ...string[]]): ExpertQuoteEvidence {
   return { kind: "expert_quote", utteranceId: statementId, exactQuote: text, t0Ms: 0, t1Ms: 0, frameIds: moment, eventIds: [], relation: "supports", provenance: "human_text" };
+}
+
+/** Words the expert said aloud in the debrief conversation: the `utterance.transcript` entry the quote is a verbatim span of. */
+export type SpokenWords = { utteranceId: string };
+
+/**
+ * The utterance behind spoken words, refused (400, nothing written) unless it is an expert utterance of this
+ * session and `quote` is a verbatim span of it: a quote is evidence only if the expert said exactly that.
+ */
+function spokenUtterance(snap: Snapshot, spoken: SpokenWords, quote: string): UtteranceRecord {
+  const record = snap.engine.utterances.get(spoken.utteranceId);
+  if (record === undefined) throw new ApiFailure(400, "unknown_utterance", "utteranceId is not an expert utterance of this session");
+  if (!containsQuote(record.text, quote)) throw new ApiFailure(400, "quote_not_verbatim", "the quote is not a verbatim span of the utterance");
+  return record;
+}
+
+/**
+ * A quote of spoken words (`human_voice`), as the interview's own voice evidence: the utterance's id, times and
+ * the frames on screen while it was said — else the same moment a typed quote would cite — and, for another
+ * language, the original words with their English rendering for display (`quoteLanguageFields`).
+ */
+function spokenQuote(record: UtteranceRecord, text: string, moment: [string, ...string[]]): ExpertQuoteEvidence {
+  const [frame, ...frames] = record.frameIds;
+  return {
+    kind: "expert_quote",
+    utteranceId: record.entryId,
+    exactQuote: text,
+    t0Ms: record.t0Ms,
+    t1Ms: record.t1Ms,
+    frameIds: frame === undefined ? moment : [frame, ...frames],
+    eventIds: [],
+    relation: "supports",
+    provenance: "human_voice",
+    ...quoteLanguageFields(record, text),
+  };
 }
 
 function decisionLinks(ids: readonly string[]): NonQuoteLink[] {
@@ -529,7 +567,7 @@ export function generateTeachBack(deps: DebriefDeps, sessionId: string): Promise
  * against the domain, the action checked against the family, and refused when the same guardrail is
  * already in force.
  */
-function statedStopRule(snap: Snapshot, req: Extract<ExpertActionRequest, { action: "confirm_stop_rule" }>): StatedRule {
+function statedStopRule(snap: Snapshot, req: Extract<ExpertActionRequest, { action: "confirm_stop_rule" }>, at: Pick<StatedRule, "t0Ms" | "t1Ms">): StatedRule {
   const family = familyOf(req.decisionFamily);
   if (!family.actions.includes(req.effect.action)) throw new ApiFailure(400, "invalid_action", `${req.effect.action} is not an action of ${family.id}`);
   const converted = conditionListToPredicate(req.when);
@@ -538,7 +576,7 @@ function statedStopRule(snap: Snapshot, req: Extract<ExpertActionRequest, { acti
   if (issues.length > 0) throw new ApiFailure(400, "invalid_predicate", issues.map((i) => `${i.path || "/"}: ${i.message}`).join("; "));
   // Keep the action the stop-rule guards for `require_approval` too, so it gates only that action (live bug #4).
   const effect = req.effect.type === "forbid" ? req.effect : { type: req.effect.type, role: req.effect.role, action: req.effect.action };
-  const stated = StatedRuleSchema.safeParse({ predicate: converted.predicate, action: req.effect.action, kind: "guardrail", effect, exactQuote: req.quote, t0Ms: 0, t1Ms: 0 });
+  const stated = StatedRuleSchema.safeParse({ predicate: converted.predicate, action: req.effect.action, kind: "guardrail", effect, exactQuote: req.quote, ...at });
   if (!stated.success) throw new ApiFailure(400, "invalid_stop_rule", stated.error.issues.map((i) => i.message).join("; "));
   return stated.data;
 }
@@ -554,14 +592,24 @@ function currentWitness(snap: Snapshot, witnessId: string): { witness: Witness; 
 
 export type ActionResult = { statementId: string; derivedIds: string[] };
 
-export function applyExpertAction(deps: DebriefDeps, sessionId: string, req: ExpertActionRequest): Promise<ActionResult> {
+/**
+ * One explicit expert action. `spoken` (the debrief conversation, by voice) says the words were said aloud:
+ * `req.quote` must then be a verbatim span of that utterance, every quote the action builds is the utterance
+ * (`human_voice`) instead of the typed statement (`human_text`), and the statement names it and cites it as a
+ * parent. Without it the action is exactly the typed one.
+ */
+export function applyExpertAction(deps: DebriefDeps, sessionId: string, req: ExpertActionRequest, spoken?: SpokenWords): Promise<ActionResult> {
   return serially(deps, sessionId, async () => {
     const snap = await snapshot(deps, sessionId);
     requireOnRecord(snap.loaded.session);
+    const voice = spoken === undefined ? undefined : spokenUtterance(snap, spoken, req.quote);
     const w = new Writer(deps, snap, randomUUID());
     const pending = withPendingStatement(deps);
     const statement = (parents: readonly (string | undefined)[], payload: PayloadInput<"expert.statement">): LedgerEntry =>
-      w.append("expert.statement", "expert", parents, payload);
+      w.append("expert.statement", "expert", [...parents, voice?.entryId], voice === undefined ? payload : { ...payload, utteranceId: voice.entryId });
+    /** The quote of the expert's words: the typed statement, or the utterance they said it in. */
+    const quoteOf = (statementId: string, moment: [string, ...string[]]): ExpertQuoteEvidence =>
+      voice === undefined ? typedQuote(statementId, req.quote, moment) : spokenQuote(voice, req.quote, moment);
     let statementEntry: LedgerEntry;
     let change: RuleChange | undefined;
     let regenerateTeachBack = false;
@@ -579,7 +627,7 @@ export function applyExpertAction(deps: DebriefDeps, sessionId: string, req: Exp
             ruleId: contentId("rule", canonicalJson({ candidate: candidate.id, statement: statementId })),
             family: req.decisionFamily,
             source: { candidate },
-            evidence: [typedQuote(statementId, req.quote, moment), ...statedQuotes(snap, candidate, moment)],
+            evidence: [quoteOf(statementId, moment), ...statedQuotes(snap, candidate, moment)],
             confirmationEntryId: statementId,
             ledger,
           });
@@ -603,7 +651,7 @@ export function applyExpertAction(deps: DebriefDeps, sessionId: string, req: Exp
             ruleId: contentId("rule", canonicalJson({ witness: witness.id, statement: statementId })),
             family: witness.decisionFamily,
             source: { predicate, action: req.decision },
-            evidence: [typedQuote(statementId, req.quote, moment)],
+            evidence: [quoteOf(statementId, moment)],
             confirmationEntryId: statementId,
             ledger,
           });
@@ -627,7 +675,7 @@ export function applyExpertAction(deps: DebriefDeps, sessionId: string, req: Exp
         const moment = requireMoment(snap, explainedBy(snap, old).length > 0 ? explainedBy(snap, old) : familyDecisionIds(snap, old.decisionFamily));
         const method = tb === undefined ? "debrief" : "teach_back";
         const make = (statementId: string, ledger: LedgerReader): ConfirmedRule =>
-          revisedRule(deps, snap, { old, change: next, quote: typedQuote(statementId, req.quote, moment), confirmationEntryId: statementId, method, ledger });
+          revisedRule(deps, snap, { old, change: next, quote: quoteOf(statementId, moment), confirmationEntryId: statementId, method, ledger });
         make(PENDING_STATEMENT, pending);
         statementEntry = statement([ruleEntries(snap.book).get(old.id), witnessFound?.id, tb?.entry.id], {
           text: req.quote,
@@ -659,7 +707,7 @@ export function applyExpertAction(deps: DebriefDeps, sessionId: string, req: Exp
         break;
       }
       case "confirm_stop_rule": {
-        const stated = statedStopRule(snap, req);
+        const stated = statedStopRule(snap, req, voice === undefined ? { t0Ms: 0, t1Ms: 0 } : { t0Ms: voice.t0Ms, t1Ms: voice.t1Ms });
         const frames = momentFrames(snap, req.momentEntryId);
         if (frames === undefined) throw noScreenFrame();
         const momentDecision = snap.decisions.find((d) => d.entry.id === req.momentEntryId)?.entry.id;
@@ -672,7 +720,7 @@ export function applyExpertAction(deps: DebriefDeps, sessionId: string, req: Exp
               source: { statedRule: stated },
               priority: RULE_PRIORITY_BY_KIND.guardrail,
               overrides: [],
-              evidence: [typedQuote(statementId, req.quote, frames)],
+              evidence: [quoteOf(statementId, frames)],
               links: decisionLinks(momentDecision === undefined ? [] : [momentDecision]),
               confirmation: { expertId: expertIdOf(snap.loaded), at: deps.now(), method: "debrief", ledgerEntryId: statementId },
               expertId: expertIdOf(snap.loaded),
@@ -702,7 +750,7 @@ export function applyExpertAction(deps: DebriefDeps, sessionId: string, req: Exp
             ruleId: contentId("rule", canonicalJson({ stated: statementId })),
             family: family.id,
             source: { predicate, action: req.decision },
-            evidence: [typedQuote(statementId, req.quote, moment)],
+            evidence: [quoteOf(statementId, moment)],
             confirmationEntryId: statementId,
             ledger,
           });

@@ -45,6 +45,7 @@ import {
   unexplainedDecisions,
   type FamilyState,
   type InterviewStore,
+  type OpenAnswer,
   type QuestionRecord,
 } from "./engine-state";
 import { entry, type EntryContext } from "./ledger";
@@ -67,6 +68,11 @@ export type InterviewDeps = {
   now: () => number;
   /** Runs `fn` once after `delayMs` (the answer window's idle timer); returns the cancel function. */
   schedule: (fn: () => void, delayMs: number) => () => void;
+  /**
+   * The debrief conversation's reader of a spoken reply to one of its turns (a `debrief_turn` question): such an
+   * answer goes here, never to the answer parser. Unset: the reply is recorded and nothing reads it.
+   */
+  debriefAnswer?: (input: { sessionId: string; questionId: string; segments: AnsweredUtterance[] }) => Promise<void>;
   log: Pick<Console, "info" | "warn" | "error">;
 };
 
@@ -275,6 +281,8 @@ function utteranceFrames(ledger: Pick<Ledger, "list">, sessionId: string, privac
  * the stop-rule was often in the second segment); the answer is parsed once its window closes
  * (`closeAnswer`), and then applied, its explicit statements promoted and the queue regenerated.
  * Without a parser the utterance is recorded and the answer stays unparsed (`unparsedAnswers`), never guessed.
+ * A reply to a debrief conversation turn (`debrief_turn`) is collected the same way, over a short window
+ * (`DEBRIEF_ANSWER_WINDOW_MS`), and handed to the conversation, which needs no model for a plain yes / no / skip.
  */
 export function recordUtterance(deps: InterviewDeps, sessionId: string, body: PostUtteranceRequest): Promise<PostUtteranceResponse> {
   return serially(deps, sessionId, async () => {
@@ -307,7 +315,12 @@ export function recordUtterance(deps: InterviewDeps, sessionId: string, body: Po
       }),
     };
     if (record === undefined) return recorded;
-    if (deps.claude === null) {
+    const debrief = record.question.kind === "debrief_turn";
+    if (debrief && deps.debriefAnswer === undefined) {
+      deps.log.info(`[interview] no debrief conversation configured; reply ${utterance.id} to ${record.question.id} recorded only`);
+      return recorded;
+    }
+    if (!debrief && deps.claude === null) {
       deps.log.info(`[interview] no answer parser configured; answer ${utterance.id} to ${record.question.id} recorded unparsed`);
       return recorded;
     }
@@ -316,14 +329,8 @@ export function recordUtterance(deps: InterviewDeps, sessionId: string, body: Po
       return recorded;
     }
     if (archived(deps, sessionId, `collecting answer segment ${utterance.id}`)) return recorded;
-    collectSegment(deps, sessionId, record.question.id, ctx.traceId, {
-      id: utterance.id,
-      text: body.text,
-      t0Ms: body.t0Ms,
-      t1Ms: body.t1Ms,
-      language,
-      ...(translation !== undefined && { translation }),
-    });
+    const segment: AnsweredUtterance = { id: utterance.id, text: body.text, t0Ms: body.t0Ms, t1Ms: body.t1Ms, language, ...(translation !== undefined && { translation }) };
+    collectSegment(deps, sessionId, record.question.id, ctx.traceId, segment, debrief ? DEBRIEF_ANSWER_WINDOW_MS : ANSWER_WINDOW_IDLE_MS);
     return recorded;
   });
 }
@@ -336,8 +343,15 @@ export function recordUtterance(deps: InterviewDeps, sessionId: string, body: Po
  */
 export const ANSWER_WINDOW_IDLE_MS = 12_000;
 
+/**
+ * The idle window for a spoken reply to a debrief conversation turn. The debrief's voice is turn-taking (one
+ * ElevenLabs user turn is normally one final transcript), so a short window keeps the conversation responsive;
+ * a late segment opens a new reply, which the conversation ignores as stale once the next turn is asked.
+ */
+export const DEBRIEF_ANSWER_WINDOW_MS = 1_500;
+
 /** Adds a segment to the session's open answer (closing another question's open answer first) and re-arms its idle timer. */
-function collectSegment(deps: InterviewDeps, sessionId: string, questionId: string, traceId: string, segment: AnsweredUtterance): void {
+function collectSegment(deps: InterviewDeps, sessionId: string, questionId: string, traceId: string, segment: AnsweredUtterance, idleMs: number): void {
   if (deps.store.answers.get(sessionId)?.questionId !== questionId) void closeAnswer(deps, sessionId);
   const open = deps.store.answers.get(sessionId);
   open?.cancel();
@@ -345,14 +359,15 @@ function collectSegment(deps: InterviewDeps, sessionId: string, questionId: stri
     questionId,
     segments: open === undefined ? [segment] : [...open.segments, segment],
     traceId: open?.traceId ?? traceId,
-    cancel: deps.schedule(() => void closeAnswer(deps, sessionId), ANSWER_WINDOW_IDLE_MS),
+    cancel: deps.schedule(() => void closeAnswer(deps, sessionId), idleMs),
   });
 }
 
 /**
  * Closes the session's open answer — the next agent turn, a new authorization, or the idle timer — and
  * parses it in the session's serial queue: all its segments in one parse, each segment still its own
- * evidence entry, and every quote verbatim within one segment. Resolves once the parse has settled.
+ * evidence entry, and every quote verbatim within one segment. A reply to a debrief conversation turn is
+ * handed to the conversation instead (`answerDebrief`). Resolves once the parse (or the reply) has settled.
  */
 export function closeAnswer(deps: InterviewDeps, sessionId: string): Promise<void> {
   const open = deps.store.answers.get(sessionId);
@@ -360,15 +375,39 @@ export function closeAnswer(deps: InterviewDeps, sessionId: string): Promise<voi
   open.cancel();
   deps.store.answers.delete(sessionId);
   const [utterance, ...continuation] = open.segments;
-  return serially(deps, sessionId, async () => {
-    if (archived(deps, sessionId, `parsing answer ${utterance.id} to ${open.questionId}`)) return;
+  return serially(deps, sessionId, async (): Promise<"debrief" | undefined> => {
+    if (archived(deps, sessionId, `parsing answer ${utterance.id} to ${open.questionId}`)) return undefined;
     const record = engineState(deps, sessionId).questions.get(open.questionId);
+    if (record?.question.kind === "debrief_turn") return "debrief";
     if (deps.claude === null || record?.asked === undefined) {
       deps.log.info(`[interview] answer ${utterance.id} to ${open.questionId} left unparsed (no parser, or the question is no longer asked)`);
-      return;
+      return undefined;
     }
     await interpretAnswer(deps, deps.claude, { sessionId, record, utterance, continuation, traceId: open.traceId });
-  }).catch((error: unknown) => deps.log.error(`[interview] parsing answer ${utterance.id} failed: ${describeError(error)}`));
+    return undefined;
+  })
+    .then((next) => (next === "debrief" ? answerDebrief(deps, sessionId, open) : undefined))
+    .catch((error: unknown) => deps.log.error(`[interview] parsing answer ${utterance.id} failed: ${describeError(error)}`));
+}
+
+/**
+ * A spoken reply to a debrief conversation turn, handed to the conversation (`debriefAnswer`) rather than the
+ * answer parser: code reads a plain yes / no / skip without any model, and the conversation alone decides
+ * whether the turn is still the one waiting. It runs after the interview's serial queue, not in it: the
+ * conversation keeps its own order, and its model and solver work never holds up the next utterance. Its
+ * failures are logged, never thrown into the utterance route.
+ */
+async function answerDebrief(deps: InterviewDeps, sessionId: string, open: OpenAnswer): Promise<void> {
+  const ids = open.segments.map((s) => s.id).join(", ");
+  if (deps.debriefAnswer === undefined) {
+    deps.log.info(`[interview] no debrief conversation configured; reply ${ids} to ${open.questionId} recorded only`);
+    return;
+  }
+  try {
+    await deps.debriefAnswer({ sessionId, questionId: open.questionId, segments: [...open.segments] });
+  } catch (error) {
+    deps.log.error(`[interview] debrief reply ${ids} to ${open.questionId} failed: ${describeError(error)}`);
+  }
 }
 
 /**

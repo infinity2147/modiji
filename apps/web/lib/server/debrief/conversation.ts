@@ -10,6 +10,9 @@
  *   so every rule still needs the expert's exact words and a screen frame, and passes promotion.
  * - Every turn is in the ledger (`debrief.asked` / `debrief.replied` / `debrief.understood`); the agent's text is
  *   deterministic.
+ * - A spoken reply (the interviewer's voice) counts only for the turn now waiting, is understood in English (the
+ *   utterance's verified translation), and is cited as the utterance itself (`human_voice`): a rule saved after a
+ *   read-back quotes the statement the expert made, not the "yes" that confirmed it.
  */
 import "server-only";
 import { randomUUID } from "node:crypto";
@@ -37,11 +40,12 @@ import {
 import { numericComparisons, replaceComparison } from "../../debrief-predicate-edit";
 import { ApiFailure } from "../casedesk/http";
 import { requireOnRecord } from "../casedesk/session";
+import type { UtteranceRecord } from "../interview/engine-state";
 import { entry, type EntryContext, type PayloadInput } from "../interview/ledger";
 import { localizeQuestion } from "../interview/llm";
 import type { SchemaDeps } from "../schema/deps";
 import { applyConceptAction, conceptsState } from "../schema/service";
-import { applyExpertAction, generateTeachBack, isAffirmative, rebuildWitnesses } from "./actions";
+import { applyExpertAction, generateTeachBack, isAffirmative, rebuildWitnesses, type SpokenWords } from "./actions";
 import type { DebriefDeps } from "./deps";
 import { interpretReply, type InterpretContext, type Reading } from "./interpret";
 import { DOMAIN, debriefState, snapshot, type Snapshot } from "./state";
@@ -65,10 +69,14 @@ const SKIP = /^\s*(skip|pass|next|not sure|i'?m not sure|i don'?t know|don'?t kn
 /** What a reply to a readback (or a retry) refers back to. */
 type Origin = { topic: Topic; ref: string | null };
 
-/** What a turn carries in `pending` (validated again on use). */
+/**
+ * What a turn carries in `pending` (validated again on use). `quote` is the expert's statement being read back
+ * and `utteranceId` the utterance it was said in (absent when typed): the saved rule cites that statement, never
+ * the "yes" that confirms it.
+ */
 type Pending =
-  | { kind: "expert"; request: Record<string, unknown>; quote: string; origin: Origin }
-  | { kind: "concept"; request: Record<string, unknown>; quote: string; origin: Origin }
+  | { kind: "expert"; request: Record<string, unknown>; quote: string; utteranceId?: string; origin: Origin }
+  | { kind: "concept"; request: Record<string, unknown>; quote: string; utteranceId?: string; origin: Origin }
   | { kind: "retry"; origin: Origin }
   | { kind: "concept_range"; name: string; origin: Origin };
 
@@ -77,6 +85,28 @@ type Replied = { entry: LedgerEntry; promptId: string; text: string; via: "chat"
 type Understood = { entry: LedgerEntry; promptId: string; intent: Intent; origin: "rule" | "llm"; statementId: string | null; refused: string | null };
 
 type History = { asked: Asked[]; replies: Map<string, Replied>; understood: Map<string, Understood>; order: LedgerEntry[] };
+
+/**
+ * One reply as the conversation reads it. `text` is recorded (the expert's words as given). `meaning` is what
+ * code and the model read: the English translation of a non-English spoken reply, else `text`. `quote` is the
+ * evidence: typed, the reply itself (`human_text`); spoken, the longest segment, a verbatim span of the
+ * utterance `spoken` names (`human_voice`, original words).
+ */
+type Reply = { text: string; meaning: string; quote: string; spoken: SpokenWords | undefined };
+
+/** The words a read-back carries: the quote, and the utterance it was said in. */
+function wordsOf(reply: Reply): { quote: string; utteranceId?: string } {
+  return { quote: reply.quote, ...(reply.spoken !== undefined && { utteranceId: reply.spoken.utteranceId }) };
+}
+
+/** The expert's words for a concept action (`ExpertWordsInputSchema`): typed, or a verbatim span of an utterance. */
+function statementOf(words: { quote: string; utteranceId?: string }): { text: string; utteranceId?: string } {
+  return { text: words.quote, ...(words.utteranceId !== undefined && { utteranceId: words.utteranceId }) };
+}
+
+function spokenOf(words: { utteranceId?: string }): SpokenWords | undefined {
+  return words.utteranceId === undefined ? undefined : { utteranceId: words.utteranceId };
+}
 
 function history(entries: readonly LedgerEntry[]): History {
   const asked: Asked[] = [];
@@ -207,9 +237,9 @@ function refusalText(error: unknown): string {
   return error instanceof Error ? error.message : "it could not be saved";
 }
 
-async function applyExpert(deps: ConversationDeps, sessionId: string, request: ExpertActionRequest): Promise<{ statementId: string | null; refused: string | null }> {
+async function applyExpert(deps: ConversationDeps, sessionId: string, request: ExpertActionRequest, spoken: SpokenWords | undefined): Promise<{ statementId: string | null; refused: string | null }> {
   try {
-    const result = await applyExpertAction(deps.debrief, sessionId, request);
+    const result = await applyExpertAction(deps.debrief, sessionId, request, spoken);
     return { statementId: result.statementId, refused: null };
   } catch (error) {
     if (!(error instanceof ApiFailure)) throw error;
@@ -256,10 +286,10 @@ function notUnderstood(asked: Asked, origin: Origin, why: string, again: string)
     : { intent: "unclear", origin: "llm", statementId: null, refused: null, ack: `Sorry, ${why}.`, next: retry(origin, again) };
 }
 
-async function understand(deps: ConversationDeps, sessionId: string, asked: Asked, reply: string): Promise<Outcome> {
+async function understand(deps: ConversationDeps, sessionId: string, asked: Asked, reply: Reply): Promise<Outcome> {
   const snap = await snapshot(deps.debrief, sessionId);
   const state = debriefState(deps.debrief, snap);
-  const plain = plainIntent(reply);
+  const plain = plainIntent(reply.meaning);
   const origin: Origin = asked.pending !== null && asked.pending.kind !== "concept_range" && asked.topic === "readback" ? asked.pending.origin : { topic: asked.topic, ref: asked.ref };
   const moveOn = (intent: Intent, ack = "Okay."): Outcome => ({ intent, origin: "rule", statementId: null, refused: null, ack });
 
@@ -270,9 +300,9 @@ async function understand(deps: ConversationDeps, sessionId: string, asked: Aske
       if (p.kind === "expert") {
         const parsed = ExpertActionRequestSchema.safeParse({ ...p.request, quote: p.quote });
         if (!parsed.success) return { ...moveOn("yes"), refused: "the read-back no longer matches a valid action", ack: "I couldn't save that, sorry." };
-        return savedOrRefused("yes", "rule", await applyExpert(deps, sessionId, parsed.data));
+        return savedOrRefused("yes", "rule", await applyExpert(deps, sessionId, parsed.data, spokenOf(p)));
       }
-      const parsed = ConceptActionRequestSchema.safeParse({ ...p.request, statement: { text: p.quote } });
+      const parsed = ConceptActionRequestSchema.safeParse({ ...p.request, statement: statementOf(p) });
       if (!parsed.success) return { ...moveOn("yes"), refused: "the read-back no longer matches a valid action", ack: "I couldn't save that, sorry." };
       return savedOrRefused("yes", "rule", applyConcept(deps, sessionId, parsed.data));
     }
@@ -288,10 +318,15 @@ async function understand(deps: ConversationDeps, sessionId: string, asked: Aske
     case "proposal": {
       const proposal = state.proposals.find((p) => p.candidateId === asked.ref);
       if (proposal === undefined) return moveOn("skip", "That one is already settled.");
-      if (plain === "yes") return savedOrRefused("yes", "rule", await applyExpert(deps, sessionId, { action: "confirm_candidate", candidateId: proposal.candidateId, decisionFamily: proposal.decisionFamily, quote: reply }));
+      if (plain === "yes")
+        return savedOrRefused(
+          "yes",
+          "rule",
+          await applyExpert(deps, sessionId, { action: "confirm_candidate", candidateId: proposal.candidateId, decisionFamily: proposal.decisionFamily, quote: reply.quote }, reply.spoken),
+        );
       if (plain === "no") return moveOn("no", "Okay, I won't keep that one.");
       if (plain === "skip") return moveOn("skip");
-      const reading = await read(deps, snap, { question: asked.text, allowed: ["decision_rule"], context: `Proposed rule: when ${proposal.text}, ${actionPhrase(DOMAIN, proposal.action)}`, actions: actionsOfFamily(proposal.decisionFamily) }, reply);
+      const reading = await read(deps, snap, { question: asked.text, allowed: ["decision_rule"], context: `Proposed rule: when ${proposal.text}, ${actionPhrase(DOMAIN, proposal.action)}`, actions: actionsOfFamily(proposal.decisionFamily) }, reply.meaning);
       return statedRule(asked, origin, reading, reply, "Is the proposed rule right? Say yes, no, or tell me the rule your way.");
     }
     case "unexplained": {
@@ -302,7 +337,7 @@ async function understand(deps: ConversationDeps, sessionId: string, asked: Aske
         deps,
         snap,
         { question: asked.text, allowed: ["decision_rule"], context: `On case ${decision.caseId} the expert chose ${decision.actionLabel}.`, actions: family === undefined ? [decision.action] : actionsOfFamily(family) },
-        reply,
+        reply.meaning,
       );
       return statedRule(asked, origin, reading, reply, `What about case ${decision.caseId} made it "${decision.actionLabel}"?`);
     }
@@ -312,7 +347,7 @@ async function understand(deps: ConversationDeps, sessionId: string, asked: Aske
       const concept = conceptsState(deps.schema, sessionId).undefinedConcepts.find((c) => c.name === asked.ref);
       if (concept === undefined) return moveOn("skip", "That one is already settled.");
       if (asked.pending?.kind === "concept_range") {
-        const reading = await read(deps, snap, { question: asked.text, allowed: ["range"], context: `New numeric concept: ${concept.label} (${concept.definition})`, actions: [] }, reply);
+        const reading = await read(deps, snap, { question: asked.text, allowed: ["range"], context: `New numeric concept: ${concept.label} (${concept.definition})`, actions: [] }, reply.meaning);
         if (reading.kind !== "range") return notUnderstood(asked, origin, reading.kind === "unclear" ? reading.why : "I didn't hear a range", `What's the smallest and largest value of "${concept.label}"?`);
         const request = { action: "confirm", name: concept.name, definition: { type: "number", label: concept.label, description: concept.definition, min: reading.min, max: reading.max, integer: reading.integer } };
         return {
@@ -321,10 +356,10 @@ async function understand(deps: ConversationDeps, sessionId: string, asked: Aske
           statementId: null,
           refused: null,
           ack: "",
-          next: readback(origin, `So "${concept.label}" goes from ${reading.min} to ${reading.max}${reading.integer ? ", whole numbers only" : ""}. Add it?`, { kind: "concept", request, quote: reply }),
+          next: readback(origin, `So "${concept.label}" goes from ${reading.min} to ${reading.max}${reading.integer ? ", whole numbers only" : ""}. Add it?`, { kind: "concept", request, ...wordsOf(reply) }),
         };
       }
-      if (plain === "no") return savedOrRefused("no", "rule", applyConcept(deps, sessionId, { action: "dismiss", name: concept.name, reason: "not_a_concept", statement: { text: reply } }));
+      if (plain === "no") return savedOrRefused("no", "rule", applyConcept(deps, sessionId, { action: "dismiss", name: concept.name, reason: "not_a_concept", statement: statementOf(wordsOf(reply)) }));
       if (plain === "yes") {
         if (concept.type === "number")
           return { intent: "yes", origin: "rule", statementId: null, refused: null, ack: "", next: { topic: "concept", ref: concept.name, text: `What's the smallest and largest value of "${concept.label}"?`, pending: { kind: "concept_range", name: concept.name, origin } } };
@@ -332,7 +367,7 @@ async function understand(deps: ConversationDeps, sessionId: string, asked: Aske
           concept.type === "enum"
             ? { type: "enum" as const, label: concept.label, description: concept.definition, values: concept.values }
             : { type: "boolean" as const, label: concept.label, description: concept.definition };
-        return savedOrRefused("yes", "rule", applyConcept(deps, sessionId, { action: "confirm", name: concept.name, definition, statement: { text: reply } }));
+        return savedOrRefused("yes", "rule", applyConcept(deps, sessionId, { action: "confirm", name: concept.name, definition, statement: statementOf(wordsOf(reply)) }));
       }
       return plain === "skip" ? moveOn("skip") : notUnderstood(asked, origin, "please answer yes or no", `Should I add "${concept.label}"? Yes or no.`);
     }
@@ -343,7 +378,7 @@ async function understand(deps: ConversationDeps, sessionId: string, asked: Aske
         deps,
         snap,
         { question: asked.text, allowed: ["stop_rule", "decision_rule"], context: "The expert is stating a hard stop (never allow an action, or only with sign-off), or another rule they follow.", actions: ALL_ACTIONS },
-        reply,
+        reply.meaning,
       );
       if (reading.kind === "decision_rule") return statedRule(asked, origin, reading, reply, "Tell me the rule again in your own words.");
       if (reading.kind !== "stop_rule") return notUnderstood(asked, origin, reading.kind === "unclear" ? reading.why : "that didn't sound like a hard stop", "Tell me the hard stop again: what should never happen, and when?");
@@ -352,16 +387,16 @@ async function understand(deps: ConversationDeps, sessionId: string, asked: Aske
       const effect = reading.effect === "forbid" ? { type: "forbid" as const, action: reading.action } : { type: "require_approval" as const, role: reading.role ?? "compliance_officer", action: reading.action };
       const what = effectPhrase(DOMAIN, effect);
       const request = { action: "confirm_stop_rule", decisionFamily, when: { combinator: reading.combinator, conditions: reading.conditions }, effect };
-      return { intent: "statement", origin: "llm", statementId: null, refused: null, ack: "", next: readback(origin, `So the hard stop is: when ${describePredicate(reading.predicate, DOMAIN)}, ${what}. Save it?`, { kind: "expert", request, quote: reply }) };
+      return { intent: "statement", origin: "llm", statementId: null, refused: null, ack: "", next: readback(origin, `So the hard stop is: when ${describePredicate(reading.predicate, DOMAIN)}, ${what}. Save it?`, { kind: "expert", request, ...wordsOf(reply) }) };
     }
     case "teach_back": {
       const tb = state.teachBack;
       if (tb === null || tb.entryId !== asked.ref || !tb.current) return moveOn("skip", "The rules changed since, so I'll read it again later.");
-      if (plain === "yes") return savedOrRefused("yes", "rule", await applyExpert(deps, sessionId, { action: "confirm_teachback", teachBackId: tb.entryId, quote: reply }));
+      if (plain === "yes") return savedOrRefused("yes", "rule", await applyExpert(deps, sessionId, { action: "confirm_teachback", teachBackId: tb.entryId, quote: reply.quote }, reply.spoken));
       if (plain === "skip") return moveOn("skip");
       if (plain === "no") return { intent: "no", origin: "rule", statementId: null, refused: null, ack: "", next: retry(origin, "What did I get wrong? Tell me the rule as it should be.") };
       const family = state.rules[0]?.rule.decisionFamily ?? DOMAIN.decisionFamilies[0]?.id ?? "";
-      const reading = await read(deps, snap, { question: asked.text, allowed: ["decision_rule"], context: `The teach-back said: ${tb.text}`, actions: family === "" ? ALL_ACTIONS : actionsOfFamily(family) }, reply);
+      const reading = await read(deps, snap, { question: asked.text, allowed: ["decision_rule"], context: `The teach-back said: ${tb.text}`, actions: family === "" ? ALL_ACTIONS : actionsOfFamily(family) }, reply.meaning);
       return statedRule(asked, origin, reading, reply, "Tell me the rule as it should be.");
     }
     case "closing":
@@ -370,7 +405,7 @@ async function understand(deps: ConversationDeps, sessionId: string, asked: Aske
 }
 
 /** A decision rule stated in the expert's words: read back, or ask again. */
-function statedRule(asked: Asked, origin: Origin, reading: Reading, quote: string, again: string): Outcome {
+function statedRule(asked: Asked, origin: Origin, reading: Reading, reply: Reply, again: string): Outcome {
   if (reading.kind !== "decision_rule") return notUnderstood(asked, origin, reading.kind === "unclear" ? reading.why : "I didn't hear a rule in that", again);
   const decisionFamily = familyOfAction(reading.action);
   if (decisionFamily === undefined) return notUnderstood(asked, origin, "I couldn't tell which decision you meant", again);
@@ -381,7 +416,7 @@ function statedRule(asked: Asked, origin: Origin, reading: Reading, quote: strin
     statementId: null,
     refused: null,
     ack: "",
-    next: readback(origin, `So the rule is: when ${describePredicate(reading.predicate, DOMAIN)}, ${actionPhrase(DOMAIN, reading.action)}. Save it?`, { kind: "expert", request, quote }),
+    next: readback(origin, `So the rule is: when ${describePredicate(reading.predicate, DOMAIN)}, ${actionPhrase(DOMAIN, reading.action)}. Save it?`, { kind: "expert", request, ...wordsOf(reply) }),
   };
 }
 
@@ -393,7 +428,7 @@ async function witnessReply(
   state: DebriefState,
   asked: Asked,
   origin: Origin,
-  reply: string,
+  reply: Reply,
   plain: "yes" | "no" | "skip" | undefined,
 ): Promise<Outcome> {
   const view = openWitnesses(state).find((v) => v.witness.id === asked.ref);
@@ -404,13 +439,13 @@ async function witnessReply(
   const sessionId = snap.loaded.session.id;
 
   if (w.kind === "boundary") {
-    if (plain === "yes") return savedOrRefused("yes", "rule", await applyExpert(deps, sessionId, { action: "confirm_boundary", witnessId: w.id, quote: reply }));
+    if (plain === "yes") return savedOrRefused("yes", "rule", await applyExpert(deps, sessionId, { action: "confirm_boundary", witnessId: w.id, quote: reply.quote }, reply.spoken));
     const rule = state.rules.find((r) => r.rule.id === w.ruleId)?.rule;
     const atom = rule === undefined ? undefined : numericComparisons(rule.predicate).find((a) => a.feature === w.feature && a.value === w.threshold);
     if (plain === "no" && rule !== undefined && atom !== undefined) {
       const predicate = replaceComparison(rule.predicate, atom.path, FLIP[atom.op] ?? atom.op, atom.value);
       const request = { action: "revise_rule", ruleId: rule.id, predicate, witnessId: w.id };
-      return { intent: "no", origin: "rule", statementId: null, refused: null, ack: "", next: readback(origin, `So the rule should be: when ${describePredicate(predicate, DOMAIN)}, ${effectPhrase(DOMAIN, rule.effect)}. Save that change?`, { kind: "expert", request, quote: reply }) };
+      return { intent: "no", origin: "rule", statementId: null, refused: null, ack: "", next: readback(origin, `So the rule should be: when ${describePredicate(predicate, DOMAIN)}, ${effectPhrase(DOMAIN, rule.effect)}. Save that change?`, { kind: "expert", request, ...wordsOf(reply) }) };
     }
     return notUnderstood(asked, origin, "please answer yes or no", "Is the rule right at exactly that value? Yes or no.");
   }
@@ -423,12 +458,12 @@ async function witnessReply(
       deps,
       snap,
       { question: asked.text, allowed: ["choose_rule", "escalate", "out_of_scope"], context: `First rule: ${ruleSentence(first)}. Second rule: ${ruleSentence(second)}.`, actions: [...w.actions] },
-      reply,
+      reply.meaning,
     );
     if (reading.kind === "choose_rule") {
       const [winner, loser] = reading.rule === "first" ? [first, second] : [second, first];
       const request = { action: "revise_rule", ruleId: winner.id, overrides: [...winner.overrides, loser.id], witnessId: w.id };
-      return { intent: "statement", origin: "llm", statementId: null, refused: null, ack: "", next: readback(origin, `So "${ruleSentence(winner)}" wins over "${ruleSentence(loser)}". Save that?`, { kind: "expert", request, quote: reply }) };
+      return { intent: "statement", origin: "llm", statementId: null, refused: null, ack: "", next: readback(origin, `So "${ruleSentence(winner)}" wins over "${ruleSentence(loser)}". Save that?`, { kind: "expert", request, ...wordsOf(reply) }) };
     }
     return acknowledgeOrRetry(asked, origin, w, reading, reply, "Which rule should win, the first or the second?");
   }
@@ -438,21 +473,21 @@ async function witnessReply(
   const reading: Reading =
     plain === "yes" && view.suggestedAction !== null
       ? { kind: "choose_action", action: view.suggestedAction }
-      : await read(deps, snap, { question: asked.text, allowed: ["choose_action", "escalate", "out_of_scope"], context: `The case: ${view.conditions.join(", ")}.`, actions: actionsOfFamily(w.decisionFamily) }, reply);
+      : await read(deps, snap, { question: asked.text, allowed: ["choose_action", "escalate", "out_of_scope"], context: `The case: ${view.conditions.join(", ")}.`, actions: actionsOfFamily(w.decisionFamily) }, reply.meaning);
   if (reading.kind === "choose_action") {
     if (view.cellRule === null) return moveOn("statement", "Noted. Confirm one of the proposed rules first, then I can save rules for cases like this.");
     const request = { action: "add_rule_for_witness", witnessId: w.id, decision: reading.action };
-    return { intent: "statement", origin: plain === "yes" ? "rule" : "llm", statementId: null, refused: null, ack: "", next: readback(origin, `So when ${view.cellRule.text}, ${actionPhrase(DOMAIN, reading.action)}. Save that as a rule?`, { kind: "expert", request, quote: reply }) };
+    return { intent: "statement", origin: plain === "yes" ? "rule" : "llm", statementId: null, refused: null, ack: "", next: readback(origin, `So when ${view.cellRule.text}, ${actionPhrase(DOMAIN, reading.action)}. Save that as a rule?`, { kind: "expert", request, ...wordsOf(reply) }) };
   }
   return acknowledgeOrRetry(asked, origin, w, reading, reply, "What would you do with this case?");
 }
 
-function acknowledgeOrRetry(asked: Asked, origin: Origin, w: Witness, reading: Reading, quote: string, again: string): Outcome {
+function acknowledgeOrRetry(asked: Asked, origin: Origin, w: Witness, reading: Reading, reply: Reply, again: string): Outcome {
   if (reading.kind === "escalate" || reading.kind === "out_of_scope") {
     const resolution = reading.kind === "escalate" ? "escalate_to_controller" : "out_of_scope";
     const request = { action: "acknowledge_witness", witnessId: w.id, resolution };
     const text = reading.kind === "escalate" ? "So cases like this go to the controller. Shall I note that?" : "So this case doesn't matter in practice. Shall I note that?";
-    return { intent: "statement", origin: "llm", statementId: null, refused: null, ack: "", next: readback(origin, text, { kind: "expert", request, quote }) };
+    return { intent: "statement", origin: "llm", statementId: null, refused: null, ack: "", next: readback(origin, text, { kind: "expert", request, ...wordsOf(reply) }) };
   }
   return notUnderstood(asked, origin, reading.kind === "unclear" ? reading.why : "that didn't sound like an answer to this case", again);
 }
@@ -535,8 +570,54 @@ export function startConversation(deps: ConversationDeps, sessionId: string): Pr
   });
 }
 
-/** The expert's reply to the waiting question (or, after the closing, a new rule they volunteer). */
-export function replyToConversation(deps: ConversationDeps, sessionId: string, input: { text: string; via: "chat" | "voice"; utteranceId?: string }): Promise<void> {
+/** A spoken reply: the `debrief_turn` question it answers and its transcript segments, in order (each an `utterance.transcript`). */
+export type SpokenReply = { questionId: string; utteranceIds: string[] };
+
+/**
+ * A spoken reply as the conversation reads it, or undefined when it is stale: it counts only if its question is
+ * the `debrief_turn` queued for the turn now waiting (after the closing, the latest closing turn) and every
+ * segment is an utterance answering that question. A reply to a turn already answered (in the chat, say) or
+ * superseded is logged and ignored, never applied to whatever is asked now.
+ *
+ * Recorded: the expert's original words (segments joined). Read: the English translation of a segment in another
+ * language when one is verified, else its words. Cited: the longest segment, verbatim, with its utterance.
+ */
+/** The longest reply a `debrief.replied` entry holds. */
+const REPLY_MAX = 1000;
+
+function spokenReply(deps: DebriefDeps, snap: Snapshot, asked: Asked | undefined, spoken: SpokenReply): Reply | undefined {
+  const question = snap.engine.questions.get(spoken.questionId)?.question;
+  if (asked === undefined || question?.kind !== "debrief_turn" || !question.parentIds.includes(asked.entry.id)) {
+    deps.log.info(`[debrief] spoken reply to ${spoken.questionId} ignored: it does not answer the turn now waiting (stale)`);
+    return undefined;
+  }
+  const segments = spoken.utteranceIds.map((id) => snap.engine.utterances.get(id)).filter((u): u is UtteranceRecord => u?.questionId === spoken.questionId);
+  const [first, ...rest] = segments;
+  if (first === undefined || segments.length !== spoken.utteranceIds.length) {
+    deps.log.warn(`[debrief] spoken reply to ${spoken.questionId} ignored: its segments are not utterances answering that question`);
+    return undefined;
+  }
+  const longest = rest.reduce((a, b) => (b.text.length > a.text.length ? b : a), first);
+  const words = segments.map((u) => u.text).join(" ");
+  return {
+    // The reply record shows at most REPLY_MAX characters; the full words stay in the utterances it cites as parents.
+    text: words.length <= REPLY_MAX ? words : `${words.slice(0, REPLY_MAX - 1)}…`,
+    meaning: segments.map((u) => (u.language !== "en" && u.translation !== undefined ? u.translation.text : u.text)).join(" "),
+    quote: longest.text,
+    spoken: { utteranceId: longest.entryId },
+  };
+}
+
+/**
+ * The expert's reply to the waiting question (or, after the closing, a new rule they volunteer): typed (`chat`),
+ * or spoken to the interviewer (`spoken`, see `spokenReply`; a stale one is ignored). `utteranceId` is kept on
+ * the record for a chat reply the client heard; only `spoken` makes the words voice evidence.
+ */
+export function replyToConversation(
+  deps: ConversationDeps,
+  sessionId: string,
+  input: { text: string; via: "chat" | "voice"; utteranceId?: string; spoken?: SpokenReply },
+): Promise<void> {
   return serially(deps.debrief, sessionId, async () => {
     const snap = await snapshot(deps.debrief, sessionId);
     requireOnRecord(snap.loaded.session);
@@ -544,12 +625,19 @@ export function replyToConversation(deps: ConversationDeps, sessionId: string, i
     const last = h.asked.at(-1);
     let asked = awaitingOf(h);
     if (asked === undefined && last?.topic === "closing") asked = { ...last, topic: "stop_rules", ref: "after-closing" };
+    const reply: Reply | undefined = input.spoken === undefined ? { text: input.text, meaning: input.text, quote: input.text, spoken: undefined } : spokenReply(deps.debrief, snap, asked, input.spoken);
+    if (reply === undefined) return;
     if (asked === undefined) throw new ApiFailure(409, "nothing_asked", "start the conversation first");
     const ctx = await context(deps.debrief, sessionId);
     const replied = deps.debrief.ledger.append(
-      entry(ctx, "debrief.replied", "expert", [asked.entry.id], { promptId: asked.promptId, text: input.text, via: input.via, utteranceId: input.utteranceId ?? null }),
+      entry(ctx, "debrief.replied", "expert", [...new Set([asked.entry.id, ...(input.spoken?.utteranceIds ?? [])])], {
+        promptId: asked.promptId,
+        text: reply.text,
+        via: input.via,
+        utteranceId: reply.spoken?.utteranceId ?? input.utteranceId ?? null,
+      }),
     );
-    const outcome = await understand(deps, sessionId, asked, input.text);
+    const outcome = await understand(deps, sessionId, asked, reply);
     const parents = [replied.id, ...(outcome.statementId === null ? [] : [outcome.statementId])];
     deps.debrief.ledger.append(
       entry(ctx, "debrief.understood", "engine", parents, {
@@ -565,6 +653,18 @@ export function replyToConversation(deps: ConversationDeps, sessionId: string, i
     if (outcome.statementId !== null && (asked.topic === "concept" || asked.pending?.kind === "concept")) await rebuildWitnesses(deps.debrief, sessionId);
     const next = outcome.next ?? (await nextItem(deps, sessionId, history((await snapshot(deps.debrief, sessionId)).entries)));
     await ask(deps.debrief, { ...ctx, occurredAt: deps.debrief.now() }, [replied.id], next, outcome.ack);
+  });
+}
+
+/**
+ * The interview's hand-off of a spoken reply to a debrief turn (`InterviewDeps.debriefAnswer`): the transcript
+ * segments collected for that turn's `debrief_turn` question, as one voice reply (stale ones are ignored).
+ */
+export function replyBySpeech(deps: ConversationDeps, input: { sessionId: string; questionId: string; segments: readonly { id: string; text: string }[] }): Promise<void> {
+  return replyToConversation(deps, input.sessionId, {
+    text: input.segments.map((s) => s.text).join(" "),
+    via: "voice",
+    spoken: { questionId: input.questionId, utteranceIds: input.segments.map((s) => s.id) },
   });
 }
 

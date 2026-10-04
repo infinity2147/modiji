@@ -1,5 +1,8 @@
 import { engineConfig } from "@vashistha/core";
+import { replyBySpeech } from "../debrief/conversation";
+import { debriefDeps } from "../debrief/runtime-deps";
 import { getRuntime } from "../runtime";
+import { schemaDeps } from "../schema/runtime-deps";
 import type { InterviewDeps } from "./orchestrator";
 
 /** Engine knobs in force: the engine's defaults (plan §7.3; heuristics, labelled as such on the HUD). */
@@ -26,6 +29,8 @@ export function interviewDeps(): InterviewDeps {
     rulebook: rulebookAllModels,
     now: Date.now,
     schedule,
+    // A spoken reply to a debrief conversation turn is the expert's reply in that conversation (same ledger and stores).
+    debriefAnswer: (input) => replyBySpeech({ debrief: debriefDeps(), schema: schemaDeps() }, input),
     log: console,
   };
 }

@@ -703,3 +703,29 @@ Source: `docs/evidence/live/ACCEPTANCE.txt` and `SUMMARY.txt`. All expert speech
 **Done.** `apps/web/lib/server/perception/frame-store.ts`: volume, R2 and tiered stores; with R2 configured new frames go to a private bucket and reads fall back to the volume. Retention: at `R2_MAX_BYTES` (default 2 GB) the oldest half of the bytes is deleted, off the request path. Deep health reports the backend, a real write/read/delete probe, and the retention counters; preflight fails on a broken probe, a missing report, or a cap that is not enforced. Env: four `R2_*` variables, all or none. 14 new frame-store tests, env tests, preflight tests. Whole suite 1575 passing, typecheck, lint and bundle clean.
 
 **Not done / honest limits.** Not deployed: it needs the four R2 variables from the user. The R2 API behaviour is unverified against a real bucket (docs/api-notes §20). The cap deletes by age alone, so a frame cited by a confirmed rule can go (its evidence link then shows it gone); the user chose oldest-50% and has not asked for cited frames to be kept. Replay bundles, the ledger and saved Work Maps stay on the volume. No migration script: frames already on the volume stay readable and are not counted against the cap.
+
+---
+
+## Debrief as one conversation, chat or voice (2026-10-04, branch `feat/debrief-chat`, NOT deployed)
+
+**Goal (user request).** Replace the debrief page's many text boxes with a few-minute conversation the engine leads, answered in natural language by typing or speaking; stop-rules said however the expert likes.
+
+**Done.**
+- `apps/web/lib/server/debrief/conversation.ts`: the agenda is computed from the debrief state. It covers the four heaviest proposed rules (each with its decision), up to three unexplained decisions, up to four open solver cases, proposed concepts, hard stops repeated until "no", and the teach-back.
+- A plain yes / no / skip is read by code. A free answer is read by Sonnet (`interpret.ts`, structured output, public domain only), checked by code (ids, condition conversion, type check), and READ BACK. Nothing is saved until a plain yes.
+- Saving uses the existing expert actions plus a new `confirm_stated_rule`. Every turn is in the ledger (`debrief.asked` / `debrief.replied` / `debrief.understood`).
+- Voice: each turn is also queued as a `debrief_turn` question that the interviewer speaks through the unchanged gate. Only the debrief page's voice loop takes that kind; CaseDesk's default excludes it.
+- Spoken replies are collected over a 1.5 s window and routed to the conversation. Saved rules cite the utterance as `human_voice` evidence with its times and frames. A Hindi reply is read via its translation and the quote keeps the Hindi words.
+- UI: a chat with Yes / No / Skip quick replies, a Talk toggle, a status strip with the microphone disclosure and the off-the-record control, and the rulebook, coverage and new concepts read-only beside the chat.
+
+**Verified.**
+- Unit: 122 files, 1595 passed.
+- Typecheck and lint clean.
+- Browser (hermetic, no model): debrief 2/2, concepts 1/1, tutor 2/2, casedesk 5/5.
+- Reply reader against the real model: 8 sample replies. Sanctions / PEP sign-off / new-customer-in-high-risk stop rules mapped exactly; "goes to the controller" read as escalate; "felt fine" read as unclear. 1.6–4.4 s per reply.
+
+**Not verified / limits.**
+- No live spoken session against ElevenLabs yet. Voice was tested with fakes and the hermetic browser run only.
+- The browser stop-rule test sets the rule through the API, because hermetic runs have no model to read free words.
+- A spoken reply over 1000 characters is stored shortened. The full words stay in its utterances.
+- "Drop that rule" (retire) is not in the conversation yet; it waits for the other session's `retire_rule` to be committed on `main`.

@@ -409,9 +409,13 @@ export function translationPending(u: Pick<UtteranceRecord, "language" | "transl
   return u.language !== "en" && u.translation === undefined;
 }
 
-/** Answers recorded while no parser was available (or it failed): utterances to an asked question with no `answer.parsed`. */
+/**
+ * Answers recorded while no parser was available (or it failed): utterances to an asked question with no
+ * `answer.parsed`. Replies to debrief conversation turns are not answers for the parser (the conversation
+ * reads them), so they never count.
+ */
 export function unparsedAnswers(state: EngineState): UtteranceRecord[] {
-  return [...state.utterances.values()].filter((u) => u.questionId !== undefined && !u.parsed);
+  return [...state.utterances.values()].filter((u) => u.questionId !== undefined && !u.parsed && state.questions.get(u.questionId)?.question.kind !== "debrief_turn");
 }
 
 export function topCandidates(family: FamilyState): { candidateId: string; description: string; weight: number }[] {

@@ -1,9 +1,9 @@
 "use client";
 
 /**
- * The live interview/tutor loop for one CaseDesk session: the ElevenLabs conversation (expert →
- * interviewer agent, novice → tutor agent), the browser speech gate, off-record control and the ledger
- * tail the judge view reads. Must be rendered inside `ConversationProvider`.
+ * The live interview/tutor loop for one CaseDesk session (or the debrief page's spoken conversation): the
+ * ElevenLabs conversation (expert → interviewer agent, novice → tutor agent), the browser speech gate,
+ * off-record control and the ledger tail the judge view reads. Must be rendered inside `ConversationProvider`.
  *
  * Everything with timers or network (gate polling, ledger tail) is created in effects, never during
  * render, so server rendering stays inert.
@@ -11,7 +11,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useConversation, useConversationClientTool } from "@elevenlabs/react";
 import { z } from "zod";
-import { DEFAULT_GATE_CONFIG, SET_OFF_RECORD_TOOL, systemClock, type AgentRole, type ExpertLanguage } from "@vashistha/core";
+import { DEFAULT_GATE_CONFIG, SET_OFF_RECORD_TOOL, systemClock, type AgentRole, type ExpertLanguage, type QuestionKind } from "@vashistha/core";
 import type { SessionMode } from "../../contracts/casedesk";
 import { describeError, type FetchFn } from "../api";
 import { createGateSession, type GateSession, type GateSnapshot } from "../gate/gate-session";
@@ -107,10 +107,21 @@ export function useInterviewLoop(options: {
   privacyInit: PrivacyBase | undefined;
   capture: CaptureControl;
   /**
-   * Screen capture is active. An expert interview may not start without it: a confirmed rule needs a
-   * redacted frame of the screen at the moment of the expert's quote. The tutor does not need it.
+   * Screen capture is active. An expert interview may not start without it (see `requireScreen`): a
+   * confirmed rule needs a redacted frame of the screen at the moment of the expert's quote. The tutor
+   * does not need it.
    */
   screenShared: boolean;
+  /**
+   * The interviewer needs a shared screen to start (default true). The debrief passes false: the rules
+   * confirmed there cite the frames captured during the session, not a frame of the debrief page.
+   */
+  requireScreen?: boolean;
+  /**
+   * The question kinds the gate may speak here (default: every kind but `debrief_turn`, see
+   * `DEFAULT_QUESTION_KINDS`). The debrief page passes `debrief_turn` only. Read once per session.
+   */
+  questionKinds?: ReadonlySet<QuestionKind>;
   /**
    * The expert's declared language (plan §7.11; default English). A non-English session starts the
    * interviewer with that language (`overrides.agent.language`, which ElevenLabs uses for ASR and TTS —
@@ -120,6 +131,9 @@ export function useInterviewLoop(options: {
   language?: ExpertLanguage;
 }): InterviewLoop {
   const { sessionId, mode, privacyInit, screenShared } = options;
+  const requireScreen = options.requireScreen ?? true;
+  // Fixed for the lifetime of the hook, so a caller's fresh Set on each render never restarts the gate.
+  const [questionKinds] = useState(() => options.questionKinds);
   const language: ExpertLanguage = mode === "expert" ? (options.language ?? "en") : "en";
   const agent = AGENT_FOR_MODE[mode];
   const [loop, setLoop] = useState<Loop | null>(null);
@@ -224,6 +238,7 @@ export function useInterviewLoop(options: {
         bridge.asked(asked.questionId);
         cues.armed(asked);
       },
+      ...(questionKinds !== undefined && { questionKinds }),
     });
     const tail = createLedgerTail({ sessionId, fetch: browserFetch, setTimer: systemClock.setTimer });
     const next = { gate, bridge, tail };
@@ -241,7 +256,7 @@ export function useInterviewLoop(options: {
         // Already ended.
       }
     };
-  }, [sessionId, agent, loaded, cues, language]);
+  }, [sessionId, agent, loaded, cues, language, questionKinds]);
 
   // The privacy controller exists once the session's privacy state is known.
   const offRecordAtLoad = privacyInit?.offRecord;
@@ -291,7 +306,7 @@ export function useInterviewLoop(options: {
       ? "Loading the session…"
       : privacyState.offRecord
         ? "Off the record: resume the record to start voice"
-        : agent === "interviewer" && !screenShared
+        : agent === "interviewer" && requireScreen && !screenShared
           ? "Share your screen to start the interview"
           : undefined;
   const startBlockedRef = useRef(startBlocked);

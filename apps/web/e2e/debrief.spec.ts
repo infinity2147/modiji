@@ -67,7 +67,20 @@ test("debrief: one conversation — proposals confirmed by a yes, open cases ans
   // No old forms on the page: one conversation, one reply box.
   await expect(page.getByLabel("Your words (recorded as evidence)")).toHaveCount(0);
   await expect(page.getByText("The language model is off, so I understand yes, no and skip only.")).toBeVisible();
+  // Voice: a Talk toggle beside Send (off until pressed), the microphone disclosure and the off-record switch.
+  const talk = page.getByRole("button", { name: "Talk", exact: true });
+  const voiceStatus = page.getByRole("status", { name: "Voice status" });
+  await expect(talk).toBeVisible();
+  await expect(talk).toHaveAttribute("aria-pressed", "false");
+  await expect(voiceStatus).toHaveText("Voice off");
+  await expect(page.getByText("Microphone is on only while Talk is on.")).toBeVisible();
+  await expect(page.getByRole("button", { name: /Go off the record/ })).toBeEnabled();
   await page.screenshot({ path: evidence("debrief-conversation-start.png"), fullPage: true });
+  // No voice credentials on this server: Talk says so plainly, and typing carries on.
+  await talk.click();
+  await expect(voiceStatus).toHaveText("Voice not set up");
+  await expect(page.getByText(/Voice isn't set up on this server/)).toBeVisible();
+  await expect(page.getByLabel("Your answer")).toBeEnabled();
 
   for (let i = 0; i < 40 && !(await page.getByTestId("debrief-done").isVisible()); i += 1) {
     const count = await agent.count();

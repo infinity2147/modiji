@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { CONDITION_KEYS, type Question } from "@vashistha/core";
-import { createGateSession, QUEUE_POLL_MS } from "../../lib/client/gate/gate-session";
+import { CONDITION_KEYS, type Question, type QuestionKind } from "@vashistha/core";
+import { createGateSession, DEFAULT_QUESTION_KINDS, QUEUE_POLL_MS } from "../../lib/client/gate/gate-session";
 import { jsonResponse, scriptedFetch, tick } from "./fake-fetch";
 import { manualClock, question } from "./interview-support";
 
@@ -16,7 +16,7 @@ const granted: Authorize = (body) =>
     text: "Was it the ownership share or the jurisdiction?",
   });
 
-function setup(opts: { queue?: Question[]; authorize?: Authorize } = {}) {
+function setup(opts: { queue?: Question[]; authorize?: Authorize; questionKinds?: ReadonlySet<QuestionKind> } = {}) {
   const time = manualClock();
   /** The server's queue: an authorized question leaves it (until the server re-queues it). */
   const queue = [...(opts.queue ?? [question("q-1")])];
@@ -39,6 +39,7 @@ function setup(opts: { queue?: Question[]; authorize?: Authorize } = {}) {
     sendControlMessage: (text) => sent.push(text),
     holdAgent: () => {},
     onAsked: (a) => asked.push(a.questionId),
+    ...(opts.questionKinds !== undefined && { questionKinds: opts.questionKinds }),
   });
   const authorizeCalls = () => net.requests.filter((r) => r.url.endsWith("/gate/authorize"));
   const queueCalls = () => net.requests.filter((r) => r.url.endsWith("/questions"));
@@ -210,5 +211,48 @@ describe("browser gate session", () => {
     expect(sent).toEqual([]);
     expect(gate.snapshot().refusals[0]).toMatchObject({ code: "withdrawn", message: expect.stringContaining("Off record") });
     gate.dispose();
+  });
+
+  describe("question kinds", () => {
+    const debriefTurn = question("q-debrief", { kind: "debrief_turn", ephemeral: true, value: 1 });
+
+    it("by default never speaks a debrief turn: the live interview's question below it is asked instead", async () => {
+      expect(DEFAULT_QUESTION_KINDS.has("debrief_turn")).toBe(false);
+      expect(DEFAULT_QUESTION_KINDS.has("counterfactual")).toBe(true);
+      const { gate, sent, asked, authorizeCalls } = setup({ queue: [debriefTurn, question("q-live")] });
+      await tick();
+      expect(gate.snapshot().queue.map((q) => q.id)).toEqual(["q-live"]);
+      gate.setVoiceLive(true);
+      gate.committed();
+      await tick();
+      expect(authorizeCalls().map((r) => (r.body as { questionId: string }).questionId)).toEqual(["q-live"]);
+      expect(sent).toEqual([CONTROL]);
+      expect(asked).toEqual(["q-live"]);
+      gate.dispose();
+    });
+
+    it("with only a debrief turn queued, the default session stays quiet", async () => {
+      const { gate, authorizeCalls, run } = setup({ queue: [debriefTurn] });
+      await tick();
+      gate.setVoiceLive(true);
+      gate.committed();
+      await run(30_000);
+      expect(authorizeCalls()).toHaveLength(0);
+      expect(gate.snapshot().queue).toEqual([]);
+      gate.dispose();
+    });
+
+    it("a session for debrief turns speaks only those, even when a live question is at the top", async () => {
+      const { gate, sent, asked, authorizeCalls } = setup({ queue: [question("q-live"), debriefTurn], questionKinds: new Set(["debrief_turn"]) });
+      await tick();
+      expect(gate.snapshot().queue.map((q) => q.id)).toEqual(["q-debrief"]);
+      gate.setVoiceLive(true);
+      // Ephemeral: no work breakpoint is needed.
+      await tick();
+      expect(authorizeCalls().map((r) => (r.body as { questionId: string }).questionId)).toEqual(["q-debrief"]);
+      expect(sent).toEqual([CONTROL]);
+      expect(asked).toEqual(["q-debrief"]);
+      gate.dispose();
+    });
   });
 });

@@ -72,8 +72,10 @@ export function entrySummary(e: LedgerEntry): string {
       return `Expert (voice): “${parseLedgerPayload(e, "utterance.transcript").text}”`;
     case "answer.parsed":
       return `Answer parsed (confidence ${parseLedgerPayload(e, "answer.parsed").confidence.toFixed(2)})`;
-    case "expert.statement":
-      return `Expert (typed): “${parseLedgerPayload(e, "expert.statement").text}”`;
+    case "expert.statement": {
+      const p = parseLedgerPayload(e, "expert.statement");
+      return `Expert (${p.utteranceId === undefined ? "typed" : "spoken"}): “${p.text}”`;
+    }
     case "rule.confirmed": {
       const { rule } = RuleConfirmedPayloadSchema.parse(parseLedgerPayload(e, "rule.confirmed"));
       const t = ruleText(DOMAIN, rule);

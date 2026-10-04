@@ -186,8 +186,9 @@ const kinds = {
   "witness.found": { sources: ["solver"], payload: WitnessSchema },
   "witness.resolved": { sources: ["engine"], payload: WitnessResolutionSchema },
   /**
-   * An explicit expert action typed in the debrief UI when voice is not used. `text` is the expert's
-   * own words: it becomes evidence (`human_text`) exactly like an utterance; derived entries
+   * An explicit expert action in the debrief: typed in the UI, or said in the debrief conversation. `text` is
+   * the expert's own words: typed, it becomes evidence (`human_text`) exactly like an utterance; said, the
+   * evidence is the utterance it is a verbatim span of (`utteranceId`, `human_voice`); derived entries
    * (`rule.*`, `witness.resolved`, `teachback.confirmed`) cite it as their parent.
    */
   "expert.statement": {
@@ -214,6 +215,12 @@ const kinds = {
         teachBackId: IdSchema.optional(),
         action: ActionIdSchema.optional(),
       }),
+      /**
+       * Said aloud in the debrief conversation: the `utterance.transcript` entry `text` is a verbatim span of
+       * (also a parent). The rule's quote is then that utterance (`human_voice`, its times and frames); absent
+       * for words typed in the UI.
+       */
+      utteranceId: IdSchema.optional(),
     }),
   },
   /**

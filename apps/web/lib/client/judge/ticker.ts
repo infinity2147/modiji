@@ -221,7 +221,7 @@ function describe(entry: LedgerEntry, ctx: TickerContext): { text: string; tone:
       return evidence(`Debrief gap closed (${sentence(parseLedgerPayload(entry, "witness.resolved").resolution)})`);
     case "expert.statement": {
       const p = parseLedgerPayload(entry, "expert.statement");
-      return evidence(`Expert (typed, ${sentence(p.intent)}): ${quote(p.text)}`);
+      return evidence(`Expert (${p.utteranceId === undefined ? "typed" : "spoken"}, ${sentence(p.intent)}): ${quote(p.text)}`);
     }
     case "debrief.asked":
       return system(`Debrief asked: ${quote(parseLedgerPayload(entry, "debrief.asked").text)}`);

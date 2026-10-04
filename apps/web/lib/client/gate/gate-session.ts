@@ -11,11 +11,14 @@
  *   flight (withdrawn); a refusal (409) or a withdrawal is recorded, gives the live-budget slot back,
  *   and the queue is re-read;
  * - the queue is only offered to the gate while a voice conversation is live, so no question is spent
- *   (or recorded as authorized) when nobody could hear it.
+ *   (or recorded as authorized) when nobody could hear it;
+ * - only the question kinds this page speaks are offered (`questionKinds`): the session's queue is shared by
+ *   the CaseDesk interview and the debrief conversation, and each page's agent speaks its own questions only.
  */
 import {
   CONDITION_LABELS,
   createGateController,
+  QuestionKindSchema,
   type GateClock,
   type GateConditions,
   type GateConfigInput,
@@ -25,6 +28,7 @@ import {
   type HudModel,
   type LatencySample,
   type Question,
+  type QuestionKind,
 } from "@vashistha/core";
 import { ApiError, describeError, type FetchFn } from "../api";
 import { authorizeQuestion, fetchQuestionQueue } from "./api";
@@ -39,6 +43,13 @@ export const QUEUE_RETRY_MS = 5000;
  * dropped; the server re-queues the question when its unsent nonce expires.
  */
 export const AUTHORIZE_TIMEOUT_MS = 10_000;
+
+/**
+ * The kinds a gate session offers by default: everything except `debrief_turn`. Debrief turns are spoken only
+ * by the debrief page's voice loop, which asks for them explicitly; a live CaseDesk capture never speaks one
+ * (a debrief left open in another tab still queues its turns in the same session).
+ */
+export const DEFAULT_QUESTION_KINDS: ReadonlySet<QuestionKind> = new Set(QuestionKindSchema.options.filter((k) => k !== "debrief_turn"));
 
 export type GateRefusal = { questionId: string; at: number; code: string; message: string };
 
@@ -76,6 +87,8 @@ export type GateSessionOptions = {
   holdAgent: () => void;
   /** A question was authorized and its control message sent: the next agent turn speaks it. */
   onAsked: (asked: AskedQuestion) => void;
+  /** The question kinds this session may speak (default `DEFAULT_QUESTION_KINDS`); others in the queue are ignored. */
+  questionKinds?: ReadonlySet<QuestionKind>;
   pollMs?: number;
 };
 
@@ -109,6 +122,7 @@ const MAX_REFUSALS = 20;
 export function createGateSession(options: GateSessionOptions): GateSession {
   const { clock, sessionId } = options;
   const pollMs = options.pollMs ?? QUEUE_POLL_MS;
+  const questionKinds = options.questionKinds ?? DEFAULT_QUESTION_KINDS;
   const listeners = new Set<() => void>();
   /** Control messages by nonce, between `issue` and `onAuthorize`. */
   const controlMessages = new Map<string, string>();
@@ -208,7 +222,8 @@ export function createGateSession(options: GateSessionOptions): GateSession {
       (response) => {
         if (abort.signal.aborted) return;
         pollAbort = null;
-        queue = response.queue;
+        // The server orders the queue; the top this page may speak is the first question of a kind it speaks.
+        queue = response.queue.filter((q) => questionKinds.has(q.kind));
         contextVersion = response.contextVersion;
         serverAsked = response.asked.length;
         queueStatus = { state: "ok", at: clock.now() };
