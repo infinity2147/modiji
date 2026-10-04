@@ -27,7 +27,7 @@
 
 ## ▶ Demo video
 
-> **[ ▶ Watch the demo — link to be added before submission ](#)**  <!-- TODO: replace # with the YouTube / Loom link -->
+> **[ ▶ Watch the demo ](https://drive.google.com/drive/folders/1JLRNCxQLfNvxhmg5C2BiBt13CVlIhFlH?usp=share_link)**  <!-- TODO: replace # with the YouTube / Loom link -->
 
 ---
 
