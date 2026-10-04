@@ -1,0 +1,333 @@
+{
+  "tool": "vashistha-preflight",
+  "startedAt": "2026-10-04T03:14:46.513Z",
+  "finishedAt": "2026-10-04T03:15:02.988Z",
+  "target": "https://vashistha-production.up.railway.app",
+  "options": {
+    "only": [
+      "env",
+      "anthropic",
+      "agents",
+      "token",
+      "public-llm",
+      "voice-skip-turn",
+      "voice-off-record",
+      "server-deep",
+      "sandbox",
+      "permissions"
+    ],
+    "quietWindowMs": 8000,
+    "speechTimeoutMs": 20000
+  },
+  "exitCode": 0,
+  "summary": {
+    "pass": 9,
+    "fail": 0,
+    "skip": 0,
+    "info": 1
+  },
+  "results": [
+    {
+      "id": "env",
+      "title": "Environment variables",
+      "status": "pass",
+      "ms": 55,
+      "detail": "6 required variables set, PUBLIC_BASE_URL is https (.env + process env)",
+      "facts": {
+        "source": ".env + process env",
+        "required": [
+          "ANTHROPIC_API_KEY",
+          "ELEVENLABS_API_KEY",
+          "ELEVENLABS_INTERVIEWER_AGENT_ID",
+          "ELEVENLABS_TUTOR_AGENT_ID",
+          "CUSTOM_LLM_SECRET",
+          "PUBLIC_BASE_URL"
+        ],
+        "missing": []
+      }
+    },
+    {
+      "id": "anthropic",
+      "title": "Anthropic structured output + routed models",
+      "status": "pass",
+      "ms": 1713,
+      "detail": "structured claude-haiku-4-5-20251001 1529 ms (in 303/out 16, cache r0/w0) → reason=not_visible; claude-sonnet-5-5 1451 ms (in 28/out 4, cache r0/w0); claude-opus-5-5 1687 ms (in 28/out 4, cache r0/w0)",
+      "facts": {
+        "structured": {
+          "model": "claude-haiku-4-5-20251001",
+          "latencyMs": 1529,
+          "stopReason": "end_turn",
+          "output": {
+            "unknown": true,
+            "reason": "not_visible"
+          },
+          "usage": {
+            "inputTokens": 303,
+            "outputTokens": 16,
+            "cacheCreationInputTokens": 0,
+            "cacheReadInputTokens": 0
+          }
+        },
+        "claude-sonnet-5-5": {
+          "latencyMs": 1451,
+          "usage": {
+            "inputTokens": 28,
+            "outputTokens": 4,
+            "cacheCreationInputTokens": 0,
+            "cacheReadInputTokens": 0
+          }
+        },
+        "claude-opus-5-5": {
+          "latencyMs": 1687,
+          "usage": {
+            "inputTokens": 28,
+            "outputTokens": 4,
+            "cacheCreationInputTokens": 0,
+            "cacheReadInputTokens": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "agents",
+      "title": "ElevenLabs agents match spec and invariants",
+      "status": "pass",
+      "ms": 1160,
+      "detail": "interviewer (vashistha-interviewer-v3), tutor (vashistha-tutor-v2): invariants hold, spec matches, client tools match, secret reference current",
+      "facts": {
+        "interviewer": {
+          "agentId": "agent_2601m41v7r80eh79v5f00x874765",
+          "specVersion": 3,
+          "modelId": "vashistha-interviewer-v3",
+          "secretReferenced": true,
+          "clientTools": [
+            "set_off_record=tool_0601m41xkp4se5kta44gyzp4f9s2"
+          ]
+        },
+        "tutor": {
+          "agentId": "agent_2401m41v7v1jfr295ekx74gh81hp",
+          "specVersion": 2,
+          "modelId": "vashistha-tutor-v2",
+          "secretReferenced": true,
+          "clientTools": [
+            "set_off_record=tool_0601m41xkp4se5kta44gyzp4f9s2"
+          ]
+        }
+      }
+    },
+    {
+      "id": "token",
+      "title": "Conversation tokens (API + public endpoint)",
+      "status": "pass",
+      "ms": 1029,
+      "detail": "interviewer token 483 ms; tutor token 515 ms; public /api/voice/token 513 ms",
+      "facts": {
+        "interviewer": {
+          "conversationId": "conv_4501m42egawge4pbv0wja92zan5d",
+          "ms": 483
+        },
+        "tutor": {
+          "conversationId": "conv_1901m42egawfehe9jkg8bhmc3ybp",
+          "ms": 515
+        },
+        "public": {
+          "conversationId": "conv_4001m42egbcnembre6r9p3am62v0",
+          "ms": 513
+        }
+      }
+    },
+    {
+      "id": "public-llm",
+      "title": "Custom-LLM endpoint over the public internet",
+      "status": "pass",
+      "ms": 2087,
+      "detail": "401 without/with wrong bearer; unauthorised → skip_turn (274 ms); authorised → exact text (first chunk 350 ms); replay → skip_turn (already_used)",
+      "facts": {
+        "path": "/api/llm/chat/completions",
+        "model": "vashistha-interviewer-v3",
+        "sessionId": "preflight-401d71b2-38f9-44f8-ac74-54aa1cd4a231",
+        "skipTurn": {
+          "ok": true,
+          "reason": "not_control_message",
+          "firstChunkMs": 273,
+          "totalMs": 274
+        },
+        "speech": {
+          "ok": true,
+          "firstChunkMs": 350,
+          "totalMs": 351
+        },
+        "replay": {
+          "ok": true,
+          "reason": "already_used",
+          "totalMs": 286
+        }
+      }
+    },
+    {
+      "id": "voice-skip-turn",
+      "title": "skip_turn honoured end to end through ElevenLabs + TTS",
+      "status": "pass",
+      "ms": 14332,
+      "detail": "conversation conv_7801m42egdcpfg5aykz39dwmc434: silent for 8000 ms on an unauthorised turn; authorised text after 5019 ms, first audio after 4252 ms",
+      "facts": {
+        "quietWindowMs": 8000,
+        "speechTimeoutMs": 20000,
+        "connectMs": 752,
+        "phaseA": {
+          "events": {
+            "agent_tool_response": 1,
+            "ping": 4
+          },
+          "agentResponses": [],
+          "toolResponses": [
+            {
+              "toolName": "skip_turn",
+              "toolType": "system",
+              "status": "success",
+              "isError": false,
+              "isCalled": true
+            }
+          ],
+          "userTranscriptEchoed": false
+        },
+        "phaseB": {
+          "reconnected": false,
+          "events": {
+            "ping": 3,
+            "audio": 4,
+            "agent_response": 1
+          },
+          "firstAudioMs": 4252,
+          "agentResponseMs": 5019,
+          "audioEvents": 4,
+          "toolResponses": [],
+          "userTranscriptEchoed": false
+        },
+        "unexpectedEventTypes": [],
+        "pongs": 7,
+        "pings": 7,
+        "protocolErrors": [],
+        "conversationIds": [
+          "conv_7801m42egdcpfg5aykz39dwmc434"
+        ],
+        "observed": {
+          "bearerAuth": "verified: ElevenLabs reached the custom LLM with Authorization: Bearer [redacted] (the endpoint speaks only for that header)",
+          "streamedSkipTurn": "accepted: no speech for 8000 ms after an unauthorised turn; agent_tool_response skip_turn observed",
+          "preToolSpeech": "none: no audio or agent text around skip_turn",
+          "userTranscriptForUserMessage": "not echoed as user_transcript"
+        }
+      }
+    },
+    {
+      "id": "voice-off-record",
+      "title": "Off-record phrase → set_off_record client tool, no speech",
+      "status": "pass",
+      "ms": 9294,
+      "detail": "conversation conv_1501m42egdcwfad9nn45eqp1v7sf: set_off_record client tool call after 504 ms, no speech for 8000 ms",
+      "facts": {
+        "quietWindowMs": 8000,
+        "conversationId": "conv_1501m42egdcwfad9nn45eqp1v7sf",
+        "events": {
+          "client_tool_call": 1,
+          "agent_tool_response": 2,
+          "ping": 4
+        },
+        "toolCallMs": 504,
+        "clientToolCalls": [
+          {
+            "toolName": "set_off_record",
+            "offRecord": true
+          }
+        ],
+        "toolResponses": [
+          {
+            "toolName": "set_off_record",
+            "toolType": "client",
+            "status": "success",
+            "isError": false,
+            "isCalled": true
+          },
+          {
+            "toolName": "skip_turn",
+            "toolType": "system",
+            "status": "success",
+            "isError": false,
+            "isCalled": true
+          }
+        ],
+        "userTranscriptEchoed": false,
+        "unexpectedEventTypes": []
+      }
+    },
+    {
+      "id": "server-deep",
+      "title": "DB, DATA_DIR writable and Z3 initialised",
+      "status": "pass",
+      "ms": 1583,
+      "detail": "health 200; deep 401 without bearer; db ok 0.5 ms, dataDir ok 0.9 ms, z3 ok 18.9 ms; model calls on; event-loop delay p99 2 ms",
+      "facts": {
+        "version": "0.1.0",
+        "uptimeS": 89,
+        "db": {
+          "ok": true,
+          "ms": 0.5
+        },
+        "dataDir": {
+          "ok": true,
+          "ms": 0.9
+        },
+        "z3": {
+          "ok": true,
+          "ms": 18.9
+        },
+        "llmCalls": "on",
+        "eventLoop": {
+          "p50Ms": 0.1,
+          "p99Ms": 2,
+          "maxMs": 1015,
+          "samples": 8231,
+          "sinceMs": 87001
+        },
+        "deepMs": 560
+      }
+    },
+    {
+      "id": "sandbox",
+      "title": "CaseDesk sandbox route",
+      "status": "pass",
+      "ms": 518,
+      "detail": "/sandbox 200 text/html with \"CaseDesk\" (518 ms)",
+      "facts": {
+        "status": 200,
+        "bytes": 7831,
+        "ms": 518
+      }
+    },
+    {
+      "id": "permissions",
+      "title": "Demo machine mic/screen checklist",
+      "status": "info",
+      "ms": 1,
+      "detail": "6-item mic/screen checklist for the demo machine (printed below)",
+      "facts": {
+        "checklist": [
+          "Use Chrome (latest stable) on the demo machine; open the app on its HTTPS origin (PUBLIC_BASE_URL), never http or a LAN IP.",
+          "Site settings for that origin: Microphone = Allow; pick the demo headset as the input device.",
+          "Screen share via getDisplayMedia: choose \"Entire screen\" or the CaseDesk \"Window\"; leave \"Also share tab audio\" OFF.",
+          "macOS: System Settings → Privacy & Security → Screen Recording and Microphone both enabled for Chrome (restart Chrome after granting).",
+          "Close notification sources (Do Not Disturb on, Slack/Mail quit) and every other tab or window with personal data or PII.",
+          "Test the headset: confirm the input level moves when you speak (OS sound settings) and that agent speech plays in the headset only, not the room."
+        ]
+      }
+    }
+  ],
+  "checklist": [
+    "Use Chrome (latest stable) on the demo machine; open the app on its HTTPS origin (PUBLIC_BASE_URL), never http or a LAN IP.",
+    "Site settings for that origin: Microphone = Allow; pick the demo headset as the input device.",
+    "Screen share via getDisplayMedia: choose \"Entire screen\" or the CaseDesk \"Window\"; leave \"Also share tab audio\" OFF.",
+    "macOS: System Settings → Privacy & Security → Screen Recording and Microphone both enabled for Chrome (restart Chrome after granting).",
+    "Close notification sources (Do Not Disturb on, Slack/Mail quit) and every other tab or window with personal data or PII.",
+    "Test the headset: confirm the input level moves when you speak (OS sound settings) and that agent speech plays in the headset only, not the room."
+  ]
+}

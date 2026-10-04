@@ -601,3 +601,52 @@ Built by a delegated sub-agent; details in `docs/api-notes.md` §16.
 2. Work Map titles and summary are the labelled templates in replay; the recorded model prose is not stored in any public API.
 3. Lineage trace buttons are hidden in replay (the trace route reads the live ledger).
 4. Audio is opt-in (`--audio`) and depends on ElevenLabs retention (30 days on our agents).
+
+### P11 update — the demo bundle is exported (2026-10-04)
+
+- Bundle `20261004-0119-96acd563eb14` was exported from production.
+- Sources: the genuine live voice run, sessions `cad2596d…` (stop-rules by voice) and `f77499f8…` (P4 final).
+- Contents: 393 entries, chain head `96acd563…`, and the recorded ElevenLabs conversation audio for both conversations.
+- Manifest: `docs/replay/20261004-0119-96acd563eb14.manifest.json`.
+
+---
+
+## Live acceptance runs against production (commit 1da6e3c, 2026-10-04 00:27–01:37 UTC)
+
+Source: `docs/evidence/live/ACCEPTANCE.txt` and `SUMMARY.txt`. All expert speech was **synthetic voice input (ElevenLabs TTS)**.
+
+**P3 — NOT MET.**
+- 3 interruptions across 5 runs, all in run D (noisy, near the VAD threshold). Root causes: ElevenLabs VAD missed quiet speech and lagged speech onset by ~600 ms.
+- Gate decision latency: p50 0, p95 3, max 15 ms (n=22).
+- Conditions valid → control message sent, including the production round trip: p95 967 ms. The network RTT alone is ≈265 ms.
+- First audio: p50 697, p95 808 ms.
+- Control turns never appeared in evidence.
+
+**P4 — MET, by voice with real Sonnet.**
+- Threshold rule: `uboOwnershipPct > 25 ∧ ¬uboVerified → enhancedReview`.
+- Guardrail: PEP requires compliance sign-off, with the exact quote.
+- 2 unresolved concepts surfaced.
+- 2/2 promoted rules pass evidence validation.
+- The script choices made after earlier bugs are disclosed.
+
+**P8 — MET.**
+- A real Claude (Opus 5.5) agent on held-out NS-2026-0201 was blocked via production `/mcp`, citing the expert's exact quote.
+- The Work Map JSON round-trips byte-identically. The Procedure rules equal `/api/rulebook`.
+- MCP agrees with a local check on 55/55 cases.
+
+**Bugs found:** 6 product bugs. All were fixed in commits `1b0c089` and `f317447`:
+- worker threads for Z3, question generation and vision preparation (event-loop p99 112 → 32 ms on 1 CPU);
+- open-turn tracking and a local speech-onset detector;
+- authorization hold, plus a server refusal of a second pending authorization;
+- multi-segment answers;
+- budget rollback;
+- explicit-statement promotion;
+- re-queue of lapsed questions;
+- session archiving;
+- canonical rule de-duplication;
+- a filter for concepts proposed from screen chrome;
+- ledger kind indexes plus incremental folds.
+
+**Simulation after the fixes:** 0 interruptions on all 5 scripted runs and on a reproduction of run D, at authorize RTTs of 0, 270 and 2640 ms. With the local detector removed, the run-D reproduction interrupts again, as live run D did.
+
+**The live P3 re-run on the fixed build is pending.**
