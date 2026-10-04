@@ -119,3 +119,11 @@ The 1 GB figure is the service's per-service cap. Raise it (the IaC already decl
 4. Redeploy (or it takes effect on the next deploy).
 
 Defense-in-depth for the judged demo (already set in `.railway/railway.ts`): `VISION_EXTRACTION=off` keeps the heaviest per-frame work off the server (the tutor and Save interlock use the disclosed DOM channel, D3). Flip to `on` only to exercise live vision.
+
+### Do not put resource limits or `VISION_EXTRACTION` in `.railway/railway.ts` (learned 2026-10-04)
+
+Adding `deploy.limitOverride` and a literal `VISION_EXTRACTION` to the IaC file made the next `railway up` deployment crash on its first start: the server reported `PUBLIC_BASE_URL`, `ANTHROPIC_API_KEY`, `ELEVENLABS_API_KEY` and `CUSTOM_LLM_SECRET` missing, exactly the variables the file marks `preserve()`. Redeploying the identical code with the previous IaC file started cleanly. A failed deployment does not replace the running one, so production stayed up on the old build and the failure was easy to miss. Check `railway deployment list` after every deploy, and confirm new behaviour is live (for example a new field in `/api/health/deep`) before trusting a green preflight.
+
+Apply these as plain variables / dashboard settings instead:
+- `railway variable set VISION_EXTRACTION=off --skip-deploys` (demo-safe: frames are still stored; no Haiku reads).
+- Memory limit: dashboard, Settings, Resources.

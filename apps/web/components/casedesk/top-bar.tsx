@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Eye, Landmark, Plus } from "lucide-react";
+import { ClipboardCheck, Eye, Landmark, Map, Plus } from "lucide-react";
 import type { SessionRef } from "@/lib/client/session-url";
 import { shortId } from "@/lib/client/format";
 import { Button } from "@/components/ui/button";
@@ -41,6 +41,22 @@ export function TopBar({ session }: { session?: SessionRef | undefined }) {
                 {shortId(session.sessionId)}
               </span>
             </p>
+            {session.mode === "expert" && (
+              <nav aria-label="Expert views" className="flex items-center gap-1">
+                <Button asChild size="sm" variant="ghost" className="text-slate-300 hover:bg-slate-800 hover:text-white">
+                  <Link href={`/debrief/${encodeURIComponent(session.sessionId)}`}>
+                    <ClipboardCheck data-icon="inline-start" />
+                    Debrief
+                  </Link>
+                </Button>
+                <Button asChild size="sm" variant="ghost" className="text-slate-300 hover:bg-slate-800 hover:text-white">
+                  <Link href={`/workmap/${encodeURIComponent(session.sessionId)}`}>
+                    <Map data-icon="inline-start" />
+                    Work Map
+                  </Link>
+                </Button>
+              </nav>
+            )}
             <Button
               asChild
               size="sm"
