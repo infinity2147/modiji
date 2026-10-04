@@ -15,11 +15,11 @@ export function Logo({ onDark = false }: { onDark?: boolean }) {
   return (
     <span className="flex items-center gap-2.5 font-heading text-xl font-bold tracking-tight">
       <svg width="32" height="32" viewBox="0 0 40 40" aria-hidden="true">
-        <rect width="40" height="40" rx="12" fill={onDark ? "#14777A" : "var(--primary)"} />
+        <rect width="40" height="40" rx="12" fill={onDark ? "#6E8B67" : "var(--primary)"} />
         <path d="M12 13h16M12 20h10M12 27h16" stroke="#fff" strokeWidth="3" strokeLinecap="round" />
         <circle cx="29" cy="20" r="3.5" fill="var(--highlight)" />
       </svg>
-      Vashistha
+      Sage
     </span>
   );
 }
@@ -31,7 +31,7 @@ export function SidebarNav({ viewer, badges }: { viewer: Viewer; badges?: Record
   const active = activeKey(viewer.role, pathname);
   return (
     <nav aria-label="Main" className="flex flex-col gap-1 border-b bg-sidebar p-4 md:sticky md:top-0 md:h-dvh md:w-64 md:shrink-0 md:overflow-y-auto md:border-r md:border-b-0">
-      <Link href="/home" className="px-2 pt-1 pb-5" aria-label="Vashistha home">
+      <Link href="/home" className="px-2 pt-1 pb-5" aria-label="Sage home">
         <Logo />
       </Link>
       {nav.sections.map((section) => (

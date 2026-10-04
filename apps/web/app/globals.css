@@ -51,43 +51,43 @@
     --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* Brand palette: deep teal for action and trust, warm amber to draw the eye to the one thing that needs attention. */
+/* Brand palette (Sage): sage green for action and trust on warm, calm neutrals; ochre draws the eye to the one thing that needs attention. */
 :root {
-    --background: #EEF4F3;
-    --foreground: #0B2B2E;
+    --background: #F3F5EF;
+    --foreground: #22301F;
     --card: #FFFFFF;
-    --card-foreground: #0B2B2E;
+    --card-foreground: #22301F;
     --popover: #FFFFFF;
-    --popover-foreground: #0B2B2E;
-    --primary: #0F5C5E;
+    --popover-foreground: #22301F;
+    --primary: #55724F;
     --primary-foreground: #FFFFFF;
-    --secondary: #E1F0EF;
-    --secondary-foreground: #0B2B2E;
-    --muted: #E6EFEE;
-    --muted-foreground: #4F6B6D;
-    --accent: #E1F0EF;
-    --accent-foreground: #0F5C5E;
-    --destructive: #B3361F;
-    --border: #D3E4E2;
-    --input: #A9CBC9;
-    --ring: #F2A33A;
-    --highlight: #F2A33A;
-    --highlight-foreground: #3A2400;
-    --highlight-soft: #FFF3DC;
-    --chart-1: #0F5C5E;
-    --chart-2: #14777A;
-    --chart-3: #F2A33A;
-    --chart-4: #7FA9A8;
-    --chart-5: #0B2B2E;
+    --secondary: #E7EDE1;
+    --secondary-foreground: #22301F;
+    --muted: #ECF0E6;
+    --muted-foreground: #5B6853;
+    --accent: #E3EBDC;
+    --accent-foreground: #3F5A3C;
+    --destructive: #A8442A;
+    --border: #D8E0CF;
+    --input: #B9C7AC;
+    --ring: #C9963A;
+    --highlight: #D9A441;
+    --highlight-foreground: #3A2A06;
+    --highlight-soft: #F8EDD3;
+    --chart-1: #55724F;
+    --chart-2: #8BA888;
+    --chart-3: #D9A441;
+    --chart-4: #A3B18A;
+    --chart-5: #22301F;
     --radius: 0.875rem;
-    --sidebar: #FFFFFF;
-    --sidebar-foreground: #36585A;
-    --sidebar-primary: #0F5C5E;
+    --sidebar: #FBFCF8;
+    --sidebar-foreground: #4A5944;
+    --sidebar-primary: #55724F;
     --sidebar-primary-foreground: #FFFFFF;
-    --sidebar-accent: #E1F0EF;
-    --sidebar-accent-foreground: #0F5C5E;
-    --sidebar-border: #D3E4E2;
-    --sidebar-ring: #F2A33A;
+    --sidebar-accent: #E3EBDC;
+    --sidebar-accent-foreground: #3F5A3C;
+    --sidebar-border: #DDE4D3;
+    --sidebar-ring: #C9963A;
 }
 
 .dark {

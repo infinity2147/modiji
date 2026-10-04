@@ -20,7 +20,7 @@ export function JudgeView({ sessionId, loop }: { sessionId: string; loop: Interv
   const [engineering, setEngineering] = useState(false);
   return (
     <div data-gate-ignore="" className="flex min-h-0 flex-col border-t bg-card">
-      <div className="flex items-center bg-[#0B2B2E] pr-2">
+      <div className="flex items-center bg-[#22301F] pr-2">
         <div className="min-w-0 flex-1">
           <HudBar gate={loop.gate} voiceLive={loop.voice.state === "connected"} />
         </div>

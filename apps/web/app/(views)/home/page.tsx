@@ -7,7 +7,7 @@ import type { Viewer } from "@/lib/contracts/auth";
 import { currentViewer } from "@/lib/server/auth/viewer";
 import { getRuntime } from "@/lib/server/runtime";
 
-export const metadata: Metadata = { title: "Home · Vashistha" };
+export const metadata: Metadata = { title: "Home · Sage" };
 export const dynamic = "force-dynamic";
 
 const WHEN = new Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeStyle: "short" });

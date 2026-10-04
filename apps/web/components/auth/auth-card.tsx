@@ -7,7 +7,7 @@ export function AuthCard({ title, description, children, footer }: { title: stri
   return (
     <div className="flex min-h-dvh flex-col md:flex-row">
       <aside className="flex flex-col justify-between gap-10 bg-primary p-8 text-primary-foreground md:w-[42%] md:p-14">
-        <Link href="/" className="text-primary-foreground" aria-label="Vashistha home">
+        <Link href="/" className="text-primary-foreground" aria-label="Sage home">
           <Logo />
         </Link>
         <div className="grid gap-6">

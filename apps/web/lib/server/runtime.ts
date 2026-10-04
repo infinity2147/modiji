@@ -102,7 +102,7 @@ export function getRuntime(): Runtime {
   const runtime = registry[RUNTIME_KEY];
   if (!runtime) {
     throw new Error(
-      "Vashistha runtime is not initialised: start the app through server.ts (pnpm dev / pnpm start), not `next dev` or `next start`",
+      "Sage runtime is not initialised: start the app through server.ts (pnpm dev / pnpm start), not `next dev` or `next start`",
     );
   }
   return runtime;

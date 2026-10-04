@@ -32,6 +32,6 @@ export function registerReplay(service: ReplayService | undefined): void {
 
 export function getReplay(): ReplayService {
   const service = registry[KEY];
-  if (!service) throw new Error("Vashistha replay service is not initialised: start the app through server.ts");
+  if (!service) throw new Error("Sage replay service is not initialised: start the app through server.ts");
   return service;
 }

@@ -15,7 +15,7 @@ const SOURCE_STYLE: Record<LedgerSource, string> = {
   voice: "bg-emerald-100 text-emerald-800",
   engine: "bg-slate-200 text-slate-700",
   solver: "bg-amber-100 text-amber-800",
-  expert: "bg-teal-100 text-teal-800",
+  expert: "bg-accent text-accent-foreground",
   client: "bg-indigo-100 text-indigo-800",
   system_control: "bg-transparent text-slate-400 ring-1 ring-inset ring-slate-300",
 };
