@@ -15,7 +15,8 @@
 import { mkdirSync } from "node:fs";
 import { randomUUID } from "node:crypto";
 import { join } from "node:path";
-import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
+import { type APIRequestContext, type Page } from "@playwright/test";
+import { LENA, expect, signInPage, test } from "./support/accounts";
 import { uploadFrame } from "./support/screen-frame";
 
 const EVIDENCE_DIR = join(import.meta.dirname, "../../../docs/evidence/p6");
@@ -73,7 +74,9 @@ async function seedExpertRulebook(request: APIRequestContext): Promise<void> {
   await confirmAndRevise("requestDocuments", DOCS, QUOTE_DOCS);
 }
 
+/** The trainee starts a held-out session in the browser; the API context stays the expert's. */
 async function startNovice(page: Page): Promise<string> {
+  await signInPage(page, LENA);
   await page.goto("/sandbox");
   await page.getByRole("radio", { name: /^Novice practice/ }).click();
   await page.getByRole("radio", { name: /^Held-out/ }).click();
@@ -133,7 +136,7 @@ test("tutor: predict → reveal in the expert's words → commit → mastery →
   await expect(page.getByRole("region", { name: "Mastery ladder" })).toContainText("heuristic estimate");
   await shot(page, "mastery-after-commit.png");
 
-  const entries = await ledger(request, sessionId);
+  const entries = await ledger(page.request, sessionId);
   const kinds = entries.map((e) => e.kind);
   expect(kinds).toEqual(expect.arrayContaining(["tutor.prediction", "case.decision", "mastery.updated"]));
   const prediction = entries.find((e) => e.kind === "tutor.prediction");
@@ -160,7 +163,7 @@ test("tutor: predict → reveal in the expert's words → commit → mastery →
   await page.getByRole("button", { name: "Save decision" }).click();
   await expect(page.getByText("Decision committed")).toBeVisible();
   await shot(page, "practice-case-decided.png");
-  const generated = (await ledger(request, sessionId)).filter((e) => e.kind === "case.generated");
+  const generated = (await ledger(page.request, sessionId)).filter((e) => e.kind === "case.generated");
   expect(generated.length).toBeGreaterThanOrEqual(1);
   expect(generated[0]?.payload).toMatchObject({ origin: { kind: "boundary_practice" } });
 });
@@ -218,7 +221,7 @@ test("tutor: a real stop-rule from the debrief → intervention on selection, be
   await shot(page, "intervention-card-before-save.png");
 
   // The intervention is ledgered before Save, citing the novice's selection; Save is then blocked by the interlock.
-  const entries = await ledger(request, sessionId);
+  const entries = await ledger(page.request, sessionId);
   const intent = entries.findLast((e) => e.kind === "tutor.intent");
   const intervention = entries.find((e) => e.kind === "tutor.intervention");
   expect(intervention?.payload).toMatchObject({ caseId: "NS-2026-0201", trigger: "guardrail_violation", proposedAction: "approve" });
@@ -227,7 +230,7 @@ test("tutor: a real stop-rule from the debrief → intervention on selection, be
   await expect(page.getByRole("dialog")).toContainText("Blocked by a confirmed guardrail");
   await expect(page.getByRole("dialog")).toContainText(STOP_QUOTE);
   await shot(page, "interlock-blocked-by-stop-rule.png");
-  const after = await ledger(request, sessionId);
+  const after = await ledger(page.request, sessionId);
   expect(after.some((e) => e.kind === "case.decision")).toBe(false);
   expect(Math.max(...after.filter((e) => e.kind === "tutor.intervention").map((e) => e.sequence))).toBeLessThan(
     Math.min(...after.filter((e) => e.kind === "interlock.check").map((e) => e.sequence)),

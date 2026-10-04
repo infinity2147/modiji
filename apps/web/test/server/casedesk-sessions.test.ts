@@ -1,3 +1,4 @@
+import { PERMIT_ALL, harnessActor } from "../support/accounts";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { CreateSessionResponseSchema, ListCasesResponseSchema } from "../../lib/contracts/casedesk";
 import { createCaseDeskStore, loadSession, sessionInfo } from "../../lib/server/casedesk/session";
@@ -38,6 +39,8 @@ describe("POST /api/sessions", () => {
       mode: "novice",
       caseSet: "practice",
       startedEntryId: started?.id,
+      expert: undefined,
+      owner: { userId: expect.any(String), username: expect.stringMatching(/^trainee-/), role: "trainee" },
     });
   });
 
@@ -67,6 +70,8 @@ describe("POST /api/sessions", () => {
     const response = await handleCreateSession(
       jsonRequest("/api/sessions", { mode: "novice", caseSet: "training", pad: "x".repeat(70_000) }),
       h.deps,
+      harnessActor("novice"),
+      PERMIT_ALL,
     );
     expect(response.status).toBe(413);
     expect(await response.json()).toEqual({ error: "payload_too_large", detail: expect.any(String) });

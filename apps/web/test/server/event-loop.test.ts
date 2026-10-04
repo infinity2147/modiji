@@ -7,6 +7,7 @@
  * two-experts disagreement search and the tutor's practice cases — and bounds how long the event loop
  * was ever blocked meanwhile (`monitorEventLoopDelay`). Every handler module is loaded before measuring.
  */
+import { PERMIT_ALL, harnessSessionRequest } from "../support/accounts";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -33,6 +34,12 @@ import { createRuntime } from "../../lib/server/runtime-init";
 import type { Runtime } from "../../lib/server/runtime";
 import { tutorDeps } from "../../lib/server/tutor/deps";
 import { handlePractice, handleTutorState } from "../../lib/server/tutor/handlers";
+
+/** POST /api/sessions as the account the pre-accounts body names (see support/accounts.ts). */
+function createSessionAs(raw: unknown): Promise<Response> {
+  const { actor, body } = harnessSessionRequest(raw);
+  return handleCreateSession(post("/api/sessions", body), caseDeskDeps(), actor, PERMIT_ALL);
+}
 
 /** The bound on any single block of the request event loop under the heavy flow (CI hardware; locally it stays far below). */
 const MAX_BLOCK_MS = 100;
@@ -108,7 +115,7 @@ type Debrief = {
 /** An expert session: three decisions, each followed by an authorised question, its custom-LLM turn and the expert's answer. */
 async function expertSession(index: number): Promise<{ sessionId: string; asked: number }> {
   const { sessionId } = await ok<{ sessionId: string }>(
-    handleCreateSession(post("/api/sessions", { mode: "expert", caseSet: "training", expert: EXPERTS[index % 3 === 2 ? 1 : 0] }), caseDeskDeps()),
+    createSessionAs({ mode: "expert", caseSet: "training", expert: EXPERTS[index % 3 === 2 ? 1 : 0] }),
   );
   let frameSeq = 0;
   let asked = 0;
@@ -186,7 +193,7 @@ describe("request event loop under the heavy flow", () => {
     const found = await ok<{ written: string[] }>(
       handleSearchDisagreements(post("/api/disagreements", { experts: ["asha-rao", "priya-sharma"], decisionFamily: "reviewOutcome" }), disagreementDeps()),
     );
-    const { sessionId: novice } = await ok<{ sessionId: string }>(handleCreateSession(post("/api/sessions", { mode: "novice", caseSet: "heldout" }), caseDeskDeps()));
+    const { sessionId: novice } = await ok<{ sessionId: string }>(createSessionAs({ mode: "novice", caseSet: "heldout" }));
     await ok(handleTutorState(novice, tutorDeps()));
     const practice = await ok<{ cases: unknown[] }>(handlePractice(novice, tutorDeps()));
     histogram.disable();

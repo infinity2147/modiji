@@ -32,7 +32,11 @@ const GAP_SOURCE: Record<DebriefState["gaps"][number]["source"], string> = {
   witness: "solver witness",
 };
 
-export function DebriefView({ sessionId }: { sessionId: string }) {
+/**
+ * `readOnly`: why the viewer may not write to this session (another account's, e.g. an admin
+ * reviewing it). The view then never reruns the solver or records answers; the server refuses anyway.
+ */
+export function DebriefView({ sessionId, readOnly }: { sessionId: string; readOnly?: string | undefined }) {
   const [state, setState] = useState<DebriefState | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -56,8 +60,10 @@ export function DebriefView({ sessionId }: { sessionId: string }) {
   useEffect(() => {
     if (started.current) return;
     started.current = true;
-    void run("Running the solver…", () => rebuildWitnesses(fetch, sessionId));
-  }, [run, sessionId]);
+    void run(readOnly === undefined ? "Running the solver…" : "Loading the debrief…", () =>
+      readOnly === undefined ? rebuildWitnesses(fetch, sessionId) : getDebrief(fetch, sessionId),
+    );
+  }, [run, sessionId, readOnly]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -65,14 +71,14 @@ export function DebriefView({ sessionId }: { sessionId: string }) {
         (s) => {
           setState(s);
           // Voice answers to apply, or an open witness whose question the interview queue dropped: rebuild re-asks it.
-          if (s.pendingVoiceAnswers > 0 || s.witnesses.some((v) => v.current && v.status === "open"))
+          if (readOnly === undefined && (s.pendingVoiceAnswers > 0 || s.witnesses.some((v) => v.current && v.status === "open")))
             void rebuildWitnesses(fetch, sessionId).then(setState, () => undefined);
         },
         () => undefined,
       );
     }, POLL_MS);
     return () => clearInterval(timer);
-  }, [sessionId]);
+  }, [sessionId, readOnly]);
 
   /** After a concept is confirmed or dismissed: the solver reruns under the new feature model. */
   const recompute = useCallback(() => void run("Recomputing under the new model…", () => rebuildWitnesses(fetch, sessionId)), [run, sessionId]);
@@ -95,7 +101,12 @@ export function DebriefView({ sessionId }: { sessionId: string }) {
           </div>
           <div className="ml-auto flex items-center gap-2">
             {busy !== null && <span className="text-sm text-muted-foreground">{busy}</span>}
-            <Button variant="outline" size="sm" onClick={() => void run("Running the solver…", () => rebuildWitnesses(fetch, sessionId))} disabled={busy !== null}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => void run("Running the solver…", () => rebuildWitnesses(fetch, sessionId))}
+              disabled={busy !== null || readOnly !== undefined}
+            >
               <RefreshCw /> Rerun solver
             </Button>
             <Button asChild variant="outline" size="sm">
@@ -109,6 +120,11 @@ export function DebriefView({ sessionId }: { sessionId: string }) {
             </Button>
           </div>
         </header>
+        {readOnly !== undefined && (
+          <p role="status" className="rounded-md border bg-muted px-3 py-2 text-sm">
+            <strong>Read-only:</strong> {readOnly}. Only the expert who captured this session confirms or corrects its rules.
+          </p>
+        )}
         {error !== null && (
           <p role="alert" className="rounded-md bg-destructive/10 px-3 py-2 text-destructive">
             {error}

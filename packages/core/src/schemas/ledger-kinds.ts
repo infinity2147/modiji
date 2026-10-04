@@ -8,6 +8,7 @@ import {
   FeatureBackfilledPayloadSchema,
   SchemaVersionBumpedPayloadSchema,
 } from "./concepts";
+import { SessionOwnerSchema } from "./account";
 import { ExpertLanguageSchema, ExpertSchema } from "./expert";
 import { ParsedAnswerSchema, ProposedConceptSchema, QuestionSchema, WitnessResolutionSchema, WitnessSchema, MasteryLevelSchema } from "./engine";
 import { GuardrailResultSchema } from "./guardrail";
@@ -43,6 +44,8 @@ const kinds = {
       schemaVersion: SchemaVersionSchema,
       /** Expert capture sessions since P10: who the expert is and the language they speak (plan §7.10–7.11). */
       expert: ExpertSchema.optional(),
+      /** Sessions since accounts: the signed-in account that started it, the only one that may write to it. */
+      owner: SessionOwnerSchema.optional(),
     }),
   },
   /**

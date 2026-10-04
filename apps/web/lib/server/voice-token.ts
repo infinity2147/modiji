@@ -7,7 +7,7 @@ import "server-only";
 import { z } from "zod";
 import { AGENT_ID_ENV, AGENT_ROLES } from "@vashistha/core";
 import type { ServerEnv } from "@vashistha/core/server";
-import type { RateLimiter } from "./rate-limit";
+import { clientKey, type RateLimiter } from "./rate-limit";
 import type { Runtime } from "./runtime";
 
 export type VoiceTokenDeps = {
@@ -20,13 +20,6 @@ export type VoiceTokenDeps = {
 
 const NO_STORE = { "Cache-Control": "no-store" };
 
-/**
- * Railway's proxy appends the client address to X-Forwarded-For; its first hop is the client.
- * Without the header (local runs) every caller shares one bucket.
- */
-function clientKey(headers: Headers): string {
-  return headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-}
 
 /**
  * Error class, kind and HTTP status only (read structurally: a value import of the client's error

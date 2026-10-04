@@ -2,9 +2,10 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { AlertCircle, ArrowRight, Loader2 } from "lucide-react";
+import { AlertCircle, ArrowRight, Clock, Loader2, Lock } from "lucide-react";
 import { EXPERT_LANGUAGES, EXPERT_LANGUAGE_LABELS, ExpertLanguageSchema, type ExpertLanguage } from "@vashistha/core";
-import type { CaseSet } from "@vashistha/core/domains/kyc";
+import { SESSION_STARTS, startRefusal, type ServedCaseSet } from "@/lib/auth/policy";
+import type { Viewer } from "@/lib/contracts/auth";
 import { createSession, describeError } from "@/lib/client/api";
 import { sessionHref } from "@/lib/client/session-url";
 import type { SessionMode } from "@/lib/contracts/casedesk";
@@ -22,7 +23,7 @@ const MODES: readonly Option<SessionMode>[] = [
   { value: "novice", description: "Practise reviews. Every Save passes the deterministic interlock." },
 ];
 
-const SETS: readonly Option<Exclude<CaseSet, "bench">>[] = [
+const SETS: readonly Option<ServedCaseSet>[] = [
   { value: "training", description: "The cases an expert works during capture." },
   { value: "heldout", description: "Unseen cases, kept back for evaluation." },
   { value: "practice", description: "Cases for novice practice." },
@@ -35,6 +36,7 @@ function ChoiceGroup<T extends string>({
   value,
   onChange,
   label,
+  refusal,
 }: {
   name: string;
   legend: string;
@@ -42,6 +44,8 @@ function ChoiceGroup<T extends string>({
   value: T;
   onChange: (value: T) => void;
   label: (value: T) => string;
+  /** Why the signed-in account may not pick this option (shown in place of nothing; the server enforces it). */
+  refusal: (value: T) => string | undefined;
 }) {
   return (
     <fieldset className="grid gap-2">
@@ -57,16 +61,24 @@ function ChoiceGroup<T extends string>({
       >
         {options.map((option) => {
           const id = `${name}-${option.value}`;
+          const refused = refusal(option.value);
           return (
             <Label
               key={option.value}
               htmlFor={id}
-              className="flex cursor-pointer items-start gap-3 rounded-lg border bg-card p-3 font-normal transition-colors hover:bg-muted/60 has-data-checked:border-primary/60 has-data-checked:bg-accent"
+              data-refused={refused !== undefined || undefined}
+              className="flex cursor-pointer items-start gap-3 rounded-lg border bg-card p-3 font-normal transition-colors hover:bg-muted/60 has-data-checked:border-primary/60 has-data-checked:bg-accent data-refused:cursor-not-allowed data-refused:bg-muted/40 data-refused:hover:bg-muted/40"
             >
-              <RadioGroupItem id={id} value={option.value} className="mt-0.5" />
+              <RadioGroupItem id={id} value={option.value} disabled={refused !== undefined} className="mt-0.5" />
               <span className="grid gap-1">
-                <span className="text-sm font-medium">{label(option.value)}</span>
+                <span className={refused === undefined ? "text-sm font-medium" : "text-sm font-medium text-muted-foreground"}>{label(option.value)}</span>
                 <span className="text-xs leading-snug text-muted-foreground">{option.description}</span>
+                {refused !== undefined && (
+                  <span className="flex items-start gap-1 text-xs leading-snug text-muted-foreground">
+                    <Lock aria-hidden className="mt-0.5 size-3 shrink-0" />
+                    {refused}
+                  </span>
+                )}
               </span>
             </Label>
           );
@@ -76,12 +88,16 @@ function ChoiceGroup<T extends string>({
   );
 }
 
-/** Starts a CaseDesk session (`POST /api/sessions`) and moves to its URL. */
-export function Launcher({ notice }: { notice?: string | undefined }) {
+/**
+ * Starts a CaseDesk session (`POST /api/sessions`) owned by the signed-in account and moves to its
+ * URL. Every option is shown; those the account's role may not start are disabled with the reason
+ * (lib/auth/policy.ts, which the server enforces). An expert's identity is the account, not a name.
+ */
+export function Launcher({ viewer, notice }: { viewer: Viewer; notice?: string | undefined }) {
   const router = useRouter();
-  const [mode, setMode] = useState<SessionMode>("expert");
-  const [caseSet, setCaseSet] = useState<Exclude<CaseSet, "bench">>("training");
-  const [expertName, setExpertName] = useState("");
+  const allowed = SESSION_STARTS[viewer.role];
+  const [mode, setMode] = useState<SessionMode>(allowed.mode);
+  const [caseSet, setCaseSet] = useState<ServedCaseSet>(allowed.caseSets[0] ?? "practice");
   const [expertLanguage, setExpertLanguage] = useState<ExpertLanguage>("en");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string>();
@@ -90,9 +106,7 @@ export function Launcher({ notice }: { notice?: string | undefined }) {
     event.preventDefault();
     setPending(true);
     setError(undefined);
-    const name = expertName.trim();
-    const expert = mode === "expert" && name !== "" ? { expert: { name, language: expertLanguage } } : {};
-    createSession((input, init) => fetch(input, init), { mode, caseSet, ...expert }).then(
+    createSession((input, init) => fetch(input, init), { mode, caseSet, ...(mode === "expert" && { language: expertLanguage }) }).then(
       (session) => router.push(sessionHref({ sessionId: session.sessionId, caseSet: session.caseSet, mode: session.mode })),
       (failure: unknown) => {
         setPending(false);
@@ -113,7 +127,15 @@ export function Launcher({ notice }: { notice?: string | undefined }) {
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-6 py-5 sm:grid-cols-2">
-            <ChoiceGroup name="mode" legend="Mode" options={MODES} value={mode} onChange={setMode} label={(v) => MODE_LABELS[v]} />
+            <ChoiceGroup
+              name="mode"
+              legend="Mode"
+              options={MODES}
+              value={mode}
+              onChange={setMode}
+              label={(v) => MODE_LABELS[v]}
+              refusal={(v) => startRefusal(viewer.role, v, allowed.caseSets[0] ?? "practice")}
+            />
             <ChoiceGroup
               name="set"
               legend="Case set"
@@ -121,26 +143,21 @@ export function Launcher({ notice }: { notice?: string | undefined }) {
               value={caseSet}
               onChange={setCaseSet}
               label={(v) => SET_LABELS[v]}
+              refusal={(v) => startRefusal(viewer.role, mode, v)}
             />
             {mode === "expert" && (
               <fieldset className="grid gap-3 sm:col-span-2 sm:grid-cols-2">
                 <legend className="mb-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">Expert</legend>
-                <Label htmlFor="expert-name" className="grid gap-1.5 font-normal">
-                  <span className="text-sm font-medium">Your name</span>
-                  <input
-                    id="expert-name"
-                    name="expertName"
-                    value={expertName}
-                    maxLength={60}
-                    autoComplete="name"
-                    placeholder="e.g. Asha Rao"
-                    onChange={(e) => setExpertName(e.target.value)}
-                    className="h-9 rounded-md border bg-background px-3 text-sm shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
-                  />
+                <div className="grid gap-1.5">
+                  <span className="text-sm font-medium">Capturing as</span>
+                  <p aria-label="Capturing as" className="flex h-9 items-center gap-2 rounded-md border bg-muted/40 px-3 text-sm">
+                    <span className="font-medium">{viewer.displayName}</span>
+                    <span className="font-mono text-xs text-muted-foreground">{viewer.username}</span>
+                  </p>
                   <span className="text-xs leading-snug text-muted-foreground">
-                    Sessions under one name share one rulebook. Leave empty for a one-off session.
+                    Your signed-in account. Every session you capture shares your rulebook, and only you can confirm its rules.
                   </span>
-                </Label>
+                </div>
                 <Label htmlFor="expert-language" className="grid gap-1.5 font-normal">
                   <span className="text-sm font-medium">You will speak</span>
                   <select
@@ -151,7 +168,7 @@ export function Launcher({ notice }: { notice?: string | undefined }) {
                       const next = ExpertLanguageSchema.safeParse(e.target.value);
                       if (next.success) setExpertLanguage(next.data);
                     }}
-                    className="h-9 rounded-md border bg-background px-3 text-sm shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+                    className="h-10 rounded-full border bg-background px-4 text-sm shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
                   >
                     {EXPERT_LANGUAGES.map((l) => (
                       <option key={l} value={l}>
@@ -164,6 +181,13 @@ export function Launcher({ notice }: { notice?: string | undefined }) {
                   </span>
                 </Label>
               </fieldset>
+            )}
+            {viewer.expertRequested && (
+              <Alert className="sm:col-span-2">
+                <Clock />
+                <AlertTitle>Your request for expert access is waiting for an admin</AlertTitle>
+                <AlertDescription>Until it is granted, you practise as a trainee. Once granted, sign in again to capture.</AlertDescription>
+              </Alert>
             )}
           </CardContent>
           {(notice ?? error) && (

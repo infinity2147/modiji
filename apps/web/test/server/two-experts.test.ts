@@ -77,7 +77,8 @@ describe("expert identity (session start)", () => {
     ]);
     expect(state.experts[0]?.sessionIds.at(-1)).toBe(again.sessionId);
     expect(state.pair).toBeNull();
-    const refused = await h.createSession({ mode: "novice", caseSet: "training", expert: { name: "Someone" } });
+    // Identity is the signed-in account's; the request states only the expert's language, and only for an expert session.
+    const refused = await h.createSession({ mode: "novice", caseSet: "training", language: "hi" });
     expect(refused.status).toBe(400);
   });
 });

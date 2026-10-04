@@ -104,6 +104,7 @@ function AnswerBlock({
   view,
   familyActions,
   submit,
+  canAnswer,
 }: {
   expert: ExpertView;
   answer: DisagreementAnswer | null;
@@ -111,6 +112,8 @@ function AnswerBlock({
   view: DisagreementView;
   familyActions: { id: string; label: string }[];
   submit: (decision: string, quote: string) => Promise<void>;
+  /** Only the expert themself records their decision; the server refuses anyone else. */
+  canAnswer: boolean;
 }) {
   const [choice, setChoice] = useState<string>(familyActions[0]?.id ?? "");
   const question = view.questions.find((q) => q.expertId === expert.id);
@@ -138,7 +141,10 @@ function AnswerBlock({
       ) : (
         <p className="text-sm text-muted-foreground">No answer yet.</p>
       )}
-      {view.status !== "resolved" && (
+      {view.status !== "resolved" && !canAnswer && answer === null && (
+        <p className="text-xs text-muted-foreground">Only {expert.name} records this decision, signed in as {expert.id}.</p>
+      )}
+      {view.status !== "resolved" && canAnswer && (
         <QuoteForm submitLabel={`Record ${expert.name}'s decision`} placeholder="In your own words: what would you decide here, and why?" onSubmit={(quote) => submit(choice, quote)}>
           <label className="grid gap-1 text-xs font-medium text-muted-foreground">
             {expert.name}&apos;s decision
@@ -156,7 +162,17 @@ function AnswerBlock({
   );
 }
 
-function DisagreementCard({ pair, view, submit }: { pair: PairState; view: DisagreementView; submit: (expertId: string, decision: string, quote: string) => Promise<void> }) {
+function DisagreementCard({
+  pair,
+  view,
+  submit,
+  viewer,
+}: {
+  pair: PairState;
+  view: DisagreementView;
+  submit: (expertId: string, decision: string, quote: string) => Promise<void>;
+  viewer: string;
+}) {
   const status = STATUS[view.status];
   const familyActions = (KYC_DOMAIN.decisionFamilies.find((f) => f.id === pair.decisionFamily)?.actions ?? []).map((id) => ({ id, label: KYC_DOMAIN.actions.find((a) => a.id === id)?.label ?? id }));
   const r = view.resolution;
@@ -193,6 +209,7 @@ function DisagreementCard({ pair, view, submit }: { pair: PairState; view: Disag
               view={view}
               familyActions={familyActions}
               submit={(decision, quote) => submit(pair.experts[i].id, decision, quote)}
+              canAnswer={pair.experts[i].id === viewer}
             />
           ))}
         </div>
@@ -230,7 +247,18 @@ function DisagreementCard({ pair, view, submit }: { pair: PairState; view: Disag
   );
 }
 
-export function TwoExpertsView({ initialA, initialB, initialFamily }: { initialA?: string | undefined; initialB?: string | undefined; initialFamily: string }) {
+export function TwoExpertsView({
+  initialA,
+  initialB,
+  initialFamily,
+  viewer,
+}: {
+  initialA?: string | undefined;
+  initialB?: string | undefined;
+  initialFamily: string;
+  /** The signed-in account's username: the expert whose answer form this page shows. */
+  viewer: string;
+}) {
   const [state, setState] = useState<DisagreementsState | null>(null);
   const [a, setA] = useState(initialA);
   const [b, setB] = useState(initialB);
@@ -369,7 +397,7 @@ export function TwoExpertsView({ initialA, initialB, initialFamily }: { initialA
                 </CardContent>
               </Card>
             ) : (
-              p.witnesses.map((v) => <DisagreementCard key={v.witness.id} pair={p} view={v} submit={(expertId, decision, quote) => submit(expertId, v.witness.id, decision, quote)} />)
+              p.witnesses.map((v) => <DisagreementCard key={v.witness.id} pair={p} view={v} viewer={viewer} submit={(expertId, decision, quote) => submit(expertId, v.witness.id, decision, quote)} />)
             )}
           </section>
           <section aria-label="Team rulebook">

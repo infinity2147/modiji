@@ -4,6 +4,7 @@
  * and a fake Anthropic client behind the real `createClaude` wrapper (so the oracle prompt guard and
  * structured-output validation run exactly as in production).
  */
+import { PERMIT_ALL, harnessSessionRequest } from "./accounts";
 import { expect } from "vitest";
 import {
   ANSWER_PARSER_SYSTEM,
@@ -253,7 +254,8 @@ export function createInterviewHarness(): InterviewHarness {
       casedesk.interview = interviewHooks(deps);
     },
     session: async (mode, expert) => {
-      const r = await reply(await handleCreateSession(jsonRequest("/api/sessions", { mode, caseSet: "training", ...(expert && { expert }) }), casedesk));
+      const { actor, body } = harnessSessionRequest({ mode, caseSet: "training", ...(expert && { expert }) });
+      const r = await reply(await handleCreateSession(jsonRequest("/api/sessions", body), casedesk, actor, PERMIT_ALL));
       expect(r.status).toBe(201);
       return (r.body as { sessionId: string }).sessionId;
     },

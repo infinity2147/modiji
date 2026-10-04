@@ -7,6 +7,7 @@
  */
 import type { ConfirmedRule, Rulebook, TeamRulebook } from "@vashistha/core";
 import type { Claude, ElevenLabsClient, Ledger, ServerEnv } from "@vashistha/core/server";
+import type { AccountStore } from "./auth/store";
 import type { AuthorizationStore } from "./authorizations";
 import type { CaseDeskStore } from "./casedesk/session";
 import type { DebriefExports, DebriefModels, DebriefStore } from "./debrief/deps";
@@ -70,6 +71,10 @@ export type Runtime = {
   /** Tutor (P6): the Z3 practice-case search (unseen boundary cases for the weakest rules). */
   tutor: { practice: PracticeSolver };
   voiceTokenLimiter: RateLimiter;
+  /** Accounts and sign-ins (lib/server/auth). */
+  accounts: AccountStore;
+  /** Failed sign-ins per client and username; sign-ups per client. */
+  authLimits: { signIn: RateLimiter; signUp: RateLimiter };
   /** Probes behind `GET /api/health/deep`. */
   checks: {
     db: () => CheckResult;

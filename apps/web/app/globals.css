@@ -5,8 +5,11 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-    --font-heading: var(--font-geist-sans);
-    --font-sans: var(--font-geist-sans);
+    --font-heading: var(--font-bricolage), var(--font-geist-sans);
+    --font-sans: var(--font-figtree), var(--font-geist-sans);
+    --color-highlight: var(--highlight);
+    --color-highlight-foreground: var(--highlight-foreground);
+    --color-highlight-soft: var(--highlight-soft);
     --font-mono: var(--font-geist-mono);
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
@@ -48,40 +51,43 @@
     --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* Brand palette: deep teal for action and trust, warm amber to draw the eye to the one thing that needs attention. */
 :root {
-    /* Restrained back-office palette: cool neutrals, one bank-blue accent. */
-    --background: oklch(0.972 0.004 255);
-    --foreground: oklch(0.21 0.02 260);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.21 0.02 260);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.21 0.02 260);
-    --primary: oklch(0.43 0.13 258);
-    --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.955 0.006 255);
-    --secondary-foreground: oklch(0.27 0.02 260);
-    --muted: oklch(0.962 0.005 255);
-    --muted-foreground: oklch(0.5 0.018 258);
-    --accent: oklch(0.95 0.018 255);
-    --accent-foreground: oklch(0.3 0.06 258);
-    --destructive: oklch(0.55 0.21 27);
-    --border: oklch(0.91 0.007 255);
-    --input: oklch(0.88 0.009 255);
-    --ring: oklch(0.56 0.15 258);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
-    --radius: 0.5rem;
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.205 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.708 0 0);
+    --background: #EEF4F3;
+    --foreground: #0B2B2E;
+    --card: #FFFFFF;
+    --card-foreground: #0B2B2E;
+    --popover: #FFFFFF;
+    --popover-foreground: #0B2B2E;
+    --primary: #0F5C5E;
+    --primary-foreground: #FFFFFF;
+    --secondary: #E1F0EF;
+    --secondary-foreground: #0B2B2E;
+    --muted: #E6EFEE;
+    --muted-foreground: #4F6B6D;
+    --accent: #E1F0EF;
+    --accent-foreground: #0F5C5E;
+    --destructive: #B3361F;
+    --border: #D3E4E2;
+    --input: #A9CBC9;
+    --ring: #F2A33A;
+    --highlight: #F2A33A;
+    --highlight-foreground: #3A2400;
+    --highlight-soft: #FFF3DC;
+    --chart-1: #0F5C5E;
+    --chart-2: #14777A;
+    --chart-3: #F2A33A;
+    --chart-4: #7FA9A8;
+    --chart-5: #0B2B2E;
+    --radius: 0.875rem;
+    --sidebar: #FFFFFF;
+    --sidebar-foreground: #36585A;
+    --sidebar-primary: #0F5C5E;
+    --sidebar-primary-foreground: #FFFFFF;
+    --sidebar-accent: #E1F0EF;
+    --sidebar-accent-foreground: #0F5C5E;
+    --sidebar-border: #D3E4E2;
+    --sidebar-ring: #F2A33A;
 }
 
 .dark {

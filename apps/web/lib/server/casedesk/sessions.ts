@@ -1,27 +1,41 @@
 /** `POST /api/sessions` and `GET /api/cases?set=[&session=]`. */
 import { randomUUID } from "node:crypto";
 import type { z } from "zod";
-import { expertIdFromName, ledgerPayloadSchema, type Expert } from "@vashistha/core";
+import { ledgerPayloadSchema, type Expert, type SessionOwner } from "@vashistha/core";
 import { KYC_DOMAIN, kycCases } from "@vashistha/core/domains/kyc";
 import {
   CreateSessionRequestSchema,
   type CreateSessionResponseSchema,
   type ListCasesResponseSchema,
 } from "../../contracts/casedesk";
+import { startRefusal } from "../../auth/policy";
+import type { Account } from "../auth/store";
 import { ApiFailure, json, parseOr400, readJson, respond } from "./http";
 import { sessionCases } from "./cases";
 import { CASEDESK_SCHEMA_VERSION, SERVED_CASE_SETS, loadSession, sessionExpert, type CaseDeskDeps } from "./session";
 
-/** Creates a ledger session rooted in an `engine` / `session.started` entry. */
-export function handleCreateSession(request: Request, deps: CaseDeskDeps): Promise<Response> {
+/** The signed-in account starting a session. */
+export type SessionActor = Pick<Account, "id" | "username" | "displayName" | "role">;
+
+/**
+ * Creates a ledger session rooted in an `engine` / `session.started` entry, owned by `actor`: 403 when
+ * the actor's role may not start this mode on this case set. An expert session's expert IS the actor.
+ */
+export function handleCreateSession(
+  request: Request,
+  deps: CaseDeskDeps,
+  actor: SessionActor,
+  /** The access policy; harnesses that test session mechanics on any mode and set pass a permissive one. */
+  refusalFor: typeof startRefusal = startRefusal,
+): Promise<Response> {
   return respond(deps.log, async () => {
-    const { mode, caseSet, expert: named } = await readJson(request, CreateSessionRequestSchema);
-    if (!SERVED_CASE_SETS.safeParse(caseSet).success)
-      throw new ApiFailure(400, "invalid_case_set", `the ${caseSet} set is reserved for the benchmark`);
-    const expertId = named === undefined ? undefined : expertIdFromName(named.name);
-    if (named !== undefined && expertId === undefined)
-      throw new ApiFailure(400, "invalid_expert_name", "the expert name needs at least one Latin letter or digit (it becomes the expert's id)");
-    const expert: Expert | undefined = named === undefined || expertId === undefined ? undefined : { id: expertId, name: named.name, language: named.language };
+    const { mode, caseSet, language } = await readJson(request, CreateSessionRequestSchema);
+    const served = SERVED_CASE_SETS.safeParse(caseSet);
+    if (!served.success) throw new ApiFailure(400, "invalid_case_set", `the ${caseSet} set is reserved for the benchmark`);
+    const refusal = refusalFor(actor.role, mode, served.data);
+    if (refusal !== undefined) throw new ApiFailure(403, "not_permitted", refusal);
+    const expert: Expert | undefined = mode === "expert" ? { id: actor.username, name: actor.displayName, language: language ?? "en" } : undefined;
+    const owner: SessionOwner = { userId: actor.id, username: actor.username, role: actor.role };
     const session = deps.ledger.createSession();
     const started = deps.ledger.append({
       sessionId: session.id,
@@ -38,9 +52,10 @@ export function handleCreateSession(request: Request, deps: CaseDeskDeps): Promi
         domainId: KYC_DOMAIN.id,
         schemaVersion: CASEDESK_SCHEMA_VERSION,
         ...(expert !== undefined && { expert }),
+        owner,
       }),
     });
-    deps.store.sessions.set(session.id, { mode, caseSet, startedEntryId: started.id, expert: sessionExpert(session.id, mode, expert) });
+    deps.store.sessions.set(session.id, { mode, caseSet, startedEntryId: started.id, expert: sessionExpert(session.id, mode, expert), owner });
     const body: z.infer<typeof CreateSessionResponseSchema> = {
       sessionId: session.id,
       mode,

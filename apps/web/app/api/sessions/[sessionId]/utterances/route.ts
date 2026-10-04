@@ -1,3 +1,4 @@
+import { guardSession } from "@/lib/server/auth/access";
 import { handlePostUtterance } from "@/lib/server/interview/handlers";
 import { interviewDeps } from "@/lib/server/interview/deps";
 
@@ -6,5 +7,5 @@ export const runtime = "nodejs";
 
 export async function POST(request: Request, ctx: RouteContext<"/api/sessions/[sessionId]/utterances">): Promise<Response> {
   const { sessionId } = await ctx.params;
-  return handlePostUtterance(request, sessionId, interviewDeps());
+  return guardSession(request, sessionId, "write", () => handlePostUtterance(request, sessionId, interviewDeps()));
 }

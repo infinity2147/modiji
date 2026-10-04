@@ -13,7 +13,7 @@ import { mkdirSync, mkdtempSync, readFileSync, readdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { defineConfig, devices } from "@playwright/test";
-import { E2E_OPERATOR_SECRET } from "./e2e/support/operator";
+import { E2E_ADMIN, E2E_OPERATOR_SECRET } from "./e2e/support/operator";
 
 const BASE_PORT = Number(process.env.E2E_PORT ?? 4391);
 const TEST_DIR = join(import.meta.dirname, "e2e");
@@ -78,6 +78,9 @@ export default defineConfig({
       DATA_DIR: dataDir,
       PUBLIC_BASE_URL: "https://casedesk-e2e.invalid",
       CUSTOM_LLM_SECRET: E2E_OPERATOR_SECRET,
+      // The first admin; specs sign up their experts and trainees and have this admin grant the roles.
+      ADMIN_USERNAME: E2E_ADMIN.username,
+      ADMIN_PASSWORD: E2E_ADMIN.password,
       ANTHROPIC_API_KEY: "e2e-placeholder-not-a-key",
       ELEVENLABS_API_KEY: "e2e-placeholder-not-a-key",
       // Hermetic: no Anthropic client exists (interview, debrief and vision included), so the placeholder key is never

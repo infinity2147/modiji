@@ -14,7 +14,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { build } from "esbuild";
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./support/accounts";
 import { kycCases } from "@vashistha/core/domains/kyc";
 import { FixtureSchema, percentile } from "../../../packages/perception/src/evaluation";
 import { CLIENT_OCR_SCALE, personNames } from "../lib/client/capture/browser";

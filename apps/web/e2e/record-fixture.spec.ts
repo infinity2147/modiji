@@ -26,7 +26,8 @@
 import { createHash } from "node:crypto";
 import { mkdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
+import { type APIRequestContext, type Page } from "@playwright/test";
+import { expect, test } from "./support/accounts";
 import { ScreenEventSchema, type ScreenEvent } from "@vashistha/core";
 import { KYC_DOMAIN, mulberry32 } from "@vashistha/core/domains/kyc";
 import { FixtureSchema } from "../../../packages/perception/src/evaluation";

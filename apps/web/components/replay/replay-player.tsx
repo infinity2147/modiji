@@ -148,7 +148,7 @@ function ReplayStage({ data }: { data: ReplayBundleResponse }) {
       </div>
 
       <section aria-label="Judge view (recorded)" className="flex shrink-0 flex-col border-t bg-card">
-        <div className="bg-slate-900">
+        <div className="bg-[#0B2B2E]">
           <HudDisplay status={hud.status} judge={hud.judge} value={hud.value} reason={hud.reason} />
         </div>
         <div className="grid h-32 min-h-0 border-b">

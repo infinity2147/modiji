@@ -4,6 +4,7 @@
  * CaseDesk, interview and tutor handlers wired together; the real Z3 practice solver. No model, no
  * network, no oracle.
  */
+import { PERMIT_ALL, harnessActor } from "./accounts";
 import { randomUUID } from "node:crypto";
 import { expect } from "vitest";
 import type { z } from "zod";
@@ -147,7 +148,7 @@ export function createTutorHarness(): TutorHarness {
   const frameSeqs = new Map<string, number>();
   const epoch = (sessionId: string): number => ledger.getSession(sessionId)?.privacyEpoch ?? -1;
   const createSession = async (mode: "novice" | "expert", caseSet: string): Promise<string> => {
-    const r = await reply(await handleCreateSession(jsonRequest("/api/sessions", { mode, caseSet }), casedesk));
+    const r = await reply(await handleCreateSession(jsonRequest("/api/sessions", { mode, caseSet }), casedesk, harnessActor(mode), PERMIT_ALL));
     expect(r.status).toBe(201);
     return (r.body as { sessionId: string }).sessionId;
   };

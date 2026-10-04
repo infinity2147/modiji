@@ -11,7 +11,8 @@
 import { mkdirSync } from "node:fs";
 import { randomUUID } from "node:crypto";
 import { join } from "node:path";
-import { expect, test, type APIRequestContext, type Locator, type Page } from "@playwright/test";
+import { type APIRequestContext, type Locator, type Page } from "@playwright/test";
+import { expect, test } from "./support/accounts";
 import { uploadFrame } from "./support/screen-frame";
 
 const EVIDENCE_DIR = join(import.meta.dirname, "../../../docs/evidence/p5");

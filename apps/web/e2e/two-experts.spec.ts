@@ -13,7 +13,8 @@
 import { mkdirSync } from "node:fs";
 import { randomUUID } from "node:crypto";
 import { join } from "node:path";
-import { expect, test, type APIRequestContext } from "@playwright/test";
+import { type APIRequestContext } from "@playwright/test";
+import { ASHA, PRIYA, apiAs, expect, signInPage, test } from "./support/accounts";
 import { uploadFrame } from "./support/screen-frame";
 
 const EVIDENCE_DIR = join(import.meta.dirname, "../../../docs/evidence/p10");
@@ -34,9 +35,9 @@ async function ok<T>(response: Awaited<ReturnType<APIRequestContext["post"]>>): 
   return (await response.json()) as T;
 }
 
-/** An expert session named at start, with the three training cases decided and a screen frame per case. */
-async function expertSession(request: APIRequestContext, expert: { name: string; language: "en" | "hi" }): Promise<string> {
-  const { sessionId } = await ok<{ sessionId: string }>(await request.post("/api/sessions", { data: { mode: "expert", caseSet: "training", expert } }));
+/** A capture session of the expert signed in on `request`, with the three training cases decided and a screen frame per case. */
+async function expertSession(request: APIRequestContext, language: "en" | "hi"): Promise<string> {
+  const { sessionId } = await ok<{ sessionId: string }>(await request.post("/api/sessions", { data: { mode: "expert", caseSet: "training", language } }));
   let frameSeq = 0;
   for (const [caseId, action] of Object.entries(DECISIONS)) {
     frameSeq += 1;
@@ -71,8 +72,10 @@ async function highRiskRule(request: APIRequestContext, sessionId: string, quote
 
 test("two experts: Z3 disagreement case → both answer → revision with both quotes → team rulebook", async ({ page, request }) => {
   test.setTimeout(240_000);
-  const asha = await expertSession(request, { name: "Asha Rao", language: "en" });
-  const priya = await expertSession(request, { name: "Priya Sharma", language: "hi" });
+  // Each expert works signed in as themselves: `request` is Asha's (the default), Priya has her own.
+  const asha = await expertSession(request, "en");
+  const priyaApi = await apiAs(PRIYA);
+  const priya = await expertSession(priyaApi, "hi");
 
   // Asha: high risk → enhanced review; the long-standing exception → approve (a rule for an unresolved case, then corrected).
   const ashaEdd = await highRiskRule(request, asha, "Anything from a high-risk country goes to enhanced review.");
@@ -92,8 +95,8 @@ test("two experts: Z3 disagreement case → both answer → revision with both q
   });
 
   // Priya: high risk → enhanced review; and her stop-rule, typed in Hindi.
-  await highRiskRule(request, priya, "High-risk country means enhanced review, every time.");
-  await debriefAction(request, priya, {
+  await highRiskRule(priyaApi, priya, "High-risk country means enhanced review, every time.");
+  await debriefAction(priyaApi, priya, {
     action: "confirm_stop_rule",
     decisionFamily: "reviewOutcome",
     when: { combinator: "all", conditions: [{ feature: "jurisdictionRisk", op: "==", value: "high" }] },
@@ -121,10 +124,14 @@ test("two experts: Z3 disagreement case → both answer → revision with both q
   await expect(team.locator('[data-held="false"]').filter({ hasText: PRIYA_STOP_RULE })).toHaveCount(1);
   await page.screenshot({ path: evidence("two-experts-disagreement.png"), fullPage: true });
 
-  for (const [i, quote] of [
-    [0, "Fair point: even a long-standing customer from a high-risk country should get enhanced review."],
-    [1, "Enhanced review. Two years of history does not change the country risk."],
+  // Each expert records their own decision, signed in as themselves; the other's form is not theirs to fill.
+  await expect(answers.nth(1)).toContainText("Only Priya Sharma records this decision");
+  for (const [i, expert, quote] of [
+    [0, ASHA, "Fair point: even a long-standing customer from a high-risk country should get enhanced review."],
+    [1, PRIYA, "Enhanced review. Two years of history does not change the country risk."],
   ] as const) {
+    await signInPage(page, expert);
+    await page.reload();
     const block = answers.nth(i);
     await block.getByRole("combobox").selectOption("enhancedReview");
     await block.getByLabel("Your words (recorded as evidence)").fill(quote);
@@ -142,4 +149,5 @@ test("two experts: Z3 disagreement case → both answer → revision with both q
   // The solver reruns: no more disagreement between the two rulebooks.
   const again = await ok<{ written: string[] }>(await request.post("/api/disagreements", { data: { experts: ["asha-rao", "priya-sharma"], decisionFamily: "reviewOutcome" } }));
   expect(again.written).toEqual([]);
+  await priyaApi.dispose();
 });

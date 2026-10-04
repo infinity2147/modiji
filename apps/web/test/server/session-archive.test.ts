@@ -5,6 +5,7 @@
  * and rules confirmed in the session stay in the rulebook. Runs the real runtime (createRuntime) and
  * the real handlers; a route inventory keeps the table complete as routes are added.
  */
+import { PERMIT_ALL, harnessSessionRequest } from "../support/accounts";
 import { randomUUID } from "node:crypto";
 import { mkdtempSync, readFileSync, readdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -47,6 +48,12 @@ import { handleConceptAction, handleGetConcepts } from "../../lib/server/schema/
 import { schemaDeps } from "../../lib/server/schema/runtime-deps";
 import { tutorDeps } from "../../lib/server/tutor/deps";
 import { handleIntent, handleJudgeCase, handlePractice, handlePrediction, handleTutorState } from "../../lib/server/tutor/handlers";
+
+/** POST /api/sessions as the account the pre-accounts body names (see support/accounts.ts). */
+function createSessionAs(raw: unknown): Promise<Response> {
+  const { actor, body } = harnessSessionRequest(raw);
+  return handleCreateSession(post("/api/sessions", body), caseDeskDeps(), actor, PERMIT_ALL);
+}
 
 const SECRET = "archive-test-secret-0123456789-abcdef";
 const BASE = "http://localhost:3000";
@@ -136,6 +143,11 @@ const NOT_SESSION_WRITES = new Set([
   "preflight/authorize",
   "replays/[bundleId]/import",
   "replays/[bundleId]/import/[...path]",
+  // Accounts (no CaseDesk session): sign-up, sign-in, sign-out, and the admin's account actions.
+  "auth/signup",
+  "auth/login",
+  "auth/logout",
+  "admin/users/[userId]",
 ]);
 
 /** Novice-session writes (the tutor teaches novices; an expert session answers 409 not_novice first). */
@@ -148,7 +160,7 @@ function routeFiles(dir: string): string[] {
 beforeAll(async () => {
   dataDir = mkdtempSync(join(tmpdir(), "vashistha-archive-"));
   ({ close } = createRuntime({ NODE_ENV: "test", PUBLIC_BASE_URL: BASE, DATA_DIR: dataDir, CUSTOM_LLM_SECRET: SECRET }));
-  const created = CreateSessionResponseSchema.parse(await ok(handleCreateSession(post("/api/sessions", { mode: "expert", caseSet: "training", expert: { name: "Asha Rao" } }), caseDeskDeps())));
+  const created = CreateSessionResponseSchema.parse(await ok(createSessionAs({ mode: "expert", caseSet: "training", expert: { name: "Asha Rao" } })));
   expert = created.sessionId;
   const decisions: [string, string][] = [
     ["NS-2026-0101", "requestDocuments"],
@@ -175,7 +187,7 @@ beforeAll(async () => {
       debriefDeps(),
     ),
   );
-  novice = CreateSessionResponseSchema.parse(await ok(handleCreateSession(post("/api/sessions", { mode: "novice", caseSet: "heldout" }), caseDeskDeps()))).sessionId;
+  novice = CreateSessionResponseSchema.parse(await ok(createSessionAs({ mode: "novice", caseSet: "heldout" }))).sessionId;
   await ok(handlePostEvents(post(`/api/sessions/${novice}/events`, { events: [openCase("NS-2026-0201", 1)] }), novice, caseDeskDeps()));
 });
 

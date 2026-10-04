@@ -1,3 +1,4 @@
+import { guardSession } from "@/lib/server/auth/access";
 import { caseDeskDeps } from "@/lib/server/casedesk/deps";
 import { handleLedgerPage } from "@/lib/server/casedesk/ledger-page";
 
@@ -6,5 +7,5 @@ export const runtime = "nodejs";
 
 export async function GET(request: Request, ctx: RouteContext<"/api/sessions/[sessionId]/ledger">): Promise<Response> {
   const { sessionId } = await ctx.params;
-  return handleLedgerPage(request, sessionId, caseDeskDeps());
+  return guardSession(request, sessionId, "read", () => handleLedgerPage(request, sessionId, caseDeskDeps()));
 }

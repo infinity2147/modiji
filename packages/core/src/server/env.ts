@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { UsernameSchema } from "../schemas/account";
 
 const ENV_KEYS = [
   "NODE_ENV",
@@ -12,6 +13,8 @@ const ENV_KEYS = [
   "CUSTOM_LLM_SECRET",
   "MCP_BEARER_TOKEN",
   "LLM_CALLS",
+  "ADMIN_USERNAME",
+  "ADMIN_PASSWORD",
 ] as const;
 type EnvKey = (typeof ENV_KEYS)[number];
 
@@ -30,6 +33,8 @@ const HINTS: Record<EnvKey, string> = {
   CUSTOM_LLM_SECRET: "at least 32 characters; required in production",
   MCP_BEARER_TOKEN: "at least 32 characters; /mcp refuses every request in production while unset",
   LLM_CALLS: "on or off",
+  ADMIN_USERNAME: "a username (lowercase letters, digits and hyphens); set together with ADMIN_PASSWORD",
+  ADMIN_PASSWORD: "at least 12 characters; set together with ADMIN_USERNAME",
 };
 
 const optional = z.string().optional();
@@ -64,6 +69,12 @@ const ServerEnvSchema = z.strictObject({
    * the process makes no model call even with ANTHROPIC_API_KEY set (e2e). Preflight fails a target that reports it off.
    */
   LLM_CALLS: z.enum(["on", "off"]).default("on"),
+  /**
+   * The first admin (accounts): created at boot when no account has this username, never overwritten
+   * afterwards. Everyone else signs up as a trainee; this admin grants the expert role.
+   */
+  ADMIN_USERNAME: UsernameSchema.optional(),
+  ADMIN_PASSWORD: z.string().min(12).max(200).optional(),
 });
 export type ServerEnv = z.infer<typeof ServerEnvSchema>;
 
@@ -106,6 +117,10 @@ export function loadServerEnv(source: Readonly<Record<string, string | undefined
   if (input.NODE_ENV === "production") {
     for (const key of PRODUCTION_REQUIRED) if (input[key] === undefined) invalid.add(key);
     if (input.PUBLIC_BASE_URL !== undefined && !/^https:\/\//i.test(input.PUBLIC_BASE_URL)) invalid.add("PUBLIC_BASE_URL");
+  }
+  // One without the other would silently create no admin.
+  if ((input.ADMIN_USERNAME === undefined) !== (input.ADMIN_PASSWORD === undefined)) {
+    invalid.add(input.ADMIN_USERNAME === undefined ? "ADMIN_USERNAME" : "ADMIN_PASSWORD");
   }
   if (result.success && invalid.size === 0) return result.data;
 

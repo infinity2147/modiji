@@ -75,6 +75,9 @@ export async function send(fetchFn: FetchFn, url: string, init: RequestInit): Pr
   } catch (error) {
     throw new ApiError("network", 0, "network_error", error instanceof Error ? error.message : undefined);
   }
+  // The sign-in ended (expired, signed out elsewhere, account disabled): back to sign-in, then here again.
+  if (response.status === 401 && typeof window !== "undefined" && !url.startsWith("/api/auth/"))
+    window.location.assign(`/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`);
   return { status: response.status, ok: response.ok, body: await readBody(response) };
 }
 

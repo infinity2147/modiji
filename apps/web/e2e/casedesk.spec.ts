@@ -5,7 +5,11 @@
  */
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
-import { expect, test, type APIRequestContext, type Page, type Route } from "@playwright/test";
+import { type APIRequestContext, type Page, type Route } from "@playwright/test";
+
+// Pages sign in as whoever the session needs (startSession); ledger reads go through the admin, who reads every session.
+test.use({ requestAs: ADMIN });
+import { ADMIN, ASHA, LENA, expect, signInPage, test } from "./support/accounts";
 
 const EVIDENCE_DIR = join(import.meta.dirname, "../../../docs/evidence/p1");
 mkdirSync(EVIDENCE_DIR, { recursive: true });
@@ -35,6 +39,7 @@ const EXPERT_QUOTE = {
 } as const;
 
 async function startSession(page: Page, mode: "Expert capture" | "Novice practice", set: "Training" | "Held-out" | "Practice") {
+  await signInPage(page, mode === "Expert capture" ? ASHA : LENA);
   await page.goto("/sandbox");
   await expect(page.getByRole("heading", { name: "Start a review session" })).toBeVisible();
   await page.getByRole("radio", { name: new RegExp(`^${mode}`) }).click();

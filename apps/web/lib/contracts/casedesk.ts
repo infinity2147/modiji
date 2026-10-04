@@ -18,17 +18,18 @@ export const SessionModeSchema = z.enum(["expert", "novice"]);
 export type SessionMode = z.infer<typeof SessionModeSchema>;
 
 /**
- * POST /api/sessions. `expert` (expert sessions only, plan §7.10–7.11): the expert's name — their id is
- * its slug, so sessions of the same name share one rulebook — and the language they speak. Without it
- * an expert session is its own expert (`expert-<sessionId>`), speaking English.
+ * POST /api/sessions, by a signed-in account. Who the expert is comes from the account, never the
+ * request: an expert's username is their expert id (plan §7.10), so every session of that account
+ * shares one rulebook. `language` (expert sessions only, §7.11): the language the expert speaks to the
+ * interviewer, English by default. Which mode and case set an account may start: `lib/auth/policy.ts`.
  */
 export const CreateSessionRequestSchema = z
   .strictObject({
     mode: SessionModeSchema,
     caseSet: CaseSetSchema,
-    expert: z.strictObject({ name: z.string().trim().min(1).max(60), language: ExpertLanguageSchema.default("en") }).optional(),
+    language: ExpertLanguageSchema.optional(),
   })
-  .refine((r) => r.expert === undefined || r.mode === "expert", { message: "only an expert session names an expert", path: ["expert"] });
+  .refine((r) => r.language === undefined || r.mode === "expert", { message: "only an expert session states a language", path: ["language"] });
 export const CreateSessionResponseSchema = z.strictObject({
   sessionId: IdSchema,
   mode: SessionModeSchema,

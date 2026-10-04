@@ -1,4 +1,5 @@
 /** Shared setup for the CaseDesk handler tests: in-memory ledger, swappable rulebook, JSON request helpers. */
+import { PERMIT_ALL, harnessSessionRequest } from "./accounts";
 import { randomUUID } from "node:crypto";
 import type { z } from "zod";
 import { ConfirmedRuleSchema, type ConfirmedRule } from "@vashistha/core";
@@ -74,7 +75,10 @@ export function createCaseDeskHarness(): CaseDeskHarness {
     restart: () => {
       deps.store = createCaseDeskStore();
     },
-    createSession: async (body) => reply(await handleCreateSession(jsonRequest("/api/sessions", body), deps)),
+    createSession: async (raw) => {
+      const { actor, body } = harnessSessionRequest(raw);
+      return reply(await handleCreateSession(jsonRequest("/api/sessions", body), deps, actor, PERMIT_ALL));
+    },
     session: async (caseSet = "training") => {
       const { status, body } = await h.createSession({ mode: "novice", caseSet });
       if (status !== 201) throw new Error(`session creation failed: ${status} ${JSON.stringify(body)}`);

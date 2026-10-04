@@ -9,7 +9,8 @@
  * MediaStream from a canvas the test draws on. Everything after the stream — grab, change detector,
  * Tesseract OCR + blur from /tesseract/, upload queue, server validation, storage, ledger — is real.
  */
-import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
+import { type APIRequestContext, type Page } from "@playwright/test";
+import { expect, test } from "./support/accounts";
 import { kycCases } from "@vashistha/core/domains/kyc";
 
 type Entry = { id: string; source: string; kind: string; privacyEpoch: number; payload: Record<string, unknown> };

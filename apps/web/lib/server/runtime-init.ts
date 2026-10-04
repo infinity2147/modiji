@@ -19,6 +19,8 @@ import {
 } from "@vashistha/core/server";
 import { KYC_DOMAIN } from "@vashistha/core/domains/kyc";
 import { ORACLE_MARKER as KYC_ORACLE_MARKER } from "@vashistha/core/domains/kyc/oracle";
+import { hashPasswordSync } from "./auth/passwords";
+import { bootstrapAdmin, createAccountStore } from "./auth/store";
 import { createAuthorizationStore } from "./authorizations";
 import { createCaseDeskStore } from "./casedesk/session";
 import { createDebriefStore } from "./debrief/deps";
@@ -40,6 +42,10 @@ const ORACLE_MARKERS = [KYC_ORACLE_MARKER];
 
 /** Tokens cost agent minutes; a real session needs one or two. */
 const VOICE_TOKEN_RATE_LIMIT = { limit: 10, windowMs: 60_000 };
+/** Wrong passwords per client and username before sign-in pauses (scrypt makes each guess slow too). */
+const SIGN_IN_FAILURE_LIMIT = { limit: 10, windowMs: 15 * 60_000 };
+/** New accounts per client. */
+const SIGN_UP_LIMIT = { limit: 10, windowMs: 60 * 60_000 };
 /** First use includes WASM compilation; later self-tests take milliseconds. */
 const Z3_CHECK_DEADLINE_MS = 30_000;
 
@@ -127,6 +133,14 @@ export function createRuntime(source: Readonly<Record<string, string | undefined
   const vision = createVisionWorker(console);
   const eventLoop = createEventLoopMonitor();
   const gc = createGcMonitor();
+  const accounts = createAccountStore(opened.sqlite);
+  const { ADMIN_USERNAME, ADMIN_PASSWORD } = env;
+  bootstrapAdmin(
+    accounts,
+    ADMIN_USERNAME === undefined || ADMIN_PASSWORD === undefined ? undefined : { username: ADMIN_USERNAME, passwordHash: () => hashPasswordSync(ADMIN_PASSWORD) },
+    Date.now(),
+    console,
+  );
   const runtime: Runtime = {
     env,
     ledger,
@@ -155,6 +169,8 @@ export function createRuntime(source: Readonly<Record<string, string | undefined
     },
     tutor: { practice: z3.practice },
     voiceTokenLimiter: createRateLimiter(VOICE_TOKEN_RATE_LIMIT),
+    accounts,
+    authLimits: { signIn: createRateLimiter(SIGN_IN_FAILURE_LIMIT), signUp: createRateLimiter(SIGN_UP_LIMIT) },
     checks: { db: () => probeDatabase(opened), dataDir: () => probeDataDir(env.DATA_DIR), z3: () => probeZ3(z3), eventLoop: eventLoop.snapshot, gc: gc.snapshot, cpuThrottle: readCpuThrottle },
   };
   registerRuntime(runtime);

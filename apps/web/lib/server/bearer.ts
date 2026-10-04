@@ -24,6 +24,13 @@ function describeAuth(headers: Headers): { scheme: string; authLikeHeaders: stri
   return { scheme, authLikeHeaders };
 }
 
+/** True when `authorization` is `Bearer <secret>` (false while no secret is configured). */
+export function bearerMatches(authorization: string | null | undefined, secret: string | undefined): boolean {
+  if (secret === undefined) return false;
+  const match = /^Bearer\s+(\S+)\s*$/i.exec(authorization ?? "");
+  return match?.[1] !== undefined && secretsEqual(match[1], secret);
+}
+
 /**
  * Returns null when the request carries the secret, otherwise the response to send:
  * 401 for a missing or wrong credential, 503 when no secret is configured (development only;

@@ -1,22 +1,22 @@
 import Link from "next/link";
-import { ClipboardCheck, Eye, Landmark, Map, Plus } from "lucide-react";
+import { ClipboardCheck, Eye, Map, Plus } from "lucide-react";
+import type { Viewer } from "@/lib/contracts/auth";
 import type { SessionRef } from "@/lib/client/session-url";
+import { AccountChip } from "@/components/auth/account-chip";
+import { Logo } from "@/components/shell/sidebar-nav";
 import { shortId } from "@/lib/client/format";
 import { Button } from "@/components/ui/button";
 import { MODE_LABELS, SET_LABELS } from "./labels";
 
 /** Northstar Bank · CaseDesk header. Always states that the data is synthetic and how the app senses. */
-export function TopBar({ session }: { session?: SessionRef | undefined }) {
+export function TopBar({ session, viewer }: { session?: SessionRef | undefined; viewer: Viewer }) {
   return (
-    <header className="flex h-12 shrink-0 items-center gap-4 border-b border-slate-800 bg-slate-900 px-4 text-slate-100">
-      <div className="flex items-center gap-2.5">
-        <span aria-hidden className="grid size-7 place-items-center rounded-md bg-blue-600 text-white">
-          <Landmark className="size-4" />
-        </span>
-        <span className="text-sm font-semibold tracking-tight">Northstar Bank</span>
-        <span aria-hidden className="h-4 w-px bg-slate-700" />
-        <h1 className="text-sm font-medium text-slate-300">CaseDesk</h1>
-      </div>
+    <header className="flex h-12 shrink-0 items-center gap-4 border-b border-[#12393D] bg-[#0B2B2E] px-4 text-slate-100">
+      <Link href="/home" aria-label="Back to Home" className="flex items-center gap-2.5 text-white">
+        <Logo onDark />
+      </Link>
+      <span aria-hidden className="h-4 w-px bg-slate-700" />
+      <h1 className="text-sm font-medium text-slate-300">CaseDesk</h1>
       <span className="rounded border border-amber-400/40 bg-amber-400/10 px-1.5 py-0.5 text-[11px] font-medium text-amber-200">
         Synthetic data — fictional policy
       </span>
@@ -70,6 +70,8 @@ export function TopBar({ session }: { session?: SessionRef | undefined }) {
             </Button>
           </>
         )}
+        <span aria-hidden className="h-4 w-px bg-slate-700" />
+        <AccountChip viewer={viewer} />
       </div>
     </header>
   );

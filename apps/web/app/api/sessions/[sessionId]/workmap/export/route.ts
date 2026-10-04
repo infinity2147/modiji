@@ -1,3 +1,4 @@
+import { guardSession } from "@/lib/server/auth/access";
 import { handleExport } from "@/lib/server/debrief/handlers";
 import { debriefDeps } from "@/lib/server/debrief/runtime-deps";
 
@@ -6,5 +7,5 @@ export const runtime = "nodejs";
 
 export async function GET(request: Request, ctx: RouteContext<"/api/sessions/[sessionId]/workmap/export">): Promise<Response> {
   const { sessionId } = await ctx.params;
-  return handleExport(request, sessionId, debriefDeps());
+  return guardSession(request, sessionId, "read", () => handleExport(request, sessionId, debriefDeps()));
 }

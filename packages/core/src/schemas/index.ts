@@ -11,5 +11,6 @@ export * from "./engine";
 export * from "./workmap";
 export * from "./concepts";
 export * from "./expert";
+export * from "./account";
 export * from "./translation";
 export * from "./ledger-kinds";

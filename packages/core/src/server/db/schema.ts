@@ -1,4 +1,5 @@
 import { index, integer, primaryKey, sqliteTable, text, unique } from "drizzle-orm/sqlite-core";
+import { USER_ROLES } from "../../schemas/account";
 import { LEDGER_SOURCES } from "../../schemas/ledger";
 
 /** Mutable per-session state. Every change to it is mirrored by an append to the ledger. */
@@ -52,4 +53,54 @@ export const ledgerEdges = sqliteTable(
       .references(() => ledgerEntries.id),
   },
   (t) => [primaryKey({ columns: [t.childId, t.parentId] }), index("ledger_edges_parent_idx").on(t.parentId)],
+);
+
+/**
+ * Accounts. Mutable (a role is granted, a password changes), unlike the ledger; every role change is
+ * mirrored by an append to `account_events`. `username` never changes: an expert's username is their
+ * expert id in the ledger.
+ */
+export const users = sqliteTable("users", {
+  id: text("id").primaryKey(),
+  username: text("username").notNull().unique(),
+  displayName: text("display_name").notNull(),
+  role: text("role", { enum: USER_ROLES }).notNull(),
+  /** Asked for the expert role at sign-up; cleared when an admin grants or declines it. */
+  expertRequested: integer("expert_requested", { mode: "boolean" }).notNull().default(false),
+  passwordHash: text("password_hash").notNull(),
+  createdAt: integer("created_at").notNull(),
+  /** Set while the account is disabled: it cannot sign in and its sign-ins are revoked. */
+  disabledAt: integer("disabled_at"),
+});
+
+/** Sign-ins. Only a SHA-256 of the cookie token is stored, so a copy of the database cannot sign anyone in. */
+export const authSessions = sqliteTable(
+  "auth_sessions",
+  {
+    tokenHash: text("token_hash").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id),
+    createdAt: integer("created_at").notNull(),
+    expiresAt: integer("expires_at").notNull(),
+  },
+  (t) => [index("auth_sessions_user_idx").on(t.userId)],
+);
+
+/** Who changed which account, when (sign-up, role granted or declined, disabled). Append-only (enforced by triggers). */
+export const accountEvents = sqliteTable(
+  "account_events",
+  {
+    id: text("id").primaryKey(),
+    at: integer("at").notNull(),
+    /** The admin who acted; null for a sign-up or the env bootstrap. */
+    actorId: text("actor_id").references(() => users.id),
+    subjectId: text("subject_id")
+      .notNull()
+      .references(() => users.id),
+    kind: text("kind").notNull(),
+    /** JSON text. */
+    detail: text("detail").notNull(),
+  },
+  (t) => [index("account_events_subject_idx").on(t.subjectId)],
 );

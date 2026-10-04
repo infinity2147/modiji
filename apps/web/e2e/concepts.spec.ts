@@ -14,7 +14,8 @@
 import { mkdirSync } from "node:fs";
 import { randomUUID } from "node:crypto";
 import { join } from "node:path";
-import { expect, test, type APIRequestContext } from "@playwright/test";
+import { type APIRequestContext } from "@playwright/test";
+import { expect, test } from "./support/accounts";
 import { createLedger, openDatabase } from "@vashistha/core/server";
 import { uploadFrame } from "./support/screen-frame";
 import { serverDataDir } from "./support/server";

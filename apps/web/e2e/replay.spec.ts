@@ -19,7 +19,8 @@ import { execFileSync } from "node:child_process";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { randomUUID } from "node:crypto";
 import { join } from "node:path";
-import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
+import { type APIRequestContext, type Page } from "@playwright/test";
+import { LENA, apiAs, expect, test } from "./support/accounts";
 import type { LedgerEntry } from "@vashistha/core";
 import { computeCompliance } from "../lib/client/judge/compliance";
 import { E2E_OPERATOR_SECRET } from "./support/operator";
@@ -119,7 +120,9 @@ async function seek(page: Page, n: number): Promise<void> {
 test("verified replay: genuine run → export → verified replay through the same UI; seek/play in step; one byte tampered → refused", async ({ page, request, baseURL }) => {
   test.setTimeout(300_000);
   const expert = await expertRun(request);
-  const novice = await noviceRun(request);
+  // The novice session is the trainee's own: only they write to it.
+  const lena = await apiAs(LENA);
+  const novice = await noviceRun(lena);
 
   // Archive, then export through the public read APIs into this server's DATA_DIR (the script verifies what it wrote).
   const dataDir = serverDataDir();
@@ -139,12 +142,13 @@ test("verified replay: genuine run → export → verified replay through the sa
 
   // Both sessions were archived before export (their last recorded entry): writes are refused, reads work.
   expect(bundle.entries.filter((e) => e.kind === "session.archived").map((e) => e.sessionId).sort()).toEqual([expert, novice].sort());
-  const refused = await request.post(`/api/sessions/${novice}/tutor/intent`, { data: { caseId: "NS-2026-0201", proposedAction: "approve", edits: {} } });
+  const refused = await lena.post(`/api/sessions/${novice}/tutor/intent`, { data: { caseId: "NS-2026-0201", proposedAction: "approve", edits: {} } });
   expect(refused.status()).toBe(409);
   expect(await refused.json()).toMatchObject({ error: "session_archived" });
   expect((await request.post(`/api/sessions/${expert}/teachback`)).status()).toBe(409);
   expect((await request.get(`/api/sessions/${expert}/debrief`)).status()).toBe(200);
-  expect((await request.get(`/api/sessions/${novice}/tutor`)).status()).toBe(200);
+  expect((await lena.get(`/api/sessions/${novice}/tutor`)).status()).toBe(200);
+  await lena.dispose();
   // The expert's stop-rule stays in force.
   expect(JSON.stringify(await ok<unknown>(await request.get("/api/rulebook")))).toContain(STOP_QUOTE);
 

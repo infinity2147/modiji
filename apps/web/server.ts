@@ -4,7 +4,7 @@
  * pages and route handlers to Next.js, whose routes reach the runtime through `getRuntime()`.
  */
 import { existsSync } from "node:fs";
-import { createServer } from "node:http";
+import { createServer, type ServerResponse } from "node:http";
 import { registerHooks } from "node:module";
 import type { Socket } from "node:net";
 import next from "next";
@@ -29,11 +29,26 @@ registerHooks({
   },
 });
 
+/** A request the front door turned away: 401 for an API, a redirect to sign-in for a page, 403 for a cross-site write. */
+function refuse(res: ServerResponse, verdict: { kind: "unauthenticated" } | { kind: "sign_in"; location: string } | { kind: "cross_site" }): void {
+  res.setHeader("Cache-Control", "no-store");
+  if (verdict.kind === "sign_in") {
+    res.writeHead(302, { Location: verdict.location }).end();
+    return;
+  }
+  const [status, body] =
+    verdict.kind === "unauthenticated"
+      ? [401, { error: "unauthenticated", detail: "sign in first" }]
+      : [403, { error: "cross_site", detail: "a signed-in write must come from this site" }];
+  res.writeHead(status, { "Content-Type": "application/json" }).end(JSON.stringify(body));
+}
+
 async function main(): Promise<void> {
   const { createRuntime } = await import("./lib/server/runtime-init");
   const { MCP_PATH, createMcpEndpoint } = await import("./lib/server/debrief/mcp");
   const { createReplayService } = await import("./lib/server/replay/service");
   const { registerReplay } = await import("./lib/server/replay/registry");
+  const { gate } = await import("./lib/server/auth/gate");
   // Variables already set in the environment win over the file (process.loadEnvFile never overrides).
   if (process.env.NODE_ENV !== "production" && existsSync(ROOT_ENV_FILE)) process.loadEnvFile(ROOT_ENV_FILE);
   const { runtime, close: closeRuntime } = createRuntime(process.env);
@@ -69,6 +84,14 @@ async function main(): Promise<void> {
       if (shuttingDown && inFlightRequests === 0) destroySockets();
     });
     const isMcp = new URL(req.url ?? "/", "http://localhost").pathname === MCP_PATH;
+    // The front door (lib/server/auth/gate.ts); /mcp checks its own bearer.
+    if (!isMcp) {
+      const verdict = gate(req, { accounts: runtime.accounts, operatorSecret: runtime.env.CUSTOM_LLM_SECRET, publicBaseUrl: runtime.env.PUBLIC_BASE_URL, now: Date.now() });
+      if (verdict.kind !== "pass") {
+        refuse(res, verdict);
+        return;
+      }
+    }
     (isMcp ? mcp(req, res) : handle(req, res)).catch((error: unknown) => {
       console.error("Unhandled request error", req.method, req.url, error);
       if (!res.headersSent) res.statusCode = 500;
