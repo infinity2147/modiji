@@ -678,3 +678,18 @@ Source: `docs/evidence/live/ACCEPTANCE.txt` and `SUMMARY.txt`. All expert speech
 1. **Stale witness question text.** A debrief witness keeps its id, and therefore its already-queued question, while its assignment is unchanged. If the confirmed rulebook changes afterwards so that the same cell now needs another condition to describe it, the spoken or displayed question can omit that condition (for example it says "Politically exposed person: no" when the live cell is also "country risk not medium"). The answer still targets the correct cell, because the card's chips and the cell rule are computed live. Candidate fix: re-queue or refresh a witness question when its cell description changes.
 2. **P2 vision thresholds not met.** See the P2 sections above. On the current fixture, with the thresholds unchanged: false critical 0.024 (pass), server p95 2.93 s (pass), critical field recall 0.846 and critical action recall 0.857 (both below 0.95). The team accepted reporting the miss. The human-paced fixture is still to be delivered and re-measured.
 3. **Host freeze.** One-off event-loop freezes of up to 13.8 s occurred in production while memory sat at about 96% of the 1 GB cap and CPU stayed near idle. Raising the memory limit to 2 GB is a dashboard action (docs/deploy.md).
+
+---
+
+## Deployed state (2026-10-04, ~12:10 IST)
+
+- **Production runs `main` at `6abc2a4`**: the accounts, roles and new UI merge (`39f3cd3`), plus the live-path fixes, the P2 vision changes, the redesigned training cases and the expert Debrief / Work Map buttons. Deployment `4df5220b`: SUCCESS, started cleanly, deep health ok, event-loop p99 1.8 ms.
+- **Sign-in is enforced.** Anonymous `POST /api/sessions` and `GET /api/auth/me` return 401. Anonymous `/sandbox` redirects to `/login`. Anonymous `GET /api/voice/token` returns 401.
+- **Vision extraction is OFF in production** (`VISION_EXTRACTION=off`, a plain Railway variable). Frames are still stored and ledgered; no Haiku reads. This was ON before, which with screen motion explains the high latency reported during the first live session.
+- **Fresh demo ledger**: `DATA_DIR=/data/demo-20261004`. The old data is still on the volume. The verified replay bundle `20261004-0119-96acd563eb14` is imported (393 entries, chain head `96acd563eb14`).
+- **Admin not yet created.** `ADMIN_USERNAME` and `ADMIN_PASSWORD` must be set together on Railway. With neither set, nobody can grant the expert role, and startup logs a warning. Setting only one fails startup.
+- **Live preflight on this build: GREEN 9/9.** It includes the retry-window invariant (same text inside 10 s, refusal after it), the anonymous voice-token refusal and the sign-in gate on `/sandbox`.
+
+**Operational lessons recorded in `docs/deploy.md`.**
+1. Putting `limitOverride` and `VISION_EXTRACTION` in `.railway/railway.ts` crashed a deploy (the `preserve()` variables arrived missing). A failed deploy leaves the old build serving. After every deploy, check `railway deployment list` and confirm a new behaviour is live.
+2. This machine's network stalls about one new connection in six for the full 10 s connect timeout, on every host. Preflight now retries a connect timeout once.

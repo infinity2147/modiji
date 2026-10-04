@@ -1,0 +1,150 @@
+{
+  "tool": "vashistha-preflight",
+  "startedAt": "2026-10-04T06:42:03.349Z",
+  "finishedAt": "2026-10-04T06:42:39.356Z",
+  "target": "https://vashistha-production.up.railway.app",
+  "options": {
+    "only": [
+      "env",
+      "anthropic",
+      "agents",
+      "token",
+      "public-llm",
+      "voice-skip-turn",
+      "voice-off-record",
+      "server-deep",
+      "sandbox",
+      "permissions"
+    ],
+    "quietWindowMs": 8000,
+    "speechTimeoutMs": 20000
+  },
+  "exitCode": 1,
+  "summary": {
+    "pass": 1,
+    "fail": 6,
+    "skip": 2,
+    "info": 1
+  },
+  "results": [
+    {
+      "id": "env",
+      "title": "Environment variables",
+      "status": "pass",
+      "ms": 38,
+      "detail": "6 required variables set, PUBLIC_BASE_URL is https (.env + process env)",
+      "facts": {
+        "source": ".env + process env",
+        "required": [
+          "ANTHROPIC_API_KEY",
+          "ELEVENLABS_API_KEY",
+          "ELEVENLABS_INTERVIEWER_AGENT_ID",
+          "ELEVENLABS_TUTOR_AGENT_ID",
+          "CUSTOM_LLM_SECRET",
+          "PUBLIC_BASE_URL"
+        ],
+        "missing": []
+      }
+    },
+    {
+      "id": "anthropic",
+      "title": "Anthropic structured output + routed models",
+      "status": "fail",
+      "ms": 32006,
+      "detail": "structured output on claude-haiku-4-5-20251001: Request timed out.; claude-sonnet-5-5: Request timed out.; claude-opus-5-5: Request timed out.",
+      "facts": {}
+    },
+    {
+      "id": "agents",
+      "title": "ElevenLabs agents match spec and invariants",
+      "status": "fail",
+      "ms": 25468,
+      "detail": "1 problem(s):\n- tutor: ElevenLabs GET /v1/convai/agents/agent_2401m41v7v1jfr295ekx74gh81hp failed (timeout): no complete response within 15000 ms",
+      "facts": {
+        "interviewer": {
+          "agentId": "agent_2601m41v7r80eh79v5f00x874765",
+          "specVersion": 3,
+          "modelId": "vashistha-interviewer-v3",
+          "secretReferenced": true,
+          "clientTools": [
+            "set_off_record=tool_0601m41xkp4se5kta44gyzp4f9s2"
+          ]
+        },
+        "tutor": {}
+      }
+    },
+    {
+      "id": "token",
+      "title": "Conversation tokens (API + public endpoint)",
+      "status": "fail",
+      "ms": 35972,
+      "detail": "tutor: ElevenLabs GET /v1/convai/conversation/token?agent_id=agent_2401m41v7v1jfr295ekx74gh81hp failed (timeout): no complete response within 15000 ms; public endpoint: GET /api/voice/token: fetch failed (Connect Timeout Error (attempted address: vashistha-production.up.railway.app:443, timeout: 10000ms)); interviewer token 10506 ms",
+      "facts": {
+        "interviewer": {
+          "conversationId": "conv_0701m42tc5zte2kaac04ybzcjabb",
+          "ms": 10506
+        }
+      }
+    },
+    {
+      "id": "public-llm",
+      "title": "Custom-LLM endpoint over the public internet",
+      "status": "fail",
+      "ms": 20983,
+      "detail": "POST /api/llm/chat/completions: fetch failed (Connect Timeout Error (attempted address: vashistha-production.up.railway.app:443, timeout: 10000ms))"
+    },
+    {
+      "id": "voice-skip-turn",
+      "title": "skip_turn honoured end to end through ElevenLabs + TTS",
+      "status": "skip",
+      "ms": 0,
+      "detail": "depends on public-llm (fail)"
+    },
+    {
+      "id": "voice-off-record",
+      "title": "Off-record phrase → set_off_record client tool, no speech",
+      "status": "skip",
+      "ms": 0,
+      "detail": "depends on public-llm (fail)"
+    },
+    {
+      "id": "server-deep",
+      "title": "DB, DATA_DIR writable and Z3 initialised",
+      "status": "fail",
+      "ms": 20983,
+      "detail": "GET /api/health: fetch failed (Connect Timeout Error (attempted address: vashistha-production.up.railway.app:443, timeout: 10000ms))"
+    },
+    {
+      "id": "sandbox",
+      "title": "CaseDesk sandbox route",
+      "status": "fail",
+      "ms": 20981,
+      "detail": "GET /sandbox: fetch failed (Connect Timeout Error (attempted address: vashistha-production.up.railway.app:443, timeout: 10000ms))"
+    },
+    {
+      "id": "permissions",
+      "title": "Demo machine mic/screen checklist",
+      "status": "info",
+      "ms": 1,
+      "detail": "6-item mic/screen checklist for the demo machine (printed below)",
+      "facts": {
+        "checklist": [
+          "Use Chrome (latest stable) on the demo machine; open the app on its HTTPS origin (PUBLIC_BASE_URL), never http or a LAN IP.",
+          "Site settings for that origin: Microphone = Allow; pick the demo headset as the input device.",
+          "Screen share via getDisplayMedia: choose \"Entire screen\" or the CaseDesk \"Window\"; leave \"Also share tab audio\" OFF.",
+          "macOS: System Settings → Privacy & Security → Screen Recording and Microphone both enabled for Chrome (restart Chrome after granting).",
+          "Close notification sources (Do Not Disturb on, Slack/Mail quit) and every other tab or window with personal data or PII.",
+          "Test the headset: confirm the input level moves when you speak (OS sound settings) and that agent speech plays in the headset only, not the room."
+        ]
+      }
+    }
+  ],
+  "checklist": [
+    "Use Chrome (latest stable) on the demo machine; open the app on its HTTPS origin (PUBLIC_BASE_URL), never http or a LAN IP.",
+    "Site settings for that origin: Microphone = Allow; pick the demo headset as the input device.",
+    "Screen share via getDisplayMedia: choose \"Entire screen\" or the CaseDesk \"Window\"; leave \"Also share tab audio\" OFF.",
+    "macOS: System Settings → Privacy & Security → Screen Recording and Microphone both enabled for Chrome (restart Chrome after granting).",
+    "Close notification sources (Do Not Disturb on, Slack/Mail quit) and every other tab or window with personal data or PII.",
+    "Test the headset: confirm the input level moves when you speak (OS sound settings) and that agent speech plays in the headset only, not the room."
+  ]
+}
