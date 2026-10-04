@@ -70,8 +70,10 @@ describe("sweep", () => {
   });
 
   it("ACTA's fixed perturbation stays inside the valid domain", () => {
-    const [c] = episodeData(21, 3, 1).stream;
-    if (c === undefined) throw new Error("no case");
+    // Pick a genuinely new customer from the stream so the test does not depend on how the demo
+    // training cases happen to be designed (case 1 is an existing customer after the narrative redesign).
+    const c = episodeData(21, 24, 1).stream.find((x) => x.features[FeatureIdSchema.parse("customerStatus")] === "new");
+    if (c === undefined) throw new Error("no new-customer case in the stream");
     const age = DOMAIN.features.find((f) => f.id === "accountAgeMonths");
     const status = DOMAIN.features.find((f) => f.id === "customerStatus");
     const pep = DOMAIN.features.find((f) => f.id === "pep");

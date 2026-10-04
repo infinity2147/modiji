@@ -264,7 +264,7 @@ Also required:
 
   | Strategy | Questions | Fidelity | Unsafe FN rate | Notes |
   |---|---|---|---|---|
-  | A record-only | 0 | 0.633 | 14.9% | — |
+  | A record-only | 0 | 0.645 | 14.6% | — (was 0.633 / 14.9% before the demo training cases were redesigned; see below) |
   | D (ours) | 8 | **0.990** | **1.2%** | about 13 questions and 8 interruptions at its plateau |
   | B generic-why | 16–24 | 0.949 | **0.0%** | 16–24 questions and interruptions |
   | C ACTA | 12+ | 0.940 | 4.1% | — |
@@ -667,3 +667,5 @@ Source: `docs/evidence/live/ACCEPTANCE.txt` and `SUMMARY.txt`. All expert speech
 4. **Resource bump (cost decision, for the team):** raise the Railway service CPU/memory so the container isn't throttled under burst. Not applied unilaterally.
 
 **Fresh demo ledger required before judging:** production is at rulebook revision 60 (14 team rules) from the live runs, including a Hindi rule that now forbids approval for every high-risk-country customer. Point `DATA_DIR` at a fresh path before the demo (procedure in `docs/deploy.md`); the old data stays on the volume.
+
+**P9 re-run after the demo-case redesign (2026-10-04).** The training cases 1 and 2 were redesigned (they now differ only on ownership share and jurisdiction), which changes the seed observation stream. Re-running `pnpm bench` (still deterministic, 7.5 s) moved only the record-only floor: A fidelity 0.633 → 0.645, unsafe 14.9% → 14.6%. Strategies B, C and D are unchanged at every budget (D 0.990 / 1.2% from 8 questions; B 0.0% unsafe at 24 questions), so every comparative claim above still holds. `results.json` sha256 changed from `9d8e2584…` to `c66a686a…`; the committed evidence is the new run.
