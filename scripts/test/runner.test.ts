@@ -81,10 +81,22 @@ describe("runChecks", () => {
   });
 
   it("runs the real suite green against the fakes, with nothing sensitive in any result", async () => {
-    const server = fakeServer();
+    // The fake deployment and the check context share one clock, so the retry-window wait advances it.
+    let now = Date.now();
+    const clock = () => now;
+    const server = fakeServer({}, clock);
     const sockets = fakeAgentSockets(server);
     const eleven = fakeElevenLabs({ getAgent: () => Promise.reject(new Error("not part of this test")) });
-    const ctx = makeContext({ fetch: server.fetch, WebSocket: sockets.factory, createElevenLabs: () => eleven, createClaude: () => fakeClaude() });
+    const ctx = makeContext({
+      fetch: server.fetch,
+      WebSocket: sockets.factory,
+      createElevenLabs: () => eleven,
+      createClaude: () => fakeClaude(),
+      wallClock: clock,
+      sleep: async (ms) => {
+        now += ms;
+      },
+    });
     const ids = selectChecks(["env", "anthropic", "token", "public-llm", "voice-skip-turn", "server-deep", "sandbox", "permissions"]);
     const results = await runChecks(ctx, ids);
     expect(results.map((r) => [r.id, r.status])).toEqual([

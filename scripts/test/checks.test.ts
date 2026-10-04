@@ -245,18 +245,22 @@ describe("token", () => {
 
 describe("public-llm", () => {
   const run = (behaviour: FakeServerBehaviour = {}) => {
-    const server = fakeServer(behaviour);
-    return { server, result: checkPublicLlm(makeContext({ fetch: server.fetch })) };
+    // A clock the test controls: `sleep` advances it, so the retry-window wait costs no real time.
+    let now = Date.now();
+    const clock = () => now;
+    const server = fakeServer(behaviour, clock);
+    const ctx = makeContext({ fetch: server.fetch, wallClock: clock, sleep: async (ms) => { now += ms; } });
+    return { server, result: checkPublicLlm(ctx) };
   };
 
-  it("passes: 401s, skip_turn, exact authorised text, replay refused", async () => {
+  it("passes: 401s, skip_turn, exact authorised text, same-text retry inside the window, replay refused after it", async () => {
     const { server, result } = run();
     const r = await result;
     expect(r.detail).toMatch(/^401 without\/with wrong bearer; unauthorised → skip_turn/);
     expect(r.status).toBe("pass");
-    expect(r.facts).toMatchObject({ model: "vashistha-interviewer-v3", skipTurn: { ok: true, reason: "not_control_message" }, speech: { ok: true }, replay: { ok: true } });
+    expect(r.facts).toMatchObject({ model: "vashistha-interviewer-v3", skipTurn: { ok: true, reason: "not_control_message" }, speech: { ok: true }, retry: { ok: true }, replay: { ok: true } });
     const chat = server.requests.filter((q) => q.path === "/api/llm/chat/completions");
-    expect(chat.map((q) => q.authorized)).toEqual([false, false, true, true, true]);
+    expect(chat.map((q) => q.authorized)).toEqual([false, false, true, true, true, true]);
   });
 
   it("fails when an unauthenticated request is answered", async () => {
@@ -272,10 +276,16 @@ describe("public-llm", () => {
     expect(r.detail).toMatch(/unauthorised turn: expected no content/);
   });
 
-  it("fails when a replayed nonce speaks again", async () => {
+  it("fails when a replayed nonce still speaks after the retry window", async () => {
     const r = await run({ allowReplay: true }).result;
     expect(r.status).toBe("fail");
-    expect(r.detail).toMatch(/^replayed nonce: expected one skip_turn/);
+    expect(r.detail).toMatch(/^replayed nonce after the window: expected one skip_turn/);
+  });
+
+  it("fails when a retry inside the window is refused instead of re-speaking the same text", async () => {
+    const r = await run({ strictSingleUse: true }).result;
+    expect(r.status).toBe("fail");
+    expect(r.detail).toMatch(/^retry inside the window: /);
   });
 
   it("refuses a plain-http target that was not an explicit loopback --target", async () => {

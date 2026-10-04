@@ -92,4 +92,6 @@ export type PreflightContext = {
   now: () => number;
   /** Epoch ms (authorization expiry, report timestamps). */
   wallClock: () => number;
+  /** Waits `ms` (injectable so tests can advance a fake clock instead of waiting). */
+  sleep: (ms: number) => Promise<void>;
 };

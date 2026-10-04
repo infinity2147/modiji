@@ -8,7 +8,7 @@ import type { CheckOutcome, Facts, PreflightContext } from "../types";
 /** The path ElevenLabs calls: `custom_llm.url` plus the `/chat/completions` it appends (api-notes §4.1). */
 export const CHAT_COMPLETIONS_PATH = `${CUSTOM_LLM_PATH}/chat/completions`;
 
-type Ctx = Pick<PreflightContext, "env" | "target" | "fetch" | "now" | "options" | "secrets" | "loadAgentSpec">;
+type Ctx = Pick<PreflightContext, "env" | "target" | "fetch" | "now" | "options" | "secrets" | "loadAgentSpec" | "sleep">;
 
 /** An ElevenLabs-shaped request body: system prompt, conversation, system tools, `elevenlabs_extra_body`. */
 export function chatRequestBody(model: string, userText: string, sessionId: string | null): Record<string, unknown> {
@@ -110,10 +110,15 @@ export function speechProblems(call: StreamCall, text: string): string[] {
   return problems;
 }
 
+/** Mirrors `RESPEAK_WINDOW_MS` in apps/web/lib/server/authorizations.ts (scripts cannot import the web app's modules). */
+const RESPEAK_WINDOW_MS = 10_000;
+/** Slack past the window, for network and clock differences between this machine and the server. */
+const RESPEAK_MARGIN_MS = 1_500;
+
 /**
  * The custom-LLM endpoint, called from this machine over the public internet exactly as ElevenLabs will:
  * refuses missing and wrong credentials, answers an unauthorised user turn with a streamed `skip_turn`, speaks the
- * authorised text for a valid control message, and refuses to speak again when that nonce is replayed.
+ * authorised text for a valid control message, and speaks the same text again for a retry inside the retry window, and refuses once the window has passed.
  */
 export async function checkPublicLlm(ctx: Ctx): Promise<CheckOutcome> {
   const { CUSTOM_LLM_SECRET: secret } = requireVars(ctx.env, ["CUSTOM_LLM_SECRET"]);
@@ -150,16 +155,24 @@ export async function checkPublicLlm(ctx: Ctx): Promise<CheckOutcome> {
   problems.push(...speechIssues.map((p) => `authorised turn: ${p}`));
   facts.speech = { ok: speechIssues.length === 0, firstChunkMs: speech.firstChunkMs, totalMs: speech.totalMs };
 
-  // 5. Replay of the same nonce must not speak again.
+  // 5. A retry of the same nonce. ElevenLabs retries a custom-LLM turn that errored or came back empty, so inside
+  //    the retry window the same authorised text is spoken again (and nothing else); once the window has passed the
+  //    nonce is spent and a replay is refused.
+  const retry = await postChat(ctx, url, chatRequestBody(model, auth.controlMessage, auth.sessionId), bearer(secret));
+  const retryIssues = speechProblems(retry, auth.text);
+  problems.push(...retryIssues.map((p) => `retry inside the window: ${p}`));
+  facts.retry = { ok: retryIssues.length === 0, totalMs: retry.totalMs };
+
+  await ctx.sleep(RESPEAK_WINDOW_MS + RESPEAK_MARGIN_MS);
   const replay = await postChat(ctx, url, chatRequestBody(model, auth.controlMessage, auth.sessionId), bearer(secret));
   const replayProblems = skipTurnProblems(replay);
-  problems.push(...replayProblems.map((p) => `replayed nonce: ${p}`));
+  problems.push(...replayProblems.map((p) => `replayed nonce after the window: ${p}`));
   facts.replay = { ok: replayProblems.length === 0, reason: skipReason(replay), totalMs: replay.totalMs };
 
   if (problems.length > 0) return { status: "fail", detail: problems.join("; "), facts };
   return {
     status: "pass",
-    detail: `401 without/with wrong bearer; unauthorised → skip_turn (${plain.totalMs} ms); authorised → exact text (first chunk ${speech.firstChunkMs ?? "?"} ms); replay → skip_turn (${skipReason(replay) ?? "no reason"})`,
+    detail: `401 without/with wrong bearer; unauthorised → skip_turn (${plain.totalMs} ms); authorised → exact text (first chunk ${speech.firstChunkMs ?? "?"} ms); retry inside the window → same text; replay after it → skip_turn (${skipReason(replay) ?? "no reason"})`,
     facts,
   };
 }

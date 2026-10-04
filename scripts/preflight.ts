@@ -72,6 +72,7 @@ async function main(): Promise<number> {
     secrets,
     now: () => performance.now(),
     wallClock: Date.now,
+    sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
   };
 
   const startedAt = Date.now();

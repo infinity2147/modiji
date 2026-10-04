@@ -104,15 +104,20 @@ export function speechEvents(text: string): string[] {
   ];
 }
 
-type Authorization = { sessionId: string; nonce: string; expiresAt: number; used: boolean };
+/** Mirrors `RESPEAK_WINDOW_MS` in apps/web/lib/server/authorizations.ts: a retry of a spoken nonce re-speaks the same text. */
+export const RESPEAK_WINDOW_MS = 10_000;
+
+type Authorization = { sessionId: string; nonce: string; expiresAt: number; used: boolean; spokenAt?: number };
 
 export type FakeServerBehaviour = {
   /** Answer the unauthenticated chat request with 200 instead of 401. */
   acceptMissingAuth?: boolean;
   /** Speak for any user message (the bug the gate exists to prevent). */
   speakWithoutAuthorization?: boolean;
-  /** Never mark nonces used, so a replay speaks again. */
+  /** Never mark nonces used, so a replay speaks again, even long after the retry window. */
   allowReplay?: boolean;
+  /** Strict single use: no retry window, so a retry of a spoken nonce is refused at once (the pre-window behaviour). */
+  strictSingleUse?: boolean;
   /** Behave like a server without the off-record branch: an off-record phrase gets skip_turn. */
   ignoreOffRecordPhrase?: boolean;
   deep?: { db?: boolean; dataDir?: boolean; z3?: boolean };
@@ -199,9 +204,13 @@ export function fakeServer(behaviour: FakeServerBehaviour = {}, wallClock: () =>
   function decide(text: string, sessionId: string | undefined): string[] {
     const nonce = /^⟦ctl:([A-Za-z0-9_-]+)⟧$/.exec(text)?.[1];
     const auth = nonce === undefined ? undefined : authorizations.get(nonce);
-    const valid = auth !== undefined && !auth.used && auth.sessionId === sessionId && auth.expiresAt > wallClock();
-    if (valid) {
-      if (!behaviour.allowReplay) auth.used = true;
+    const live = auth !== undefined && auth.sessionId === sessionId && auth.expiresAt > wallClock();
+    const retry = live && auth.used && !behaviour.strictSingleUse && wallClock() - (auth.spokenAt ?? 0) <= RESPEAK_WINDOW_MS;
+    if (live && (!auth.used || retry)) {
+      if (!behaviour.allowReplay && !auth.used) {
+        auth.used = true;
+        auth.spokenAt = wallClock();
+      }
       return speechEvents(PREFLIGHT_TEXT);
     }
     if (behaviour.speakWithoutAuthorization) return speechEvents("Sure, I can help with that.");
@@ -359,7 +368,10 @@ export function fakeElevenLabs(overrides: Partial<PreflightElevenLabs> = {}): Pr
 export function makeContext(overrides: Partial<PreflightContext> & { cliTarget?: string } = {}): PreflightContext {
   const { cliTarget, ...rest } = overrides;
   const env = rest.env ?? GOOD_ENV;
-  const server = fakeServer();
+  // One clock the whole fake deployment shares: `sleep` advances it, so waiting costs no real time.
+  let clockNow = Date.now();
+  const clock = () => clockNow;
+  const server = fakeServer({}, clock);
   return {
     env,
     envFileLoaded: false,
@@ -372,7 +384,10 @@ export function makeContext(overrides: Partial<PreflightContext> & { cliTarget?:
     loadAgentSpec: (role: AgentRole) => loadAgentSpec(new URL(`../../../agents/${role}.json`, import.meta.url)),
     secrets: createSecretRegistry([env.ANTHROPIC_API_KEY, env.ELEVENLABS_API_KEY, env.CUSTOM_LLM_SECRET]),
     now: () => performance.now(),
-    wallClock: Date.now,
+    wallClock: clock,
+    sleep: async (ms) => {
+      clockNow += ms;
+    },
     ...rest,
   };
 }
