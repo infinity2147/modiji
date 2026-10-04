@@ -1,0 +1,97 @@
+$ pnpm --filter @vashistha/web vendor:tesseract && pnpm --filter @vashistha/web build && pnpm --filter @vashistha/web exec playwright test
+$ tsx ../../packages/perception/scripts/vendor-tesseract.ts public/tesseract
+worker.min.js                                 109 KiB
+tesseract-core-lstm.wasm.js                  3805 KiB
+tesseract-core-simd-lstm.wasm.js             3808 KiB
+tesseract-core-relaxedsimd-lstm.wasm.js      3814 KiB
+eng.traineddata.gz                           1916 KiB
+vendored into /home/24b4530/modiji/apps/web/public/tesseract
+$ next build
+▲ Next.js 16.3.8 (Turbopack)
+✓ Running next.config.ts took 770ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 6.1s
+  Running TypeScript ...
+  Finished TypeScript in 13.7s ...
+  Collecting page data using 39 workers ...
+  Generating static pages using 39 workers (0/4) ...
+  Generating static pages using 39 workers (1/4) 
+  Generating static pages using 39 workers (2/4) 
+  Generating static pages using 39 workers (3/4) 
+✓ Generating static pages using 39 workers (4/4) in 937ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /api/cases
+├ ƒ /api/health
+├ ƒ /api/health/deep
+├ ƒ /api/interlock/check
+├ ƒ /api/llm/chat/completions
+├ ƒ /api/media/[sessionId]/frames/[file]
+├ ƒ /api/preflight/authorize
+├ ƒ /api/rulebook
+├ ƒ /api/sessions
+├ ƒ /api/sessions/[sessionId]/agent-utterances
+├ ƒ /api/sessions/[sessionId]/concepts
+├ ƒ /api/sessions/[sessionId]/debrief
+├ ƒ /api/sessions/[sessionId]/decisions
+├ ƒ /api/sessions/[sessionId]/engine
+├ ƒ /api/sessions/[sessionId]/events
+├ ƒ /api/sessions/[sessionId]/frames
+├ ƒ /api/sessions/[sessionId]/gate/authorize
+├ ƒ /api/sessions/[sessionId]/ledger
+├ ƒ /api/sessions/[sessionId]/lineage
+├ ƒ /api/sessions/[sessionId]/off-record
+├ ƒ /api/sessions/[sessionId]/questions
+├ ƒ /api/sessions/[sessionId]/teachback
+├ ƒ /api/sessions/[sessionId]/tutor
+├ ƒ /api/sessions/[sessionId]/tutor/cases
+├ ƒ /api/sessions/[sessionId]/tutor/intent
+├ ƒ /api/sessions/[sessionId]/tutor/practice
+├ ƒ /api/sessions/[sessionId]/tutor/prediction
+├ ƒ /api/sessions/[sessionId]/utterances
+├ ƒ /api/sessions/[sessionId]/witnesses
+├ ƒ /api/sessions/[sessionId]/workmap
+├ ƒ /api/sessions/[sessionId]/workmap/export
+├ ƒ /api/voice/token
+├ ƒ /debrief/[sessionId]
+├ ○ /sandbox
+└ ƒ /workmap/[sessionId]
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+[WebServer] > LLM_CALLS=off: model calls disabled (no Anthropic client)
+[WebServer] ✓ Running next.config.ts took 74ms
+[WebServer] > production server ready on http://0.0.0.0:4391
+[WebServer] > Z3 ready (1723 ms)
+
+Running 15 tests using 1 worker
+
+  ✓   1 [chromium] › e2e/casedesk.spec.ts:92:1 › P1 acceptance: an expert processes the three training cases by hand (7.1s)
+  ✓   2 [chromium] › e2e/casedesk.spec.ts:168:1 › a forbid from the interlock blocks the commit and shows the expert's quote (2.8s)
+  ✓   3 [chromium] › e2e/casedesk.spec.ts:203:1 › needs_approval requires a note; acknowledging commits through the real server (2.8s)
+  ✓   4 [chromium] › e2e/casedesk.spec.ts:238:1 › insufficient_information lists the missing features by their domain labels and can be escalated (2.0s)
+  ✓   5 [chromium] › e2e/casedesk.spec.ts:261:1 › reloading the session URL resumes it with decided cases still marked (3.2s)
+  ✓   6 [chromium] › e2e/concepts.spec.ts:68:1 › concepts: undefined concept → expert confirms → Model updated banner → backfill shown → coverage under v2 (1.9s)
+[WebServer] [debrief] teach-back uses the template: LLM unavailable
+[WebServer] [debrief] teach-back uses the template: LLM unavailable
+  ✓   7 [chromium] › e2e/debrief.spec.ts:70:1 › debrief: witnesses → typed answers → teach-back correction → coverage closed; Work Map with lineage (11.3s)
+  ✓   8 [chromium] › e2e/debrief.spec.ts:168:1 › debrief: a session whose screen was never shared cannot confirm a rule (409 no_screen_frame) (244ms)
+  ✓   9 [chromium] › e2e/judge-view.spec.ts:42:1 › judge view: gate HUD reacts to typing, ticker follows the ledger, strip stays honestly pending, voice not configured (7.9s)
+  ✓  10 [chromium] › e2e/judge-view.spec.ts:110:1 › tutor voice on a server without voice credentials: a clear not-configured state, CaseDesk keeps working (2.5s)
+  ✓  11 [chromium] › e2e/judge-view.spec.ts:123:1 › off the record: red banner, capture paused, nothing recorded, resume with a new epoch (2.7s)
+  ✓  12 [chromium] › e2e/judge-view.spec.ts:183:1 › a session reloaded while off the record stays off the record (1.9s)
+  ✓  13 [chromium] › e2e/perception.spec.ts:55:1 › share screen → change-detected, redacted frames are uploaded, stored and ledgered; off the record stops them (8.0s)
+  ✓  14 [chromium] › e2e/tutor.spec.ts:98:1 › tutor: predict → reveal in the expert's words → commit → mastery → unseen practice case decided (7.3s)
+  ✓  15 [chromium] › e2e/tutor.spec.ts:198:1 › tutor: a real stop-rule from the debrief → intervention on selection, before Save → Save blocked (3.7s)
+
+  15 passed (1.2m)
+
+real	1m47.810s
+user	1m24.721s
+sys	0m15.941s

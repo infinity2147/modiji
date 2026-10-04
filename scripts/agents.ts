@@ -10,6 +10,7 @@
  * `${PUBLIC_BASE_URL}/api/llm/chat/completions` for every agent turn. `--dry-run` prints the rendered bodies (with a
  * placeholder secret id) and makes no network calls.
  */
+import { setDefaultResultOrder } from "node:dns";
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
@@ -17,6 +18,9 @@ import { createElevenLabsClient } from "../packages/core/src/server/elevenlabs";
 import { AGENT_ROLES, loadAgentSpec, type AgentRole } from "../packages/core/src/server/elevenlabs-agents";
 import { syncAgents } from "../packages/core/src/server/elevenlabs-sync";
 import { loadServerEnv, requireEnv } from "../packages/core/src/server/env";
+
+// Prefer IPv4: on networks with broken IPv6 routes, Node's fetch otherwise hits its 10 s connect timeout.
+setDefaultResultOrder("ipv4first");
 
 async function main(): Promise<number> {
   const { values } = parseArgs({

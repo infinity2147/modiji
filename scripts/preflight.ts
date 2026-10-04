@@ -10,6 +10,7 @@
  * `--target http://127.0.0.1:<port>` is accepted for the HTTP checks against a local production server; the voice
  * checks refuse it (ElevenLabs cannot call localhost).
  */
+import { setDefaultResultOrder } from "node:dns";
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
@@ -22,6 +23,9 @@ import { exitCodeFor, runChecks, selectChecks, UsageError } from "./preflight/ru
 import { resolveTarget } from "./preflight/target";
 import { DEFAULT_OPTIONS, type PreflightContext } from "./preflight/types";
 import { nodeWebSocketFactory } from "./preflight/voice-session";
+
+// Prefer IPv4: on networks with broken IPv6 routes, Node's fetch otherwise hits its 10 s connect timeout.
+setDefaultResultOrder("ipv4first");
 
 const USAGE = "usage: pnpm preflight [--target <url>] [--only id,id] [--json] [--quiet-window-ms N]";
 

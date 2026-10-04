@@ -1,0 +1,73 @@
+$ pnpm --filter @vashistha/web build && vitest run --project web-bundle
+$ next build
+▲ Next.js 16.3.8 (Turbopack)
+✓ Running next.config.ts took 42ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 7.1s
+  Running TypeScript ...
+  Finished TypeScript in 15.0s ...
+  Collecting page data using 39 workers ...
+  Generating static pages using 39 workers (0/4) ...
+  Generating static pages using 39 workers (1/4) 
+  Generating static pages using 39 workers (2/4) 
+  Generating static pages using 39 workers (3/4) 
+✓ Generating static pages using 39 workers (4/4) in 1027ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /api/cases
+├ ƒ /api/health
+├ ƒ /api/health/deep
+├ ƒ /api/interlock/check
+├ ƒ /api/llm/chat/completions
+├ ƒ /api/media/[sessionId]/frames/[file]
+├ ƒ /api/preflight/authorize
+├ ƒ /api/rulebook
+├ ƒ /api/sessions
+├ ƒ /api/sessions/[sessionId]/agent-utterances
+├ ƒ /api/sessions/[sessionId]/concepts
+├ ƒ /api/sessions/[sessionId]/debrief
+├ ƒ /api/sessions/[sessionId]/decisions
+├ ƒ /api/sessions/[sessionId]/engine
+├ ƒ /api/sessions/[sessionId]/events
+├ ƒ /api/sessions/[sessionId]/frames
+├ ƒ /api/sessions/[sessionId]/gate/authorize
+├ ƒ /api/sessions/[sessionId]/ledger
+├ ƒ /api/sessions/[sessionId]/lineage
+├ ƒ /api/sessions/[sessionId]/off-record
+├ ƒ /api/sessions/[sessionId]/questions
+├ ƒ /api/sessions/[sessionId]/teachback
+├ ƒ /api/sessions/[sessionId]/tutor
+├ ƒ /api/sessions/[sessionId]/tutor/cases
+├ ƒ /api/sessions/[sessionId]/tutor/intent
+├ ƒ /api/sessions/[sessionId]/tutor/practice
+├ ƒ /api/sessions/[sessionId]/tutor/prediction
+├ ƒ /api/sessions/[sessionId]/utterances
+├ ƒ /api/sessions/[sessionId]/witnesses
+├ ƒ /api/sessions/[sessionId]/workmap
+├ ƒ /api/sessions/[sessionId]/workmap/export
+├ ƒ /api/voice/token
+├ ƒ /debrief/[sessionId]
+├ ○ /sandbox
+└ ƒ /workmap/[sessionId]
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+
+ RUN  v5.0.3 /home/24b4530/modiji
+
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  05:43:07
+   Duration  1.50s (import 56%, transform 34%, tests 10%)
+
+
+real	0m30.094s
+user	1m30.744s
+sys	0m17.866s
