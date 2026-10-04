@@ -9,7 +9,7 @@ import { useCallback, useEffect, useRef, useState, type FormEvent, type Keyboard
 import Link from "next/link";
 import { ConversationProvider } from "@elevenlabs/react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, CornerDownLeft, Loader2, Mic, Sparkles, X } from "lucide-react";
+import { Check, CornerDownLeft, Loader2, Mic, Sparkles, Trash2, X } from "lucide-react";
 import { ApiError, describeError } from "@/lib/client/api";
 import { PrivacyContext } from "@/lib/client/voice/use-interview";
 import type { DebriefConversation, DebriefState, DebriefTurn } from "@/lib/contracts/debrief";
@@ -20,7 +20,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { TraceButton } from "@/components/lineage/lineage-trace";
 import { ConceptsStatus } from "@/components/concepts/concepts-panel";
 import { OffRecordBanner } from "@/components/voice/off-record";
-import { getConversation, postConversation } from "./api";
+import { expertAction, getConversation, postConversation } from "./api";
 import { CoveragePanel } from "./coverage-panel";
 import { TalkButton, useDebriefVoice, VOICE_REFRESH_MS, voiceOn, VoiceStrip } from "./debrief-voice";
 
@@ -50,6 +50,17 @@ function DebriefChatBody({ sessionId, readOnly }: { sessionId: string; readOnly?
   const voice = useDebriefVoice(sessionId, writable ? conv?.session : undefined);
   const offRecord = voice.privacyState?.offRecord === true;
   const { sensors } = voice;
+
+  /** Deletes a rule with the expert's reason (`retire_rule`), then re-reads the conversation; rejects when refused. */
+  const deleteRule = useCallback(
+    async (ruleId: string, reason: string) => {
+      writes.current += 1;
+      await expertAction(fetch, sessionId, { action: "retire_rule", ruleId, quote: reason });
+      writes.current += 1;
+      setConv(await getConversation(fetch, sessionId));
+    },
+    [sessionId],
+  );
 
   useEffect(() => {
     if (started.current) return;
@@ -230,7 +241,7 @@ function DebriefChatBody({ sessionId, readOnly }: { sessionId: string; readOnly?
           </Card>
           <div className="space-y-4">
             {conv !== null && <CoveragePanel coverage={conv.state.coverage} revision={conv.state.rulebookRevision} />}
-            {conv !== null && <RulebookList state={conv.state} />}
+            {conv !== null && <RulebookList state={conv.state} onDelete={writable && !offRecord ? deleteRule : undefined} />}
             <ConceptsStatus sessionId={sessionId} refreshKey={conv?.turns.length ?? 0} />
             {conv?.done === true && (
               <Button asChild className="w-full">
@@ -300,8 +311,12 @@ function PendingBubble({ text }: { text: string }) {
   );
 }
 
-/** The confirmed rulebook, read-only: what the conversation has produced so far. */
-function RulebookList({ state }: { state: DebriefState }) {
+/**
+ * The confirmed rulebook: what the conversation has produced so far. With `onDelete` (the session's own expert),
+ * each rule can be deleted: the expert says why in their own words (kept in the audit trail, `retire_rule`) and
+ * confirms. Saying "drop that rule" in the conversation does the same.
+ */
+function RulebookList({ state, onDelete }: { state: DebriefState; onDelete?: ((ruleId: string, reason: string) => Promise<void>) | undefined }) {
   return (
     <Card aria-label="Confirmed rulebook">
       <CardHeader className="pb-2">
@@ -319,35 +334,95 @@ function RulebookList({ state }: { state: DebriefState }) {
           <ul className="space-y-2">
             <AnimatePresence initial={false}>
               {state.rules.map((r) => (
-                <motion.li
-                  key={r.rule.id}
-                  layout
-                  initial={{ opacity: 0, backgroundColor: "rgba(250, 204, 21, 0.35)" }}
-                  animate={{ opacity: 1, backgroundColor: "rgba(250, 204, 21, 0)" }}
-                  transition={{ duration: 1.2 }}
-                  className="rounded-md border p-2 text-sm"
-                  data-testid="rule"
-                >
-                  <div className="flex items-start gap-2">
-                    <Badge variant={r.rule.kind === "guardrail" ? "destructive" : "secondary"} className="shrink-0">
-                      {r.rule.kind === "guardrail" ? "hard stop" : "rule"}
-                    </Badge>
-                    <p className="flex-1">
-                      When {r.when}, {r.then}.
-                    </p>
-                    <TraceButton entryId={r.entryId} label="rule" />
-                  </div>
-                  {r.rule.evidence[0] !== undefined && "exactQuote" in r.rule.evidence[0] && (
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      you said <span className="italic">“{r.rule.evidence[0].exactQuote}”</span>
-                    </p>
-                  )}
-                </motion.li>
+                <RuleItem key={r.rule.id} view={r} onDelete={onDelete} />
               ))}
             </AnimatePresence>
           </ul>
         )}
       </CardContent>
     </Card>
+  );
+}
+
+function RuleItem({ view: r, onDelete }: { view: DebriefState["rules"][number]; onDelete?: ((ruleId: string, reason: string) => Promise<void>) | undefined }) {
+  const [deleting, setDeleting] = useState(false);
+  const [reason, setReason] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const confirm = async () => {
+    setBusy(true);
+    try {
+      await onDelete?.(r.rule.id, reason.trim());
+    } catch (e) {
+      setError(describeError(e));
+      setBusy(false);
+    }
+  };
+  return (
+    <motion.li
+      layout
+      initial={{ opacity: 0, backgroundColor: "rgba(250, 204, 21, 0.35)" }}
+      animate={{ opacity: 1, backgroundColor: "rgba(250, 204, 21, 0)" }}
+      exit={{ opacity: 0, height: 0 }}
+      transition={{ duration: 1.2 }}
+      className="rounded-md border p-2 text-sm"
+      data-testid="rule"
+    >
+      <div className="flex items-start gap-2">
+        <Badge variant={r.rule.kind === "guardrail" ? "destructive" : "secondary"} className="shrink-0">
+          {r.rule.kind === "guardrail" ? "hard stop" : "rule"}
+        </Badge>
+        <p className="flex-1">
+          When {r.when}, {r.then}.
+        </p>
+        <TraceButton entryId={r.entryId} label="rule" />
+      </div>
+      {r.rule.evidence[0] !== undefined && "exactQuote" in r.rule.evidence[0] && (
+        <p className="mt-1 text-xs text-muted-foreground">
+          you said <span className="italic">“{r.rule.evidence[0].exactQuote}”</span>
+        </p>
+      )}
+      {onDelete !== undefined && !deleting && (
+        <Button type="button" variant="ghost" size="xs" className="mt-1 text-destructive" onClick={() => setDeleting(true)}>
+          <Trash2 /> Delete
+        </Button>
+      )}
+      {onDelete !== undefined && deleting && (
+        <div className="mt-2 space-y-2 rounded-md border border-destructive/40 bg-destructive/5 p-2" role="group" aria-label={`Delete rule ${r.rule.id}`}>
+          <p className="text-xs">Delete this rule? Say why in your own words; your reason is kept in the audit trail.</p>
+          <Textarea
+            aria-label="Why delete it"
+            placeholder="e.g. We don't do that any more."
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            rows={2}
+            maxLength={1000}
+            className="min-h-[2.5rem] resize-none bg-background"
+          />
+          {error !== null && (
+            <p role="alert" className="text-xs text-destructive">
+              {error}
+            </p>
+          )}
+          <div className="flex gap-2">
+            <Button type="button" variant="destructive" size="xs" disabled={busy || reason.trim().length < 3} onClick={() => void confirm()}>
+              {busy ? <Loader2 className="animate-spin" /> : <Trash2 />} Delete rule
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="xs"
+              disabled={busy}
+              onClick={() => {
+                setDeleting(false);
+                setError(null);
+              }}
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+      )}
+    </motion.li>
   );
 }

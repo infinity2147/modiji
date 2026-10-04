@@ -105,9 +105,26 @@ test("debrief: one conversation — proposals confirmed by a yes, open cases ans
   await page.waitForTimeout(800);
   await page.screenshot({ path: evidence("debrief-conversation-done.png"), fullPage: true });
 
-  // Reloading resumes the same conversation (it is in the ledger), and a new rule can still be said after the closing.
+  // A rule can be deleted from the list beside the chat, with the expert's reason (kept in the audit trail).
+  const rulesBefore = await page.getByTestId("rule").count();
+  const doomed = page.getByTestId("rule").first();
+  await doomed.getByRole("button", { name: "Delete" }).click();
+  const confirmDelete = page.getByRole("group", { name: /^Delete rule / });
+  await expect(confirmDelete.getByRole("button", { name: "Delete rule" })).toBeDisabled();
+  await confirmDelete.getByLabel("Why delete it").fill("We don't decide it that way any more.");
+  await confirmDelete.getByRole("button", { name: "Delete rule" }).click();
+  await expect(page.getByTestId("rule")).toHaveCount(rulesBefore - 1);
+  const retired = (await ok<{ entries: { kind: string; payload: { reason?: string } }[] }>(await request.get(`/api/sessions/${sessionId}/ledger?limit=500`))).entries.filter((e) => e.kind === "rule.retired");
+  expect(retired).toHaveLength(1);
+  expect(retired[0]?.payload.reason).toContain("We don't decide it that way any more.");
+
+  // Reloading resumes the same conversation (it is in the ledger). The deletion left a decision unexplained, so the
+  // conversation picks that new gap up instead of staying closed; the reply box stays open either way.
+  const turnsBefore = await agent.count();
   await page.reload();
-  await expect(agent.last()).toContainText("That's everything I needed.");
+  await expect(agent.first()).toContainText("Let's go over what I learned");
+  await expect(agent).toHaveCount(turnsBefore + 1);
+  await expect(agent.last()).toContainText("What made that the right call?");
   await expect(page.getByLabel("Your answer")).toBeEnabled();
 
   // Work Map: steps built by code, quotes with a disabled clip, rule graph, exports, lineage.
