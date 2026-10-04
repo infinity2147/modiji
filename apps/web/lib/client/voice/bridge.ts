@@ -3,6 +3,8 @@
  *
  * - VAD scores, agent mode and the arrival of transcripts (tentative and final: proof the expert
  *   spoke, and a final one closes their turn at the provider) feed the gate;
+ * - voice is live for the gate (it may send control messages) only once the conversation is connected
+ *   AND the agent has initialised it (`conversation_initiation_metadata`, see `initialised`);
  * - final expert transcripts (`onMessage` role "user") are posted as utterances, tagged with the
  *   question the agent asked last before the expert began that segment — every segment until the
  *   agent's next turn (an answer often arrives in several) — the privacy epoch they were captured in
@@ -61,10 +63,31 @@ export type BridgeOptions = {
    * prior for the server's language detection (plan §7.11). Omitted: English.
    */
   language?: ExpertLanguage;
+  /**
+   * Schedules the fallback for an agent whose initiation never arrives (`INITIATION_FALLBACK_MS`). Omitted:
+   * no fallback, voice stays not live until `initialised`.
+   */
+  setTimer?: (fn: () => void, delayMs: number) => () => void;
 };
+
+/**
+ * Defence in depth: should the agent's `conversation_initiation_metadata` never be reported, voice turns live
+ * this long after connecting anyway (live runs: it arrived ≈250 ms after the browser's initiation data, every time).
+ */
+export const INITIATION_FALLBACK_MS = 5000;
 
 export type ConversationBridge = {
   connected: (conversationId: string) => void;
+  /**
+   * The agent has initialised the conversation (`conversation_initiation_metadata`, the SDK's
+   * `onConversationMetadata`): only from now may the gate send it a control message. Over WebRTC the SDK
+   * reports `onConnect` as soon as the browser has published its own initiation data, before the agent has
+   * answered it (≈250 ms later in every live run), and a control message sent into that window can be lost
+   * before the agent's LLM ever sees it. CaseDesk questions only become askable seconds after connecting, but a
+   * debrief turn is already waiting when Talk connects: the gate authorised it and sent its control message in
+   * the same tick as onConnect, and the interviewer never spoke.
+   */
+  initialised: () => void;
   disconnected: () => void;
   vad: (score: number) => void;
   /** The browser's own microphone detector: when the expert started speaking (it hears speech the VAD misses, and earlier). */
@@ -99,6 +122,13 @@ export function createConversationBridge(options: BridgeOptions): ConversationBr
   const { gate, now } = options;
   const listeners = new Set<() => void>();
   let conversation: { id: string; startedAt: number } | undefined;
+  /** The agent has initialised the current conversation (see `initialised`). */
+  let agentReady = false;
+  let cancelFallback: (() => void) | null = null;
+  const stopFallback = (): void => {
+    cancelFallback?.();
+    cancelFallback = null;
+  };
   let speaking = false;
   let localSpeaking = false;
   let agentSpeaking = false;
@@ -182,11 +212,29 @@ export function createConversationBridge(options: BridgeOptions): ConversationBr
       agentSpeaking = false;
       speechStartedAt = undefined;
       silentSince = undefined;
-      gate.setVoiceLive(true);
+      // The agent's initiation metadata is delivered after the SDK's onConnect; should it ever come first, it counts.
+      stopFallback();
+      if (agentReady) gate.setVoiceLive(true);
+      else if (options.setTimer !== undefined)
+        cancelFallback = options.setTimer(() => {
+          cancelFallback = null;
+          if (conversation?.id !== conversationId || agentReady) return;
+          console.warn(`voice: the agent's conversation initiation was not reported within ${INITIATION_FALLBACK_MS} ms; treating it as ready`);
+          agentReady = true;
+          gate.setVoiceLive(true);
+        }, INITIATION_FALLBACK_MS);
       notify();
     },
+    initialised() {
+      stopFallback();
+      if (agentReady) return;
+      agentReady = true;
+      if (conversation !== undefined) gate.setVoiceLive(true);
+    },
     disconnected() {
+      stopFallback();
       conversation = undefined;
+      agentReady = false;
       armed = undefined;
       turns = [];
       gate.setVoiceLive(false);
