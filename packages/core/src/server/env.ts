@@ -11,6 +11,7 @@ const ENV_KEYS = [
   "ELEVENLABS_TUTOR_AGENT_ID",
   "CUSTOM_LLM_SECRET",
   "MCP_BEARER_TOKEN",
+  "LLM_CALLS",
 ] as const;
 type EnvKey = (typeof ENV_KEYS)[number];
 
@@ -28,6 +29,7 @@ const HINTS: Record<EnvKey, string> = {
   ELEVENLABS_TUTOR_AGENT_ID: "written by the agent-sync script",
   CUSTOM_LLM_SECRET: "at least 32 characters; required in production",
   MCP_BEARER_TOKEN: "at least 32 characters; /mcp refuses every request in production while unset",
+  LLM_CALLS: "on or off",
 };
 
 const optional = z.string().optional();
@@ -57,6 +59,11 @@ const ServerEnvSchema = z.strictObject({
   CUSTOM_LLM_SECRET: z.string().min(32).optional(),
   /** Bearer token MCP clients send to `/mcp` (plan §7.9). Unset: open in development, refused in production. */
   MCP_BEARER_TOKEN: z.string().min(32).optional(),
+  /**
+   * Hermetic switch: `off` makes `runtime.claude` null for every consumer (interview, debrief, perception), so
+   * the process makes no model call even with ANTHROPIC_API_KEY set (e2e). Preflight fails a target that reports it off.
+   */
+  LLM_CALLS: z.enum(["on", "off"]).default("on"),
 });
 export type ServerEnv = z.infer<typeof ServerEnvSchema>;
 

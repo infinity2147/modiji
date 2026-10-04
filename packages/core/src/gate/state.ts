@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { QuestionSchema, type Question } from "../schemas/engine";
+import { QuestionSchema, type Question, type QuestionKind } from "../schemas/engine";
 import { EpochMsSchema } from "../schemas/primitives";
 import { ActivitySignalSchema, VoiceSignalSchema, type ActivitySignal } from "../schemas/signals";
 import type { GateConfig } from "./config";
@@ -48,8 +48,8 @@ export type GateState = Readonly<{
   top: Question | null;
   /** When the top question last became (or changed in a way that matters to) a candidate. */
   topSince: number;
-  /** Every authorization issued, oldest first (budget, and never the same question twice). */
-  asked: readonly { questionId: string; at: number }[];
+  /** Every authorization issued, oldest first (the live budget counts its kinds; never the same question twice). */
+  asked: readonly { questionId: string; kind: QuestionKind; at: number }[];
   /**
    * The latest authorization, holding the floor until `until`: its expiry while unspoken, Infinity
    * while the agent speaks, then the end of the agent's turn. Never two in flight.
@@ -132,7 +132,7 @@ export function reduceGate(s: GateState, e: GateEvent, cfg: GateConfig): GateSta
     case "authorized":
       return {
         ...s,
-        asked: [...s.asked, { questionId: e.question.id, at: e.t }],
+        asked: [...s.asked, { questionId: e.question.id, kind: e.question.kind, at: e.t }],
         hold: { question: e.question, at: e.t, until: e.expiresAt },
       };
   }

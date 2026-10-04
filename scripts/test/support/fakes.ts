@@ -116,6 +116,8 @@ export type FakeServerBehaviour = {
   /** Behave like a server without the off-record branch: an off-record phrase gets skip_turn. */
   ignoreOffRecordPhrase?: boolean;
   deep?: { db?: boolean; dataDir?: boolean; z3?: boolean };
+  /** What `/api/health/deep` reports as `llmCalls` (default "on"); null omits the field, as an older server would. */
+  llmCalls?: "on" | "off" | null;
   sandboxHtml?: string;
   voiceTokenStatus?: number;
 };
@@ -143,7 +145,9 @@ export function fakeServer(behaviour: FakeServerBehaviour = {}, wallClock: () =>
         const d = { db: true, dataDir: true, z3: true, ...behaviour.deep };
         const part = (ok: boolean) => (ok ? { ok: true, ms: 1.5 } : { ok: false, error: "EACCES: permission denied" });
         const ok = d.db && d.dataDir && d.z3;
-        return json({ ok, db: part(d.db), dataDir: part(d.dataDir), z3: part(d.z3) }, ok ? 200 : 503);
+        const llmCalls = behaviour.llmCalls === undefined ? "on" : behaviour.llmCalls;
+        const body = { ok, db: part(d.db), dataDir: part(d.dataDir), z3: part(d.z3), ...(llmCalls !== null && { llmCalls }) };
+        return json(body, ok ? 200 : 503);
       }
       case "GET /sandbox":
         return new Response(behaviour.sandboxHtml ?? "<!doctype html><title>CaseDesk</title><h1>CaseDesk</h1>", {

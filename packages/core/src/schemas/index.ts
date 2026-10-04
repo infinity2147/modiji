@@ -9,4 +9,5 @@ export * from "./guardrail";
 export * from "./gate";
 export * from "./engine";
 export * from "./workmap";
+export * from "./concepts";
 export * from "./ledger-kinds";

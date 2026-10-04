@@ -32,6 +32,7 @@ import {
   familyModel,
   promoteToConfirmedRule,
   recordLookup,
+  SCREEN_FRAME_KIND,
   type ActionId,
   type Assignment,
   type ConfirmedRule,
@@ -92,7 +93,15 @@ export type Prediction = { action: ActionId; resolution: "decided" | "fallback" 
 
 const SYNTHETIC = "bench-synthetic";
 /** Bench-only ledger: every synthetic id exists and comes from the (simulated) expert. */
-const SYNTHETIC_LEDGER: LedgerReader = { get: (id) => (id.startsWith(`${SYNTHETIC}:`) ? { id, source: "expert" } : undefined) };
+const SYNTHETIC_FRAME = `${SYNTHETIC}:frame`;
+const SYNTHETIC_LEDGER: LedgerReader = {
+  get: (id) =>
+    id === SYNTHETIC_FRAME
+      ? { id, source: "client", kind: SCREEN_FRAME_KIND }
+      : id.startsWith(`${SYNTHETIC}:`)
+        ? { id, source: "expert", kind: "expert.statement" }
+        : undefined,
+};
 
 function statedRuleId(statementId: string): string {
   return `bench.stated.${statementId}`;
@@ -104,7 +113,6 @@ function promote(s: ExpertStatement, known: ReadonlySet<string>): ConfirmedRule 
     domain: DOMAIN,
     decisionFamily: FAMILY_ID,
     source: { statedRule: s.rule },
-    effect: s.effect,
     priority: s.priority,
     overrides: s.overrides.filter((o) => known.has(o)).map(statedRuleId),
     evidence: [
@@ -114,7 +122,7 @@ function promote(s: ExpertStatement, known: ReadonlySet<string>): ConfirmedRule 
         exactQuote: s.rule.exactQuote,
         t0Ms: s.rule.t0Ms,
         t1Ms: s.rule.t1Ms,
-        frameIds: [`${SYNTHETIC}:frame`],
+        frameIds: [SYNTHETIC_FRAME],
         eventIds: [],
         relation: "supports",
         provenance: "human_text",

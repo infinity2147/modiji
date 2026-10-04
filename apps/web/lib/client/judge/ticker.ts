@@ -176,8 +176,23 @@ function describe(entry: LedgerEntry, ctx: TickerContext): { text: string; tone:
     }
     case "concept.proposed":
       return system(`New concept proposed: ${parseLedgerPayload(entry, "concept.proposed").label}`);
-    case "concept.confirmed":
-      return evidence(`Concept confirmed: ${featureLabel(parseLedgerPayload(entry, "concept.confirmed").feature)}`);
+    case "concept.confirmed": {
+      const p = parseLedgerPayload(entry, "concept.confirmed");
+      return evidence(`Concept confirmed by the expert: ${p.definition.label} · ${quote(p.statement.text)}`);
+    }
+    case "concept.dismissed": {
+      const p = parseLedgerPayload(entry, "concept.dismissed");
+      return evidence(`Concept dismissed: ${p.name} · ${p.coveredBy === undefined ? "not a real concept" : `already covered by ${featureLabel(p.coveredBy)}`}`);
+    }
+    case "schema.version_bumped": {
+      const p = parseLedgerPayload(entry, "schema.version_bumped");
+      return system(`Model updated: new concept ${p.label} · schema v${p.from} → v${p.to} · coverage recomputing`);
+    }
+    case "feature.backfilled": {
+      const p = parseLedgerPayload(entry, "feature.backfilled");
+      const value = typeof p.value === "object" ? `unknown (${sentence(p.failure ?? "backfill_failed").toLowerCase()})` : String(p.value);
+      return system(`Backfill ${p.feature} for ${p.caseId}: ${value} · ${p.frameIds.length} frame(s) re-read`);
+    }
     case "rule.confirmed":
       return evidence(ruleLine("confirmed", parseLedgerPayload(entry, "rule.confirmed")));
     case "rule.revised":

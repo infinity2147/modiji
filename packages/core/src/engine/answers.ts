@@ -1,4 +1,4 @@
-import type { ParsedAnswer, ProposedConcept, Question, StatedRule } from "../schemas/engine";
+import { isStopEffect, type ParsedAnswer, type ProposedConcept, type Question, type StatedRule } from "../schemas/engine";
 import type { HypothesisSet } from "../schemas/rules";
 import { typecheckPredicate } from "../logic/typecheck";
 import type { EngineConfig } from "./config";
@@ -7,8 +7,15 @@ import { candidateId, predicateComplexity, type CandidateSeed } from "./enumerat
 import type { FamilyModel, Observation } from "./model";
 import { buildHypothesisSet, type FamilyKnowledge } from "./posterior";
 
+/**
+ * - `candidate`: a decision rule, now an `expert_statement` hypothesis of the family;
+ * - `guardrail`: a stop-rule (forbid / require approval). Not a decision hypothesis — it predicts no
+ *   outcome, so it stays out of the posterior — but valid for the family and surfaced for promotion;
+ * - `rejected`: with the reasons.
+ */
 export type StatedRuleOutcome =
   | { status: "candidate"; rule: StatedRule; candidateId: string }
+  | { status: "guardrail"; rule: StatedRule }
   | { status: "rejected"; rule: StatedRule; reasons: string[] };
 
 export type Ignored = { item: string; reason: string };
@@ -37,8 +44,10 @@ export type AnswerApplication = {
  * Applies a parsed expert answer to one family (plan §7.3 "answer parsing"):
  *   - eliminated candidates leave the set for good (weight 0, then renormalised by the rebuild);
  *   - `answeredAction` on a counterfactual/witness question is an observation of the asked case;
- *   - stated rules become `expert_statement` candidates after type-checking (a statement re-admits
- *     an identical candidate that an earlier answer eliminated: the expert's explicit words win);
+ *   - stated decision rules become `expert_statement` candidates after type-checking (a statement
+ *     re-admits an identical candidate that an earlier answer eliminated: the expert's explicit words
+ *     win); stated stop-rules are checked the same way and reported as `guardrail` outcomes, never
+ *     added to the hypothesis set;
  *   - new concepts join the undefined-concepts list.
  * The set is then rebuilt from the updated knowledge, so weights stay prior × likelihood.
  */
@@ -74,6 +83,7 @@ export function applyAnswer(params: {
   const statedRules = answer.statedRules.map((rule): StatedRuleOutcome => {
     const reasons = statedRuleProblems(model, rule);
     if (reasons.length > 0) return { status: "rejected", rule, reasons };
+    if (isStopEffect(rule.effect)) return { status: "guardrail", rule };
     const seed: CandidateSeed = {
       id: candidateId(model.family.id, rule.predicate, rule.action),
       predicate: rule.predicate,
@@ -125,7 +135,7 @@ export function applyAnswer(params: {
 function statedRuleProblems(model: FamilyModel, rule: StatedRule): string[] {
   const reasons = typecheckPredicate(rule.predicate, model.domain.features).map((i) => `predicate ${i.path || "/"}: ${i.message}`);
   if (!model.family.actions.includes(rule.action)) reasons.push(`"${rule.action}" is not an action of family ${model.family.id}`);
-  else if (rule.action === model.defaultAction)
+  else if (rule.action === model.defaultAction && !isStopEffect(rule.effect))
     reasons.push(`predicts the family default "${rule.action}", so as a hypothesis it equals "no rule"; promote it directly once confirmed`);
   if (rule.t1Ms < rule.t0Ms) reasons.push("quote ends before it starts (t1Ms < t0Ms)");
   return reasons;

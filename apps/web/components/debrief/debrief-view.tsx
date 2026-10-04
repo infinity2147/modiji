@@ -17,9 +17,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineageProvider, TraceButton } from "@/components/lineage/lineage-trace";
 import { expertAction, generateTeachBack, getDebrief, rebuildWitnesses } from "./api";
+import { ConceptsPanel } from "@/components/concepts/concepts-panel";
 import { CoveragePanel } from "./coverage-panel";
 import { QuoteForm } from "./quote-form";
 import { RulebookPanel } from "./rulebook-panel";
+import { StopRuleForm } from "./stop-rule-form";
 import { WitnessCard, actionLabel } from "./witness-card";
 
 const POLL_MS = 4_000;
@@ -72,6 +74,9 @@ export function DebriefView({ sessionId }: { sessionId: string }) {
     return () => clearInterval(timer);
   }, [sessionId]);
 
+  /** After a concept is confirmed or dismissed: the solver reruns under the new feature model. */
+  const recompute = useCallback(() => void run("Recomputing under the new model…", () => rebuildWitnesses(fetch, sessionId)), [run, sessionId]);
+
   /** Rejects when refused, so the form keeps the expert's words for another try. */
   const act = useCallback(
     async (body: ExpertActionRequest): Promise<void> => {
@@ -112,6 +117,7 @@ export function DebriefView({ sessionId }: { sessionId: string }) {
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)]">
             <div className="space-y-4">
               <CoveragePanel coverage={state.coverage} revision={state.rulebookRevision} />
+              <ConceptsPanel sessionId={sessionId} onChange={recompute} />
               <TeachBackPanel state={state} busy={busy !== null} generate={() => void run("Writing the teach-back…", () => generateTeachBack(fetch, sessionId))} act={act} />
               <DecisionsCard state={state} />
               <GapsCard state={state} />
@@ -140,6 +146,7 @@ export function DebriefView({ sessionId }: { sessionId: string }) {
                 </CardContent>
               </Card>
               <RulebookPanel state={state} act={act} />
+              <StopRuleForm state={state} act={act} />
               <ProposalsCard state={state} act={act} />
             </div>
           </div>

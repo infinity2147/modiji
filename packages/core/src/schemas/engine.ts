@@ -65,6 +65,17 @@ export const QuestionKindSchema = z.enum([
 export type QuestionKind = z.infer<typeof QuestionKindSchema>;
 
 /**
+ * The live interview's own questions (plan §7.2–7.3), asked while the expert works: the only kinds the
+ * interview queue plans and supersedes, and the only kinds the live budget counts. Debrief (`witness`,
+ * `teach_back`) and tutor (`prediction`, `intervention`) questions belong to their own flows.
+ */
+export const LIVE_QUESTION_KINDS = ["why_probe", "counterfactual", "concept_definition"] as const satisfies readonly QuestionKind[];
+
+export function isLiveQuestionKind(kind: QuestionKind): boolean {
+  return (LIVE_QUESTION_KINDS as readonly QuestionKind[]).includes(kind);
+}
+
+/**
  * A question the system may speak. Text is precomputed (≤25 words for live questions, plan §7.2);
  * the gate authorises a question by id and the custom-LLM wrapper speaks exactly this text.
  */
@@ -96,16 +107,60 @@ export const QuestionSchema = z.strictObject({
 });
 export type Question = z.infer<typeof QuestionSchema>;
 
-/** A rule the expert stated, extracted by the answer parser with the exact quote span. */
-export const StatedRuleSchema = z.strictObject({
-  predicate: PredicateSchema,
-  action: ActionIdSchema,
-  kind: z.enum(["decision", "guardrail", "escalation", "exception"]),
-  exactQuote: z.string().trim().min(1),
-  t0Ms: z.int().nonnegative(),
-  t1Ms: z.int().nonnegative(),
-});
-export type StatedRule = z.infer<typeof StatedRuleSchema>;
+/** Who may sign off a `require_approval` stop-rule the expert states (a fixed list: the parser picks, code checks). */
+export const APPROVAL_ROLES = ["compliance_officer", "senior_reviewer", "controller"] as const;
+export const ApprovalRoleSchema = z.enum(APPROVAL_ROLES);
+export type ApprovalRole = z.infer<typeof ApprovalRoleSchema>;
+
+/**
+ * What a stated rule enforces: the subset of `RuleEffect` an expert states in words. `forbid` and
+ * `require_approval` are stop-rules ("never approve …", "needs compliance sign-off"); `recommend` is
+ * a decision ("… goes to enhanced review").
+ */
+export const StatedRuleEffectSchema = z.discriminatedUnion("type", [
+  z.strictObject({ type: z.literal("recommend"), action: ActionIdSchema }),
+  z.strictObject({ type: z.literal("forbid"), action: ActionIdSchema }),
+  z.strictObject({ type: z.literal("require_approval"), role: ApprovalRoleSchema }),
+]);
+export type StatedRuleEffect = z.infer<typeof StatedRuleEffectSchema>;
+
+export function isStopEffect(effect: Pick<StatedRuleEffect, "type">): boolean {
+  return effect.type === "forbid" || effect.type === "require_approval";
+}
+
+/**
+ * A rule the expert stated, extracted by the answer parser (or typed in the debrief) with the exact
+ * quote span. Coherence, enforced here:
+ *   - `action` is the family action the rule is about: the recommended action, the forbidden action,
+ *     or the action that needs sign-off — so for `recommend`/`forbid` it equals `effect.action`;
+ *   - `kind` is "guardrail" exactly when the effect is a stop-rule (`forbid` / `require_approval`).
+ * Backwards compatibility: entries written before `effect` existed carry none. For decisions,
+ * exceptions and escalations the effect was always "recommend `action`", so that default is filled
+ * in; a legacy guardrail is ambiguous (its polarity was never recorded) and fails validation.
+ */
+export const StatedRuleSchema = z
+  .strictObject({
+    predicate: PredicateSchema,
+    action: ActionIdSchema,
+    kind: z.enum(["decision", "guardrail", "escalation", "exception"]),
+    effect: StatedRuleEffectSchema.optional(),
+    exactQuote: z.string().trim().min(1),
+    t0Ms: z.int().nonnegative(),
+    t1Ms: z.int().nonnegative(),
+  })
+  .transform((rule, ctx) => {
+    const effect: StatedRuleEffect | undefined = rule.effect ?? (rule.kind === "guardrail" ? undefined : { type: "recommend", action: rule.action });
+    if (effect === undefined) {
+      ctx.addIssue({ code: "custom", path: ["effect"], message: "a stated guardrail must say what it enforces (forbid or require_approval)" });
+      return z.NEVER;
+    }
+    if (effect.type !== "require_approval" && effect.action !== rule.action)
+      ctx.addIssue({ code: "custom", path: ["effect", "action"], message: `effect action "${effect.action}" differs from the rule's action "${rule.action}"` });
+    if (isStopEffect(effect) !== (rule.kind === "guardrail"))
+      ctx.addIssue({ code: "custom", path: ["kind"], message: `a ${effect.type} rule must ${isStopEffect(effect) ? "" : "not "}be a guardrail` });
+    return { ...rule, effect };
+  });
+export type StatedRule = z.output<typeof StatedRuleSchema>;
 
 /** A concept the expert used that the feature model does not have yet (plan §6.6). */
 export const ProposedConceptSchema = z.strictObject({

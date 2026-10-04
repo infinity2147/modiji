@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { kycCases } from "@vashistha/core/domains/kyc";
 import { createRedactor, createRgba, type OcrFn, type OcrWord, type RgbaImage } from "@vashistha/perception";
-import { decodePng, encodePng } from "../../../../packages/perception/scripts/png";
+import { decodePng, encodePng } from "../../../../packages/perception/src/png";
 import { FrameMetadataSchema, type PostFrameResponse, type VisionState } from "../../lib/contracts/frames";
 import type { FetchFn } from "../../lib/client/api";
 import { personNames } from "../../lib/client/capture/browser";

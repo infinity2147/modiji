@@ -129,3 +129,35 @@ export function prepareUpload(image: RgbaImage, bbox: Rect | null, maxLongEdge =
   const cropSize = fitLongEdge(native.width, native.height, maxLongEdge);
   return { frame, crop: { image: resizeRgba(native, cropSize.width, cropSize.height), rect } };
 }
+
+/**
+ * The image without its uniform margins: rows (from the top or bottom edge) and columns (from the left
+ * or right edge) whose every pixel is within `tolerance` levels per channel of that edge's corner pixel
+ * are blank and carry nothing to read. Returns the whole image when nothing is blank; never empty.
+ */
+export function contentRect(image: RgbaImage, tolerance = 2): Rect {
+  assertRgba(image);
+  const { data, width, height } = image;
+  const pixel = (x: number, y: number): number => (y * width + x) * 4;
+  const same = (a: number, b: number): boolean =>
+    Math.abs((data[a] ?? 0) - (data[b] ?? 0)) <= tolerance &&
+    Math.abs((data[a + 1] ?? 0) - (data[b + 1] ?? 0)) <= tolerance &&
+    Math.abs((data[a + 2] ?? 0) - (data[b + 2] ?? 0)) <= tolerance;
+  const blankRow = (y: number, ref: number): boolean => {
+    for (let x = 0; x < width; x += 1) if (!same(pixel(x, y), ref)) return false;
+    return true;
+  };
+  const blankCol = (x: number, y0: number, y1: number, ref: number): boolean => {
+    for (let y = y0; y < y1; y += 1) if (!same(pixel(x, y), ref)) return false;
+    return true;
+  };
+  let top = 0;
+  while (top < height - 1 && blankRow(top, pixel(0, 0))) top += 1;
+  let bottom = height;
+  while (bottom - 1 > top && blankRow(bottom - 1, pixel(0, height - 1))) bottom -= 1;
+  let left = 0;
+  while (left < width - 1 && blankCol(left, top, bottom, pixel(0, top))) left += 1;
+  let right = width;
+  while (right - 1 > left && blankCol(right - 1, top, bottom, pixel(width - 1, top))) right -= 1;
+  return { x: left, y: top, width: right - left, height: bottom - top };
+}

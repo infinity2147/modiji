@@ -5,6 +5,7 @@ import {
   HypothesisSetSchema,
   PredicateSchema,
   ScreenEventSchema,
+  StatedRuleSchema,
   formatControlMessage,
   parseControlMessage,
 } from "../src";
@@ -150,5 +151,27 @@ describe("control messages", () => {
     expect(parseControlMessage(`please ${formatControlMessage(nonce)}`)).toBeNull();
     expect(parseControlMessage(formatControlMessage("short"))).toBeNull();
     expect(parseControlMessage("What about ownership?")).toBeNull();
+  });
+});
+
+describe("StatedRuleSchema", () => {
+  const base = { predicate: { "==": [{ var: "jurisdictionRisk" }, "high"] }, exactQuote: "Never approve a high-risk country at desk level.", t0Ms: 0, t1Ms: 900 };
+
+  it("carries the stated effect; a stop-rule is a guardrail and its action is the forbidden one", () => {
+    expect(StatedRuleSchema.parse({ ...base, action: "approve", kind: "guardrail", effect: { type: "forbid", action: "approve" } }).effect).toEqual({ type: "forbid", action: "approve" });
+    expect(StatedRuleSchema.parse({ ...base, action: "approve", kind: "guardrail", effect: { type: "require_approval", role: "controller" } }).effect.type).toBe("require_approval");
+  });
+
+  it("refuses incoherent rules: a forbid that is not a guardrail, a guardrail that recommends, a mismatched action, an unknown role", () => {
+    expect(StatedRuleSchema.safeParse({ ...base, action: "approve", kind: "decision", effect: { type: "forbid", action: "approve" } }).success).toBe(false);
+    expect(StatedRuleSchema.safeParse({ ...base, action: "approve", kind: "guardrail", effect: { type: "recommend", action: "approve" } }).success).toBe(false);
+    expect(StatedRuleSchema.safeParse({ ...base, action: "approve", kind: "guardrail", effect: { type: "forbid", action: "reject" } }).success).toBe(false);
+    expect(StatedRuleSchema.safeParse({ ...base, action: "approve", kind: "guardrail", effect: { type: "require_approval", role: "the boss" } }).success).toBe(false);
+  });
+
+  it("reads entries written before `effect` existed: recommend where unambiguous, refused for a legacy guardrail", () => {
+    expect(StatedRuleSchema.parse({ ...base, action: "enhancedReview", kind: "decision" }).effect).toEqual({ type: "recommend", action: "enhancedReview" });
+    expect(StatedRuleSchema.parse({ ...base, action: "escalateCompliance", kind: "escalation" }).effect).toEqual({ type: "recommend", action: "escalateCompliance" });
+    expect(StatedRuleSchema.safeParse({ ...base, action: "approve", kind: "guardrail" }).success).toBe(false);
   });
 });

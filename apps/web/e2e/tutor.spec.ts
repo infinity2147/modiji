@@ -1,22 +1,22 @@
 /**
- * P6 tutor end to end against the production server (voice not configured: placeholder keys).
+ * P6 tutor end to end against the production server (voice not configured: placeholder keys; LLM_CALLS=off).
  *
  * The expert's rulebook is seeded through public APIs only: an expert CaseDesk session decides the
- * training cases, then the debrief's explicit expert actions confirm two proposed rules and revise
- * them in the expert's typed words (`confirm_candidate`, `revise_rule`). The novice then works the
- * held-out set: predict → reveal on NS-2026-0201, commit, mastery, practice cases.
+ * training cases while a redacted screen frame of each case is uploaded through the frames route, then
+ * the debrief's explicit expert actions confirm two proposed rules and revise them in the expert's
+ * typed words (`confirm_candidate`, `revise_rule`). The novice then works the held-out set: predict →
+ * reveal on NS-2026-0201, commit, mastery, practice cases.
  *
- * Stop-rules: no public API (debrief action or interview path) confirms a rule with a `forbid`
- * effect yet, so the spoken intervention and the interlock block on a confirmed stop-rule are proven
- * by the server-handler scripted run (test/server/tutor-monitor.test.ts, ledger ordering) and the
- * interlock property test; the second test below shows the intervention card's UI states with
- * route-intercepted tutor responses (labelled as such, as P1 did for interlock dialogs).
- * Screenshots go to docs/evidence/p6/.
+ * Stop-rule: the second test has an expert state a REAL stop-rule on the debrief page's "Add a
+ * stop-rule" form (`confirm_stop_rule`, tied to a real frame); the novice's selection of the forbidden
+ * outcome then makes the guardrail monitor intervene before Save, and Save is blocked by the interlock.
+ * Nothing is route-intercepted. Screenshots go to docs/evidence/p6/.
  */
 import { mkdirSync } from "node:fs";
 import { randomUUID } from "node:crypto";
 import { join } from "node:path";
 import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
+import { uploadFrame } from "./support/screen-frame";
 
 const EVIDENCE_DIR = join(import.meta.dirname, "../../../docs/evidence/p6");
 mkdirSync(EVIDENCE_DIR, { recursive: true });
@@ -26,6 +26,7 @@ const HIGH_NEW = { and: [{ "==": [{ var: "jurisdictionRisk" }, "high"] }, { "=="
 const DOCS = { and: [{ ">": [{ var: "uboOwnershipPct" }, 25] }, { "==": [{ var: "uboVerified" }, false] }] };
 const QUOTE_ENHANCED = "A brand-new customer from a high-risk country always goes to enhanced review.";
 const QUOTE_DOCS = "If the biggest owner holds more than 25% and we haven't verified them, ask for documents.";
+const STOP_QUOTE = "Never approve a customer on a high-risk country list at desk level.";
 /** Above the debrief's default priority, so these rules decide even beside other expert sessions' rules. */
 const PRIORITY = 100;
 
@@ -49,6 +50,7 @@ async function seedExpertRulebook(request: APIRequestContext): Promise<void> {
     frameSeq += 1;
     const event = { id: randomUUID(), frameSeq, captureTime: Date.now(), sessionEpoch: 0, kind: "open_case", caseId, confidence: 1, source: "dom", critical: false };
     await ok(await request.post(`/api/sessions/${sessionId}/events`, { data: { events: [event] } }));
+    await uploadFrame(request, sessionId, frameSeq);
     const { checkId } = await ok<{ checkId: string }>(await request.post("/api/interlock/check", { data: { sessionId, caseId, edits: {}, proposedAction: action } }));
     await ok(await request.post(`/api/sessions/${sessionId}/decisions`, { data: { caseId, edits: {}, action, checkId } }));
   }
@@ -115,7 +117,8 @@ test("tutor: predict → reveal in the expert's words → commit → mastery →
   await shot(page, "reveal-wrong-prediction.png");
   await reveal.getByRole("button", { name: "Replay the expert’s moment" }).click();
   const replay = page.getByRole("dialog", { name: "The expert’s moment" });
-  await expect(replay).toContainText("Frame unavailable");
+  // The redacted frame the expert's words are tied to (uploaded through the frames route while they worked).
+  await expect(replay.getByRole("img", { name: "Redacted frame of the expert's screen when they said this" })).toBeVisible();
   await expect(replay.getByRole("button", { name: "Play audio" })).toBeDisabled();
   await expect(replay).toContainText("No audio: the expert typed these words during the debrief.");
   await shot(page, "replay-moment.png");
@@ -162,58 +165,71 @@ test("tutor: predict → reveal in the expert's words → commit → mastery →
   expect(generated[0]?.payload).toMatchObject({ origin: { kind: "boundary_practice" } });
 });
 
-test("tutor: intervention card appears on selection, before Save (UI states; stop-rule responses route-intercepted)", async ({ page }) => {
+/** An expert states a stop-rule on the debrief page ("Add a stop-rule"), tied to a real redacted frame of their capture. */
+async function stateStopRule(page: Page, request: APIRequestContext): Promise<void> {
+  const { sessionId } = await ok<{ sessionId: string }>(await request.post("/api/sessions", { data: { mode: "expert", caseSet: "training" } }));
+  const caseId = "NS-2026-0103";
+  const event = { id: randomUUID(), frameSeq: 1, captureTime: Date.now(), sessionEpoch: 0, kind: "open_case", caseId, confidence: 1, source: "dom", critical: false };
+  await ok(await request.post(`/api/sessions/${sessionId}/events`, { data: { events: [event] } }));
+  const frame = await uploadFrame(request, sessionId, 1);
+
+  await page.goto(`/debrief/${sessionId}`);
+  const form = page.getByTestId("stop-rule-form");
+  await expect(form).toBeVisible();
+  await form.getByLabel("Condition 1 feature").selectOption({ label: "Country risk (Northstar list)" });
+  await form.getByLabel("Condition 1 value").selectOption("high");
+  await form.getByRole("radio", { name: "Never allow" }).check();
+  await form.getByLabel("Action").selectOption({ label: "Approve onboarding" });
+  await form.getByLabel("Your words (recorded as evidence)").fill(STOP_QUOTE);
+  await page.screenshot({ path: evidence("debrief-add-stop-rule.png"), fullPage: true });
+  await form.getByRole("button", { name: "Confirm stop-rule" }).click();
+  const rule = page.getByTestId("rule").filter({ hasText: "never approve onboarding" });
+  await expect(rule).toBeVisible();
+  await expect(rule).toContainText(`“${STOP_QUOTE}” (typed)`);
+  await expect(rule.getByText("guardrail")).toBeVisible();
+
+  // The confirmed rule cites the real frame (not a DOM event) and the exact words.
+  const book = await ok<{ rules: { kind: string; effect: { type: string; action?: string }; evidence: { exactQuote?: string; frameIds?: string[] }[] }[] }>(await request.get("/api/rulebook"));
+  const stop = book.rules.find((r) => r.evidence[0]?.exactQuote === STOP_QUOTE);
+  expect(stop).toMatchObject({ kind: "guardrail", effect: { type: "forbid", action: "approve" } });
+  expect(stop?.evidence[0]?.frameIds).toEqual([frame.ledgerId]);
+}
+
+test("tutor: a real stop-rule from the debrief → intervention on selection, before Save → Save blocked", async ({ page, request }) => {
+  test.setTimeout(120_000);
+  await stateStopRule(page, request);
   const sessionId = await startNovice(page);
-  const QUOTE = "Never approve a new customer from a high-risk country on the spot.";
-  const rule = {
-    ruleId: "rule-never-approve",
-    kind: "guardrail",
-    when: "country risk is high and customer status is new",
-    then: "never approve onboarding",
-    stopRule: true,
-    quote: {
-      text: QUOTE,
-      attribution: "The expert, by voice",
-      replay: { frameUrl: null, frameNote: "Frame unavailable: no screen moment of this quote is on record.", screen: [], audioNote: "Audio playback unavailable: conversation audio is not stored, only the transcript quote." },
-    },
-    level: "untested",
-  };
-  const intervention = {
-    entryId: "intercepted-intervention",
-    caseId: "NS-2026-0201",
-    trigger: "guardrail_violation",
-    proposedAction: "approve",
-    ruleIds: [rule.ruleId],
-    questionId: "intercepted-question",
-    text: `Careful — never approve onboarding when country risk is high and customer status is new. The expert said: "${QUOTE}"`,
-    speech: "queued",
-  };
-  let intervened = false;
-  await page.route(`**/api/sessions/${sessionId}/tutor`, async (route) => {
-    const response = await route.fetch();
-    const body = (await response.json()) as { rules: unknown[]; cases: { caseId: string; prompt: unknown; interventions: unknown[] }[] };
-    body.rules = [...body.rules, rule];
-    for (const c of body.cases)
-      if (c.caseId === "NS-2026-0201") {
-        c.prompt = { ask: false, reason: "Route-intercepted demo: decide directly." };
-        if (intervened) c.interventions = [intervention];
-      }
-    await route.fulfill({ response, json: body });
-  });
-  await page.route(`**/api/sessions/${sessionId}/tutor/intent`, async (route) => {
-    intervened = true;
-    await route.fulfill({
-      json: { result: { decision: "forbid", matchedRules: [rule.ruleId], missingFeatures: [], evidence: [] }, intervention, fresh: true },
-    });
-  });
 
   await queueItem(page, "NS-2026-0201").click();
+  // Predict first when asked (the rule deciding this case is not mastered in this fresh session).
+  const prompt = page.getByRole("region", { name: "What would the expert decide?" });
+  if (await prompt.isVisible()) {
+    await prompt.getByRole("radio", { name: "Send to enhanced review" }).click();
+    await prompt.getByRole("button", { name: "Lock in prediction" }).click();
+    await expect(page.getByTestId("reveal-card")).toBeVisible();
+  }
   await page.getByRole("radio", { name: "Approve onboarding" }).click();
   const card = page.getByTestId("intervention-card");
   await expect(card).toBeVisible();
   await expect(card).toContainText("Careful — the expert's rule forbids “Approve onboarding” here");
-  await expect(card.getByTestId("expert-quote")).toHaveText(`“${QUOTE}”`);
+  await expect(card.getByTestId("expert-quote")).toHaveText(`“${STOP_QUOTE}”`);
   await expect(card).toContainText("Queued for the tutor's voice");
   await expect(page.getByRole("button", { name: "Save decision" })).toBeEnabled();
   await shot(page, "intervention-card-before-save.png");
+
+  // The intervention is ledgered before Save, citing the novice's selection; Save is then blocked by the interlock.
+  const entries = await ledger(request, sessionId);
+  const intent = entries.findLast((e) => e.kind === "tutor.intent");
+  const intervention = entries.find((e) => e.kind === "tutor.intervention");
+  expect(intervention?.payload).toMatchObject({ caseId: "NS-2026-0201", trigger: "guardrail_violation", proposedAction: "approve" });
+  expect(intervention?.parentIds[0]).toBe(intent?.id);
+  await page.getByRole("button", { name: "Save decision" }).click();
+  await expect(page.getByRole("dialog")).toContainText("Blocked by a confirmed guardrail");
+  await expect(page.getByRole("dialog")).toContainText(STOP_QUOTE);
+  await shot(page, "interlock-blocked-by-stop-rule.png");
+  const after = await ledger(request, sessionId);
+  expect(after.some((e) => e.kind === "case.decision")).toBe(false);
+  expect(Math.max(...after.filter((e) => e.kind === "tutor.intervention").map((e) => e.sequence))).toBeLessThan(
+    Math.min(...after.filter((e) => e.kind === "interlock.check").map((e) => e.sequence)),
+  );
 });

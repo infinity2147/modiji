@@ -17,12 +17,29 @@ import { typecheckPredicate } from "../logic/typecheck";
 import { containsQuote } from "./describe";
 
 /** Read access to the ledger; the real `Ledger` and test fakes both satisfy it. */
-export type LedgerReader = { get(id: string): Pick<LedgerEntry, "id" | "source"> | undefined };
+export type LedgerReader = { get(id: string): Pick<LedgerEntry, "id" | "source" | "kind"> | undefined };
+
+/** The ledger kind of a redacted screen frame: the only thing a quote's `frameIds` may point at. */
+export const SCREEN_FRAME_KIND = "frame.received";
+
+/**
+ * Priority of a rule confirmed from the expert's own statement, by kind, until the expert orders
+ * rules explicitly (debrief `revise_rule`): guardrails above exceptions above escalations above plain
+ * decisions. Priority orders decision rules within a family (solver, Work Map); stop-rules
+ * (`forbid`, `require_approval`) are enforced by `checkAction` whatever their priority.
+ */
+export const RULE_PRIORITY_BY_KIND: Readonly<Record<ConfirmedRule["kind"], number>> = {
+  decision: 10,
+  escalation: 20,
+  exception: 30,
+  guardrail: 40,
+};
 
 export type PromotionError =
   | { code: "utterance_missing"; evidenceIndex: number; utteranceId: string }
   | { code: "utterance_not_expert"; evidenceIndex: number; utteranceId: string; source: string }
   | { code: "frame_missing"; evidenceIndex: number; frameId: string }
+  | { code: "not_a_frame"; evidenceIndex: number; frameId: string; kind: string }
   | { code: "event_missing"; evidenceIndex: number; eventId: string }
   | { code: "not_evidence"; evidenceIndex: number; ledgerEntryId: string }
   | { code: "link_missing"; linkIndex: number; ledgerEntryId: string }
@@ -47,8 +64,9 @@ const UTTERANCE_SOURCES: readonly string[] = ["voice", "expert"];
  * Code checks every link against the ledger — nothing the LLM produced is trusted:
  *   - at least one expert quote, the first one supporting; every quote non-blank with t1 ≥ t0;
  *   - each `utteranceId` exists and comes from `voice` or `expert` (never `system_control`);
- *   - each frame and event id, and each further link's ledger entry, exists and is
- *     evidence-eligible (not `system_control`);
+ *   - each frame id is a real redacted screen frame (`frame.received`) — never a DOM event or any
+ *     other stand-in — and each frame and event id, and each further link's ledger entry, exists and
+ *     is evidence-eligible (not `system_control`);
  *   - for a stated rule, its exact quote appears in one of the supporting quotes;
  *   - the confirmation's ledger entry exists and is evidence-eligible;
  *   - the predicate type-checks against the domain and the action belongs to the family.
@@ -59,7 +77,10 @@ export function promoteToConfirmedRule(input: {
   domain: DomainConfig;
   decisionFamily: string;
   source: { candidate: CandidateRule } | { statedRule: StatedRule };
-  /** Defaults: the stated rule's kind, else "decision"; effect `recommend` of the predicted action. */
+  /**
+   * Defaults: the stated rule's kind and effect; for a candidate, "decision" and `recommend` of the
+   * predicted action. An explicit effect is for revisions that keep a rule's own effect.
+   */
   kind?: ConfirmedRule["kind"];
   effect?: RuleEffect;
   priority: number;
@@ -95,6 +116,7 @@ export function promoteToConfirmedRule(input: {
       const frame = ledger.get(frameId);
       if (frame === undefined) errors.push({ code: "frame_missing", evidenceIndex, frameId });
       else if (!isEvidenceEligible(frame)) errors.push({ code: "not_evidence", evidenceIndex, ledgerEntryId: frameId });
+      else if (frame.kind !== SCREEN_FRAME_KIND) errors.push({ code: "not_a_frame", evidenceIndex, frameId, kind: frame.kind });
     }
     for (const eventId of e.eventIds) {
       const event = ledger.get(eventId);
@@ -119,12 +141,13 @@ export function promoteToConfirmedRule(input: {
   if (errors.length > 0 || first === undefined) return { ok: false, errors };
 
   const kind = input.kind ?? ("statedRule" in input.source ? input.source.statedRule.kind : "decision");
+  const effect = input.effect ?? ("statedRule" in input.source ? input.source.statedRule.effect : { type: "recommend", action });
   const parsed = ConfirmedRuleSchema.safeParse({
     id: input.ruleId,
     decisionFamily: input.decisionFamily,
     kind,
     predicate,
-    effect: input.effect ?? { type: "recommend", action },
+    effect,
     priority: input.priority,
     overrides: input.overrides,
     evidence: [first, ...rest, ...(input.links ?? [])],

@@ -22,12 +22,15 @@ import {
   findFeature,
   observeDecision,
   parseLedgerPayload,
+  REMODEL_LEDGER_KINDS,
+  conceptValues,
   rulebookFromLedger,
   type AnswerApplication,
   type EngineConfig,
   type FamilyKnowledge,
   type FamilyModel,
   type FeatureId,
+  type FeatureValue,
   type HypothesisSet,
   type LedgerEntry,
   type MasteryLevel,
@@ -35,15 +38,15 @@ import {
   type Question,
   type RecentDecision,
   type Rulebook,
+  type SessionSchema,
   type TranscriptLine,
-  type Value,
 } from "@vashistha/core";
 import type { Ledger } from "@vashistha/core/server";
-import { KYC_DOMAIN, caseFeatures, findKycCase } from "@vashistha/core/domains/kyc";
+import { caseFeatures, findKycCase } from "@vashistha/core/domains/kyc";
 import type { z } from "zod";
 import { ReviewEditsSchema, type SessionMode } from "../../contracts/casedesk";
 import type { EngineStateResponseSchema } from "../../contracts/interview";
-import { CASEDESK_SCHEMA_VERSION } from "../casedesk/session";
+import { sessionSchema } from "../schema/session-schema";
 
 /** Candidates shown per family on the HUD and in `hypotheses.updated`. */
 export const TOP_CANDIDATES = 5;
@@ -51,7 +54,8 @@ export const TOP_CANDIDATES = 5;
 export type DecisionRecord = {
   entryId: string;
   caseId: string;
-  features: Record<FeatureId, Value>;
+  /** Case features plus the session's confirmed concepts (backfilled, or Unknown while not read). */
+  features: Record<FeatureId, FeatureValue>;
   /** The decision judged against the hypotheses held before it arrived. */
   recent: RecentDecision;
 };
@@ -95,6 +99,11 @@ export type EngineState = {
   /** Family of the latest committed decision: where an answer to a family-less question applies. */
   lastFamily: string | undefined;
   undefinedConcepts: ProposedConcept[];
+  /**
+   * The session's feature model (base domain + expert-confirmed concepts, plan §6.6) and concept state,
+   * as of the last rebuild: every family model, hypothesis set and observation uses `schema.model`.
+   */
+  schema: SessionSchema;
   questions: Map<string, QuestionRecord>;
   /** `question.queued` and `gate.authorized` entry id → question id. */
   questionByEntry: Map<string, string>;
@@ -127,15 +136,16 @@ function hypothesisSetId(sessionId: string, family: string): string {
   return contentId("hs", canonicalJson({ sessionId, family }));
 }
 
-function initialState(sessionId: string, config: EngineConfig): EngineState {
+function initialState(sessionId: string, config: EngineConfig, schema: SessionSchema): EngineState {
+  const { domain, schemaVersion } = schema.model;
   const families = new Map<string, FamilyState>();
-  for (const f of KYC_DOMAIN.decisionFamilies) {
-    const model = familyModel(KYC_DOMAIN, f.id, config);
+  for (const f of domain.decisionFamilies) {
+    const model = familyModel(domain, f.id, config);
     const set = buildHypothesisSet({
       setId: hypothesisSetId(sessionId, f.id),
       model,
       knowledge: EMPTY_KNOWLEDGE,
-      schemaVersion: CASEDESK_SCHEMA_VERSION,
+      schemaVersion,
       config,
     });
     families.set(f.id, { model, knowledge: EMPTY_KNOWLEDGE, set, decisions: [] });
@@ -147,6 +157,7 @@ function initialState(sessionId: string, config: EngineConfig): EngineState {
     families,
     lastFamily: undefined,
     undefinedConcepts: [],
+    schema,
     questions: new Map(),
     questionByEntry: new Map(),
     utterances: new Map(),
@@ -159,10 +170,21 @@ function initialState(sessionId: string, config: EngineConfig): EngineState {
   };
 }
 
-/** The session's engine state, folded up to the ledger's latest entry. */
+/**
+ * The session's engine state, folded up to the ledger's latest entry. When the feature model or a
+ * concept's values change (a concept confirmed or dismissed, a version bump, a backfilled value), the
+ * state is rebuilt from the whole ledger under the new model: hypotheses are re-enumerated over the new
+ * feature set and every observation is re-observed with its backfilled (or Unknown) concept values.
+ */
 export function engineState(deps: EngineStateDeps, sessionId: string): EngineState {
-  const state = deps.store.states.get(sessionId) ?? initialState(sessionId, deps.config);
-  for (const e of deps.ledger.list(sessionId, { afterSequence: state.lastSequence })) {
+  const cached = deps.store.states.get(sessionId);
+  let entries = deps.ledger.list(sessionId, { afterSequence: cached?.lastSequence ?? -1 });
+  let state = cached;
+  if (state === undefined || entries.some((e) => REMODEL_LEDGER_KINDS.has(e.kind))) {
+    if (state !== undefined) entries = deps.ledger.list(sessionId);
+    state = initialState(sessionId, deps.config, sessionSchema(deps.ledger, sessionId));
+  }
+  for (const e of entries) {
     try {
       applyEntry(state, e, deps.config);
     } catch (error) {
@@ -191,13 +213,8 @@ function applyEntry(state: EngineState, e: LedgerEntry, config: EngineConfig): v
       return applyParsedAnswer(state, e, config);
     case "concept.proposed": {
       const concept = parseLedgerPayload(e, "concept.proposed");
-      if (findFeature(KYC_DOMAIN, concept.name) === undefined && !state.undefinedConcepts.some((c) => c.name === concept.name))
+      if (unsettledConcept(state, concept.name) && !state.undefinedConcepts.some((c) => c.name === concept.name))
         state.undefinedConcepts = [...state.undefinedConcepts, concept];
-      return;
-    }
-    case "concept.confirmed": {
-      const { feature } = parseLedgerPayload(e, "concept.confirmed");
-      state.undefinedConcepts = state.undefinedConcepts.filter((c) => c.name !== feature);
       return;
     }
     case "question.queued": {
@@ -245,6 +262,11 @@ function applyEntry(state: EngineState, e: LedgerEntry, config: EngineConfig): v
   }
 }
 
+/** Not a feature of the session's model and not dismissed by the expert: still an undefined concept. */
+function unsettledConcept(state: EngineState, name: string): boolean {
+  return findFeature(state.schema.model.domain, name) === undefined && !state.schema.dismissed.some((d) => d.name.toLowerCase() === name.toLowerCase());
+}
+
 /** Expert sessions only: the observed decision is the case as the expert saw it, with their edits. */
 function applyDecision(state: EngineState, e: LedgerEntry, config: EngineConfig): void {
   const { caseId, action, edits } = parseLedgerPayload(e, "case.decision");
@@ -252,7 +274,10 @@ function applyDecision(state: EngineState, e: LedgerEntry, config: EngineConfig)
   const kycCase = findKycCase(caseId);
   if (kycCase === undefined) throw new Error(`unknown case ${caseId}`);
   const { riskRating } = ReviewEditsSchema.parse(edits);
-  const features = caseFeatures(kycCase, riskRating === undefined ? {} : { riskRating });
+  const features: Record<FeatureId, FeatureValue> = {
+    ...caseFeatures(kycCase, riskRating === undefined ? {} : { riskRating }),
+    ...conceptValues(state.schema, e.id),
+  };
   for (const family of state.families.values()) {
     if (!family.model.family.actions.includes(action)) continue;
     const step = observeDecision({
@@ -289,7 +314,7 @@ function applyParsedAnswer(state: EngineState, e: LedgerEntry, config: EngineCon
   if (result.status === "applied") {
     family.set = result.set;
     family.knowledge = result.knowledge;
-    state.undefinedConcepts = result.undefinedConcepts;
+    state.undefinedConcepts = result.undefinedConcepts.filter((c) => unsettledConcept(state, c.name));
   }
   state.answers.set(e.id, {
     status: result.status,
@@ -324,7 +349,7 @@ export function topCandidates(family: FamilyState): { candidateId: string; descr
     .slice(0, TOP_CANDIDATES)
     .map((c) => ({
       candidateId: c.id,
-      description: `if ${describePredicate(c.predicate, KYC_DOMAIN)} then ${c.predictedAction}`,
+      description: `if ${describePredicate(c.predicate, family.model.domain)} then ${c.predictedAction}`,
       weight: Math.min(1, Math.max(0, c.weight)),
     }));
 }
@@ -339,7 +364,7 @@ export function unexplainedDecisions(family: FamilyState, config: EngineConfig):
   return family.decisions.filter((d) => d.recent.explainedMass < config.explainedMass);
 }
 
-export function engineStateResponse(state: EngineState): z.infer<typeof EngineStateResponseSchema> {
+export function engineStateResponse(state: EngineState, parser: { available: boolean }): z.infer<typeof EngineStateResponseSchema> {
   return {
     families: [...state.families.values()].map((f) => {
       const bits = f.decisions.at(-1)?.recent.surprise.bits;
@@ -354,5 +379,6 @@ export function engineStateResponse(state: EngineState): z.infer<typeof EngineSt
     confirmedRules: state.rulebook.rules.length,
     rulebookRevision: state.rulebook.revision,
     mastery: [...state.mastery].map(([ruleId, level]) => ({ ruleId, level })),
+    answerParser: { available: parser.available, unparsedAnswers: unparsedAnswers(state).length },
   };
 }

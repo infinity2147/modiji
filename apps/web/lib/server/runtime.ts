@@ -13,6 +13,7 @@ import type { WitnessSolver } from "./debrief/solver";
 import type { InterviewStore } from "./interview/engine-state";
 import type { PerceptionService } from "./perception/service";
 import type { RateLimiter } from "./rate-limit";
+import type { ConceptReread, SchemaStore } from "./schema/deps";
 import type { PracticeSolver } from "./tutor/deps";
 
 export type CheckResult = { ok: true; ms: number } | { ok: false; error: string; ms?: number };
@@ -23,7 +24,10 @@ export type Runtime = {
   authorizations: AuthorizationStore;
   /** Null when ELEVENLABS_API_KEY is not set (allowed outside production). */
   elevenLabs: ElevenLabsClient | null;
-  /** Null when ANTHROPIC_API_KEY is not set (allowed outside production). Refuses any prompt carrying an oracle marker. */
+  /**
+   * Null when ANTHROPIC_API_KEY is not set (allowed outside production) or LLM_CALLS=off. The process's only model
+   * client: every consumer receives this value. Refuses any prompt carrying an oracle marker.
+   */
   claude: Claude | null;
   /**
    * The confirmed rulebook in force now: `rulebookFromLedger` over the `rule.*` entries of every expert
@@ -33,6 +37,12 @@ export type Runtime = {
   rulebookRevision: () => number;
   /** The same fold with its history (diffs, rule entry ids). */
   rulebookState: () => Rulebook;
+  /**
+   * `rulebook`, `rulebookRevision` and `rulebookState` hold the rules expressible in the BASE feature
+   * model (what the interlock, tutor and MCP evaluate). This is every confirmed rule, including rules over
+   * concepts confirmed in an expert session; the debrief narrows it to its session's feature model.
+   */
+  rulebookAllModels: () => Rulebook;
   /** CaseDesk session facts and per-session frame order. */
   casedesk: CaseDeskStore;
   /** Derived hypothesis-engine state per session (a cache over the ledger) and its serial work queues. */
@@ -44,6 +54,8 @@ export type Runtime = {
   perception: PerceptionService;
   /** Debrief (P5): the Z3 witness search, the deterministic exports, prose model routing and caches. */
   debrief: { solver: WitnessSolver; exports: DebriefExports; models: DebriefModels; store: DebriefStore };
+  /** Schema versioning (plan §6.6): the concept re-reader (null without a model) and the backfill queues. */
+  schema: { reread: ConceptReread | null; store: SchemaStore };
   /** Tutor (P6): the Z3 practice-case search (unseen boundary cases for the weakest rules). */
   tutor: { practice: PracticeSolver };
   voiceTokenLimiter: RateLimiter;

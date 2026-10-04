@@ -108,7 +108,8 @@ export const DOCS_QUOTE = "If the main owner holds more than a quarter and we ca
 
 export type World = { opened: OpenedDatabase; ledger: Ledger; deps: DebriefDeps; sessionId: string; calls: { system: string; user: string; model: string }[]; dataDir: string };
 
-export function seed(ledger: Ledger): string {
+/** `screenFrames: false` seeds a DOM-only session: the expert never shared their screen. */
+export function seed(ledger: Ledger, { screenFrames = true }: { screenFrames?: boolean } = {}): string {
   const session = ledger.createSession();
   const at = (kind: string, source: LedgerEntry["source"], payload: unknown, parentIds: string[] = []): LedgerEntry =>
     ledger.append({ sessionId: session.id, source, kind, occurredAt: T0, traceId: "seed", parentIds, schemaVersion: 1, privacyEpoch: 0, payload });
@@ -120,7 +121,20 @@ export function seed(ledger: Ledger): string {
     const action = decide[c.id] ?? "approve";
     frameSeq += 1;
     const opened = at("screen.event", "dom", { id: `ev-${c.id}`, frameSeq, captureTime: T0, sessionEpoch: 0, kind: "open_case", caseId: c.id, confidence: 1, source: "dom", critical: false });
-    moments.push(opened.id);
+    // What perception uploads while the expert shares their screen: the redacted frame of the case.
+    const frame = !screenFrames
+      ? undefined
+      : at("frame.received", "client", {
+          frameId: `frame-${c.id}`,
+          frameSeq,
+          captureTime: T0,
+          width: 1568,
+          height: 882,
+          mediaPath: `frames/${session.id}/frame-${c.id}.png`,
+          redactedRegions: 0,
+          changeScore: 12,
+        });
+    moments.push((frame ?? opened).id);
     const result = { decision: "allow", matchedRules: [], missingFeatures: [], evidence: [] };
     const check = at("interlock.check", "engine", { caseId: c.id, action, edits: {}, result }, [started.id]);
     at("case.decision", "dom", { caseId: c.id, action, edits: {}, result }, [check.id]);
@@ -136,10 +150,10 @@ export function seed(ledger: Ledger): string {
   return session.id;
 }
 
-export async function world(): Promise<World> {
+export async function world(options: { screenFrames?: boolean } = {}): Promise<World> {
   const opened = openDatabase({ memory: true });
   const ledger = createLedger(opened.db, { now: () => T0 });
-  const sessionId = seed(ledger);
+  const sessionId = seed(ledger, options);
   const calls: World["calls"] = [];
   const dataDir = await mkdtemp(join(tmpdir(), "debrief-"));
   const deps: DebriefDeps = {

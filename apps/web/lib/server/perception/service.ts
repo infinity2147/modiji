@@ -11,8 +11,11 @@
  *   applied one and its privacy epoch current. At apply time the session is re-read from the
  *   ledger, and the append is refused if it went off the record or changed epoch meanwhile, so an
  *   extraction that straddles a privacy transition never writes anything.
- * - `toScreenEvents` validates the model output against the domain and sets `critical` from
- *   `criticalFields`; vision events are appended as `vision` / `screen.event` with the frame's
+ * - Stateful reading (`@vashistha/perception/extraction`): the worker keeps the last applied reading
+ *   (`CaseSnapshot`); `prepareRead` compares the frame with it and asks the model for a full or a
+ *   local read; `interpretReading` validates the reading against the domain and the app's declared
+ *   editable fields (`ScreenProfile`), derives the events and sets `critical` from `criticalFields`.
+ *   Vision events are appended as `vision` / `screen.event` with the frame's
  *   `frame.received` entry as parent. They never replace DOM events: both channels are ledgered
  *   side by side with their source, so vision accuracy is measured, not assumed (D3).
  * - Proposed concepts become `engine` / `concept.proposed` entries, at most once per name per session.
@@ -28,13 +31,16 @@ import { ProposedConceptSchema, type DomainConfig, type NewLedgerEntry, type Pro
 import type { Ledger } from "@vashistha/core/server";
 import { createStateApplier, percentile, type StateApplier } from "@vashistha/perception";
 import {
-  toScreenEvents,
+  interpretReading,
+  prepareRead,
   type CaseSnapshot,
   type EncodedImage,
-  type ExtractionInput,
   type ExtractionResult,
-  type FrameOutput,
+  type FrameReading,
+  type PreparedRead,
+  type ScreenProfile,
 } from "@vashistha/perception/extraction";
+import { decodePng } from "@vashistha/perception/png";
 import type { VisionState } from "../../contracts/frames";
 import { CASEDESK_SCHEMA_VERSION } from "../casedesk/session";
 
@@ -57,14 +63,16 @@ export type VisionJob = {
   crop: VisionCrop | null;
 };
 
-/** One model call per frame; returns the structured output exactly as the model gave it. */
-export type VisionExtractor = (input: ExtractionInput) => Promise<FrameOutput>;
+/** One model call per frame: answers the prepared read with the structured output exactly as the model gave it. */
+export type VisionExtractor = (read: PreparedRead) => Promise<FrameReading>;
 
 export type UnavailableReason = NonNullable<VisionState["unavailableReason"]>;
 
 export type PerceptionServiceOptions = {
   ledger: Ledger;
   domain: DomainConfig;
+  /** What the app on screen lets the reviewer edit (declared by the app, see screen-profile.ts). */
+  profile: ScreenProfile;
   extractor: { run: VisionExtractor } | { unavailable: UnavailableReason };
   now: () => number;
   log: Pick<Console, "error">;
@@ -148,7 +156,7 @@ type Worker = {
 };
 
 export function createPerceptionService(options: PerceptionServiceOptions): PerceptionService {
-  const { ledger, domain, now, log } = options;
+  const { ledger, domain, profile, now, log } = options;
   const extractor = "run" in options.extractor ? options.extractor.run : null;
   const unavailableReason = "unavailable" in options.extractor ? options.extractor.unavailable : null;
   const lastFrameSeqs = new Map<string, number>();
@@ -271,12 +279,17 @@ export function createPerceptionService(options: PerceptionServiceOptions): Perc
     w.pending = null;
     const slot = { job, abandoned: false };
     w.inFlight = slot;
-    const context = { domain, previous: w.snapshot, frameSeq: job.frameSeq, captureTime: job.captureTime, sessionEpoch: job.epoch };
+    const context = { domain, profile, previous: w.snapshot, frameSeq: job.frameSeq, captureTime: job.captureTime, sessionEpoch: job.epoch };
     Promise.resolve()
-      .then(() => run({ ...context, frame: job.frame, ...(job.crop !== null && { crop: job.crop }) }))
+      .then(async () => {
+        // Decoded here, only for frames that reach the model (coalesced ones never are): code compares it with the last reading.
+        const image = decodePng(Buffer.from(job.frame.base64Png, "base64"));
+        const { sourceWidth, sourceHeight, base64Png } = job.frame;
+        const read = prepareRead({ ...context, frame: { image, base64Png, sourceWidth, sourceHeight }, ...(job.crop !== null && { crop: job.crop }) });
+        return interpretReading(await run(read), read.context);
+      })
       .then(
-        (output) => {
-          const result = toScreenEvents(output, context);
+        (result) => {
           if (slot.abandoned || !w.applier.offer({ frameSeq: job.frameSeq, epoch: job.epoch }, { job, result }))
             w.counts.staleDropped += 1;
         },

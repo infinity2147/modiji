@@ -3,9 +3,10 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { KYC_DOMAIN, kycCases } from "@vashistha/core/domains/kyc";
+import { CASEDESK_SCREEN } from "../../lib/server/perception/screen-profile";
 import { createRgba } from "@vashistha/perception";
-import type { FrameOutput } from "@vashistha/perception/extraction";
-import { encodePng } from "../../../../packages/perception/scripts/png";
+import type { FrameReading, FullRead, ReadMode } from "@vashistha/perception/extraction";
+import { encodePng } from "../../../../packages/perception/src/png";
 import type { FrameMetadata } from "../../lib/contracts/frames";
 import { handlePostFrame, handleVisionState, type PerceptionDeps } from "../../lib/server/perception/frames";
 import { createPerceptionService, type PerceptionServiceOptions, type VisionExtractor } from "../../lib/server/perception/service";
@@ -46,19 +47,36 @@ export function frameRequest(sessionId: string, parts: FrameParts): Request {
   return new Request(`http://localhost/api/sessions/${sessionId}/frames`, { method: "POST", body: form });
 }
 
-/** A controllable extractor: every call waits until the test resolves or rejects it. */
+/** What the model would answer for a screen showing `output`, in the shape of the read that was asked for. */
+function answer(mode: ReadMode, output: FullRead): FrameReading {
+  const { concepts, ...caseState } = output;
+  if (mode === "local") return { mode, output: { fields: output.fields, committed: output.committed } };
+  return mode === "refresh" ? { mode, output: caseState } : { mode, output: { ...caseState, concepts } };
+}
+
+/** A controllable extractor: every call waits until the test resolves (with what the screen shows) or rejects it. */
 export function controlledExtractor() {
   const calls: Array<{
     frameSeq: number;
-    previous: Parameters<VisionExtractor>[0]["previous"];
-    hasCrop: boolean;
-    resolve: (output: FrameOutput) => void;
+    previous: Parameters<VisionExtractor>[0]["context"]["previous"];
+    mode: ReadMode;
+    images: number;
+    resolve: (screen: FullRead) => void;
     reject: (error: unknown) => void;
   }> = [];
-  const run: VisionExtractor = (input) =>
-    new Promise<FrameOutput>((resolve, reject) =>
-      calls.push({ frameSeq: input.frameSeq, previous: input.previous, hasCrop: input.crop !== undefined, resolve, reject }),
-    );
+  const run: VisionExtractor = (read) =>
+    new Promise<FrameReading>((resolve, reject) => {
+      const content = read.request.messages[0]?.content;
+      const images = Array.isArray(content) ? content.filter((b) => b.type === "image").length : 0;
+      calls.push({
+        frameSeq: read.context.frameSeq,
+        previous: read.context.previous,
+        mode: read.mode,
+        images,
+        resolve: (screen) => resolve(answer(read.mode, screen)),
+        reject,
+      });
+    });
   return { run, calls };
 }
 
@@ -68,15 +86,13 @@ export const trainingCaseId = (): string => {
   return id;
 };
 
-/** What the model might return for a frame where the reviewer raised the risk rating. */
-export function riskChangeOutput(caseId: string, over: Partial<FrameOutput> = {}): FrameOutput {
-  return {
-    screen: { caseId, values: [{ field: "riskRating", value: "high" }] },
-    events: [{ kind: "field_change", caseId, field: "riskRating", from: "low", to: "high", action: null, confidence: 0.9 }],
-    proposedConcepts: [{ name: "documentExpiry", description: "Whether an identity document has expired", observedValue: "expired" }],
-    ...over,
-  };
+/** A screen showing `caseId` with the given risk rating (and, optionally, more). */
+export function caseReading(caseId: string, riskRating: string, over: Partial<FullRead> = {}): FullRead {
+  return { caseId, caseTitle: `Customer of ${caseId}`, fields: { riskRating }, committed: null, concepts: [], ...over };
 }
+
+/** A concept the model might propose on the frame that opens a case. */
+export const DOCUMENT_EXPIRY = { name: "documentExpiry", description: "Whether an identity document has expired", observedValue: "expired" };
 
 export type PerceptionHarness = CaseDeskHarness & {
   dataDir: string;
@@ -95,7 +111,7 @@ export function createPerceptionHarness(extractor: PerceptionServiceOptions["ext
   const dataDir = mkdtempSync(join(tmpdir(), "vashistha-perception-"));
   const clock = { now: T0 + 500 };
   const build = (ex: PerceptionServiceOptions["extractor"]) =>
-    createPerceptionService({ ledger: h.ledger, domain: KYC_DOMAIN, extractor: ex, now: () => clock.now, log: h.deps.log });
+    createPerceptionService({ ledger: h.ledger, domain: KYC_DOMAIN, profile: CASEDESK_SCREEN, extractor: ex, now: () => clock.now, log: h.deps.log });
   const perceptionDeps: PerceptionDeps = {
     ledger: h.ledger,
     store: h.deps.store,

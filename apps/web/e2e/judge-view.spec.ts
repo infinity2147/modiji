@@ -99,6 +99,8 @@ test("judge view: gate HUD reacts to typing, ticker follows the ledger, strip st
   await expect(engineering.getByRole("region", { name: "Gate conditions (all 8)" }).locator("tbody tr")).toHaveCount(8);
   await expect(engineering.getByRole("region", { name: "Question queue" })).toContainText(/ontext v\d+ · 0 asked/);
   await expect(engineering.getByRole("region", { name: "Engine state" })).toContainText(/confirmed rule\(s\) · rulebook rev \d+/);
+  // Hermetic run (LLM_CALLS=off): the parser is reported unavailable, never silently assumed.
+  await expect(engineering.getByTestId("answer-parser")).toHaveText("Answer parser: unavailable (no model) · unparsed answers 0");
   await expect(engineering).toContainText("Keep this tab in the foreground");
   await expect(engineering).toContainText("No authorizations yet.");
   await page.waitForTimeout(700);

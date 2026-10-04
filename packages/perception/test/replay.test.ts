@@ -3,20 +3,22 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { KYC_DOMAIN } from "@vashistha/core/domains/kyc";
 import { evaluate, FixtureSchema } from "../src/evaluation";
-import { createRgba } from "../src/image";
+import { screenProfile } from "../src/extraction";
+import { contentRect, createRgba } from "../src/image";
 import { createVirtualClock, replaySession } from "../src/replay";
 import { createFakeExtractor, type FakeNoise } from "../scripts/fake-extractor";
-import { decodePng, encodePng } from "../scripts/png";
+import { decodePng, encodePng } from "../src/png";
 
 const FIXTURE_DIR = join(import.meta.dirname, "fixtures/synthetic-kyc");
 const fixture = FixtureSchema.parse(JSON.parse(readFileSync(join(FIXTURE_DIR, "fixture.json"), "utf8")));
+const profile = screenProfile(KYC_DOMAIN, ["riskRating"]);
 const frames = fixture.frames.map((f) => ({ captureTime: f.captureTime, load: () => decodePng(readFileSync(join(FIXTURE_DIR, f.file))) }));
 
 async function run(seed: number, noise?: FakeNoise) {
   const start = fixture.frames[0]?.captureTime ?? 0;
   const clock = createVirtualClock(start);
-  const extract = createFakeExtractor({ domain: KYC_DOMAIN, domEvents: fixture.domEvents, clock, seed, ...(noise && { noise }) });
-  const result = await clock.run(() => replaySession({ domain: KYC_DOMAIN, sessionEpoch: fixture.sessionEpoch, frames, extract, clock }));
+  const extract = createFakeExtractor({ domain: KYC_DOMAIN, profile, domEvents: fixture.domEvents, clock, seed, ...(noise && { noise }) });
+  const result = await clock.run(() => replaySession({ domain: KYC_DOMAIN, profile, sessionEpoch: fixture.sessionEpoch, frames, extract, clock }));
   const report = evaluate({ domain: KYC_DOMAIN, domEvents: fixture.domEvents, vision: result.observations, frameToEventMs: result.queue.frameToApplyMs });
   return { result, report };
 }
@@ -83,10 +85,24 @@ describe("fixture replay through the real pipeline (fake extractor)", () => {
   });
 });
 
-describe("png codec (scripts)", () => {
+describe("png codec", () => {
   it("round-trips RGBA", () => {
     const img = createRgba(7, 5);
     for (let i = 0; i < img.data.length; i += 1) img.data[i] = (i * 31) % 256;
     expect(decodePng(encodePng(img))).toEqual(img);
+  });
+});
+
+describe("contentRect", () => {
+  it("trims uniform margins on each edge to that edge's own colour, never to nothing", () => {
+    const img = createRgba(40, 30);
+    for (let i = 0; i < img.data.length; i += 4) img.data.set([240, 240, 240, 255], i);
+    for (let y = 0; y < 5; y += 1) for (let x = 0; x < 40; x += 1) img.data.set([20, 20, 20, 255], (y * 40 + x) * 4); // dark header band
+    img.data.set([0, 0, 0, 255], (12 * 40 + 30) * 4); // one dark pixel of content
+    img.data.set([0, 0, 0, 255], (8 * 40 + 2) * 4); // and another
+    // Rows 0–4 are the header (its colour is the top-left pixel): trimmed. Below row 12 and around the content: blank.
+    expect(contentRect(img)).toEqual({ x: 2, y: 5, width: 29, height: 8 });
+    const blank = createRgba(4, 3);
+    expect(contentRect(blank)).toMatchObject({ width: 1, height: 1 });
   });
 });

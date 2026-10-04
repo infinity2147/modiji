@@ -87,11 +87,20 @@ describe("answer parser contract", () => {
     statedRules: [
       {
         when: { combinator: "all", conditions: [{ feature: "uboOwnershipPct", op: ">", value: 25 }, { feature: "uboVerified", op: "==", value: false }] },
+        polarity: "recommend",
         action: "enhancedReview",
+        approvalRole: null,
         kind: "decision",
         exactQuote: "anything over a quarter that isn't verified goes to enhanced review",
       },
-      { when: { combinator: "all", conditions: [{ feature: "pep", op: "==", value: true }] }, action: "escalateCompliance", kind: "escalation", exactQuote: "PEPs always go up" },
+      {
+        when: { combinator: "all", conditions: [{ feature: "pep", op: "==", value: true }] },
+        polarity: "recommend",
+        action: "escalateCompliance",
+        approvalRole: null,
+        kind: "escalation",
+        exactQuote: "PEPs always go up",
+      },
     ],
     newConcepts: [],
     answeredAction: "enhancedReview",
@@ -109,6 +118,64 @@ describe("answer parser contract", () => {
     const eliminated = new Set(answer.eliminatedCandidateIds);
     expect(eliminated.size).toBeGreaterThan(0);
     expect(applied.set.candidates.some((c) => eliminated.has(c.id))).toBe(false);
+  });
+
+  it("a prohibition is a forbid guardrail (never a recommendation of the same action) and stays out of the posterior", () => {
+    const utterance = { id: "utt-stop", text: "Never approve a customer on a high-risk country list at desk level.", t0Ms: 3_000, t1Ms: 6_200 };
+    const stop: LlmAnswer["statedRules"][number] = {
+      when: { combinator: "all", conditions: [{ feature: "jurisdictionRisk", op: "==", value: "high" }] },
+      polarity: "forbid",
+      action: "approve",
+      approvalRole: null,
+      kind: "decision", // the parser's kind is overruled: a stop-rule is a guardrail
+      exactQuote: "Never approve a customer on a high-risk country list at desk level.",
+    };
+    const { answer, rejected } = toParsedAnswer({ ...output, statedRules: [stop], answeredAction: null }, { questionId: QUESTION.id, utterance, domain: KYC, pendingConcepts: [] });
+    expect(rejected).toEqual([]);
+    expect(answer.statedRules).toEqual([
+      { predicate: { "==": [{ var: "jurisdictionRisk" }, "high"] }, action: "approve", kind: "guardrail", effect: { type: "forbid", action: "approve" }, exactQuote: stop.exactQuote, t0Ms: 3_000, t1Ms: 6_200 },
+    ]);
+    const knowledge = { ...EMPTY_KNOWLEDGE, observations: [CASE_A, CASE_B] };
+    const applied = applyAnswer({ model: REVIEW, set: SET, knowledge, question: QUESTION, answer: { ...answer, eliminatedCandidateIds: [] }, undefinedConcepts: [], config: CONFIG });
+    // Approve is the family default, yet a stop-rule on it is valid: it is surfaced, not hypothesised.
+    expect(applied.statedRules).toEqual([{ status: "guardrail", rule: answer.statedRules[0] }]);
+    expect(applied.knowledge.statedCandidates).toEqual([]);
+    expect(applied.set.candidates.map((c) => c.id)).toEqual(SET.candidates.map((c) => c.id));
+  });
+
+  it("a sign-off requirement is require_approval with a role from the fixed list; incoherent polarity is rejected with a reason", () => {
+    const utterance = { id: "utt-signoff", text: "A PEP needs compliance sign-off before we approve. Sanctions hits always go to compliance.", t0Ms: 0, t1Ms: 4_000 };
+    const when = { combinator: "all" as const, conditions: [{ feature: "pep", op: "==" as const, value: true }] };
+    const rule = (over: Partial<LlmAnswer["statedRules"][number]>): LlmAnswer["statedRules"][number] => ({
+      when,
+      polarity: "require_approval",
+      action: "approve",
+      approvalRole: "compliance_officer",
+      kind: "guardrail",
+      exactQuote: "A PEP needs compliance sign-off before we approve.",
+      ...over,
+    });
+    const { answer, rejected } = toParsedAnswer(
+      {
+        ...output,
+        answeredAction: null,
+        statedRules: [
+          rule({}),
+          rule({ approvalRole: null }),
+          rule({ polarity: "recommend", approvalRole: null, action: "escalateCompliance", exactQuote: "Sanctions hits always go to compliance." }),
+          rule({ when: { combinator: "all", conditions: [{ feature: "pep", op: ">", value: "yes" }] } }),
+          rule({ action: "shrug" }),
+        ],
+      },
+      { questionId: QUESTION.id, utterance, domain: KYC, pendingConcepts: [] },
+    );
+    expect(answer.statedRules).toHaveLength(1);
+    expect(answer.statedRules[0]).toMatchObject({ kind: "guardrail", action: "approve", effect: { type: "require_approval", role: "compliance_officer" } });
+    expect(rejected.map((r) => r.item)).toEqual(["statedRules[1]", "statedRules[2]", "statedRules[3]", "statedRules[4]"]);
+    expect(rejected[0]?.reason).toContain("approval role");
+    expect(rejected[1]?.reason).toContain("a recommendation is not a guardrail");
+    expect(rejected[2]?.reason).toContain("predicate");
+    expect(rejected[3]?.reason).toContain("not an action of the domain");
   });
 
   it("verifies concept proposals: verbatim quote, genuinely new, enum values present", () => {
@@ -145,6 +212,15 @@ describe("prompt builders", () => {
     }
     expect(prompts[1]?.user).toContain(UTTERANCE.text);
     expect(prompts[1]?.user).toContain("if country risk is medium then enhancedReview");
+  });
+
+  it("the parser prompt teaches polarity: prohibitions forbid, sign-offs require approval from the fixed roles", () => {
+    const system = prompts[1]?.system ?? "";
+    expect(system).toContain('"never approve …"');
+    expect(system).toContain('polarity "forbid"');
+    expect(system).toContain("Never turn a\n    prohibition into a recommendation of the same action.");
+    expect(system).toContain('polarity "require_approval"');
+    expect(system).toContain("compliance_officer, senior_reviewer, controller");
   });
 
   it("accept no oracle-typed input", () => {

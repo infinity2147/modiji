@@ -21,7 +21,9 @@ const PARSE: LlmAnswer = {
   statedRules: [
     {
       when: { combinator: "all", conditions: [{ feature: "uboOwnershipPct", op: ">", value: 25 }, { feature: "uboVerified", op: "==", value: false }] },
+      polarity: "recommend",
       action: "enhancedReview",
+      approvalRole: null,
       kind: "decision",
       exactQuote: QUOTE,
     },

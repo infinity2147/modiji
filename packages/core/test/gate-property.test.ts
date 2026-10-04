@@ -7,7 +7,7 @@ import {
   type GateMode,
 } from "../src/gate/index";
 import { runScript } from "../src/gate/simulate";
-import { QuestionKindSchema } from "../src/schemas/engine";
+import { QuestionKindSchema, type QuestionKind } from "../src/schemas/engine";
 import { q } from "./gate-support";
 
 const RUNS = { seed: 20261004, numRuns: 150 };
@@ -118,7 +118,7 @@ function worldAt(script: readonly GateInput[], at: number) {
   let offRecordEnd = -Infinity;
   let atBreakpoint = false;
   let breakpointSince = -Infinity;
-  let top: { t: number; ephemeral: boolean; value: number; kind: string } | null = null;
+  let top: { t: number; ephemeral: boolean; value: number; kind: QuestionKind } | null = null;
   let vad = false;
   let explicit = false;
   let speechEnd = -Infinity;
@@ -155,6 +155,14 @@ function worldAt(script: readonly GateInput[], at: number) {
   };
 }
 
+const budgeted = (kind: QuestionKind | undefined) => kind !== undefined && cfg.liveBudget.kinds.includes(kind);
+
+/** The kind of the question queued as `questionId` (ids are unique per script). */
+function kindOf(script: readonly GateInput[], questionId: string): QuestionKind | undefined {
+  for (const e of script) if (e.kind === "queue" && e.top?.id === questionId) return e.top.kind;
+  return undefined;
+}
+
 function simulate(script: GateInput[], jitter: number, seed: number, mode: GateMode = "interviewer") {
   return runScript(script, cfg, { mode, timerJitterMs: jitter, seed, untilMs: (script.at(-1)?.t ?? 0) + 20_000 });
 }
@@ -175,7 +183,10 @@ describe("gate properties (random interleavings, fixed seed)", () => {
           expect(a.at - w.speechEnd).toBeGreaterThanOrEqual(cfg.userSilenceMs);
           expect(a.at - w.typing).toBeGreaterThanOrEqual(cfg.typingIdleMs);
           expect(a.at - w.motion).toBeGreaterThanOrEqual(cfg.screenIdleMs);
-          const inWindow = authorizations.slice(0, i).filter((b) => a.at - b.at < cfg.liveBudget.windowMs);
+          if (!budgeted(w.top!.kind)) return;
+          const inWindow = authorizations
+            .slice(0, i)
+            .filter((b) => budgeted(kindOf(script, b.questionId)) && a.at - b.at < cfg.liveBudget.windowMs);
           expect(inWindow.length).toBeLessThan(cfg.liveBudget.max);
         });
         expect(new Set(authorizations.map((a) => a.questionId)).size).toBe(authorizations.length);

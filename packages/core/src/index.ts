@@ -12,4 +12,5 @@ export * from "./gate/index";
 export { predicateNode, type PredicateNode } from "./logic/node";
 export * from "./engine/index";
 export * from "./workmap/index";
+export * from "./schema/index";
 export * from "./voice/off-record";

@@ -4,7 +4,7 @@
  * origin under `/tesseract/`, vendored by `packages/perception/scripts/vendor-tesseract.ts`).
  */
 import type { KycCase } from "@vashistha/core/domains/kyc";
-import { createRedactor, createTesseractOcr, type Redactor, type RgbaImage } from "@vashistha/perception";
+import { createRedactor, createTesseractOcr, type OcrScale, type Redactor, type RgbaImage } from "@vashistha/perception";
 import type { FrameGrabber, PngEncoder } from "./pipeline";
 
 /** Where `createTesseractOcr` loads its worker, cores and English model (apps/web/public/tesseract). */
@@ -77,8 +77,16 @@ export function personNames(cases: readonly KycCase[]): string[] {
   return [...names];
 }
 
+/**
+ * OCR upscaling for the PII pass: 2× for local changes; regions of at least a quarter of the frame
+ * (case switches, scrolls — the slow reads that dominate the client's p95) at a lower scale.
+ * Chosen from `e2e/perception-ocr-latency.spec.ts` (latency and PII-box recall per setting,
+ * docs/evidence/p2/ocr-latency.json).
+ */
+export const CLIENT_OCR_SCALE: OcrScale = { scale: 2, largeRegion: { share: 0.25, scale: 1.5 } };
+
 /** The redactor plus its OCR worker's teardown. */
 export function createBrowserRedactor(names: () => readonly string[]): { redactor: Redactor; terminate: () => Promise<void> } {
-  const ocr = createTesseractOcr({ basePath: TESSERACT_BASE_PATH });
+  const ocr = createTesseractOcr({ basePath: TESSERACT_BASE_PATH, ...CLIENT_OCR_SCALE });
   return { redactor: createRedactor({ ocr: ocr.ocr, names }), terminate: ocr.terminate };
 }

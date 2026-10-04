@@ -12,24 +12,24 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
 import {
+  RULE_PRIORITY_BY_KIND,
   RuleConfirmedPayloadSchema,
   canonicalJson,
   contentId,
   isContradiction,
+  isLiveQuestionKind,
   promoteToConfirmedRule,
   type EngineConfig,
   type LedgerEntry,
   type ParsedAnswer,
   type Question,
-  type RuleKindSchema,
 } from "@vashistha/core";
 import type { Claude, Ledger } from "@vashistha/core/server";
-import { KYC_DOMAIN } from "@vashistha/core/domains/kyc";
 import type { z } from "zod";
 import type { PostUtteranceRequestSchema, PostUtteranceResponseSchema } from "../../contracts/interview";
 import type { AuthorizationStore } from "../authorizations";
 import { ApiFailure } from "../casedesk/http";
-import { CASEDESK_SCHEMA_VERSION, type CaseDeskStore, type InterviewHooks } from "../casedesk/session";
+import type { CaseDeskStore, InterviewHooks } from "../casedesk/session";
 import {
   engineState,
   queuedQuestions,
@@ -54,17 +54,6 @@ export type InterviewDeps = {
   config: EngineConfig;
   now: () => number;
   log: Pick<Console, "info" | "warn" | "error">;
-};
-
-/**
- * Priority of a rule promoted from an explicit statement, by kind, until the debrief (P5) orders
- * rules explicitly: guardrails above exceptions above escalations above plain decisions.
- */
-const STATED_RULE_PRIORITY: Record<z.infer<typeof RuleKindSchema>, number> = {
-  decision: 10,
-  escalation: 20,
-  exception: 30,
-  guardrail: 40,
 };
 
 function describeError(error: unknown): string {
@@ -145,10 +134,13 @@ async function afterDecision(deps: InterviewDeps, sessionId: string, decision: L
 }
 
 /**
- * Regenerates the session's queue for `familyId`: queues the planned questions that are not live
- * yet (rephrased by Sonnet when available) and drops every live question that was not re-planned
- * (`superseded`). Drops and new questions are appended together, after re-reading the live queue,
- * so a question authorised while the rephraser ran is never dropped.
+ * Regenerates the session's live-interview queue for `familyId`: queues the planned questions that
+ * are not queued yet (rephrased by Sonnet when available) and drops every queued live-interview
+ * question (`LIVE_QUESTION_KINDS`) that was not re-planned (`superseded`). Questions of the other
+ * flows — debrief witnesses and teach-backs, tutor predictions and interventions — are never touched:
+ * this planner does not produce them, so it has no grounds to supersede them. Drops and new questions
+ * are appended together, after re-reading the queue, so a question authorised while the rephraser ran
+ * is never dropped.
  */
 async function requeue(
   deps: InterviewDeps,
@@ -174,7 +166,7 @@ async function requeue(
     planned.filter((q) => !wasLive.has(q.id)),
   );
 
-  const live = queuedQuestions(engineState(deps, sessionId));
+  const live = queuedQuestions(engineState(deps, sessionId)).filter((r) => isLiveQuestionKind(r.question.kind));
   const liveIds = new Set(live.map((r) => r.question.id));
   const keep = new Set(planned.map((q) => q.id));
   const ctx = entryContext(deps, sessionId, opts.traceId);
@@ -279,6 +271,7 @@ async function interpretAnswer(
       question: record.question,
       utterance: { id: input.utterance, text: body.text, t0Ms: body.t0Ms, t1Ms: body.t1Ms },
       set: family.set,
+      domain: family.model.domain,
       pendingConcepts: state.undefinedConcepts,
     });
   } catch (error) {
@@ -321,7 +314,10 @@ async function interpretAnswer(
 function promoteStatements(deps: InterviewDeps, ctx: EntryContext, input: { answer: ParsedAnswer; answerEntryId: string; decisionFamily: string }): void {
   const { answer } = input;
   if (answer.statedRules.length === 0) return;
-  const utterance = engineState(deps, ctx.sessionId).utterances.get(answer.utteranceId);
+  const state = engineState(deps, ctx.sessionId);
+  // Rules are stated in the session's feature model (base + confirmed concepts) and record its version.
+  const { domain, schemaVersion } = state.schema.model;
+  const utterance = state.utterances.get(answer.utteranceId);
   const [frame, ...frames] = utterance?.frameIds ?? [];
   if (frame === undefined) {
     deps.log.info(`[interview] ${answer.statedRules.length} stated rule(s) in ${answer.utteranceId} not promoted: no frame on record for the utterance`);
@@ -331,10 +327,10 @@ function promoteStatements(deps: InterviewDeps, ctx: EntryContext, input: { answ
   answer.statedRules.forEach((rule, index) => {
     const result = promoteToConfirmedRule({
       ruleId: contentId("rule", canonicalJson({ utteranceId: answer.utteranceId, index })),
-      domain: KYC_DOMAIN,
+      domain,
       decisionFamily: input.decisionFamily,
       source: { statedRule: rule },
-      priority: STATED_RULE_PRIORITY[rule.kind],
+      priority: RULE_PRIORITY_BY_KIND[rule.kind],
       overrides: [],
       evidence: [
         {
@@ -351,7 +347,7 @@ function promoteStatements(deps: InterviewDeps, ctx: EntryContext, input: { answ
       ],
       confirmation: { expertId, at: ctx.occurredAt, method: "explicit_statement", ledgerEntryId: answer.utteranceId },
       expertId,
-      schemaVersion: CASEDESK_SCHEMA_VERSION,
+      schemaVersion,
       ledger: deps.ledger,
     });
     if (!result.ok) {

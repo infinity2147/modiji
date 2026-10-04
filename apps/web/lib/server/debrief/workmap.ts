@@ -23,7 +23,7 @@ import {
 import type { WorkMapResponse } from "../../contracts/debrief";
 import { entry } from "../interview/ledger";
 import type { DebriefDeps } from "./deps";
-import { DOMAIN, SCHEMA_VERSION, coverageOf, expertIdOf, kycCaseFeatures, ruleEntries, snapshot, type Snapshot } from "./state";
+import { DOMAIN, coverageOf, expertIdOf, kycCaseFeatures, ruleEntries, snapshot, type Snapshot } from "./state";
 import { ruleText } from "./text";
 
 /** Relative to DATA_DIR/media. */
@@ -158,14 +158,18 @@ export async function sessionWorkMap(deps: DebriefDeps, sessionId: string): Prom
   if (workMap === undefined || proseOrigin === undefined) {
     const base = {
       id,
-      domain: DOMAIN,
+      domain: snap.domain,
       entries: snap.entries,
       rules: snap.book.rules,
       revision: snap.book.revision,
       coverage,
-      caseFeatures: kycCaseFeatures,
+      // The case as the expert saw it, plus the session's confirmed concepts (backfilled or Unknown) for that decision.
+      caseFeatures: (caseId: string, edits: Readonly<Record<string, unknown>>) => {
+        const features = kycCaseFeatures(caseId, edits);
+        return features === undefined ? undefined : { ...snap.decisions.findLast((d) => d.caseId === caseId)?.features, ...features };
+      },
       expertId: expertIdOf(snap.loaded.session.id),
-      schemaVersion: SCHEMA_VERSION,
+      schemaVersion: snap.schemaVersion,
       now: recorded?.occurredAt ?? deps.now(),
     };
     const cached = deps.store.prose.get(id);
@@ -193,7 +197,7 @@ export async function sessionWorkMap(deps: DebriefDeps, sessionId: string): Prom
     exportPath: mediaPath,
     generatedEntryId,
     moments: moments(snap, workMap),
-    ruleText: Object.fromEntries(workMap.rules.map((r) => [r.id, { ...ruleText(DOMAIN, r), entryId: entryOf.get(r.id) ?? generatedEntryId }])),
+    ruleText: Object.fromEntries(workMap.rules.map((r) => [r.id, { ...ruleText(snap.domain, r), entryId: entryOf.get(r.id) ?? generatedEntryId }])),
     voiceSession: snap.entries.some((e) => e.kind === "utterance.transcript"),
     mcp: { path: "/mcp", tool: "check_action", bearerRequired: deps.mcpBearerRequired, rulebookRevision: snap.book.revision },
   };

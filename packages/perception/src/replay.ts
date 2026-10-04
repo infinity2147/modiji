@@ -3,13 +3,25 @@
  * ordered queue → extractor → `toScreenEvents` → state applier), for the P2 evaluation. The clock
  * is injected: a real clock paces frames at their recorded times (live Haiku measurement); the
  * virtual clock runs the same schedule as a deterministic discrete-event simulation (fake
- * extractor). PII redaction is not part of the replay: fixtures are synthetic CaseDesk sessions.
+ * extractor). PII redaction is not part of the replay: fixtures are synthetic CaseDesk sessions, so the
+ * live product's frame→event latency is this replay's plus client OCR/redaction and the upload.
  */
 import type { DomainConfig } from "@vashistha/core";
 import { createChangeDetector, DEFAULT_CHANGE_CONFIG, type ChangeDetectorConfig } from "./change-detector";
-import { toScreenEvents, type CaseSnapshot, type Dropped, type ExtractionResult, type FrameOutput, type ProposedConcept } from "./extraction";
+import {
+  interpretReading,
+  prepareRead,
+  type CaseSnapshot,
+  type Dropped,
+  type ExtractionResult,
+  type FrameReading,
+  type PreparedRead,
+  type ProposedConcept,
+  type ScreenProfile,
+} from "./extraction";
 import type { VisionObservation } from "./evaluation";
-import type { Rect, RgbaImage } from "./image";
+import { prepareUpload, type Rect, type RgbaImage } from "./image";
+import { encodePng } from "./png";
 import { createPerceptionQueue, type QueueStats } from "./queue";
 
 export type Clock = { now(): number; sleepUntil(t: number): Promise<void> };
@@ -70,16 +82,8 @@ export function createVirtualClock(start: number): VirtualClock {
   };
 }
 
-export type ExtractorInput = {
-  image: RgbaImage;
-  bbox: Rect | null;
-  previous: CaseSnapshot | null;
-  frameSeq: number;
-  captureTime: number;
-  sessionEpoch: number;
-};
-/** One model call per frame: returns the structured output exactly as the model would. */
-export type FrameExtractor = (input: ExtractorInput) => Promise<FrameOutput>;
+/** One model call per frame: answers the prepared read exactly as the model would. */
+export type FrameExtractor = (read: PreparedRead) => Promise<FrameReading>;
 
 export type ReplayFrame = { captureTime: number; load(): RgbaImage };
 
@@ -94,13 +98,14 @@ export type ReplayResult = {
 
 export async function replaySession(options: {
   domain: DomainConfig;
+  profile: ScreenProfile;
   sessionEpoch: number;
   frames: readonly ReplayFrame[];
   extract: FrameExtractor;
   clock: Clock;
   detector?: ChangeDetectorConfig;
 }): Promise<ReplayResult> {
-  const { domain, sessionEpoch, clock } = options;
+  const { domain, profile, sessionEpoch, clock } = options;
   const detector = createChangeDetector(options.detector ?? DEFAULT_CHANGE_CONFIG);
   const observations: VisionObservation[] = [];
   const concepts: ProposedConcept[] = [];
@@ -113,9 +118,23 @@ export async function replaySession(options: {
     epoch: sessionEpoch,
     now: () => clock.now(),
     async send(frame) {
-      const context = { domain, previous: snapshot, frameSeq: frame.frameSeq, captureTime: frame.captureTime, sessionEpoch: frame.epoch };
-      const output = await options.extract({ ...frame.payload, ...context });
-      return toScreenEvents(output, context);
+      // As on the server: the ≤1568 px upload (plus the client's crop of its change bbox) is what extraction sees.
+      const { image, bbox } = frame.payload;
+      const upload = prepareUpload(image, bbox);
+      const crop = upload.crop;
+      const read = prepareRead({
+        domain,
+        profile,
+        previous: snapshot,
+        frameSeq: frame.frameSeq,
+        captureTime: frame.captureTime,
+        sessionEpoch: frame.epoch,
+        frame: { image: upload.frame, sourceWidth: image.width, sourceHeight: image.height },
+        ...(crop !== null && {
+          crop: { base64Png: encodePng(crop.image).toString("base64"), width: crop.image.width, height: crop.image.height, rect: crop.rect },
+        }),
+      });
+      return interpretReading(await options.extract(read), read.context);
     },
     apply(result) {
       snapshot = result.snapshot;

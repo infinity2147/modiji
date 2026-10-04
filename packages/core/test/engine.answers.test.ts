@@ -40,7 +40,7 @@ const apply = (question: Question, parsed: ParsedAnswer, undefinedConcepts: Prop
   applyAnswer({ model: REVIEW, set: SET, knowledge: KNOWLEDGE, question, answer: parsed, undefinedConcepts, config: CONFIG });
 const jurisdictionIds = SET.candidates.filter((c) => featuresReferenced(c.predicate).join() === "jurisdictionRisk").map((c) => c.id);
 const stated = (predicate: unknown, action: string, quote = "over a quarter and not verified goes to enhanced review"): StatedRule =>
-  ({ predicate: predicate as Predicate, action, kind: "decision", exactQuote: quote, t0Ms: 1000, t1Ms: 4000 }) as StatedRule;
+  ({ predicate: predicate as Predicate, action, kind: "decision", effect: { type: "recommend", action }, exactQuote: quote, t0Ms: 1000, t1Ms: 4000 }) as StatedRule;
 
 describe("applyAnswer", () => {
   it("removes eliminated candidates and renormalises the rest (relative weights unchanged)", () => {

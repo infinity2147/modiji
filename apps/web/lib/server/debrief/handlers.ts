@@ -5,7 +5,6 @@
 import "server-only";
 import { z } from "zod";
 import { IdSchema } from "@vashistha/core";
-import { KYC_DOMAIN } from "@vashistha/core/domains/kyc";
 import {
   ExpertActionRequestSchema,
   type DebriefState,
@@ -69,7 +68,8 @@ export function handleExport(request: Request, sessionId: string, deps: DebriefD
     const body =
       format === "json"
         ? deps.exports.workMapJson(workMap)
-        : deps.exports.procedure({ domain: KYC_DOMAIN, rules: workMap.rules, revision: workMap.rulebookRevision });
+        : // The session's feature model: its rules may read concepts the expert confirmed (plan §6.6).
+          deps.exports.procedure({ domain: (await snapshot(deps, sessionId)).domain, rules: workMap.rules, revision: workMap.rulebookRevision });
     const name = format === "json" ? `workmap-${workMap.id}.json` : `procedure-r${workMap.rulebookRevision}.md`;
     return new Response(body, {
       status: 200,

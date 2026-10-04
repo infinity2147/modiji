@@ -189,7 +189,7 @@ export function handleOffRecord(request: Request, sessionId: string, deps: Inter
 export function handleEngineState(sessionId: string, deps: InterviewDeps): Promise<Response> {
   return respond(deps.log, () => {
     const { session } = load(deps, sessionId);
-    const body: z.infer<typeof EngineStateResponseSchema> = engineStateResponse(engineState(deps, session.id));
+    const body: z.infer<typeof EngineStateResponseSchema> = engineStateResponse(engineState(deps, session.id), { available: deps.claude !== null });
     return json(body);
   });
 }

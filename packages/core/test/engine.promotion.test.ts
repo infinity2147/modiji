@@ -13,22 +13,23 @@ import {
   type LedgerSource,
   type PromotionError,
   type StatedRule,
+  StatedRuleSchema,
 } from "../src";
 import { KYC } from "./engine.fixtures";
 
-const ENTRIES: Record<string, LedgerSource> = {
-  "utt-voice": "voice",
-  "utt-typed": "expert",
-  "utt-ctl": "system_control",
-  "utt-vision": "vision",
-  "frame-1": "client",
-  "frame-ctl": "system_control",
-  "event-1": "vision",
-  "event-dom": "dom",
-  "confirm-1": "voice",
-  "decision-1": "dom",
+const ENTRIES: Record<string, { source: LedgerSource; kind: string }> = {
+  "utt-voice": { source: "voice", kind: "utterance.transcript" },
+  "utt-typed": { source: "expert", kind: "expert.statement" },
+  "utt-ctl": { source: "system_control", kind: "gate.control_message" },
+  "utt-vision": { source: "vision", kind: "screen.event" },
+  "frame-1": { source: "client", kind: "frame.received" },
+  "frame-ctl": { source: "system_control", kind: "frame.received" },
+  "event-1": { source: "vision", kind: "screen.event" },
+  "event-dom": { source: "dom", kind: "screen.event" },
+  "confirm-1": { source: "voice", kind: "utterance.transcript" },
+  "decision-1": { source: "dom", kind: "case.decision" },
 };
-const LEDGER: LedgerReader = { get: (id) => (ENTRIES[id] === undefined ? undefined : { id, source: ENTRIES[id] }) };
+const LEDGER: LedgerReader = { get: (id) => (ENTRIES[id] === undefined ? undefined : { id, ...ENTRIES[id] }) };
 
 const QUOTE: ExpertQuoteEvidence = {
   kind: "expert_quote",
@@ -78,16 +79,18 @@ describe("promoteToConfirmedRule", () => {
   });
 
   it("promotes an explicitly stated rule whose quote is in the evidence; typed text counts as the expert's words", () => {
-    const rule: StatedRule = {
+    const rule: StatedRule = StatedRuleSchema.parse({
       predicate: CANDIDATE.predicate,
-      action: CANDIDATE.predictedAction,
+      action: "approve",
       kind: "guardrail",
+      effect: { type: "forbid", action: "approve" },
       exactQuote: "over a quarter that isn't verified",
       t0Ms: 61_200,
       t1Ms: 64_900,
-    };
-    const r = promote({ source: { statedRule: rule }, effect: { type: "forbid", action: "approve" as never }, evidence: [{ ...QUOTE, utteranceId: "utt-typed", provenance: "human_text" }] });
-    expect(r.ok && r.rule.kind).toBe("guardrail");
+    });
+    const r = promote({ source: { statedRule: rule }, evidence: [{ ...QUOTE, utteranceId: "utt-typed", provenance: "human_text" }] });
+    // The stated effect is carried through: a prohibition stays a prohibition.
+    expect(r.ok && { kind: r.rule.kind, effect: r.rule.effect, priority: r.rule.priority }).toEqual({ kind: "guardrail", effect: { type: "forbid", action: "approve" }, priority: 10 });
     expect(codes(promote({ source: { statedRule: { ...rule, exactQuote: "never approve these" } } }))).toEqual(["stated_quote_not_in_evidence"]);
   });
 
@@ -103,6 +106,11 @@ describe("promoteToConfirmedRule", () => {
   it("rejects missing or control frames and events", () => {
     expect(codes(promote({ evidence: [{ ...QUOTE, frameIds: ["frame-1", "frame-gone"] }] }))).toEqual(["frame_missing"]);
     expect(codes(promote({ evidence: [{ ...QUOTE, frameIds: ["frame-ctl"] }] }))).toEqual(["not_evidence"]);
+    // Frames are real redacted screen frames: a DOM event (or any other entry) never stands in for one.
+    expect(promote({ evidence: [{ ...QUOTE, frameIds: ["event-dom"] }] })).toEqual({
+      ok: false,
+      errors: [{ code: "not_a_frame", evidenceIndex: 0, frameId: "event-dom", kind: "screen.event" }],
+    });
     expect(codes(promote({ evidence: [{ ...QUOTE, eventIds: ["event-gone"] }] }))).toEqual(["event_missing"]);
     expect(codes(promote({ links: [{ kind: "frame", frameId: "f", ledgerEntryId: "nowhere" }] }))).toEqual(["link_missing"]);
   });

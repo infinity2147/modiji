@@ -5,6 +5,7 @@ import { Wrench } from "lucide-react";
 import type { InterviewLoop } from "@/lib/client/voice/use-interview";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { JudgeConcepts } from "@/components/concepts/concepts-panel";
 import { ComplianceStrip } from "./compliance-strip";
 import { EngineeringView } from "./engineering-view";
 import { EventTicker } from "./event-ticker";
@@ -23,6 +24,7 @@ export function JudgeView({ sessionId, loop }: { sessionId: string; loop: Interv
         <div className="min-w-0 flex-1">
           <HudBar gate={loop.gate} voiceLive={loop.voice.state === "connected"} />
         </div>
+        <JudgeConcepts sessionId={sessionId} />
         <Button
           size="xs"
           variant="ghost"

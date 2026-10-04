@@ -25,6 +25,7 @@ import {
   type AnsweredUtterance,
   type BuiltPrompt,
   type ConceptConversion,
+  type DomainConfig,
   type HypothesisSet,
   type ProposedConcept,
   type Question,
@@ -80,20 +81,28 @@ async function ask<S extends z.ZodType>(claude: Claude, prompt: BuiltPrompt, sch
 
 export async function parseAnswer(
   claude: Claude,
-  input: { decisionFamily: string; question: Question; utterance: AnsweredUtterance; set: HypothesisSet; pendingConcepts: readonly ProposedConcept[] },
+  input: {
+    decisionFamily: string;
+    question: Question;
+    utterance: AnsweredUtterance;
+    set: HypothesisSet;
+    /** The session's feature model: stated rules may use the concepts the expert confirmed. */
+    domain: DomainConfig;
+    pendingConcepts: readonly ProposedConcept[];
+  },
 ): Promise<AnswerConversion> {
   const prompt = buildAnswerParserPrompt({
-    domain: PROMPT_DOMAIN,
+    domain: promptDomain(input.domain),
     decisionFamily: input.decisionFamily,
     question: { id: input.question.id, kind: input.question.kind, text: input.question.text },
     utterance: input.utterance,
-    candidates: summarizeCandidates(input.set, KYC_DOMAIN, PARSER_CANDIDATES),
+    candidates: summarizeCandidates(input.set, input.domain, PARSER_CANDIDATES),
   });
   const output = await ask(claude, prompt, LlmAnswerSchema, 2048, DEADLINE_MS.parse, "answer parser");
   return toParsedAnswer(output, {
     questionId: input.question.id,
     utterance: input.utterance,
-    domain: KYC_DOMAIN,
+    domain: input.domain,
     pendingConcepts: input.pendingConcepts.map((c) => c.name),
   });
 }

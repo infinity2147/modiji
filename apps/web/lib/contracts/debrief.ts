@@ -6,10 +6,12 @@
 import { z } from "zod";
 import {
   ActionIdSchema,
+  ApprovalRoleSchema,
   ConfirmedRuleSchema,
   CoverageSchema,
   IdSchema,
   LedgerSourceSchema,
+  LlmConditionSchema,
   PredicateSchema,
   WitnessResolutionSchema,
   WitnessSchema,
@@ -137,9 +139,31 @@ export const DebriefStateSchema = z.strictObject({
   gapsClosed: z.strictObject({ closed: z.int().nonnegative(), total: z.int().nonnegative() }),
   /** Expert answers to debrief questions received by voice and not yet applied (applied by a witness rebuild). */
   pendingVoiceAnswers: z.int().nonnegative(),
+  /**
+   * Redacted screen frames (`frame.received`) recorded in this session. Every rule the expert confirms
+   * cites at least one: with none, confirmations are refused (409 `no_screen_frame`).
+   */
+  screenFrames: z.int().nonnegative(),
   llmAvailable: z.boolean(),
 });
 export type DebriefState = z.infer<typeof DebriefStateSchema>;
+
+/** Conditions of a stop-rule in the answer parser's flat form; the server converts and type-checks them. */
+export const StopRuleConditionsSchema = z.strictObject({
+  combinator: z.enum(["all", "any"]),
+  conditions: z.array(LlmConditionSchema).min(1).max(8),
+});
+export type StopRuleConditions = z.infer<typeof StopRuleConditionsSchema>;
+
+/**
+ * What a stop-rule enforces: `forbid` the action outright, or `require_approval` from a role (from the
+ * fixed list) before the action may be taken.
+ */
+export const StopRuleEffectSchema = z.discriminatedUnion("type", [
+  z.strictObject({ type: z.literal("forbid"), action: ActionIdSchema }),
+  z.strictObject({ type: z.literal("require_approval"), role: ApprovalRoleSchema, action: ActionIdSchema }),
+]);
+export type StopRuleEffect = z.infer<typeof StopRuleEffectSchema>;
 
 /** POST /api/sessions/:sessionId/debrief — an explicit expert action from the UI (voice unavailable). */
 export const ExpertActionRequestSchema = z.discriminatedUnion("action", [
@@ -165,6 +189,20 @@ export const ExpertActionRequestSchema = z.discriminatedUnion("action", [
   }),
   z.strictObject({ action: z.literal("confirm_boundary"), witnessId: IdSchema, quote: ExpertQuoteSchema }),
   z.strictObject({ action: z.literal("confirm_teachback"), teachBackId: IdSchema, quote: ExpertQuoteSchema }),
+  /**
+   * "Never approve a customer on a high-risk country list at desk level": a guardrail the expert states
+   * outright. Confirmed with the expert's exact words and the redacted screen frame of `momentEntryId`
+   * (a decision, frame or screen event of this session; default: the latest frame) — refused with 409
+   * `no_screen_frame` when no frame was captured at or before that moment.
+   */
+  z.strictObject({
+    action: z.literal("confirm_stop_rule"),
+    decisionFamily: z.string().min(1),
+    when: StopRuleConditionsSchema,
+    effect: StopRuleEffectSchema,
+    momentEntryId: IdSchema.optional(),
+    quote: ExpertQuoteSchema,
+  }),
 ]);
 export type ExpertActionRequest = z.infer<typeof ExpertActionRequestSchema>;
 

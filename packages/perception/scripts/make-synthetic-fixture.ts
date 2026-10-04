@@ -12,7 +12,7 @@ import { ActionIdSchema, FeatureIdSchema, type ScreenEvent } from "@vashistha/co
 import { KYC_DOMAIN, mulberry32 } from "@vashistha/core/domains/kyc";
 import { createRgba, type RgbaImage } from "../src/image";
 import type { Fixture } from "../src/evaluation";
-import { encodePng } from "./png";
+import { encodePng } from "../src/png";
 
 const OUT_DIR = join(import.meta.dirname, "../test/fixtures/synthetic-kyc");
 const T0 = 1_790_000_000_000;

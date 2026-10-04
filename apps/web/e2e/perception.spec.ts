@@ -1,5 +1,5 @@
 /**
- * Vision channel end to end, against the production server (VISION_EXTRACTION=off: frames are stored
+ * Vision channel end to end, against the production server (LLM_CALLS=off: frames are stored
  * and ledgered, the model is never called, and the UI says so).
  *
  * Headless Chromium cannot capture a screen: with `--use-fake-ui-for-media-stream` and

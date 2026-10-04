@@ -41,6 +41,16 @@ describe("env", () => {
     expect(r.detail).not.toContain("too-short-secret");
     expect(JSON.stringify(r)).not.toContain(ANTHROPIC_KEY);
   });
+
+  it("fails when LLM_CALLS is off, and names an invalid LLM_CALLS without echoing it", async () => {
+    const off = await checkEnv({ env: { ...GOOD_ENV, LLM_CALLS: "off" }, envFileLoaded: true });
+    expect(off.status).toBe("fail");
+    expect(off.detail).toBe("LLM_CALLS=off disables every model call");
+    const invalid = await checkEnv({ env: { ...GOOD_ENV, LLM_CALLS: "sometimes" }, envFileLoaded: true });
+    expect(invalid.status).toBe("fail");
+    expect(invalid.detail).toBe("invalid per loadServerEnv: LLM_CALLS");
+    expect((await checkEnv({ env: { ...GOOD_ENV, LLM_CALLS: "on" }, envFileLoaded: true })).status).toBe("pass");
+  });
 });
 
 describe("anthropic", () => {
@@ -283,7 +293,18 @@ describe("server-deep and sandbox", () => {
   it("passes when health is up, deep refuses anonymous callers and every probe is ok", async () => {
     const r = await checkServerDeep(makeContext());
     expect(r.status).toBe("pass");
-    expect(r.detail).toBe("health 200; deep 401 without bearer; db ok 1.5 ms, dataDir ok 1.5 ms, z3 ok 1.5 ms");
+    expect(r.detail).toBe("health 200; deep 401 without bearer; db ok 1.5 ms, dataDir ok 1.5 ms, z3 ok 1.5 ms; model calls on");
+    expect(r.facts?.llmCalls).toBe("on");
+  });
+
+  it("fails a target that reports LLM_CALLS=off, or does not report it at all", async () => {
+    const off = await checkServerDeep(makeContext({ fetch: fakeServer({ llmCalls: "off" }).fetch }));
+    expect(off.status).toBe("fail");
+    expect(off.detail).toBe("target runs with LLM_CALLS=off: model calls disabled");
+    expect(off.facts?.llmCalls).toBe("off");
+    const missing = await checkServerDeep(makeContext({ fetch: fakeServer({ llmCalls: null }).fetch }));
+    expect(missing.status).toBe("fail");
+    expect(missing.detail).toContain("does not report llmCalls");
   });
 
   it("fails naming the probe that is not ok", async () => {

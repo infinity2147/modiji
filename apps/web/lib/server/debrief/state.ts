@@ -7,12 +7,14 @@
 import "server-only";
 import {
   ACKNOWLEDGING_RESOLUTIONS,
+  SCREEN_FRAME_KIND,
   GAP_WITNESS_KINDS,
   acknowledgementFor,
   atomicConditions,
   canonicalJson,
   cellPredicate,
   computeCoverage,
+  conceptValues,
   decisionCell,
   describePredicate,
   evaluatePredicate,
@@ -23,6 +25,7 @@ import {
   formatValue,
   observedDecisions,
   parseLedgerPayload,
+  pendingBackfills,
   predictive,
   recordLookup,
   type AcknowledgedWitness,
@@ -32,6 +35,7 @@ import {
   type ConfirmedRule,
   type Coverage,
   type DecisionFamily,
+  type DomainConfig,
   type LedgerEntry,
   type ObservedDecision,
   type Rulebook,
@@ -46,6 +50,7 @@ import type { DecisionViewSchema, GapSchema, ProposalSchema, RuleViewSchema } fr
 import { ApiFailure } from "../casedesk/http";
 import { CASEDESK_SCHEMA_VERSION, loadSession, type LoadedSession } from "../casedesk/session";
 import { engineState, type EngineState, type FamilyState, type QuestionRecord } from "../interview/engine-state";
+import { rulebookWithinModel } from "../schema/rulebook";
 import type { DebriefDeps } from "./deps";
 import { caseDescription, cellPhrases, ruleText } from "./text";
 
@@ -84,6 +89,10 @@ export type TeachBackRecord = {
 export type Snapshot = {
   loaded: LoadedSession;
   entries: LedgerEntry[];
+  /** The session's feature model (base + expert-confirmed concepts, plan §6.6) and its version. */
+  domain: DomainConfig;
+  schemaVersion: number;
+  /** The confirmed rules expressible in `domain`. */
   book: Rulebook;
   engine: EngineState;
   decisions: ObservedDecision[];
@@ -109,12 +118,19 @@ function familyOf(id: string): DecisionFamily {
   return family;
 }
 
-async function currentWitnesses(deps: DebriefDeps, book: Rulebook, families: readonly string[]): Promise<{ witnesses: Witness[]; truncated: boolean }> {
+async function currentWitnesses(
+  deps: DebriefDeps,
+  model: { domain: DomainConfig; schemaVersion: number },
+  book: Rulebook,
+  families: readonly string[],
+): Promise<{ witnesses: Witness[]; truncated: boolean }> {
   if (families.length === 0) return { witnesses: [], truncated: false };
-  const key = canonicalJson({ revision: book.revision, families, schemaVersion: SCHEMA_VERSION });
+  const { domain, schemaVersion } = model;
+  // Keyed by the feature list too: two sessions can be at the same version with different concepts.
+  const key = canonicalJson({ revision: book.revision, families, schemaVersion, features: domain.features });
   let pending = deps.store.witnesses.get(key);
   if (pending === undefined) {
-    pending = deps.solver({ domain: DOMAIN, rules: book.rules, families, schemaVersion: SCHEMA_VERSION });
+    pending = deps.solver({ domain, rules: book.rules, families, schemaVersion });
     deps.store.witnesses.set(key, pending);
     pending.catch(() => deps.store.witnesses.delete(key));
   }
@@ -131,11 +147,16 @@ export function loadExpertSession(deps: DebriefDeps, sessionId: string): LoadedS
 export async function snapshot(deps: DebriefDeps, sessionId: string): Promise<Snapshot> {
   const loaded = loadExpertSession(deps, sessionId);
   const entries = deps.ledger.evidence(loaded.session.id);
-  const book = deps.rulebook();
   const engine = engineState({ ledger: deps.ledger, store: deps.interview, config: deps.engineConfig }, loaded.session.id);
-  const decisions = observedDecisions({ domain: DOMAIN, entries, caseFeatures: kycCaseFeatures });
-  const families = DOMAIN.decisionFamilies.map((f) => f.id).filter((id) => decisions.some((d) => d.decisionFamily === id));
-  const { witnesses: current, truncated } = await currentWitnesses(deps, book, families);
+  const { domain, schemaVersion } = engine.schema.model;
+  const book = rulebookWithinModel(domain, deps.rulebook());
+  // Observed decisions carry the session's concept values (backfilled, or Unknown) next to the case features.
+  const decisions = observedDecisions({ domain, entries, caseFeatures: kycCaseFeatures }).map((d) => ({
+    ...d,
+    features: { ...d.features, ...conceptValues(engine.schema, d.entry.id) },
+  }));
+  const families = domain.decisionFamilies.map((f) => f.id).filter((id) => decisions.some((d) => d.decisionFamily === id));
+  const { witnesses: current, truncated } = await currentWitnesses(deps, { domain, schemaVersion }, book, families);
 
   const found = new Map<string, FoundWitness>();
   const resolutions = new Map<string, { resolution: WitnessResolution; entry: LedgerEntry }>();
@@ -180,6 +201,8 @@ export async function snapshot(deps: DebriefDeps, sessionId: string): Promise<Sn
   return {
     loaded,
     entries,
+    domain,
+    schemaVersion,
     book,
     engine,
     decisions,
@@ -203,7 +226,7 @@ export function isGap(w: Witness): boolean {
 }
 
 export function acknowledgement(snap: Snapshot, w: Witness): AcknowledgedWitness | undefined {
-  return acknowledgementFor({ domain: DOMAIN, rules: snap.book.rules, witness: w, acknowledged: snap.acknowledged });
+  return acknowledgementFor({ domain: snap.domain, rules: snap.book.rules, witness: w, acknowledged: snap.acknowledged });
 }
 
 /** A witness still asks something of the expert: current, not acknowledged, not a confirmed boundary. */
@@ -217,17 +240,19 @@ export function teachBackConfirmed(snap: Snapshot): boolean {
 
 export function coverageOf(snap: Snapshot): Coverage {
   const coverage = computeCoverage({
-    domain: DOMAIN,
+    domain: snap.domain,
     rules: snap.book.rules,
     decisions: snap.decisions,
     witnesses: snap.current,
     resolutions: snap.acknowledged,
     undefinedConcepts: snap.engine.undefinedConcepts.length,
     teachBackConfirmed: teachBackConfirmed(snap),
-    schemaVersion: SCHEMA_VERSION,
+    schemaVersion: snap.schemaVersion,
   });
-  // A truncated unresolved list proves nothing about the cells it did not list.
-  return snap.truncated ? { ...coverage, closed: false } : coverage;
+  // A truncated unresolved list proves nothing about the cells it did not list; while a new concept is
+  // still being backfilled (plan §6.6 "coverage recomputing"), the claim under the new model is not settled.
+  const recomputing = pendingBackfills(snap.engine.schema, snap.decisions.map((d) => d.entry.id)).length > 0;
+  return snap.truncated || recomputing ? { ...coverage, closed: false } : coverage;
 }
 
 /** The family's hypothesis state (interview engine). */
@@ -278,8 +303,8 @@ export function boundaryPhrases(snap: Snapshot, w: Extract<Witness, { kind: "bou
     const { truth } = evaluatePredicate(condition, lookup);
     return truth === "unknown" ? [] : [{ condition, holds: truth }];
   });
-  const f = findFeature(DOMAIN, w.feature);
-  const others = cellPhrases(DOMAIN, literals.filter((l) => !featuresReferenced(l.condition).includes(w.feature)));
+  const f = findFeature(snap.domain, w.feature);
+  const others = cellPhrases(snap.domain, literals.filter((l) => !featuresReferenced(l.condition).includes(w.feature)));
   return [`${f === undefined ? w.feature : featurePhrase(f)} exactly ${formatValue(f, w.threshold)}`, ...others];
 }
 
@@ -308,8 +333,8 @@ export function witnessView(snap: Snapshot, w: Witness): WitnessView {
     foundEntryId: snap.found.get(w.id)?.entry.id ?? null,
     question: q === undefined ? null : { id: q.question.id, text: q.question.text, entryId: q.queuedEntryId },
     resolution,
-    conditions: !isCurrent ? [] : w.kind === "boundary" ? boundaryPhrases(snap, w) : cellPhrases(DOMAIN, cell),
-    cellRule: predicate === undefined ? null : { predicate, text: describePredicate(predicate, DOMAIN) },
+    conditions: !isCurrent ? [] : w.kind === "boundary" ? boundaryPhrases(snap, w) : cellPhrases(snap.domain, cell),
+    cellRule: predicate === undefined ? null : { predicate, text: describePredicate(predicate, snap.domain) },
     suggestedAction: isCurrent && w.kind === "unresolved" ? (suggestedAction(snap, w) ?? null) : null,
   };
 }
@@ -318,7 +343,7 @@ function ruleChange(snap: Snapshot): RuleChange | null {
   const last = snap.book.history.at(-1);
   if (last === undefined) return null;
   const view = (r: ConfirmedRule): NonNullable<RuleChange["before"]> => ({
-    ...ruleText(DOMAIN, r),
+    ...ruleText(snap.domain, r),
     priority: r.priority,
     overrides: r.overrides,
   });
@@ -358,7 +383,7 @@ export function debriefState(deps: DebriefDeps, snap: Snapshot): DebriefState {
   const coverage = coverageOf(snap);
   const entryOf = ruleEntries(book);
   const decisions: z.infer<typeof DecisionViewSchema>[] = snap.decisions.map((d) => {
-    const ex = explainObserved(DOMAIN, book.rules, d);
+    const ex = explainObserved(snap.domain, book.rules, d);
     return {
       entryId: d.entry.id,
       caseId: d.caseId,
@@ -396,14 +421,14 @@ export function debriefState(deps: DebriefDeps, snap: Snapshot): DebriefState {
     decisionFamily: family,
     action: candidate.predictedAction,
     predicate: candidate.predicate,
-    text: ruleText(DOMAIN, { predicate: candidate.predicate, effect: { type: "recommend", action: candidate.predictedAction } }).when,
+    text: ruleText(snap.domain, { predicate: candidate.predicate, effect: { type: "recommend", action: candidate.predictedAction } }).when,
     origin: candidate.origin,
     weight: candidate.weight,
   }));
 
   const rules: z.infer<typeof RuleViewSchema>[] = book.rules.flatMap((rule) => {
     const entryId = entryOf.get(rule.id);
-    return entryId === undefined ? [] : [{ rule, ...ruleText(DOMAIN, rule), entryId, explains: decisions.filter((d) => d.ruleIds.includes(rule.id)).length }];
+    return entryId === undefined ? [] : [{ rule, ...ruleText(snap.domain, rule), entryId, explains: decisions.filter((d) => d.ruleIds.includes(rule.id)).length }];
   });
 
   const tb = snap.teachBack;
@@ -434,6 +459,7 @@ export function debriefState(deps: DebriefDeps, snap: Snapshot): DebriefState {
     debriefQuestions: snap.questions.size,
     gapsClosed: gapsClosed(snap),
     pendingVoiceAnswers: pendingVoiceAnswers(snap).length,
+    screenFrames: snap.entries.filter((e) => e.kind === SCREEN_FRAME_KIND && e.source === "client").length,
     llmAvailable: deps.claude !== null,
   };
 }

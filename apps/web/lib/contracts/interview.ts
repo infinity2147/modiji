@@ -16,7 +16,10 @@ import {
 export const QuestionQueueResponseSchema = z.strictObject({
   queue: z.array(QuestionSchema),
   contextVersion: z.int().nonnegative(),
-  /** Live questions already asked in this session (for the compliance strip and the gate budget). */
+  /**
+   * Questions already asked in this session, of every kind (live, debrief, tutor). The compliance strip
+   * counts the live-interview kinds among them; the gate's live budget is kept by the browser gate itself.
+   */
   asked: z.array(z.strictObject({ questionId: IdSchema, authorizedAt: z.int().nonnegative() })),
   offRecord: z.boolean(),
 });
@@ -93,4 +96,11 @@ export const EngineStateResponseSchema = z.strictObject({
   confirmedRules: z.int().nonnegative(),
   rulebookRevision: z.int().nonnegative(),
   mastery: z.array(z.strictObject({ ruleId: IdSchema, level: MasteryLevelSchema })),
+  /**
+   * The answer parser (Sonnet): `available` is false when the server has no model (no ANTHROPIC_API_KEY,
+   * or LLM_CALLS=off); `unparsedAnswers` counts expert answers to asked questions that have no
+   * `answer.parsed` entry (recorded while no parser was available, or the parser failed) — they are
+   * never guessed.
+   */
+  answerParser: z.strictObject({ available: z.boolean(), unparsedAnswers: z.int().nonnegative() }),
 });

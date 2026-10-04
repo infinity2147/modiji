@@ -13,7 +13,9 @@ export const REQUIRED_ENV = [
 
 /**
  * `.env` (loaded by the CLI) plus the shell, validated by the server's own `loadServerEnv`. DATA_DIR belongs to the
- * server (checked remotely by `server-deep`), so a placeholder stands in when it is unset here.
+ * server (checked remotely by `server-deep`), so a placeholder stands in when it is unset here. `LLM_CALLS=off` (the
+ * hermetic e2e switch) fails: this env is meant to mirror the deployment's. Whether the deployed target itself runs with
+ * model calls on is checked by `server-deep`, which reads it from `/api/health/deep`.
  */
 export async function checkEnv(ctx: Pick<PreflightContext, "env" | "envFileLoaded">): Promise<CheckOutcome> {
   const problems: string[] = [];
@@ -25,6 +27,7 @@ export async function checkEnv(ctx: Pick<PreflightContext, "env" | "envFileLoade
   }
   const missing = REQUIRED_ENV.filter((name) => (ctx.env[name]?.trim() ?? "") === "");
   if (missing.length > 0) problems.push(`missing: ${missing.join(", ")}`);
+  if (ctx.env.LLM_CALLS?.trim() === "off") problems.push("LLM_CALLS=off disables every model call");
   const publicBaseUrl = ctx.env.PUBLIC_BASE_URL?.trim();
   if (publicBaseUrl && !/^https:\/\//i.test(publicBaseUrl)) problems.push("PUBLIC_BASE_URL is not https");
 

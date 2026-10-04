@@ -12,11 +12,9 @@
  *   case (the proposed action committed without an escalation).
  */
 import { z } from "zod";
-import { IdSchema, parseLedgerPayload, type LedgerEntry, type QuestionKind } from "@vashistha/core";
+import { IdSchema, isLiveQuestionKind, parseLedgerPayload, type LedgerEntry } from "@vashistha/core";
 
 export const LIVE_QUESTION_TARGET = 3;
-/** Questions asked during capture (M1); witness and teach-back questions belong to the debrief. */
-export const LIVE_QUESTION_KINDS: ReadonlySet<QuestionKind> = new Set(["why_probe", "counterfactual", "concept_definition"]);
 export const DEBRIEF_GAP_TARGET = 3;
 
 export type Compliance = {
@@ -56,7 +54,7 @@ export function computeCompliance(entries: readonly LedgerEntry[]): Compliance {
     switch (entry.kind) {
       case "question.queued": {
         const q = safely(() => parseLedgerPayload(entry, "question.queued"));
-        if (q && LIVE_QUESTION_KINDS.has(q.kind)) liveQuestionIds.add(q.id);
+        if (q && isLiveQuestionKind(q.kind)) liveQuestionIds.add(q.id);
         break;
       }
       case "gate.authorized": {

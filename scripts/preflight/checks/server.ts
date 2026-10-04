@@ -8,7 +8,8 @@ const DEEP_PARTS = ["db", "dataDir", "z3"] as const;
 
 /**
  * `/api/health` is up, `/api/health/deep` refuses an anonymous caller, and with the bearer reports the database
- * writable, DATA_DIR writable and Z3 initialised (plan §12).
+ * writable, DATA_DIR writable and Z3 initialised (plan §12), and model calls on: a target running with the hermetic
+ * `LLM_CALLS=off` (e2e setting) would never call the model, so it fails here, where the deployed env is observable.
  */
 export async function checkServerDeep(ctx: Ctx): Promise<CheckOutcome> {
   const { CUSTOM_LLM_SECRET: secret } = requireVars(ctx.env, ["CUSTOM_LLM_SECRET"]);
@@ -42,6 +43,10 @@ export async function checkServerDeep(ctx: Ctx): Promise<CheckOutcome> {
       }
     }
     if (body.ok !== true && problems.length === 0) problems.push(`/api/health/deep: ok=${String(body.ok)} (HTTP ${deep.status})`);
+    const llmCalls = body.llmCalls === "on" || body.llmCalls === "off" ? body.llmCalls : null;
+    facts.llmCalls = llmCalls;
+    if (llmCalls === "off") problems.push("target runs with LLM_CALLS=off: model calls disabled");
+    else if (llmCalls === null) problems.push("/api/health/deep does not report llmCalls (server older than this preflight?)");
   }
   facts.deepMs = deep.ms;
 
@@ -51,7 +56,7 @@ export async function checkServerDeep(ctx: Ctx): Promise<CheckOutcome> {
     const ms = f !== null && typeof f === "object" && !Array.isArray(f) ? f.ms : null;
     return `${p} ok${typeof ms === "number" ? ` ${ms} ms` : ""}`;
   });
-  return { status: "pass", detail: `health 200; deep 401 without bearer; ${parts.join(", ")}`, facts };
+  return { status: "pass", detail: `health 200; deep 401 without bearer; ${parts.join(", ")}; model calls on`, facts };
 }
 
 /** The CaseDesk sandbox page renders. */

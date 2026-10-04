@@ -1,10 +1,11 @@
 /**
- * Minimal PNG codec for the Node evaluation scripts (no image dependency in this package): decodes
- * 8-bit, non-interlaced grayscale/RGB/gray+alpha/RGBA PNGs — what Playwright screenshots and our
- * fixtures use — and encodes RGBA. The browser uses canvas instead.
+ * Minimal PNG codec for Node — the server's extraction path and the evaluation scripts (no image
+ * dependency in this package): decodes 8-bit, non-interlaced grayscale/RGB/gray+alpha/RGBA PNGs —
+ * what browsers' canvas, Playwright screenshots and our fixtures produce — and encodes RGBA. The
+ * browser uses canvas instead.
  */
 import { deflateSync, inflateSync } from "node:zlib";
-import { createRgba, type RgbaImage } from "../src/image";
+import { createRgba, type RgbaImage } from "./image";
 
 const SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 /** Colour type → channels, for the supported 8-bit types. */
@@ -65,24 +66,49 @@ export function decodePng(file: Uint8Array): RgbaImage {
     const filter = raw[y * (stride + 1)];
     const src = y * (stride + 1) + 1;
     const dst = y * stride;
-    for (let x = 0; x < stride; x += 1) {
-      const value = raw[src + x] ?? 0;
-      const left = x >= channels ? (pixels[dst + x - channels] ?? 0) : 0;
-      const up = y > 0 ? (pixels[dst - stride + x] ?? 0) : 0;
-      const upLeft = y > 0 && x >= channels ? (pixels[dst - stride + x - channels] ?? 0) : 0;
-      const predicted =
-        filter === 0 ? 0 : filter === 1 ? left : filter === 2 ? up : filter === 3 ? (left + up) >> 1 : filter === 4 ? paeth(left, up, upLeft) : -1;
-      if (predicted < 0) throw new Error(`bad PNG filter ${filter}`);
-      pixels[dst + x] = (value + predicted) & 0xff;
+    const prev = dst - stride;
+    // One loop per filter type (rows of a screenshot are mostly "none"/"sub"/"up"): no per-byte branching.
+    switch (filter) {
+      case 0:
+        pixels.set(raw.subarray(src, src + stride), dst);
+        break;
+      case 1:
+        for (let x = 0; x < stride; x += 1) pixels[dst + x] = ((raw[src + x] ?? 0) + (x >= channels ? (pixels[dst + x - channels] ?? 0) : 0)) & 0xff;
+        break;
+      case 2:
+        for (let x = 0; x < stride; x += 1) pixels[dst + x] = ((raw[src + x] ?? 0) + (y > 0 ? (pixels[prev + x] ?? 0) : 0)) & 0xff;
+        break;
+      case 3:
+        for (let x = 0; x < stride; x += 1) {
+          const left = x >= channels ? (pixels[dst + x - channels] ?? 0) : 0;
+          const up = y > 0 ? (pixels[prev + x] ?? 0) : 0;
+          pixels[dst + x] = ((raw[src + x] ?? 0) + ((left + up) >> 1)) & 0xff;
+        }
+        break;
+      case 4:
+        for (let x = 0; x < stride; x += 1) {
+          const left = x >= channels ? (pixels[dst + x - channels] ?? 0) : 0;
+          const up = y > 0 ? (pixels[prev + x] ?? 0) : 0;
+          const upLeft = y > 0 && x >= channels ? (pixels[prev + x - channels] ?? 0) : 0;
+          pixels[dst + x] = ((raw[src + x] ?? 0) + paeth(left, up, upLeft)) & 0xff;
+        }
+        break;
+      default:
+        throw new Error(`bad PNG filter ${filter}`);
     }
   }
   const image = createRgba(width, height);
-  for (let i = 0, p = 0; i < width * height; i += 1, p += channels) {
-    const o = i * 4;
-    const [a, b, c, d] = [pixels[p] ?? 0, pixels[p + 1] ?? 0, pixels[p + 2] ?? 0, pixels[p + 3] ?? 0];
-    if (channels === 1 || channels === 2) image.data.set([a, a, a, channels === 2 ? b : 255], o);
-    else image.data.set([a, b, c, channels === 4 ? d : 255], o);
-  }
+  const out = image.data;
+  if (channels === 4) out.set(pixels);
+  else
+    for (let i = 0, p = 0, o = 0; i < width * height; i += 1, p += channels, o += 4) {
+      const a = pixels[p] ?? 0;
+      const grey = channels <= 2;
+      out[o] = a;
+      out[o + 1] = grey ? a : (pixels[p + 1] ?? 0);
+      out[o + 2] = grey ? a : (pixels[p + 2] ?? 0);
+      out[o + 3] = channels === 2 ? (pixels[p + 1] ?? 0) : channels === 4 ? (pixels[p + 3] ?? 0) : 255;
+    }
   return image;
 }
 

@@ -112,6 +112,11 @@ The exit code is 0 if every threshold passes, 1 if any fails, and 2 on a usage o
 `--fake` reads the DOM ground truth and adds seeded noise. It proves the harness and says nothing
 about Haiku's accuracy.
 
+The script reads frames as the server does (stateful extraction, `src/extraction.ts`): it uses the
+CaseDesk screen profile declared by the app (`apps/web/lib/server/perception/screen-profile.ts`,
+the editable fields), compiles the output grammars before the first frame, and in live mode writes
+every read (frame, read mode, latency, tokens, the model's answer) to `reads` in the JSON report.
+
 ## The recorded CaseDesk fixture (`test/fixtures/casedesk-recorded/`)
 - Committed: `fixture.json` (frame list + DOM ground truth) and `frames.sha256` (one line per frame file).
 - Not committed: `frames/` (55 MiB of PNGs). Before an eval, verify the frames with `cd frames && sha256sum -c ../frames.sha256`. Every published metric in `docs/evidence/p2/` was computed on frames that match this manifest.

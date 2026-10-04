@@ -11,6 +11,7 @@ import {
   type GateMode,
   type LatencySample,
 } from "../src/gate/index";
+import { runScript } from "../src/gate/simulate";
 import type { GateAuthorization } from "../src/schemas/gate";
 import type { Question } from "../src/schemas/engine";
 import { fakeClock, q, queue, stateOf } from "./gate-support";
@@ -39,7 +40,7 @@ describe("config", () => {
       userSilenceMs: 1200,
       screenIdleMs: 1500,
       typingIdleMs: 1500,
-      liveBudget: { max: 5, windowMs: 600_000 },
+      liveBudget: { max: 5, windowMs: 600_000, kinds: ["why_probe", "counterfactual", "concept_definition"] },
       authorizationTtlMs: 4000,
     });
     expect(cfg.tickMs).toBeLessThanOrEqual(50);
@@ -144,6 +145,36 @@ describe("evaluateGate: each condition", () => {
     expect(failing([...asked.slice(3), BASE[0]!, queue(100_000, q("q6"))], 100_000)).toEqual([]);
   });
 
+  it("budgets live question kinds only: debrief and tutor questions neither wait for nor spend it", () => {
+    const live = [0, 1, 2, 3, 4].flatMap((i) => askedAndSpoken(i * 10_000, q(`live${i}`, { kind: "why_probe" })));
+    const exhausted = (top: Question): GateEvent[] => [...live, BASE[0]!, queue(100_000, top)];
+    expect(failing(exhausted(q("q6", { kind: "concept_definition" })), 100_000)).toEqual(["budget"]);
+    for (const kind of ["witness", "teach_back", "prediction"] as const) {
+      const e = evalAt(exhausted(q("q6", { kind })), 100_000);
+      expect(e.decision).toBe("authorize");
+      expect(e.conditions.budget).toEqual({ ok: true, waitMs: 0 });
+    }
+
+    const debrief = [0, 1, 2, 3, 4, 5, 6].flatMap((i) =>
+      askedAndSpoken(i * 10_000, q(`d${i}`, { kind: i % 2 === 0 ? "witness" : "teach_back" })),
+    );
+    const afterDebrief = (top: Question): GateEvent[] => [...debrief, BASE[0]!, queue(100_000, top)];
+    expect(failing(afterDebrief(q("d7", { kind: "teach_back" })), 100_000)).toEqual([]);
+    const liveAfter = evalAt(afterDebrief(q("live", { kind: "counterfactual" })), 100_000);
+    expect(liveAfter.decision).toBe("authorize");
+    // Four live questions plus any number of debrief ones still leave room for a fifth live question.
+    const mixed = [...live.slice(3), ...debrief];
+    expect(failing([...mixed, BASE[0]!, queue(100_000, q("q6"))], 100_000)).toEqual([]);
+  });
+
+  it("honours a configured set of budgeted kinds", () => {
+    const strict = GateConfigSchema.parse({ liveBudget: { max: 1, kinds: ["witness"] } });
+    const events: GateEvent[] = [...askedAndSpoken(0, q("w1", { kind: "witness" })), BASE[0]!];
+    const at = (top: Question) => evaluateGate(stateOf([...events, queue(10_000, top)], strict), 20_000, "interviewer", strict);
+    expect(at(q("w2", { kind: "witness" })).conditions.budget.ok).toBe(false);
+    expect(at(q("c1", { kind: "counterfactual" })).decision).toBe("authorize");
+  });
+
   it("never authorizes off the record, and restarts the clock when back on", () => {
     const off: GateEvent[] = [...BASE, { kind: "off_record", t: 5000, on: true }];
     expect(failing(off)).toEqual(["notOffRecord"]);
@@ -187,6 +218,23 @@ describe("evaluateGate: each condition", () => {
   it("lists what it waits for, with seconds where time alone resolves it", () => {
     const e = evalAt([queue(0, q("q1")), { kind: "typing", t: 9201 }, { kind: "vad", t: 9500, value: 0.8 }]);
     expect(e.reason).toBe("waiting: Speaking, Typing 0.8 s, Breakpoint");
+  });
+});
+
+describe("live budget through the controller (simulation)", () => {
+  it("authorizes 7 debrief questions and then still 5 live ones, holding back only the 6th live question", () => {
+    const debrief = Array.from({ length: 7 }, (_, i) =>
+      queue(i * 20_000, q(`d${i}`, { kind: i % 2 === 0 ? "witness" : "teach_back", t: i * 20_000 })),
+    );
+    const live = Array.from({ length: 6 }, (_, i) =>
+      queue(140_000 + i * 20_000, q(`l${i}`, { kind: "why_probe", t: 140_000 + i * 20_000 })),
+    );
+    const script = [{ kind: "breakpoint", t: 0, at: true } as const, ...debrief, ...live];
+    const { authorizations } = runScript(script, {}, { untilMs: 300_000 });
+    expect(authorizations.map((a) => a.questionId)).toEqual([
+      ...debrief.map((_, i) => `d${i}`),
+      ...live.slice(0, 5).map((_, i) => `l${i}`),
+    ]);
   });
 });
 

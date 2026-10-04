@@ -39,14 +39,14 @@ describe("simulated expert", () => {
         expect(rule, `statement ${s.rule.exactQuote} on ${c.caseId}`).toBeDefined();
         // Vagueness 0: the statement is the oracle rule itself.
         expect(canonicalJson(s.rule.predicate)).toBe(canonicalJson(rule?.predicate));
-        expect(s.effect).toEqual(rule?.effect);
+        expect(s.rule.effect).toEqual(rule?.effect);
         expect(s.priority).toBe(rule?.priority);
       }
       // The decisive rule is always among them, unless no rule decided (then the default is stated).
       if (verdict.firedRuleIds.length === 0) {
         defaults++;
         expect(answer).toEqual({ kind: "why", statements: [], defaultAction: verdict.action });
-      } else expect(answer.statements.some((s) => s.effect.type === "recommend" && s.effect.action === verdict.action)).toBe(true);
+      } else expect(answer.statements.some((s) => s.rule.effect.type === "recommend" && s.rule.effect.action === verdict.action)).toBe(true);
     }
     expect(defaults).toBeGreaterThan(0);
   });
@@ -91,7 +91,7 @@ describe("simulated expert", () => {
       expect(expert.decide(c.caseId, c.features)).toBe(oracleVerdict(c.features).action);
       for (const s of why(expert, c.caseId).statements) {
         const rule = FAMILY_RULES.find((r) => statementId(r.id) === s.id);
-        expect(s.effect).toEqual(rule?.effect);
+        expect(s.rule.effect).toEqual(rule?.effect);
         if (canonicalJson(s.rule.predicate) !== canonicalJson(rule?.predicate)) blurred++;
       }
     }

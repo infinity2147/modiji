@@ -4,7 +4,9 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./extraction": "./src/extraction.ts"
+    "./extraction": "./src/extraction.ts",
+    "./backfill": "./src/backfill.ts",
+    "./png": "./src/png.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json"

@@ -1,4 +1,4 @@
-import { ActionIdSchema, PredicateSchema, type Assignment, type Predicate } from "@vashistha/core";
+import { ActionIdSchema, PredicateSchema, StatedRuleSchema, type Assignment, type Predicate } from "@vashistha/core";
 import { describe, expect, it } from "vitest";
 import { statementId, type ExpertStatement, type TranscriptEntry } from "../src/expert";
 import { fitPolicy } from "../src/learner";
@@ -25,8 +25,7 @@ const at = (patch: Record<string, unknown>): Assignment => ({ ...CLEAN, ...patch
 function sanctionsOnly(predicate: Predicate): ReturnType<typeof fitPolicy> {
   const statement: ExpertStatement = {
     id: statementId("nsrp.sanctions.reject"),
-    rule: { predicate, action: ActionIdSchema.parse("reject"), kind: "decision", exactQuote: "If sanctions match, reject.", t0Ms: 0, t1Ms: 0 },
-    effect: { type: "recommend", action: ActionIdSchema.parse("reject") },
+    rule: StatedRuleSchema.parse({ predicate, action: "reject", kind: "decision", effect: { type: "recommend", action: "reject" }, exactQuote: "If sanctions match, reject.", t0Ms: 0, t1Ms: 0 }),
     priority: 100,
     overrides: [],
   };
@@ -58,8 +57,15 @@ describe("metrics on hand-made cases", () => {
       statements: [
         {
           id: statementId("nsrp.pep.approval"),
-          rule: { predicate: PredicateSchema.parse({ "==": [{ var: "pep" }, true] }), action: ActionIdSchema.parse("approve"), kind: "guardrail", exactQuote: "PEP needs sign-off.", t0Ms: 0, t1Ms: 0 },
-          effect: { type: "require_approval", role: "compliance_officer" },
+          rule: StatedRuleSchema.parse({
+            predicate: { "==": [{ var: "pep" }, true] },
+            action: "approve",
+            kind: "guardrail",
+            effect: { type: "require_approval", role: "compliance_officer" },
+            exactQuote: "PEP needs sign-off.",
+            t0Ms: 0,
+            t1Ms: 0,
+          }),
           priority: 90,
           overrides: [],
         },

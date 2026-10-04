@@ -67,8 +67,11 @@ function conditionOkAt(s: GateState, q: Question | null, cfg: GateConfig): Recor
   const afterSpeech = s.speechEndedAt + cfg.userSilenceMs;
   // After an agent turn the expert has the floor: wait for an answer, or for the answer window to pass.
   const unanswered = s.agentTurnEndedAt > s.speechEndedAt;
-  const { max, windowMs } = cfg.liveBudget;
-  const budgetSlot = s.asked.length < max ? undefined : s.asked[s.asked.length - max];
+  // The live budget binds live questions only, and only live questions spend it.
+  const { max, windowMs, kinds } = cfg.liveBudget;
+  const budgeted = q !== null && kinds.includes(q.kind);
+  const spent = budgeted ? s.asked.filter((a) => kinds.includes(a.kind)) : [];
+  const budgetSlot = spent.length < max ? undefined : spent[spent.length - max];
   return {
     userSilent: userSpeaking
       ? Infinity
@@ -88,8 +91,8 @@ function conditionOkAt(s: GateState, q: Question | null, cfg: GateConfig): Recor
 /**
  * The deterministic speech gate (plan §7.2): authorize iff the user is silent ≥ userSilenceMs, the
  * screen and keyboard are idle, the work is at a breakpoint (or the question is ephemeral), the top
- * question is worth ≥ θ_ask, the live budget allows, the session is on the record and the agent is
- * idle with nothing in flight. Tutor interventions need only "on the record" and an idle agent:
+ * question is worth ≥ θ_ask, the live budget allows (live question kinds only), the session is on
+ * the record and the agent is idle with nothing in flight. Tutor interventions need only "on the record" and an idle agent:
  * safety overrides politeness (plan §7.4). Off the record nothing is ever authorized (plan §7.8).
  */
 export function evaluateGate(s: GateState, now: number, mode: GateMode, cfg: GateConfig): GateEvaluation {

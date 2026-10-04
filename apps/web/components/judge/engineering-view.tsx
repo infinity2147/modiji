@@ -93,7 +93,7 @@ export function EngineeringView({ sessionId, gate }: { sessionId: string; gate: 
         <p className="text-muted-foreground">
           Thresholds: silence {DEFAULT_GATE_CONFIG.userSilenceMs} ms · screen {DEFAULT_GATE_CONFIG.screenIdleMs} ms · typing{" "}
           {DEFAULT_GATE_CONFIG.typingIdleMs} ms · θ<sub>ask</sub> {DEFAULT_GATE_CONFIG.thetaAsk} bits · budget{" "}
-          {DEFAULT_GATE_CONFIG.liveBudget.max}/{DEFAULT_GATE_CONFIG.liveBudget.windowMs / 60_000} min
+          {DEFAULT_GATE_CONFIG.liveBudget.max}/{DEFAULT_GATE_CONFIG.liveBudget.windowMs / 60_000} min (live questions only: {DEFAULT_GATE_CONFIG.liveBudget.kinds.join(", ")})
         </p>
       </Panel>
 
@@ -173,6 +173,10 @@ export function EngineeringView({ sessionId, gate }: { sessionId: string; gate: 
           <>
             <p className="font-mono">
               {engine.engine.confirmedRules} confirmed rule(s) · rulebook rev {engine.engine.rulebookRevision}
+            </p>
+            <p className="font-mono" data-testid="answer-parser">
+              Answer parser: {engine.engine.answerParser.available ? "available" : "unavailable (no model)"} · unparsed answers{" "}
+              <span className={engine.engine.answerParser.unparsedAnswers > 0 ? "text-destructive" : undefined}>{engine.engine.answerParser.unparsedAnswers}</span>
             </p>
             {engine.engine.families.map((f) => (
               <div key={f.decisionFamily} className="grid gap-0.5">

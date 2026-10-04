@@ -1,8 +1,9 @@
 import { chmodSync, mkdtempSync, readdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { EnvError } from "@vashistha/core/server";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { EnvError, loadServerEnv } from "@vashistha/core/server";
+import { deepHealth } from "../../lib/server/health";
 import { createRuntime } from "../../lib/server/runtime-init";
 import { getRuntime } from "../../lib/server/runtime";
 
@@ -15,6 +16,7 @@ afterEach(() => {
   rmSync(dataDir, { recursive: true, force: true });
 });
 
+const SESSION = { id: "s", privacyEpoch: 0, offRecord: false };
 const baseEnv = () => ({ NODE_ENV: "test", PUBLIC_BASE_URL: "http://localhost:3000", DATA_DIR: dataDir });
 
 describe("createRuntime", () => {
@@ -40,6 +42,35 @@ describe("createRuntime", () => {
     }
   });
 
+  it("constructs no model client when LLM_CALLS=off, even with ANTHROPIC_API_KEY set", () => {
+    const info = vi.spyOn(console, "info").mockImplementation(() => undefined);
+    const keyed = { ...baseEnv(), ANTHROPIC_API_KEY: "sk-ant-test-not-a-real-key" };
+    const on = createRuntime(keyed);
+    try {
+      expect(on.runtime.env.LLM_CALLS).toBe("on");
+      expect(on.runtime.claude).not.toBeNull();
+      expect(on.runtime.perception.state(SESSION)).toMatchObject({ extraction: "available", unavailableReason: null });
+    } finally {
+      on.close();
+    }
+    const off = createRuntime({ ...keyed, LLM_CALLS: "off" });
+    try {
+      expect(off.runtime.env.LLM_CALLS).toBe("off");
+      expect(off.runtime.claude).toBeNull();
+      expect(off.runtime.perception.state(SESSION)).toMatchObject({ extraction: "unavailable", unavailableReason: "disabled" });
+      expect(info).toHaveBeenCalledWith(expect.stringContaining("LLM_CALLS=off: model calls disabled"));
+    } finally {
+      off.close();
+      info.mockRestore();
+    }
+  });
+
+  it("rejects an invalid LLM_CALLS naming the variable, never the value", () => {
+    expect(() => createRuntime({ ...baseEnv(), LLM_CALLS: "nope-value" })).toThrow(
+      expect.objectContaining({ name: "EnvError", variables: ["LLM_CALLS"], message: expect.not.stringContaining("nope-value") }),
+    );
+  });
+
   it("fails fast with an EnvError that names variables but not values", () => {
     const shortSecret = "too-short-secret-value";
     let caught: unknown;
@@ -54,6 +85,24 @@ describe("createRuntime", () => {
     expect(message).not.toContain(shortSecret);
     expect(message).not.toContain("70000");
     expect(() => getRuntime()).toThrow();
+  });
+});
+
+describe("deep health response", () => {
+  const checks = (z3: boolean) => ({
+    db: () => ({ ok: true as const, ms: 1 }),
+    dataDir: async () => ({ ok: true as const, ms: 1 }),
+    z3: async () => (z3 ? { ok: true as const, ms: 1 } : { ok: false as const, error: "boom" }),
+  });
+
+  it("reports llmCalls from the environment, without letting it affect ok", async () => {
+    const env = loadServerEnv({ ...baseEnv(), LLM_CALLS: "off" });
+    expect(await deepHealth({ env, checks: checks(true) })).toMatchObject({ ok: true, llmCalls: "off" });
+    expect(await deepHealth({ env: { ...env, LLM_CALLS: "on" }, checks: checks(false) })).toMatchObject({
+      ok: false,
+      z3: { ok: false, error: "boom" },
+      llmCalls: "on",
+    });
   });
 });
 

@@ -32,7 +32,9 @@ const STATED_RULE: LlmAnswer["statedRules"][number] = {
       { feature: "uboVerified", op: "==", value: false },
     ],
   },
+  polarity: "recommend",
   action: "enhancedReview",
+  approvalRole: null,
   kind: "decision",
   exactQuote: STATEMENT,
 };

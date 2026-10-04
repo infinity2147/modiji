@@ -15,12 +15,17 @@ import { randomUUID } from "node:crypto";
 import {
   ConfirmedRuleSchema,
   QuestionSchema,
+  RULE_PRIORITY_BY_KIND,
+  SCREEN_FRAME_KIND,
+  StatedRuleSchema,
   canonicalJson,
   cellPredicate,
+  conditionListToPredicate,
   contentId,
   explainObserved,
   parseLedgerPayload,
   promoteToConfirmedRule,
+  typecheckPredicate,
   type ActionId,
   type CandidateRule,
   type ConfirmedRule,
@@ -30,6 +35,7 @@ import {
   type LedgerReader,
   type NonQuoteLink,
   type PromotionResult,
+  type StatedRule,
   type Witness,
 } from "@vashistha/core";
 import type { ExpertActionRequest } from "../../contracts/debrief";
@@ -38,12 +44,12 @@ import { requireOnRecord } from "../casedesk/session";
 import { entry, type EntryContext, type PayloadInput } from "../interview/ledger";
 import type { DebriefDeps } from "./deps";
 import { witnessQuestion } from "./questions";
-import { DOMAIN, SCHEMA_VERSION, cellOf, expertIdOf, isGap, isOpen, pendingVoiceAnswers, ruleEntries, snapshot, type Snapshot } from "./state";
+import { DOMAIN, cellOf, expertIdOf, isGap, isOpen, pendingVoiceAnswers, ruleEntries, snapshot, type Snapshot } from "./state";
 import { writeTeachBack } from "./teachback";
 
-/** Priority of rules confirmed in the debrief (the interview engine's priority for plain decisions). */
-const DEBRIEF_RULE_PRIORITY = 10;
-/** Frames (or screen events) cited per quote at most. */
+/** Priority of decision rules confirmed in the debrief (the interview engine's priority for plain decisions). */
+const DEBRIEF_RULE_PRIORITY = RULE_PRIORITY_BY_KIND.decision;
+/** Frames cited per quote at most. */
 const MAX_MOMENT_IDS = 8;
 /** "yes", "that's right", "correct" … with no "but"/"not": the only voice reply taken as a teach-back confirmation. */
 const AFFIRMATIVE = /^\s*(yes|yeah|yep|correct|exactly|right|that'?s (right|correct))\b/i;
@@ -92,26 +98,53 @@ class Writer {
   }
 }
 
-/**
- * The screen moment a quote is tied to (ExpertQuoteEvidence requires at least one): the redacted
- * frames of the decisions concerned; else the session's latest frame; else — in a DOM-only CaseDesk
- * session without screen capture — the DOM screen events of those decisions, the session's record of
- * what was on screen. Undefined when the session has none of these.
- */
-export function screenMoment(snap: Snapshot, decisionIds: readonly string[]): [string, ...string[]] | undefined {
-  const concerned = snap.decisions.filter((d) => decisionIds.includes(d.entry.id));
-  const frames = concerned.flatMap((d) => d.frameIds);
-  const latestFrame = snap.entries.findLast((e) => e.kind === "frame.received")?.id;
-  const events = concerned.flatMap((d) => d.eventIds);
-  const latestEvent = snap.entries.findLast((e) => e.kind === "screen.event")?.id;
-  const pick = frames.length > 0 ? frames : latestFrame !== undefined ? [latestFrame] : events.length > 0 ? events : latestEvent !== undefined ? [latestEvent] : [];
-  const [first, ...rest] = pick.slice(-MAX_MOMENT_IDS);
+/** The session's redacted screen frames (perception uploads), in ledger order. */
+function sessionFrames(snap: Snapshot): LedgerEntry[] {
+  return snap.entries.filter((e) => e.kind === SCREEN_FRAME_KIND && e.source === "client");
+}
+
+function nonEmpty(ids: readonly string[]): [string, ...string[]] | undefined {
+  const [first, ...rest] = ids.slice(-MAX_MOMENT_IDS);
   return first === undefined ? undefined : [first, ...rest];
+}
+
+/**
+ * The redacted screen frames a typed quote is tied to (ExpertQuoteEvidence requires at least one):
+ * the frames captured while the decisions concerned were worked; else the session's latest frame —
+ * every frame of the session precedes the expert's typed words. Only real `frame.received` entries
+ * count: DOM screen events never stand in for a frame. Undefined when the expert never shared their
+ * screen.
+ */
+function screenMoment(snap: Snapshot, decisionIds: readonly string[]): [string, ...string[]] | undefined {
+  const concerned = snap.decisions.filter((d) => decisionIds.includes(d.entry.id)).flatMap((d) => d.frameIds);
+  return nonEmpty(concerned) ?? nonEmpty(sessionFrames(snap).slice(-1).map((f) => f.id));
+}
+
+/**
+ * The frames of an explicit moment of the session (`momentEntryId`): the frame itself; a decision's
+ * own frames, else the latest frame before it; for any other entry, the latest frame at or before it.
+ * Without a moment, the session's latest frame. Never a frame captured after the moment.
+ */
+function momentFrames(snap: Snapshot, momentEntryId: string | undefined): [string, ...string[]] | undefined {
+  if (momentEntryId === undefined) return screenMoment(snap, []);
+  const moment = snap.entries.find((e) => e.id === momentEntryId);
+  if (moment === undefined) throw new ApiFailure(400, "unknown_moment", `${momentEntryId} is not an entry of this session`);
+  if (moment.kind === SCREEN_FRAME_KIND && moment.source === "client") return [moment.id];
+  const own = snap.decisions.find((d) => d.entry.id === moment.id)?.frameIds ?? [];
+  return nonEmpty(own) ?? nonEmpty(sessionFrames(snap).filter((f) => f.sequence <= moment.sequence).slice(-1).map((f) => f.id));
+}
+
+function noScreenFrame(): ApiFailure {
+  return new ApiFailure(
+    409,
+    "no_screen_frame",
+    "no redacted screen frame of this session is on record at or before the expert's words: share your screen during capture, so every confirmed rule shows what the expert saw",
+  );
 }
 
 function requireMoment(snap: Snapshot, decisionIds: readonly string[]): [string, ...string[]] {
   const moment = screenMoment(snap, decisionIds);
-  if (moment === undefined) throw new ApiFailure(409, "no_screen_moment", "the session has no frame or screen event to tie the expert's words to");
+  if (moment === undefined) throw noScreenFrame();
   return moment;
 }
 
@@ -121,7 +154,7 @@ type RuleShape = Pick<ConfirmedRule, "id" | "decisionFamily" | "kind" | "predica
 function explainedBy(snap: Snapshot, rule: RuleShape): string[] {
   const rules: RuleShape[] = [...snap.book.rules.filter((r) => r.id !== rule.id), rule];
   return snap.decisions
-    .filter((d) => d.decisionFamily === rule.decisionFamily && explainObserved(DOMAIN, rules, d).ruleIds.includes(rule.id))
+    .filter((d) => d.decisionFamily === rule.decisionFamily && explainObserved(snap.domain, rules, d).ruleIds.includes(rule.id))
     .map((d) => d.entry.id);
 }
 
@@ -145,7 +178,7 @@ function decisionLinks(ids: readonly string[]): NonQuoteLink[] {
 
 /** The ledger as promotion sees it before the expert statement is written. */
 function withPendingStatement(deps: DebriefDeps): LedgerReader {
-  return { get: (id) => (id === PENDING_STATEMENT ? { id, source: "expert" } : deps.ledger.get(id)) };
+  return { get: (id) => (id === PENDING_STATEMENT ? { id, source: "expert", kind: "expert.statement" } : deps.ledger.get(id)) };
 }
 
 function promoted(result: PromotionResult): ConfirmedRule {
@@ -173,19 +206,19 @@ function newRule(deps: DebriefDeps, snap: Snapshot, input: NewRule): ConfirmedRu
   return promoted(
     promoteToConfirmedRule({
       ruleId: input.ruleId,
-      domain: DOMAIN,
+      domain: snap.domain,
       decisionFamily: input.family,
       source:
         "candidate" in input.source
           ? { candidate: input.source.candidate }
-          : { statedRule: { predicate, action, kind: "decision", exactQuote: quote.exactQuote, t0Ms: quote.t0Ms, t1Ms: quote.t1Ms } },
+          : { statedRule: { predicate, action, kind: "decision", effect: { type: "recommend", action }, exactQuote: quote.exactQuote, t0Ms: quote.t0Ms, t1Ms: quote.t1Ms } },
       priority: DEBRIEF_RULE_PRIORITY,
       overrides: [],
       evidence: input.evidence,
       links: decisionLinks(explainedBy(snap, shape)),
       confirmation: { expertId, at: deps.now(), method: "debrief", ledgerEntryId: input.confirmationEntryId },
       expertId,
-      schemaVersion: SCHEMA_VERSION,
+      schemaVersion: snap.schemaVersion,
       ledger: input.ledger,
     }),
   );
@@ -207,15 +240,18 @@ function revisedRule(
   const unknownOverride = change.overrides.find((id) => id === old.id || !snap.book.rules.some((r) => r.id === id));
   if (unknownOverride !== undefined) throw new ApiFailure(400, "invalid_override", `${unknownOverride} is not another live rule`);
   const family = familyOf(old.decisionFamily);
-  const nominal = old.effect.type === "recommend" ? old.effect.action : family.actions[0];
+  const nominal = old.effect.type === "recommend" || old.effect.type === "forbid" ? old.effect.action : family.actions[0];
   if (nominal === undefined) throw new ApiFailure(400, "unknown_family", `family ${family.id} has no actions`);
   const expertId = expertIdOf(snap.loaded.session.id);
   const check = promoted(
     promoteToConfirmedRule({
       ruleId: old.id,
-      domain: DOMAIN,
+      domain: snap.domain,
       decisionFamily: old.decisionFamily,
-      source: { statedRule: { predicate: change.predicate, action: nominal, kind: old.kind, exactQuote: input.quote.exactQuote, t0Ms: input.quote.t0Ms, t1Ms: input.quote.t1Ms } },
+      // The stated rule is a validation vehicle (quote in evidence, predicate, family); `kind` and `effect` below keep the rule's own.
+      source: {
+        statedRule: { predicate: change.predicate, action: nominal, kind: "decision", effect: { type: "recommend", action: nominal }, exactQuote: input.quote.exactQuote, t0Ms: input.quote.t0Ms, t1Ms: input.quote.t1Ms },
+      },
       kind: old.kind,
       effect: old.effect,
       priority: change.priority,
@@ -223,7 +259,7 @@ function revisedRule(
       evidence: [input.quote],
       confirmation: { expertId, at: deps.now(), method: input.method, ledgerEntryId: input.confirmationEntryId },
       expertId,
-      schemaVersion: SCHEMA_VERSION,
+      schemaVersion: snap.schemaVersion,
       ledger: input.ledger,
     }),
   );
@@ -279,8 +315,8 @@ async function resolveVanished(deps: DebriefDeps, before: Snapshot, w: Writer, r
 
 /**
  * Records every current witness (`witness.found`, source solver), queues a debrief question for each
- * open one that has none live, and drops queued questions whose witness is closed or gone (the
- * interview engine's requeue may also drop them; they are re-queued here while their witness is open).
+ * open one that has none live, and drops queued questions whose witness is closed or gone. (The
+ * interview engine's requeue supersedes only live-interview kinds, never these.)
  */
 function recordAndAsk(deps: DebriefDeps, snap: Snapshot, w: Writer): void {
   const sessionId = snap.loaded.session.id;
@@ -336,7 +372,11 @@ function applyVoiceAnswer(deps: DebriefDeps, snap: Snapshot, w: Writer, utteranc
   const predicate = cellPredicate(cellOf(snap, wit));
   if (predicate === undefined) return undefined;
   const [frame, ...frames] = record.frameIds;
-  const moment: [string, ...string[]] = frame === undefined ? requireMoment(snap, familyDecisionIds(snap, wit.decisionFamily)) : [frame, ...frames];
+  const moment = frame === undefined ? screenMoment(snap, familyDecisionIds(snap, wit.decisionFamily)) : ([frame, ...frames] as [string, ...string[]]);
+  if (moment === undefined) {
+    deps.log.info(`[debrief] voice answer ${utterance.id} not applied: no redacted screen frame is on record for it`);
+    return undefined;
+  }
   const quote: ExpertQuoteEvidence = { kind: "expert_quote", utteranceId: utterance.id, exactQuote: record.text, t0Ms: record.t0Ms, t1Ms: record.t1Ms, frameIds: moment, eventIds: [], relation: "supports", provenance: "human_voice" };
   const rule = newRule(deps, snap, {
     ruleId: contentId("rule", canonicalJson({ utterance: utterance.id, witness: wit.id })),
@@ -420,6 +460,27 @@ export function generateTeachBack(deps: DebriefDeps, sessionId: string): Promise
 }
 
 // ── Explicit expert actions (UI, when voice is not used) ──
+
+/**
+ * The stop-rule the expert typed, as a stated guardrail: the condition list converted and type-checked
+ * against the domain, the action checked against the family, and refused when the same guardrail is
+ * already in force.
+ */
+function statedStopRule(snap: Snapshot, req: Extract<ExpertActionRequest, { action: "confirm_stop_rule" }>): StatedRule {
+  const family = familyOf(req.decisionFamily);
+  if (!family.actions.includes(req.effect.action)) throw new ApiFailure(400, "invalid_action", `${req.effect.action} is not an action of ${family.id}`);
+  const converted = conditionListToPredicate(req.when);
+  if (!converted.ok) throw new ApiFailure(400, "invalid_predicate", converted.reasons.join("; "));
+  const issues = typecheckPredicate(converted.predicate, snap.domain.features);
+  if (issues.length > 0) throw new ApiFailure(400, "invalid_predicate", issues.map((i) => `${i.path || "/"}: ${i.message}`).join("; "));
+  const effect = req.effect.type === "forbid" ? req.effect : { type: req.effect.type, role: req.effect.role };
+  const stated = StatedRuleSchema.safeParse({ predicate: converted.predicate, action: req.effect.action, kind: "guardrail", effect, exactQuote: req.quote, t0Ms: 0, t1Ms: 0 });
+  if (!stated.success) throw new ApiFailure(400, "invalid_stop_rule", stated.error.issues.map((i) => i.message).join("; "));
+  const same = canonicalJson([family.id, stated.data.predicate, stated.data.effect]);
+  if (snap.book.rules.some((r) => canonicalJson([r.decisionFamily, r.predicate, r.effect]) === same))
+    throw new ApiFailure(409, "rule_exists", "this stop-rule is already in the confirmed rulebook");
+  return stated.data;
+}
 
 function currentWitness(snap: Snapshot, witnessId: string): { witness: Witness; found: LedgerEntry } {
   const witness = snap.current.find((c) => c.id === witnessId);
@@ -534,6 +595,34 @@ export function applyExpertAction(deps: DebriefDeps, sessionId: string, req: Exp
         const { witness, found } = currentWitness(snap, req.witnessId);
         if (witness.kind !== "boundary") throw new ApiFailure(409, "not_a_boundary", "only threshold checks are confirmed as they stand");
         statementEntry = statement([found.id, snap.questions.get(witness.id)?.queuedEntryId], { text: req.quote, intent: "confirm_boundary", target: { witnessId: witness.id } });
+        break;
+      }
+      case "confirm_stop_rule": {
+        const stated = statedStopRule(snap, req);
+        const frames = momentFrames(snap, req.momentEntryId);
+        if (frames === undefined) throw noScreenFrame();
+        const momentDecision = snap.decisions.find((d) => d.entry.id === req.momentEntryId)?.entry.id;
+        const make = (statementId: string, ledger: LedgerReader): ConfirmedRule =>
+          promoted(
+            promoteToConfirmedRule({
+              ruleId: contentId("rule", canonicalJson({ stopRule: statementId })),
+              domain: snap.domain,
+              decisionFamily: req.decisionFamily,
+              source: { statedRule: stated },
+              priority: RULE_PRIORITY_BY_KIND.guardrail,
+              overrides: [],
+              evidence: [typedQuote(statementId, req.quote, frames)],
+              links: decisionLinks(momentDecision === undefined ? [] : [momentDecision]),
+              confirmation: { expertId: expertIdOf(sessionId), at: deps.now(), method: "debrief", ledgerEntryId: statementId },
+              expertId: expertIdOf(sessionId),
+              schemaVersion: snap.schemaVersion,
+              ledger,
+            }),
+          );
+        make(PENDING_STATEMENT, pending);
+        statementEntry = statement([req.momentEntryId], { text: req.quote, intent: "confirm_stop_rule", target: { action: req.effect.action } });
+        const rule = make(statementEntry.id, deps.ledger);
+        change = { entry: w.append("rule.confirmed", "engine", [statementEntry.id, req.momentEntryId], { rule }), kind: "rule_added" };
         break;
       }
       case "confirm_teachback": {

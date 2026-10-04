@@ -15,12 +15,12 @@ import { registerHooks } from "node:module";
 import { join, resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { KYC_DOMAIN } from "@vashistha/core/domains/kyc";
-import { evaluate, formatReport, FixtureSchema } from "../src/evaluation";
-import { buildExtractionRequest } from "../src/extraction";
-import { prepareUpload } from "../src/image";
+import { CASEDESK_SCREEN } from "../../../apps/web/lib/server/perception/screen-profile";
+import { evaluate, formatReport, FixtureSchema, percentile } from "../src/evaluation";
+import { executeRead, warmUpExtraction } from "../src/extraction";
+import { decodePng } from "../src/png";
 import { createRealClock, createVirtualClock, replaySession, type FrameExtractor, type ReplayFrame, type ReplayResult } from "../src/replay";
 import { createFakeExtractor } from "./fake-extractor";
-import { decodePng, encodePng } from "./png";
 
 const ROOT_ENV_FILE = new URL("../../../.env", import.meta.url);
 
@@ -60,7 +60,13 @@ const frames: ReplayFrame[] = fixture.frames.map((f) => ({
 }));
 const start = fixture.frames[0]?.captureTime ?? 0;
 
-const usage = { requests: 0, inputTokens: 0, outputTokens: 0, cacheReadTokens: 0 };
+const profile = CASEDESK_SCREEN;
+
+type ModeUsage = { requests: number; inputTokens: number; outputTokens: number; cacheReadTokens: number; latencyMs: number[] };
+const emptyUsage = (): ModeUsage => ({ requests: 0, inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, latencyMs: [] });
+const usage = { full: emptyUsage(), refresh: emptyUsage(), local: emptyUsage() };
+/** Every live read, for diagnosis: what was asked, how long it took, what the model answered. */
+const reads: Array<{ frameSeq: number; atMs: number; mode: string; latencyMs: number; inputTokens: number; outputTokens: number; output: unknown }> = [];
 
 async function liveExtractor(): Promise<FrameExtractor> {
   if (existsSync(ROOT_ENV_FILE)) process.loadEnvFile(ROOT_ENV_FILE);
@@ -69,25 +75,26 @@ async function liveExtractor(): Promise<FrameExtractor> {
   const { createClaude } = await import("@vashistha/core/server");
   const { ORACLE_MARKER } = await import("@vashistha/core/domains/kyc/oracle");
   const claude = createClaude({ apiKey, forbiddenMarkers: [ORACLE_MARKER] });
-  const encode = (image: { width: number; height: number; data: Uint8ClampedArray<ArrayBuffer> }) => ({
-    base64Png: encodePng(image).toString("base64"),
-    width: image.width,
-    height: image.height,
-  });
-  return async ({ image, bbox, ...context }) => {
-    const upload = prepareUpload(image, bbox);
-    const { request } = buildExtractionRequest({
-      ...context,
-      domain,
-      frame: { ...encode(upload.frame), sourceWidth: image.width, sourceHeight: image.height },
-      ...(upload.crop !== null && { crop: { ...encode(upload.crop.image), rect: upload.crop.rect } }),
+  // As the server does at start-up: the output grammars are compiled before the first frame.
+  await warmUpExtraction(claude, domain, profile);
+  return async (read) => {
+    const { reading, usage: u, latencyMs } = await executeRead(read, claude);
+    const m = usage[read.mode];
+    m.requests += 1;
+    m.inputTokens += u.input_tokens;
+    m.outputTokens += u.output_tokens;
+    m.cacheReadTokens += u.cache_read_input_tokens ?? 0;
+    m.latencyMs.push(Math.round(latencyMs));
+    reads.push({
+      frameSeq: read.context.frameSeq,
+      atMs: read.context.captureTime - start,
+      mode: read.mode,
+      latencyMs: Math.round(latencyMs),
+      inputTokens: u.input_tokens,
+      outputTokens: u.output_tokens,
+      output: reading.output,
     });
-    const { output, usage: u } = await claude.structured(request);
-    usage.requests += 1;
-    usage.inputTokens += u.input_tokens;
-    usage.outputTokens += u.output_tokens;
-    usage.cacheReadTokens += u.cache_read_input_tokens ?? 0;
-    return output;
+    return reading;
   };
 }
 
@@ -95,11 +102,11 @@ async function run(): Promise<ReplayResult> {
   const sessionEpoch = fixture.sessionEpoch;
   if (args.fake) {
     const clock = createVirtualClock(start);
-    const extract = createFakeExtractor({ domain, domEvents: fixture.domEvents, clock, seed });
-    return clock.run(() => replaySession({ domain, sessionEpoch, frames, extract, clock }));
+    const extract = createFakeExtractor({ domain, profile, domEvents: fixture.domEvents, clock, seed });
+    return clock.run(() => replaySession({ domain, profile, sessionEpoch, frames, extract, clock }));
   }
   const extract = await liveExtractor();
-  return replaySession({ domain, sessionEpoch, frames, extract, clock: createRealClock(start) });
+  return replaySession({ domain, profile, sessionEpoch, frames, extract, clock: createRealClock(start) });
 }
 
 const result = await run();
@@ -119,11 +126,15 @@ console.info(formatReport(report));
 console.info(
   `\npipeline: ${result.frames.changed}/${result.frames.total} frames changed · queue sent ${q.sent}, coalesced ${q.coalesced}, applied ${q.applied}, stale dropped ${q.staleDropped}, failed ${q.failed}`,
 );
-console.info(`dropped by validation: ${Object.keys(dropCounts).length === 0 ? "none" : JSON.stringify(dropCounts)} · proposed concepts: ${result.concepts.length}`);
+const conceptNames = [...new Set(result.concepts.map((c) => c.name))];
+console.info(
+  `dropped by validation: ${Object.keys(dropCounts).length === 0 ? "none" : JSON.stringify(dropCounts)} · proposed concepts: ${result.concepts.length} (${conceptNames.length} distinct names)`,
+);
 if (!args.fake)
-  console.info(
-    `usage: ${usage.requests} requests, ${usage.inputTokens} input tokens (${usage.cacheReadTokens} cache reads), ${usage.outputTokens} output tokens`,
-  );
+  for (const [mode, m] of Object.entries(usage))
+    console.info(
+      `usage (${mode} reads): ${m.requests} requests, ${m.inputTokens} input tokens (${m.cacheReadTokens} cache reads), ${m.outputTokens} output tokens; request p50 ${percentile(m.latencyMs, 50) ?? "n/a"} ms, p95 ${percentile(m.latencyMs, 95) ?? "n/a"} ms`,
+    );
 for (const error of result.errors) console.error(`error: ${error}`);
 
 if (args.out !== undefined) {
@@ -132,8 +143,9 @@ if (args.out !== undefined) {
     seed: args.fake ? seed : null,
     fixture: resolve(fixtureDir),
     report,
-    pipeline: { frames: result.frames, queue: q, dropped: dropCounts, concepts: result.concepts, errors: result.errors },
+    pipeline: { frames: result.frames, queue: q, dropped: dropCounts, concepts: result.concepts, conceptNames, errors: result.errors },
     usage: args.fake ? null : usage,
+    reads: args.fake ? null : reads,
   };
   writeFileSync(args.out, `${JSON.stringify(body, null, 2)}\n`);
   console.info(`\nJSON report: ${resolve(args.out)}`);

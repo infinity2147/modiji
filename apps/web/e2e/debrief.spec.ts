@@ -1,14 +1,18 @@
 /**
  * P5 end to end against the production server: an expert session seeded through the public APIs
- * (CaseDesk decisions, then two proposed rules confirmed with the expert's typed words), then the
- * debrief page — solver witnesses, typed answers, teach-back, a deliberate correction that revises a
- * rule, coverage closed — and the Work Map page with its lineage trace. Screenshots go to
- * docs/evidence/p5/. The server has no model key (placeholder), so prose is the labelled template.
+ * (CaseDesk decisions with a redacted screen frame uploaded through the frames route for each case,
+ * then two proposed rules confirmed with the expert's typed words), then the debrief page — solver
+ * witnesses, typed answers, teach-back, a deliberate correction that revises a rule, coverage closed —
+ * and the Work Map page with its frames and lineage trace. Every confirmation cites a real
+ * `frame.received`; a session whose screen was never shared is refused (409 `no_screen_frame`).
+ * Screenshots go to docs/evidence/p5/. The server runs with LLM_CALLS=off, so prose is the labelled
+ * template.
  */
 import { mkdirSync } from "node:fs";
 import { randomUUID } from "node:crypto";
 import { join } from "node:path";
 import { expect, test, type APIRequestContext, type Locator, type Page } from "@playwright/test";
+import { uploadFrame } from "./support/screen-frame";
 
 const EVIDENCE_DIR = join(import.meta.dirname, "../../../docs/evidence/p5");
 mkdirSync(EVIDENCE_DIR, { recursive: true });
@@ -21,14 +25,15 @@ async function ok<T>(response: Awaited<ReturnType<APIRequestContext["post"]>>): 
   return (await response.json()) as T;
 }
 
-/** An expert session with the three training cases decided through the CaseDesk APIs. */
-async function seedSession(request: APIRequestContext): Promise<string> {
+/** An expert session with the three training cases decided through the CaseDesk APIs (with screen frames unless `screen: false`). */
+async function seedSession(request: APIRequestContext, { screen = true }: { screen?: boolean } = {}): Promise<string> {
   const { sessionId } = await ok<{ sessionId: string }>(await request.post("/api/sessions", { data: { mode: "expert", caseSet: "training" } }));
   let frameSeq = 0;
   for (const [caseId, action] of Object.entries(DECISIONS)) {
     frameSeq += 1;
     const event = { id: randomUUID(), frameSeq, captureTime: Date.now(), sessionEpoch: 0, kind: "open_case", caseId, confidence: 1, source: "dom", critical: false };
     await ok(await request.post(`/api/sessions/${sessionId}/events`, { data: { events: [event] } }));
+    if (screen) await uploadFrame(request, sessionId, frameSeq);
     const { checkId } = await ok<{ checkId: string }>(await request.post("/api/interlock/check", { data: { sessionId, caseId, edits: {}, proposedAction: action } }));
     await ok(await request.post(`/api/sessions/${sessionId}/decisions`, { data: { caseId, edits: {}, action, checkId } }));
   }
@@ -133,7 +138,7 @@ test("debrief: witnesses → typed answers → teach-back correction → coverag
   await page.getByRole("link", { name: "Work Map" }).click();
   await expect(page.getByRole("heading", { name: "Work Map" })).toBeVisible();
   await expect(page.getByTestId("step")).toHaveCount(3);
-  await expect(page.getByText("no frame captured").first()).toBeVisible();
+  await expect(page.getByRole("img", { name: "Redacted frame of NS-2026-0101" })).toBeVisible();
   const clip = page.getByRole("button", { name: /Play clip: audio clip requires a voice session/ }).first();
   await expect(clip).toBeDisabled();
   await expect(page.getByTestId("rule-graph")).toBeVisible();
@@ -147,6 +152,7 @@ test("debrief: witnesses → typed answers → teach-back correction → coverag
   await page.getByTestId("step").first().getByRole("button", { name: /^Trace step 1$/ }).click();
   const chain = page.getByTestId("lineage-chain");
   await expect(chain.locator('[data-stage="screen_event"]')).toBeVisible();
+  await expect(chain.locator('[data-stage="frame"]').first()).toBeVisible();
   await expect(chain.locator('[data-stage="decision"]')).toBeVisible();
   await expect(chain.locator('[data-stage="confirmed_rule"]')).toBeVisible();
   await page.waitForTimeout(1_500);
@@ -157,4 +163,28 @@ test("debrief: witnesses → typed answers → teach-back correction → coverag
   await expect(chain.locator('[data-kind="expert.statement"]').first()).toBeVisible();
   await page.waitForTimeout(1_200);
   await page.screenshot({ path: evidence("workmap-quote-lineage.png") });
+});
+
+test("debrief: a session whose screen was never shared cannot confirm a rule (409 no_screen_frame)", async ({ request }) => {
+  const sessionId = await seedSession(request, { screen: false });
+  const state = await ok<{ proposals: Proposal[]; screenFrames: number }>(await request.get(`/api/sessions/${sessionId}/debrief`));
+  expect(state.screenFrames).toBe(0);
+  const p = state.proposals[0];
+  if (p === undefined) throw new Error("no proposal");
+  const confirm = await request.post(`/api/sessions/${sessionId}/debrief`, {
+    data: { action: "confirm_candidate", candidateId: p.candidateId, decisionFamily: p.decisionFamily, quote: "Yes, that is how I decide it." },
+  });
+  expect(confirm.status()).toBe(409);
+  expect(await confirm.json()).toMatchObject({ error: "no_screen_frame" });
+  const stop = await request.post(`/api/sessions/${sessionId}/debrief`, {
+    data: {
+      action: "confirm_stop_rule",
+      decisionFamily: "reviewOutcome",
+      when: { combinator: "all", conditions: [{ feature: "jurisdictionRisk", op: "==", value: "high" }] },
+      effect: { type: "forbid", action: "approve" },
+      quote: "Never approve a customer on a high-risk country list at desk level.",
+    },
+  });
+  expect(stop.status()).toBe(409);
+  expect(await stop.json()).toMatchObject({ error: "no_screen_frame" });
 });

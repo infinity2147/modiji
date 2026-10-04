@@ -58,4 +58,8 @@ read on 2026-12-01 (docs.railway.com/infrastructure-as-code). The IaC SDK (`rail
    ```sh
    pnpm preflight
    ```
-   It must be all green (plan §12).
+   It must be all green (plan §12). Never set `LLM_CALLS=off` on the service: that hermetic switch (used by
+   the e2e suite) makes the server build no Anthropic client at all. Preflight catches it in two places:
+   the `env` check fails if the local `.env` sets it, and `server-deep` fails unless the target's
+   `/api/health/deep` reports `"llmCalls": "on"` (the only check that sees the deployed environment;
+   `--target http://127.0.0.1:<port> --only server-deep` likewise fails a local server started with it off).

@@ -14,7 +14,7 @@ export function debriefDeps(): DebriefDeps {
     interview: runtime.interview,
     engineConfig: ENGINE_CONFIG,
     authorizations: runtime.authorizations,
-    rulebook: runtime.rulebookState,
+    rulebook: runtime.rulebookAllModels,
     solver: runtime.debrief.solver,
     claude: runtime.claude,
     models: runtime.debrief.models,

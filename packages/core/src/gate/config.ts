@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { LIVE_QUESTION_KINDS, QuestionKindSchema } from "../schemas/engine";
 
 const ms = z.int().nonnegative();
 
@@ -15,6 +16,8 @@ const ms = z.int().nonnegative();
  *   waits until they have answered and then been silent for `userSilenceMs`, or until this window has
  *   passed with no answer. Without it the next question could fire 1.2 s after the previous one ends,
  *   while the expert is still thinking about their answer.
+ * - `liveBudget` (5 per 10 min) caps live interview questions only (`kinds`, default
+ *   `LIVE_QUESTION_KINDS`): a question of another kind neither spends the budget nor waits for it.
  * - `tickMs` ≤ 50: the controller wakes exactly when conditions can become valid and also ticks at
  *   this period as a fallback for late or early timers, keeping authorization ≤ 250 ms with margin.
  */
@@ -25,7 +28,11 @@ export const GateConfigSchema = z.strictObject({
   vadSpeakingThreshold: z.number().gt(0).lt(1).default(0.4),
   thetaAsk: z.number().nonnegative().default(0.3),
   liveBudget: z
-    .strictObject({ max: z.int().positive().default(5), windowMs: z.int().positive().default(600_000) })
+    .strictObject({
+      max: z.int().positive().default(5),
+      windowMs: z.int().positive().default(600_000),
+      kinds: z.array(QuestionKindSchema).default(() => [...LIVE_QUESTION_KINDS]),
+    })
     .prefault({}),
   authorizationTtlMs: z.int().positive().default(4000),
   answerWindowMs: ms.default(5000),

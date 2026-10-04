@@ -1,0 +1,29 @@
+changelog (run 3): + previous reading no longer shown to the model (no case id or values: it copied them); concepts asked once per case on its first whole-screen read after the opening one (never on the case-switch frame); catalogue near-duplicates (id/label prefix or + generic suffix) dropped. RESULT: the model still misreads the 12 px grey monospace case id (NS-2026-xxxx read NS-2626-xxxx) on some frames; each misread flipped the case (spurious open_case + baseline reset), hence low recall and non-critical precision 0.61.
+
+MODE: live — Claude Haiku 4.5 structured extraction, real-time replay.
+fixture: /home/24b4530/modiji/packages/perception/test/fixtures/casedesk-recorded — 617 frames, 145 DOM events
+
+metric                        value          threshold   result
+----------------------------  -------------  ----------  ------
+critical field-change recall  0.462 (24/52)  >= 0.95     FAIL
+critical action recall        0.667 (28/42)  >= 0.95     FAIL
+false critical rate           0.088 (5/57)   <= 0.05     FAIL
+p95 frame→event (ms)          4106           <= 3000     FAIL
+non-critical precision        0.607 (37/61)  (reported)
+non-critical recall           0.725 (37/51)  (reported)
+non-critical F1               0.661          (reported)
+p50 frame→event (ms)          2567           (n=157)
+p50 change→event (ms)         3252           (reported)
+p95 change→event (ms)         5156           (reported)
+
+DOM events: 52 critical field changes, 42 critical actions, 51 non-critical
+Vision events: 29 critical field changes, 28 critical actions, 61 non-critical
+OVERALL: FAIL
+
+pipeline: 311/617 frames changed · queue sent 157, coalesced 154, applied 157, stale dropped 0, failed 0
+dropped by validation: {"concept:known_concept":56,"field:invalid_value":4,"concept:unexpected_concept":42} · proposed concepts: 4 (3 distinct names)
+usage (full reads): 52 requests, 139516 input tokens (0 cache reads), 5038 output tokens; request p50 2522 ms, p95 3896 ms
+usage (refresh reads): 52 requests, 127343 input tokens (0 cache reads), 1704 output tokens; request p50 1845 ms, p95 2306 ms
+usage (local reads): 53 requests, 67331 input tokens (0 cache reads), 1048 output tokens; request p50 1181 ms, p95 1683 ms
+
+JSON report: /home/24b4530/modiji/docs/evidence/p2/eval-live-3.json

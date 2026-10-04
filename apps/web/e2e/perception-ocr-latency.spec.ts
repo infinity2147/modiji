@@ -6,8 +6,10 @@
  *
  * The perception package's change detector and redactor (Tesseract.js from /tesseract/, exactly as
  * the capture pipeline uses them) are bundled with esbuild and injected into a page of the running
- * app. Frames are fed in capture order; every frame the detector reports as changed is redacted and
- * timed. Writes docs/evidence/p2/ocr-latency.json.
+ * app. Frames are fed in capture order; every frame the detector reports as changed is redacted by
+ * one redactor per OCR setting (each with its own Tesseract worker and carried boxes) and timed.
+ * PII recall of a setting = share of the reference setting's PII boxes (2× everywhere, the previous
+ * client default) that the setting's boxes overlap, per frame. Writes docs/evidence/p2/ocr-latency.json.
  */
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -15,7 +17,7 @@ import { build } from "esbuild";
 import { expect, test } from "@playwright/test";
 import { kycCases } from "@vashistha/core/domains/kyc";
 import { FixtureSchema, percentile } from "../../../packages/perception/src/evaluation";
-import { personNames } from "../lib/client/capture/browser";
+import { CLIENT_OCR_SCALE, personNames } from "../lib/client/capture/browser";
 
 const FIXTURE_DIR = join(import.meta.dirname, "../../../packages/perception/test/fixtures/casedesk-recorded");
 const PERCEPTION_SRC = join(import.meta.dirname, "../../../packages/perception/src");
@@ -23,19 +25,34 @@ const OUT = join(import.meta.dirname, "../../../docs/evidence/p2/ocr-latency.jso
 /** Changed frames to time (the first is a full-frame read). */
 const SAMPLE = 80;
 
-type Timing = { frameSeq: number; ms: number; reason: string; region: number; boxes: number };
+/** OCR settings compared; `reference` is what PII recall is measured against. */
+const SETTINGS = {
+  reference: { scale: 2 },
+  large15: { scale: 2, largeRegion: { share: 0.25, scale: 1.5 } },
+  large1: { scale: 2, largeRegion: { share: 0.25, scale: 1 } },
+} as const;
+type SettingName = keyof typeof SETTINGS;
+
+type Box = { x: number; y: number; width: number; height: number };
+type Result = { ms: number; region: number; boxes: Box[]; kinds: string[] };
+type FrameResult = { frameSeq: number; reason: string; results: Record<SettingName, Result> };
+
+const overlaps = (a: Box, b: Box): boolean => a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
 
 test("@measure OCR + PII blur latency per changed frame in Chromium", async ({ page }) => {
-  test.setTimeout(30 * 60_000);
+  test.setTimeout(60 * 60_000);
   const fixture = FixtureSchema.parse(JSON.parse(readFileSync(join(FIXTURE_DIR, "fixture.json"), "utf8")));
   const bundle = await build({
     stdin: {
       contents: `import { createChangeDetector, createRedactor, createTesseractOcr } from "./index.ts";
-        const ocr = createTesseractOcr({ basePath: "/tesseract/" });
-        let redactor = null;
+        const settings = ${JSON.stringify(SETTINGS)};
+        const redactors = {};
         const detector = createChangeDetector();
         window.__ocrBench = {
-          init: (names) => { redactor = createRedactor({ ocr: ocr.ocr, names: () => names }); },
+          init: (names) => {
+            for (const [name, setting] of Object.entries(settings))
+              redactors[name] = createRedactor({ ocr: createTesseractOcr({ basePath: "/tesseract/", ...setting }).ocr, names: () => names });
+          },
           frame: async (b64) => {
             const bitmap = await createImageBitmap(await (await fetch("data:image/png;base64," + b64)).blob());
             const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
@@ -45,9 +62,18 @@ test("@measure OCR + PII blur latency per changed frame in Chromium", async ({ p
             const image = { data, width: bitmap.width, height: bitmap.height };
             const change = detector.push(image);
             if (!change.changed) return null;
-            const t0 = performance.now();
-            const result = await redactor.redact(image, change.bbox);
-            return { ms: performance.now() - t0, reason: change.reason, region: result.ocrRegion.width * result.ocrRegion.height, boxes: result.boxes.length };
+            const results = {};
+            for (const [name, redactor] of Object.entries(redactors)) {
+              const t0 = performance.now();
+              const result = await redactor.redact(image, change.bbox);
+              results[name] = {
+                ms: performance.now() - t0,
+                region: result.ocrRegion.width * result.ocrRegion.height,
+                boxes: result.boxes.map((b) => b.box),
+                kinds: result.boxes.map((b) => b.kind),
+              };
+            }
+            return { reason: change.reason, results };
           },
         };`,
       resolveDir: PERCEPTION_SRC,
@@ -64,40 +90,74 @@ test("@measure OCR + PII blur latency per changed frame in Chromium", async ({ p
   const names = personNames([...kycCases("training"), ...kycCases("practice")]);
   await page.evaluate((n) => (window as unknown as { __ocrBench: { init: (names: string[]) => void } }).__ocrBench.init(n), names);
 
-  const timings: Timing[] = [];
+  const frames: FrameResult[] = [];
   let previousFile = "";
   for (const frame of fixture.frames) {
-    if (timings.length >= SAMPLE) break;
+    if (frames.length >= SAMPLE) break;
     if (frame.file === previousFile) continue; // byte-identical capture: the detector would see no change
     previousFile = frame.file;
     const b64 = readFileSync(join(FIXTURE_DIR, frame.file)).toString("base64");
     const result = await page.evaluate(
       (data) =>
-        (window as unknown as { __ocrBench: { frame: (b64: string) => Promise<Omit<Timing, "frameSeq"> | null> } }).__ocrBench.frame(data),
+        (window as unknown as { __ocrBench: { frame: (b64: string) => Promise<Omit<FrameResult, "frameSeq"> | null> } }).__ocrBench.frame(data),
       b64,
     );
-    if (result !== null) timings.push({ frameSeq: frame.frameSeq, ...result });
+    if (result !== null) frames.push({ frameSeq: frame.frameSeq, ...result });
   }
-  expect(timings.length).toBeGreaterThan(10);
+  expect(frames.length).toBeGreaterThan(10);
 
-  const [first, ...rest] = timings;
-  const all = timings.map((t) => t.ms);
-  const partial = rest.map((t) => t.ms);
   const round = (v: number | null) => (v === null ? null : Math.round(v));
+  const frameArea = 1440 * 900;
+  const summarise = (name: SettingName) => {
+    const ms = frames.map((f) => f.results[name].ms);
+    const after = ms.slice(1);
+    const large = frames.filter((f) => f.results[name].region >= 0.25 * frameArea).map((f) => f.results[name].ms);
+    // PII recall against the reference: reference boxes this setting's boxes overlap, over all frames.
+    let found = 0;
+    let total = 0;
+    const missedKinds: Record<string, number> = {};
+    for (const f of frames) {
+      const mine = f.results[name].boxes;
+      f.results.reference.boxes.forEach((box, i) => {
+        total += 1;
+        if (mine.some((b) => overlaps(b, box))) found += 1;
+        else {
+          const kind = f.results.reference.kinds[i] ?? "unknown";
+          missedKinds[kind] = (missedKinds[kind] ?? 0) + 1;
+        }
+      });
+    }
+    return {
+      setting: SETTINGS[name],
+      firstFullFrameMs: round(ms[0] ?? null),
+      allChangedFrames: { p50: round(percentile(ms, 50)), p95: round(percentile(ms, 95)), max: round(Math.max(...ms)) },
+      afterFirstFrame: { p50: round(percentile(after, 50)), p95: round(percentile(after, 95)) },
+      largeRegions: { n: large.length, p50: round(percentile(large, 50)), p95: round(percentile(large, 95)) },
+      piiBoxesPerFrame: Math.round((frames.reduce((s, f) => s + f.results[name].boxes.length, 0) / frames.length) * 10) / 10,
+      piiRecallVsReference: name === "reference" ? 1 : total === 0 ? null : Math.round((found / total) * 1000) / 1000,
+      missedReferenceBoxesByKind: missedKinds,
+    };
+  };
   const report = {
-    host: "headless Chromium (Playwright 1.63) on the development machine; single run",
+    host: "headless Chromium (Playwright) on the development machine; single run, settings interleaved per frame",
     fixture: "packages/perception/test/fixtures/casedesk-recorded",
-    frameSize: "1440×900 at 1× (OCR upscales the read region 2×)",
-    changedFramesTimed: timings.length,
-    firstFullFrameMs: round(first?.ms ?? null),
-    allChangedFrames: { p50: round(percentile(all, 50)), p95: round(percentile(all, 95)), max: round(Math.max(...all)) },
-    afterFirstFrame: { p50: round(percentile(partial, 50)), p95: round(percentile(partial, 95)) },
-    meanRegionShare: Math.round((timings.reduce((s, t) => s + t.region, 0) / timings.length / (1440 * 900)) * 1000) / 1000,
-    timings: timings.map((t) => ({ ...t, ms: Math.round(t.ms) })),
+    frameSize: "1440×900 at 1×",
+    clientSetting: CLIENT_OCR_SCALE,
+    changedFramesTimed: frames.length,
+    meanRegionShare: Math.round((frames.reduce((s, f) => s + f.results.reference.region, 0) / frames.length / frameArea) * 1000) / 1000,
+    settings: Object.fromEntries((Object.keys(SETTINGS) as SettingName[]).map((name) => [name, summarise(name)])),
+    timings: frames.map((f) => ({
+      frameSeq: f.frameSeq,
+      reason: f.reason,
+      region: f.results.reference.region,
+      ms: Object.fromEntries(Object.entries(f.results).map(([name, r]) => [name, Math.round(r.ms)])),
+      boxes: Object.fromEntries(Object.entries(f.results).map(([name, r]) => [name, r.boxes.length])),
+    })),
   };
   mkdirSync(join(OUT, ".."), { recursive: true });
   writeFileSync(OUT, `${JSON.stringify(report, null, 2)}\n`);
-  console.info(
-    `OCR+blur over ${timings.length} changed frames: first (full frame) ${report.firstFullFrameMs} ms; p50 ${report.allChangedFrames.p50} ms, p95 ${report.allChangedFrames.p95} ms, max ${report.allChangedFrames.max} ms; mean region ${(report.meanRegionShare * 100).toFixed(1)}% of the frame`,
-  );
+  for (const [name, s] of Object.entries(report.settings))
+    console.info(
+      `${name}: OCR+blur p50 ${s.allChangedFrames.p50} ms, p95 ${s.allChangedFrames.p95} ms (large regions p95 ${s.largeRegions.p95} ms, n=${s.largeRegions.n}); PII recall vs 2× ${s.piiRecallVsReference}`,
+    );
 });

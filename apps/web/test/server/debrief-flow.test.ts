@@ -188,7 +188,10 @@ describe("debrief flow (P5 acceptance)", () => {
     expect(workMap.steps.every((s) => s.ruleIds.length > 0 && s.reasonQuotes.length > 0)).toBe(true);
     const pepStep = workMap.steps.find((s) => s.caseId === "NS-2026-0103");
     expect(pepStep?.guardrailIds).toEqual(["rule-pep"]);
-    expect(view.moments[pepStep?.id ?? ""]?.[0]).toMatchObject({ kind: "dom_event", summary: "opened case NS-2026-0103" });
+    // Screen moment of the step: the redacted frame first, then the DOM events of the same window.
+    const moments = view.moments[pepStep?.id ?? ""] ?? [];
+    expect(moments[0]).toMatchObject({ kind: "frame" });
+    expect(moments.find((m) => m.kind === "dom_event")).toMatchObject({ summary: "opened case NS-2026-0103" });
     // Saved export equals the canonical export and round-trips.
     const saved = await readFile(join(w.dataDir, "media", view.exportPath), "utf8");
     expect(saved).toBe(exportWorkMapJson(workMap));

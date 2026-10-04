@@ -241,13 +241,20 @@ export function createRedactor(options: {
  * and a manager's name; 2× found both). Cost grows with the area OCR reads: a whole 1440×900
  * frame at 2× took ≈3 s in Node (single-threaded wasm); a small changed region is far cheaper.
  *
+ * `largeRegion` trades some of that for latency where it is spent: a read region covering at least
+ * `share` of the frame (case switches, scrolls — the slow OCRs) is upscaled by `scale` instead.
+ * `e2e/perception-ocr-latency.spec.ts` measures latency and PII-box recall for each setting.
+ *
  * The worker is created on first use. Browser only.
  */
-export function createTesseractOcr(options: { basePath: string; lang?: string; scale?: number }): {
+export type OcrScale = { scale?: number; largeRegion?: { share: number; scale: number } };
+
+export function createTesseractOcr(options: { basePath: string; lang?: string } & OcrScale): {
   ocr: OcrFn;
   terminate(): Promise<void>;
 } {
-  const scale = options.scale ?? 2;
+  const baseScale = options.scale ?? 2;
+  const { largeRegion } = options;
   const base = options.basePath.endsWith("/") ? options.basePath : `${options.basePath}/`;
   let worker: Promise<Worker> | null = null;
   const getWorker = (): Promise<Worker> => {
@@ -264,9 +271,11 @@ export function createTesseractOcr(options: { basePath: string; lang?: string; s
   return {
     async ocr(image, region) {
       const crop = cropRgba(image, region);
+      const large = largeRegion !== undefined && crop.width * crop.height >= largeRegion.share * image.width * image.height;
+      const scale = large ? largeRegion.scale : baseScale;
       const origin = clampRect(region, image.width, image.height) ?? region;
       const source = new OffscreenCanvas(crop.width, crop.height);
-      const canvas = new OffscreenCanvas(crop.width * scale, crop.height * scale);
+      const canvas = new OffscreenCanvas(Math.round(crop.width * scale), Math.round(crop.height * scale));
       const sourceContext = source.getContext("2d");
       const context = canvas.getContext("2d");
       if (sourceContext === null || context === null) throw new Error("OffscreenCanvas 2D context unavailable");

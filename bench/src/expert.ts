@@ -22,6 +22,7 @@ import {
   predicateNode,
   typecheckPredicate,
   isVarRef,
+  StatedRuleSchema,
   type ActionId,
   type Assignment,
   type Predicate,
@@ -33,11 +34,10 @@ import type { ExpertSettings } from "./config";
 import { DOMAIN, FAMILY } from "./domain";
 import { FAMILY_RULES, oracleVerdict, type OracleRule } from "./oracle";
 
-/** A rule as the expert states it: what applies (`rule`), its effect, and its precedence. */
+/** A rule as the expert states it: what applies and what it enforces (`rule`), and its precedence. */
 export type ExpertStatement = {
   id: string;
   rule: StatedRule;
-  effect: RuleEffect;
   /** Higher wins; the expert's own ranking ("sanctions trump everything"). */
   priority: number;
   /** Statement ids of the rules this one is an exception to. */
@@ -133,8 +133,7 @@ export class SimulatedExpert {
     const exactQuote = verbalize(predicate, r.effect);
     return {
       id: statementId(r.id),
-      rule: { predicate, action, kind: r.kind, exactQuote, t0Ms: 0, t1Ms: 0 },
-      effect: r.effect,
+      rule: StatedRuleSchema.parse({ predicate, action, kind: r.kind, effect: r.effect, exactQuote, t0Ms: 0, t1Ms: 0 }),
       priority: r.priority,
       overrides: r.overrides.map(statementId),
     };

@@ -16,6 +16,7 @@ import {
   openDatabase,
   type OpenedDatabase,
 } from "@vashistha/core/server";
+import { KYC_DOMAIN } from "@vashistha/core/domains/kyc";
 import { ORACLE_MARKER as KYC_ORACLE_MARKER } from "@vashistha/core/domains/kyc/oracle";
 import { z3SelfTest } from "@vashistha/solver";
 import { createAuthorizationStore } from "./authorizations";
@@ -27,6 +28,9 @@ import { createInterviewStore } from "./interview/engine-state";
 import { createPerception } from "./perception/init";
 import { createRateLimiter } from "./rate-limit";
 import { registerRuntime, type CheckResult, type Runtime } from "./runtime";
+import { createSchemaStore } from "./schema/deps";
+import { createConceptReread, mediaFrameLoader } from "./schema/reread";
+import { rulebookViewWithinModel } from "./schema/rulebook";
 import { createPracticeSolver } from "./tutor/solver";
 
 /** Markers of every hidden policy this process loads; the model wrapper refuses prompts containing any. */
@@ -106,9 +110,14 @@ export function createRuntime(source: Readonly<Record<string, string | undefined
   const env = loadServerEnv(source);
   const opened = openDatabase({ dataDir: env.DATA_DIR });
   const ledger = createLedger(opened.db);
+  // The only model client in the process: interview, debrief and perception all receive this value.
   const claude =
-    env.ANTHROPIC_API_KEY === undefined ? null : createClaude({ apiKey: env.ANTHROPIC_API_KEY, forbiddenMarkers: ORACLE_MARKERS });
-  const rulebookState = createLedgerRulebook(opened.sqlite);
+    env.LLM_CALLS === "off" || env.ANTHROPIC_API_KEY === undefined
+      ? null
+      : createClaude({ apiKey: env.ANTHROPIC_API_KEY, forbiddenMarkers: ORACLE_MARKERS });
+  if (env.LLM_CALLS === "off") console.info("> LLM_CALLS=off: model calls disabled (no Anthropic client)");
+  const rulebookAllModels = createLedgerRulebook(opened.sqlite);
+  const rulebookState = rulebookViewWithinModel(KYC_DOMAIN, rulebookAllModels);
   const runtime: Runtime = {
     env,
     ledger,
@@ -118,14 +127,20 @@ export function createRuntime(source: Readonly<Record<string, string | undefined
     rulebook: () => rulebookState().rules,
     rulebookRevision: () => rulebookState().revision,
     rulebookState,
+    rulebookAllModels,
     casedesk: createCaseDeskStore(),
-    perception: createPerception({ source, ledger, claude }),
+    // LLM_CALLS=off subsumes the vision-only switch, so the vision state reports `disabled` rather than `no_api_key`.
+    perception: createPerception({ source: env.LLM_CALLS === "off" ? { ...source, VISION_EXTRACTION: "off" } : source, ledger, claude }),
     interview: createInterviewStore(),
     debrief: {
       solver: createWitnessSolver(),
       exports: { workMapJson: exportWorkMapJson, procedure: compileProcedure },
       models: { prose: CLAUDE_MODELS.prose },
       store: createDebriefStore(),
+    },
+    schema: {
+      reread: claude === null ? null : createConceptReread(claude, mediaFrameLoader(env.DATA_DIR), console),
+      store: createSchemaStore(),
     },
     tutor: { practice: createPracticeSolver() },
     voiceTokenLimiter: createRateLimiter(VOICE_TOKEN_RATE_LIMIT),

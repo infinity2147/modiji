@@ -1,7 +1,7 @@
 /**
  * End-to-end tests against the PRODUCTION server (`next build` must run first; `pnpm test:e2e` does
  * both). Each run gets a fresh DATA_DIR, so the ledger starts empty. Secrets are placeholders that
- * satisfy production env validation; no test reaches Anthropic or ElevenLabs.
+ * satisfy production env validation; LLM_CALLS=off guarantees zero model calls, and no test reaches ElevenLabs.
  */
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -52,8 +52,9 @@ export default defineConfig({
       CUSTOM_LLM_SECRET: "e2e-placeholder-secret-not-used-0123456789",
       ANTHROPIC_API_KEY: "e2e-placeholder-not-a-key",
       ELEVENLABS_API_KEY: "e2e-placeholder-not-a-key",
-      // Frames are stored and ledgered, but the placeholder key is never sent to Anthropic.
-      VISION_EXTRACTION: "off",
+      // Hermetic: no Anthropic client exists (interview, debrief and vision included), so the placeholder key is never
+      // sent anywhere; frames are still stored and ledgered, and the vision state reports "disabled".
+      LLM_CALLS: "off",
     },
   },
 });

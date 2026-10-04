@@ -2,6 +2,12 @@ import { z } from "zod";
 import { AGENT_ROLES } from "../agents";
 import { SET_OFF_RECORD_TOOL } from "../voice/off-record";
 import { ActionIdSchema, EpochMsSchema, FeatureIdSchema, IdSchema, SchemaVersionSchema, SymbolIdSchema, ValueSchema } from "./primitives";
+import {
+  ConceptConfirmedPayloadSchema,
+  ConceptDismissedPayloadSchema,
+  FeatureBackfilledPayloadSchema,
+  SchemaVersionBumpedPayloadSchema,
+} from "./concepts";
 import { ParsedAnswerSchema, ProposedConceptSchema, QuestionSchema, WitnessResolutionSchema, WitnessSchema, MasteryLevelSchema } from "./engine";
 import { GuardrailResultSchema } from "./guardrail";
 import type { LedgerEntry, LedgerSource } from "./ledger";
@@ -127,10 +133,20 @@ const kinds = {
     }),
   },
   "concept.proposed": { sources: ["engine"], payload: ProposedConceptSchema },
-  "concept.confirmed": {
-    sources: ["expert", "voice"],
-    payload: z.strictObject({ feature: FeatureIdSchema, schemaVersion: SchemaVersionSchema }),
-  },
+  /**
+   * The expert confirmed a proposed concept as a feature (plan §6.6): typed (`expert`) or spoken
+   * (`voice`, the utterance is a parent). Parents: the proposal entries it confirms.
+   */
+  "concept.confirmed": { sources: ["expert", "voice"], payload: ConceptConfirmedPayloadSchema },
+  /** The expert rejected a proposed concept ("not a real concept" / "already covered by <feature>"). */
+  "concept.dismissed": { sources: ["expert", "voice"], payload: ConceptDismissedPayloadSchema },
+  /** The session's feature model gained the confirmed concept; parent: the `concept.confirmed` entry. */
+  "schema.version_bumped": { sources: ["engine"], payload: SchemaVersionBumpedPayloadSchema },
+  /**
+   * The value of a confirmed concept for one observed decision, re-read from the case's stored redacted
+   * frames, or `Unknown{backfill_failed}` with why. Parents: the bump, the decision, the frames read.
+   */
+  "feature.backfilled": { sources: ["engine"], payload: FeatureBackfilledPayloadSchema },
   "rule.confirmed": { sources: ["engine", "expert"], payload: z.looseObject({}) },
   "rule.revised": { sources: ["engine", "expert"], payload: z.looseObject({}) },
   "rule.retired": { sources: ["engine", "expert"], payload: z.looseObject({}) },
@@ -147,7 +163,15 @@ const kinds = {
     sources: ["expert"],
     payload: z.strictObject({
       text: z.string().trim().min(1).max(1000),
-      intent: z.enum(["confirm_candidate", "add_rule_for_witness", "revise_rule", "acknowledge_witness", "confirm_boundary", "confirm_teachback"]),
+      intent: z.enum([
+        "confirm_candidate",
+        "add_rule_for_witness",
+        "revise_rule",
+        "acknowledge_witness",
+        "confirm_boundary",
+        "confirm_teachback",
+        "confirm_stop_rule",
+      ]),
       target: z.strictObject({
         ruleId: IdSchema.optional(),
         witnessId: IdSchema.optional(),

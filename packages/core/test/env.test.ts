@@ -30,6 +30,7 @@ describe("loadServerEnv", () => {
       PORT: 3000,
       PUBLIC_BASE_URL: "http://localhost:3000",
       DATA_DIR: "./data",
+      LLM_CALLS: "on",
     });
   });
 
@@ -67,6 +68,7 @@ describe("loadServerEnv", () => {
       PORT: 3000,
       PUBLIC_BASE_URL: "http://localhost:3000",
       DATA_DIR: "./data",
+      LLM_CALLS: "on",
     });
     expect(envError({ ...dev, DATA_DIR: "" }).message).toContain("DATA_DIR: missing");
     expect(envError({ ...prod, CUSTOM_LLM_SECRET: "" }).variables).toEqual(["CUSTOM_LLM_SECRET"]);
@@ -111,6 +113,16 @@ describe("loadServerEnv", () => {
 
   it.each(["0", "65536", "3000.5", "-1", "0x10", "abc"])("rejects PORT %j", (input) => {
     expect(envError({ ...dev, PORT: input }).variables).toEqual(["PORT"]);
+  });
+
+  it("reads the LLM_CALLS switch (default on) and rejects anything but on/off without echoing it", () => {
+    expect(loadServerEnv({ ...dev, LLM_CALLS: " off " }).LLM_CALLS).toBe("off");
+    expect(loadServerEnv({ ...dev, LLM_CALLS: "on" }).LLM_CALLS).toBe("on");
+    expect(loadServerEnv({ ...dev, LLM_CALLS: "" }).LLM_CALLS).toBe("on");
+    const err = envError({ ...dev, LLM_CALLS: "disabled-please" });
+    expect(err.variables).toEqual(["LLM_CALLS"]);
+    expect(err.message).toContain("LLM_CALLS: invalid (on or off)");
+    expect(err.message).not.toContain("disabled-please");
   });
 
   it("rejects an unknown NODE_ENV", () => {
