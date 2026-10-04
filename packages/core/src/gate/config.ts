@@ -18,6 +18,19 @@ const ms = z.int().nonnegative();
  *   while the expert is still thinking about their answer.
  * - `liveBudget` (5 per 10 min) caps live interview questions only (`kinds`, default
  *   `LIVE_QUESTION_KINDS`): a question of another kind neither spends the budget nor waits for it.
+ * - `answerSilenceMs` (not in the plan; live run B): once the expert has started answering the agent's
+ *   question, the silence that ends the answer. Experts pause mid-answer ("Well, let me think." … 3.5 s
+ *   … the actual answer); at 1.2 s the next question landed in those pauses and the expert resumed over
+ *   it. Talk after an answer has ended (a gap of at least this long) is ordinary speech again.
+ * - `transcriptWaitMs` (not in the plan; live bug #1): any detected speech opens a user turn at the voice
+ *   provider, and a control message sent into an open turn is merged with the expert's words and never
+ *   spoken. The gate waits for the provider's final transcript of that turn (`user_transcript`), or this
+ *   long after the speech ended when none comes (a cough or a key click that the local detector heard
+ *   but the provider never transcribed). Live finals arrived 0.4–1.0 s after speech ended, a few at 2.6 s.
+ * - `authorizationGraceMs`: an issued authorization holds the floor for its TTL plus this grace, which
+ *   covers the agent's first audio for a nonce consumed just before it expired (first audio ≈ 0.7 s
+ *   after the control message, live p95 0.85 s). An authorization still unspoken by then has lapsed: the
+ *   gate releases the floor and its live-budget slot (the server re-queues the question).
  * - `tickMs` ≤ 50: the controller wakes exactly when conditions can become valid and also ticks at
  *   this period as a fallback for late or early timers, keeping authorization ≤ 250 ms with margin.
  */
@@ -35,7 +48,10 @@ export const GateConfigSchema = z.strictObject({
     })
     .prefault({}),
   authorizationTtlMs: z.int().positive().default(4000),
+  authorizationGraceMs: ms.default(1500),
   answerWindowMs: ms.default(5000),
+  answerSilenceMs: ms.default(4000),
+  transcriptWaitMs: ms.default(3000),
   tickMs: z.int().positive().max(50).default(50),
 });
 export type GateConfig = z.output<typeof GateConfigSchema>;

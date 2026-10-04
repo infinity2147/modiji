@@ -2,15 +2,19 @@
  * The browser half of the speech gate (plan §7.2): runs the REAL core gate controller and wires it to
  * the server and the voice session. The gate alone decides when the agent speaks:
  *
- * - inputs: VAD and agent mode (voice), typing and screen motion (activity sensors), breakpoints
- *   (case opened / decision saved), off-record state, and the top of the server's question queue
- *   (polled every second, one request at a time, abortable);
- * - `issue` = POST gate/authorize; on success the control message is sent with `sendUserMessage`
- *   exactly once; a refusal (409) is recorded and the queue is re-read;
+ * - inputs: provider VAD, the local microphone detector, transcript arrivals and agent mode (voice),
+ *   typing and screen motion (activity sensors), breakpoints (case opened / decision saved),
+ *   off-record state, and the top of the server's question queue (polled every second, one request at
+ *   a time, abortable);
+ * - `issue` = POST gate/authorize (bounded by `AUTHORIZE_TIMEOUT_MS`); on success the control message
+ *   is sent with `sendUserMessage` exactly once — unless the expert resumed while the request was in
+ *   flight (withdrawn); a refusal (409) or a withdrawal is recorded, gives the live-budget slot back,
+ *   and the queue is re-read;
  * - the queue is only offered to the gate while a voice conversation is live, so no question is spent
  *   (or recorded as authorized) when nobody could hear it.
  */
 import {
+  CONDITION_LABELS,
   createGateController,
   type GateClock,
   type GateConditions,
@@ -30,6 +34,11 @@ export const QUEUE_POLL_MS = 1000;
 export const CASE_SETTLE_MS = 1000;
 /** Poll interval after the queue route failed (e.g. not deployed yet). */
 export const QUEUE_RETRY_MS = 5000;
+/**
+ * The longest the gate waits for `gate/authorize` (it holds the floor meanwhile). A later answer is
+ * dropped; the server re-queues the question when its unsent nonce expires.
+ */
+export const AUTHORIZE_TIMEOUT_MS = 10_000;
 
 export type GateRefusal = { questionId: string; at: number; code: string; message: string };
 
@@ -82,6 +91,10 @@ export type GateSession = {
   /** …a decision was committed (a breakpoint now). */
   committed: () => void;
   vad: (score: number) => void;
+  /** The browser's microphone detector started or stopped hearing speech. */
+  localSpeech: (speaking: boolean) => void;
+  /** The provider transcribed the expert (`final`: their turn is finished at the provider). */
+  transcript: (final: boolean) => void;
   agentSpeaking: (speaking: boolean) => void;
   setOffRecord: (on: boolean) => void;
   /** Whether a voice conversation is connected (the queue is offered to the gate only then). */
@@ -129,20 +142,25 @@ export function createGateSession(options: GateSessionOptions): GateSession {
     clock,
     ...(options.cfg !== undefined && { cfg: options.cfg }),
     issue: async (question, decision) => {
-      const response = await authorizeQuestion(options.fetch, sessionId, {
-        questionId: question.id,
-        contextVersion: contextVersion ?? question.contextVersion,
-        becameValidAt: Math.round(decision.becameValidAt),
-        decidedAt: Math.round(decision.decidedAt),
-        conditions: decision.conditions,
-      });
+      const response = await authorizeQuestion(
+        options.fetch,
+        sessionId,
+        {
+          questionId: question.id,
+          contextVersion: contextVersion ?? question.contextVersion,
+          becameValidAt: Math.round(decision.becameValidAt),
+          decidedAt: Math.round(decision.decidedAt),
+          conditions: decision.conditions,
+        },
+        AUTHORIZE_TIMEOUT_MS,
+      );
       controlMessages.set(response.authorization.nonce, response.controlMessage);
       return response.authorization;
     },
     onAuthorize: (authorization, question) => {
       const controlMessage = controlMessages.get(authorization.nonce);
       controlMessages.delete(authorization.nonce);
-      if (controlMessage === undefined) return;
+      if (controlMessage === undefined) return false;
       // The world changed while the server answered: never speak into it (the nonce simply expires).
       if (offRecord || !voiceLive) {
         refuse(
@@ -150,11 +168,16 @@ export function createGateSession(options: GateSessionOptions): GateSession {
           offRecord ? "off_record" : "voice_disconnected",
           offRecord ? "Went off the record before the authorization arrived" : "Voice disconnected before the authorization arrived",
         );
-        return;
+        return false;
       }
       options.sendControlMessage(controlMessage);
       options.onAsked({ questionId: question.id, text: question.text, kind: question.kind, target: question.target, at: clock.now() });
       refreshQueue();
+      return true;
+    },
+    onWithdraw: (authorization, question, conditions) => {
+      controlMessages.delete(authorization.nonce);
+      refuse(question.id, "withdrawn", `Not sent: the expert resumed (${conditions.map((k) => CONDITION_LABELS[k]).join(", ")}) before the authorization arrived`);
     },
     onHudUpdate: (hud, evaluation) => {
       current = { hud, evaluation };
@@ -253,6 +276,8 @@ export function createGateSession(options: GateSessionOptions): GateSession {
       refreshQueue();
     },
     vad: (score) => controller.feed({ kind: "vad", t: clock.now(), value: Math.min(1, Math.max(0, score)) }),
+    localSpeech: (speaking) => controller.feed({ kind: "local_speech", t: clock.now(), value: speaking ? 1 : 0 }),
+    transcript: (final) => controller.feed({ kind: final ? "user_transcript" : "tentative_transcript", t: clock.now() }),
     agentSpeaking: (speaking) => controller.feed({ kind: "agent_speaking", t: clock.now(), value: speaking ? 1 : 0 }),
     setOffRecord(on) {
       if (on === offRecord) return;

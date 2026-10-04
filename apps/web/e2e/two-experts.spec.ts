@@ -20,7 +20,7 @@ const EVIDENCE_DIR = join(import.meta.dirname, "../../../docs/evidence/p10");
 mkdirSync(EVIDENCE_DIR, { recursive: true });
 const evidence = (name: string): string => join(EVIDENCE_DIR, name);
 
-// No "approve": the e2e server's team rulebook already holds other specs' stop-rules (one forbids approving high-risk cases).
+// The three training cases, decided the same way by both experts (no "approve").
 const DECISIONS: Record<string, string> = { "NS-2026-0101": "requestDocuments", "NS-2026-0102": "enhancedReview", "NS-2026-0103": "enhancedReview" };
 const HIGH = { "==": [{ var: "jurisdictionRisk" }, "high"] };
 const LONG_STANDING_HIGH = { and: [{ "==": [{ var: "customerStatus" }, "existing"] }, { ">=": [{ var: "accountAgeMonths" }, 24] }, HIGH] };
@@ -46,7 +46,7 @@ async function expertSession(request: APIRequestContext, expert: { name: string;
     const { checkId, result } = await ok<{ checkId: string; result: { decision: string } }>(
       await request.post("/api/interlock/check", { data: { sessionId, caseId, edits: {}, proposedAction: action } }),
     );
-    // Sign-off rules confirmed by earlier specs may apply: the expert acknowledges them, as in CaseDesk.
+    // A sign-off rule confirmed earlier in this spec may apply: the expert acknowledges it, as in CaseDesk.
     const override = result.decision === "allow" ? {} : { override: { kind: "acknowledged", note: "Reviewed the sign-off requirement." } };
     await ok(await request.post(`/api/sessions/${sessionId}/decisions`, { data: { caseId, edits: {}, action, checkId, ...override } }));
   }

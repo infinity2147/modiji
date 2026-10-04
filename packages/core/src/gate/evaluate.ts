@@ -1,6 +1,6 @@
 import type { Question } from "../schemas/engine";
 import type { GateConfig } from "./config";
-import type { GateState } from "./state";
+import { holdingFloor, userSpeaking, type GateState } from "./state";
 
 export type GateMode = "interviewer" | "tutor";
 
@@ -63,8 +63,12 @@ export function formatWait(waitMs: number): string | null {
  * Infinity means only an event can make it ok, -Infinity means "always has".
  */
 function conditionOkAt(s: GateState, q: Question | null, cfg: GateConfig): Record<ConditionKey, number> {
-  const userSpeaking = s.vadSpeaking || s.explicitSpeaking;
-  const afterSpeech = s.speechEndedAt + cfg.userSilenceMs;
+  // Silence counts from the last speech signal; an answer in progress needs the longer answer silence,
+  // and a user turn the provider has not finalized holds the floor until its transcript (or the cap).
+  const afterSpeech = Math.max(
+    s.speechEndedAt + (s.answering ? cfg.answerSilenceMs : cfg.userSilenceMs),
+    s.userTurnOpen ? s.speechEndedAt + cfg.transcriptWaitMs : Number.NEGATIVE_INFINITY,
+  );
   // After an agent turn the expert has the floor: wait for an answer, or for the answer window to pass.
   const unanswered = s.agentTurnEndedAt > s.speechEndedAt;
   // The live budget binds live questions only, and only live questions spend it.
@@ -73,7 +77,7 @@ function conditionOkAt(s: GateState, q: Question | null, cfg: GateConfig): Recor
   const spent = budgeted ? s.asked.filter((a) => kinds.includes(a.kind)) : [];
   const budgetSlot = spent.length < max ? undefined : spent[spent.length - max];
   return {
-    userSilent: userSpeaking
+    userSilent: userSpeaking(s)
       ? Infinity
       : unanswered
         ? Math.max(afterSpeech, s.agentTurnEndedAt + cfg.answerWindowMs)
@@ -89,7 +93,9 @@ function conditionOkAt(s: GateState, q: Question | null, cfg: GateConfig): Recor
 }
 
 /**
- * The deterministic speech gate (plan §7.2): authorize iff the user is silent ≥ userSilenceMs, the
+ * The deterministic speech gate (plan §7.2): authorize iff the user is silent ≥ userSilenceMs (≥
+ * answerSilenceMs while answering the agent, and with their last turn transcribed or transcriptWaitMs
+ * past), the
  * screen and keyboard are idle, the work is at a breakpoint (or the question is ephemeral), the top
  * question is worth ≥ θ_ask, the live budget allows (live question kinds only), the session is on
  * the record and the agent is idle with nothing in flight. Tutor interventions need only "on the record" and an idle agent:
@@ -97,7 +103,8 @@ function conditionOkAt(s: GateState, q: Question | null, cfg: GateConfig): Recor
  */
 export function evaluateGate(s: GateState, now: number, mode: GateMode, cfg: GateConfig): GateEvaluation {
   const top = s.top;
-  const question = top !== null && !s.asked.some((a) => a.questionId === top.id) ? top : null;
+  const question =
+    top !== null && !s.asked.some((a) => a.questionId === top.id) && s.refused?.questionId !== top.id ? top : null;
   const okAt = conditionOkAt(s, question, cfg);
   const conditions = Object.fromEntries(
     CONDITION_KEYS.map((k) => [k, { ok: okAt[k] <= now, waitMs: Math.max(0, okAt[k] - now) }]),
@@ -107,7 +114,7 @@ export function evaluateGate(s: GateState, now: number, mode: GateMode, cfg: Gat
   const required: readonly ConditionKey[] = intervention ? ["notOffRecord", "agentIdle"] : CONDITION_KEYS;
   const readyAt = question === null ? Infinity : Math.max(s.topSince, ...required.map((k) => okAt[k]));
   const authorize = readyAt <= now;
-  const inFlight = s.hold !== null && now < s.hold.until ? s.hold.question : null;
+  const inFlight = holdingFloor(s, now) ? (s.hold?.question ?? null) : null;
 
   let reason: string;
   if (s.offRecord) reason = "off the record: the agent stays silent";

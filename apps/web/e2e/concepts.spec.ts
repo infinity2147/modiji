@@ -17,6 +17,7 @@ import { join } from "node:path";
 import { expect, test, type APIRequestContext } from "@playwright/test";
 import { createLedger, openDatabase } from "@vashistha/core/server";
 import { uploadFrame } from "./support/screen-frame";
+import { serverDataDir } from "./support/server";
 
 const EVIDENCE_DIR = join(import.meta.dirname, "../../../docs/evidence/schema");
 mkdirSync(EVIDENCE_DIR, { recursive: true });
@@ -45,9 +46,7 @@ async function seedSession(request: APIRequestContext): Promise<string> {
 
 /** Stands in for the concept proposer (a model, off in this run): one `concept.proposed` entry quoting the expert. */
 function proposeConcept(sessionId: string): void {
-  const dataDir = process.env.E2E_DATA_DIR;
-  if (dataDir === undefined) throw new Error("E2E_DATA_DIR is not set (playwright.config.ts sets it)");
-  const opened = openDatabase({ dataDir });
+  const opened = openDatabase({ dataDir: serverDataDir() });
   try {
     createLedger(opened.db).append({
       sessionId,

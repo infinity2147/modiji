@@ -208,6 +208,8 @@ export async function sessionWorkMap(deps: DebriefDeps, sessionId: string): Prom
   }
 
   let generatedEntryId = recorded?.id;
+  // An archived session is read-only: its Work Map is still served, citing the session start instead of a new entry.
+  if (generatedEntryId === undefined && snap.loaded.session.archived) generatedEntryId = snap.loaded.info.startedEntryId;
   if (generatedEntryId === undefined) {
     const entryOf = ruleEntries(snap.book);
     const parents = [...snap.decisions.map((d) => d.entry.id), ...workMap.rules.flatMap((r) => entryOf.get(r.id) ?? [])];

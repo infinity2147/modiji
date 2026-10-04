@@ -100,6 +100,10 @@ function describe(entry: LedgerEntry, ctx: TickerContext): { text: string; tone:
       const p = parseLedgerPayload(entry, "session.started");
       return system(`Session started · ${p.mode === "expert" ? "expert capture" : "novice practice"} · ${p.caseSet} set`);
     }
+    case "session.archived": {
+      const p = parseLedgerPayload(entry, "session.archived");
+      return system(`Session archived (read-only) · by ${p.by === "operator" ? "the operator" : "the replay export"}`);
+    }
     case "screen.event":
       return evidence(screenLine(parseLedgerPayload(entry, "screen.event")));
     case "interlock.check": {
@@ -137,6 +141,10 @@ function describe(entry: LedgerEntry, ctx: TickerContext): { text: string; tone:
     case "question.dropped": {
       const p = parseLedgerPayload(entry, "question.dropped");
       return system(`Question dropped (${sentence(p.reason)})${questionLabel(ctx, p.questionId)}`);
+    }
+    case "question.requeued": {
+      const p = parseLedgerPayload(entry, "question.requeued");
+      return system(`Question re-queued: its authorization expired unspoken${questionLabel(ctx, p.questionId)}`);
     }
     case "gate.authorized": {
       const p = parseLedgerPayload(entry, "gate.authorized");

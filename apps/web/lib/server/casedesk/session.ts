@@ -113,7 +113,17 @@ export function loadSession(deps: Pick<CaseDeskDeps, "ledger" | "store">, sessio
   return { info, session };
 }
 
-/** Capture is refused while the session is off the record (plan §7.8). */
+/**
+ * An archived session is read-only (`session.archived`): its id may be public (a published replay), and
+ * a session id is a write capability. Every write route calls this before doing anything; the ledger
+ * refuses the append anyway (409 `session_archived` either way).
+ */
+export function requireNotArchived(session: Session): void {
+  if (session.archived) throw new ApiFailure(409, "session_archived", "the session is archived and read-only; start a new session");
+}
+
+/** Capture is refused in an archived session, and while the session is off the record (plan §7.8). */
 export function requireOnRecord(session: Session): void {
+  requireNotArchived(session);
   if (session.offRecord) throw new ApiFailure(409, "off_record", "the session is off the record");
 }

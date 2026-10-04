@@ -279,8 +279,8 @@ describe("diffDesiredVsActual", () => {
     expect(diffDesiredVsActual(desired, setPath(actual(), path, events.filter((e) => e !== "vad_score")))).toEqual([
       `${path}: missing ["vad_score"]`,
     ]);
-    expect(diffDesiredVsActual(desired, setPath(actual(), path, [...events, "tentative_user_transcript"]))).toEqual([
-      `${path}: unexpected ["tentative_user_transcript"]`,
+    expect(diffDesiredVsActual(desired, setPath(actual(), path, [...events, "agent_chat_response_part"]))).toEqual([
+      `${path}: unexpected ["agent_chat_response_part"]`,
     ]);
   });
 

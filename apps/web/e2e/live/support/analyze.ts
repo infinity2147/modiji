@@ -172,6 +172,8 @@ export function analyzeRun(events: readonly HarnessEvent[], ledger: readonly Ent
       scrollEvents: events.filter((e) => e.type === "scroll").length,
       questionsQueued: ledger.filter((e) => e.kind === "question.queued").length,
       questionsDropped: ledger.filter((e) => e.kind === "question.dropped").length,
+      /** Authorized but never spoken, so put back in the queue (not counted as asked, no budget spent). */
+      questionsRequeued: ledger.filter((e) => e.kind === "question.requeued").length,
     },
     interruptions: {
       count: authViolations.length + audioViolations.length,

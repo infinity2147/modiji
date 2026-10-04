@@ -176,12 +176,12 @@ describe("Hindi answer → English: utterance, translation, parse, rule, citatio
     h.setModel(MODEL);
     const { s, question } = await asked(h);
     const frame = h.frame(s);
-    const r = await h.utter(s, utterance(h, s, HINDI, { questionId: question.id, language: "hi" }));
+    const r = await h.answerWith(s, utterance(h, s, HINDI, { questionId: question.id, language: "hi" }));
     expect(r.status, JSON.stringify(r.body)).toBe(200);
     const res = PostUtteranceResponseSchema.parse(r.body);
     expect(res.language).toBe("hi");
     expect(res.translation).toEqual({ status: "translated", text: ENGLISH });
-    expect(res.parsed?.statedRules[0]?.exactQuote).toBe(QUOTE);
+    expect(r.parsed?.statedRules[0]?.exactQuote).toBe(QUOTE);
 
     // The voice entry is exactly what was heard; the translation is the engine's own entry, parented on it.
     const transcript = h.ledger.get(res.utteranceId);
@@ -237,8 +237,8 @@ describe("Hindi answer → English: utterance, translation, parse, rule, citatio
     h.setModel({ ...MODEL, answer: () => forbidApprove(QUOTE_ENGLISH) });
     const { s, question } = await asked(h);
     h.frame(s);
-    const res = PostUtteranceResponseSchema.parse((await h.utter(s, utterance(h, s, HINDI, { questionId: question.id }))).body);
-    expect(res.parsed?.statedRules).toEqual([]);
+    const r = await h.answerWith(s, utterance(h, s, HINDI, { questionId: question.id }));
+    expect(r.parsed?.statedRules).toEqual([]);
     expect(h.ledger.list(s, { kinds: ["rule.confirmed"] })).toEqual([]);
     expect(h.logs.some((l) => l.includes("quote is not verbatim in the answer"))).toBe(true);
   });
@@ -248,7 +248,7 @@ describe("Hindi answer → English: utterance, translation, parse, rule, citatio
     h.setModel({ ...MODEL, translate: () => ({ segments: [{ original: "agar desh high-risk hai", english: "If the country is high-risk" }] }) });
     const { s, question } = await asked(h);
     h.frame(s);
-    const res = PostUtteranceResponseSchema.parse((await h.utter(s, utterance(h, s, HINDI, { questionId: question.id }))).body);
+    const res = PostUtteranceResponseSchema.parse((await h.answerWith(s, utterance(h, s, HINDI, { questionId: question.id }))).body);
     expect(res.translation).toEqual({ status: "pending" });
     expect(h.ledger.list(s, { kinds: ["utterance.translated"] })).toEqual([]);
     expect(h.logs.some((l) => l.includes("rejected (segment 0 is not verbatim"))).toBe(true);

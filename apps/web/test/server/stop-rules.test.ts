@@ -204,8 +204,8 @@ describe("frames are mandatory evidence", () => {
     const h = createInterviewHarness();
     h.setModel({ answer: () => stopRuleAnswer() });
     const { s, question } = await asked(h);
-    const r = await h.utter(s, utterance(h, s, QUOTE, { questionId: question.id }));
-    expect(PostUtteranceResponseSchema.parse(r.body).parsed?.statedRules).toHaveLength(1);
+    const r = await h.answerWith(s, utterance(h, s, QUOTE, { questionId: question.id }));
+    expect(r.parsed?.statedRules).toHaveLength(1);
     expect(h.ledger.list(s, { kinds: ["rule.confirmed"] })).toEqual([]);
     expect(h.logs.some((l) => l.includes("no frame on record"))).toBe(true);
   });
@@ -253,7 +253,7 @@ describe("spoken stop-rule (interview explicit statement)", () => {
     h.setModel({ answer: () => stopRuleAnswer() });
     const { s, question } = await asked(h);
     const frame = h.frame(s);
-    const r = await h.utter(s, utterance(h, s, QUOTE, { questionId: question.id }));
+    const r = await h.answerWith(s, utterance(h, s, QUOTE, { questionId: question.id }));
     const { utteranceId } = PostUtteranceResponseSchema.parse(r.body);
 
     const [confirmed, ...more] = h.ledger.list(s, { kinds: ["rule.confirmed"] });

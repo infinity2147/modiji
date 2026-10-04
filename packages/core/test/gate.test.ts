@@ -27,9 +27,10 @@ const failing = (events: readonly GateEvent[], now = NOW, mode: GateMode = "inte
   const e = evalAt(events, now, mode);
   return CONDITION_KEYS.filter((k) => !e.conditions[k].ok);
 };
-/** Authorized at `t`, spoken by the agent and finished. */
+/** Authorized at `t`, issued, spoken by the agent and finished. */
 const askedAndSpoken = (t: number, question: Question): GateEvent[] => [
-  { kind: "authorized", t, question, expiresAt: t + 4000 },
+  { kind: "authorized", t, question },
+  { kind: "issued", t: t + 100, questionId: question.id },
   { kind: "agent_speaking", t: t + 500, value: 1 },
   { kind: "agent_speaking", t: t + 3000, value: 0 },
 ];
@@ -42,6 +43,10 @@ describe("config", () => {
       typingIdleMs: 1500,
       liveBudget: { max: 5, windowMs: 600_000, kinds: ["why_probe", "counterfactual", "concept_definition"] },
       authorizationTtlMs: 4000,
+      authorizationGraceMs: 1500,
+      answerWindowMs: 5000,
+      answerSilenceMs: 4000,
+      transcriptWaitMs: 3000,
     });
     expect(cfg.tickMs).toBeLessThanOrEqual(50);
   });
@@ -61,13 +66,44 @@ describe("evaluateGate: each condition", () => {
     expect(e.reason).toBe("contradiction detected · EIG 0.61 bits");
   });
 
-  it("user speaking blocks until the first silent VAD frame + userSilenceMs", () => {
+  it("user speaking blocks until the turn is transcribed and userSilenceMs past the last speech signal", () => {
     expect(failing([...BASE, { kind: "vad", t: 9000, value: 0.9 }])).toEqual(["userSilent"]);
     expect(evalAt([...BASE, { kind: "vad", t: 9000, value: 0.9 }]).conditions.userSilent.waitMs).toBe(Infinity);
     const stopped: GateEvent[] = [...BASE, { kind: "vad", t: 8000, value: 0.9 }, { kind: "vad", t: 8100, value: 0.1 }];
-    expect(evalAt(stopped, 9000).conditions.userSilent).toEqual({ ok: false, waitMs: 300 });
-    expect(evalAt(stopped, 9300).decision).toBe("authorize");
-    expect(evalAt(stopped, 9300).becameValidAt).toBe(9300);
+    // No final transcript yet: the open turn holds the floor for transcriptWaitMs after the speech.
+    expect(evalAt(stopped, 9300).conditions.userSilent).toEqual({ ok: false, waitMs: 1800 });
+    expect(evalAt(stopped, 11_100).becameValidAt).toBe(11_100);
+    // The final transcript closes the turn; silence counts from it (the last speech signal).
+    const transcribed: GateEvent[] = [...stopped, { kind: "user_transcript", t: 8600 }];
+    expect(evalAt(transcribed, 9799).decision).toBe("wait");
+    expect(evalAt(transcribed, 9800).becameValidAt).toBe(9800);
+  });
+
+  it("the local microphone detector is a speech channel of its own (OR-ed with the provider VAD)", () => {
+    const local: GateEvent[] = [...BASE, { kind: "local_speech", t: 9000, value: 1 }, { kind: "vad", t: 9100, value: 0 }];
+    expect(failing(local)).toEqual(["userSilent"]);
+    expect(evalAt(local).conditions.userSilent.waitMs).toBe(Infinity);
+    const quiet: GateEvent[] = [...local, { kind: "local_speech", t: 9400, value: 0 }, { kind: "user_transcript", t: 9900 }];
+    expect(evalAt(quiet, 11_099).decision).toBe("wait");
+    expect(evalAt(quiet, 11_100).decision).toBe("authorize");
+  });
+
+  it("a transcript is speech evidence: the provider heard a word no level channel did", () => {
+    const heard: GateEvent[] = [...BASE, { kind: "tentative_transcript", t: 9000 }];
+    expect(evalAt(heard, 11_999).decision).toBe("wait");
+    expect(evalAt(heard, 12_000).decision).toBe("authorize");
+    const final: GateEvent[] = [...heard, { kind: "user_transcript", t: 9500 }];
+    expect(evalAt(final, 10_699).decision).toBe("wait");
+    expect(evalAt(final, 10_700).decision).toBe("authorize");
+  });
+
+  it("a final arriving while speech is still heard closes the turn only if that speech began ≥ 1 s earlier", () => {
+    const trailing: GateEvent[] = [...BASE, { kind: "vad", t: 6000, value: 0.9 }, { kind: "user_transcript", t: 7500 }, { kind: "vad", t: 7600, value: 0 }];
+    expect(stateOf(trailing).userTurnOpen).toBe(false);
+    expect(evalAt(trailing, 8800).decision).toBe("authorize");
+    const newTurn: GateEvent[] = [...BASE, { kind: "local_speech", t: 7000, value: 1 }, { kind: "user_transcript", t: 7500 }, { kind: "local_speech", t: 7600, value: 0 }];
+    expect(stateOf(newTurn).userTurnOpen).toBe(true);
+    expect(evalAt(newTurn, 10_599).decision).toBe("wait");
   });
 
   it("the explicit user_speaking channel blocks too, and turn_end ends it", () => {
@@ -185,28 +221,85 @@ describe("evaluateGate: each condition", () => {
     expect(back.becameValidAt).toBe(9000);
   });
 
-  it("waits while the agent speaks or an authorization holds the floor; an unspoken hold lapses at its expiry", () => {
+  it("waits while the agent speaks or an authorization holds the floor: in flight, then TTL + grace once issued", () => {
     expect(failing([...BASE, { kind: "agent_speaking", t: 9000, value: 1 }])).toEqual(["agentIdle"]);
-    const held: GateEvent[] = [...BASE, { kind: "authorized", t: 8000, question: q("q0"), expiresAt: 12_000 }];
+    const inFlight: GateEvent[] = [...BASE, { kind: "authorized", t: 1000, question: q("q0") }];
+    expect(failing(inFlight)).toEqual(["agentIdle"]);
+    expect(evalAt(inFlight, 60_000).conditions.agentIdle.waitMs).toBe(Infinity);
+    const held: GateEvent[] = [...inFlight, { kind: "issued", t: 8000, questionId: "q0" }];
     expect(failing(held)).toEqual(["agentIdle"]);
-    expect(evalAt(held).conditions.agentIdle.waitMs).toBe(2000);
+    expect(evalAt(held).conditions.agentIdle.waitMs).toBe(3500);
     expect(evalAt(held).inFlight?.id).toBe("q0");
-    expect(evalAt(held, 12_000).decision).toBe("authorize");
+    expect(evalAt(held, 13_500).decision).toBe("authorize");
     const spoken: GateEvent[] = [...held, { kind: "agent_speaking", t: 8500, value: 1 }];
     expect(evalAt(spoken, 20_000).conditions.agentIdle.waitMs).toBe(Infinity);
+  });
+
+  it("an unspoken hold lapses: floor and budget slot released (the server re-queues the question)", () => {
+    const asked = [0, 1, 2, 3].flatMap((i) => askedAndSpoken(i * 10_000, q(`old${i}`)));
+    const held: GateEvent[] = [...asked, BASE[0]!, { kind: "authorized", t: 50_000, question: q("q5") }, { kind: "issued", t: 50_300, questionId: "q5" }];
+    const top = queue(50_000, q("q6"));
+    expect(failing([...held, top], 51_000)).toEqual(["budget", "agentIdle"]);
+    // Not yet lapsed: nothing changes before the end of the hold; spoken holds never lapse.
+    expect(stateOf([...held, { kind: "lapsed", t: 55_799 }]).hold?.question.id).toBe("q5");
+    expect(stateOf([...held, { kind: "agent_speaking", t: 51_000, value: 1 }, { kind: "lapsed", t: 99_000 }]).asked).toHaveLength(5);
+    const lapsed = stateOf([...held, { kind: "lapsed", t: 55_800 }, top]);
+    expect(lapsed.hold).toBeNull();
+    expect(lapsed.asked.map((a) => a.questionId)).toEqual(["old0", "old1", "old2", "old3"]);
+    expect(evaluateGate(lapsed, 55_800, "interviewer", cfg).decision).toBe("authorize");
+  });
+
+  it("a refusal releases the floor and the budget slot, and blocks the question until the queue is re-read", () => {
+    const refused: GateEvent[] = [...BASE, { kind: "authorized", t: 1000, question: q("q1") }, { kind: "refused", t: 1300, questionId: "q1" }];
+    const s = stateOf(refused);
+    expect([s.hold, s.asked]).toEqual([null, []]);
+    expect(evalAt(refused).decision).toBe("wait");
+    expect(evalAt(refused).question).toBeNull();
+    expect(evalAt([...refused, queue(1300, q("q1"))]).decision).toBe("wait");
+    expect(evalAt([...refused, queue(1301, q("q1"))]).decision).toBe("authorize");
+    // A refusal for another question (or after the agent spoke) changes nothing.
+    expect(stateOf([...BASE, { kind: "authorized", t: 1000, question: q("q1") }, { kind: "refused", t: 1300, questionId: "x" }]).asked).toHaveLength(1);
+  });
+
+  it("a withdrawn authorization releases floor and budget slot without blocking the question", () => {
+    const withdrawn: GateEvent[] = [...BASE, { kind: "authorized", t: 1000, question: q("q1") }, { kind: "withdrawn", t: 1300, questionId: "q1" }];
+    expect(stateOf(withdrawn).asked).toEqual([]);
+    expect(evalAt(withdrawn).decision).toBe("authorize");
   });
 
   it("after an agent turn waits for the expert's answer, or for the answer window to pass", () => {
     const spoke: GateEvent[] = [...BASE, ...askedAndSpoken(1000, q("q0"))]; // agent turn ends at 4000
     expect(evalAt(spoke, 8999).conditions.userSilent).toEqual({ ok: false, waitMs: 1 });
     expect(evalAt(spoke, 9000).decision).toBe("authorize");
+    // An answer ends with answerSilenceMs of silence after its last speech signal (here its final transcript).
     const answered: GateEvent[] = [
       ...spoke,
       { kind: "vad", t: 4500, value: 0.9 },
       { kind: "vad", t: 5000, value: 0.1 },
+      { kind: "user_transcript", t: 5600 },
     ];
-    expect(evalAt(answered, 6200).decision).toBe("authorize");
-    expect(evalAt(answered, 6199).decision).toBe("wait");
+    expect(stateOf(answered).answering).toBe(true);
+    expect(evalAt(answered, 9599).decision).toBe("wait");
+    expect(evalAt(answered, 9600).decision).toBe("authorize");
+  });
+
+  it("a mid-answer pause shorter than answerSilenceMs never lets the next question in (live run B)", () => {
+    const pausing: GateEvent[] = [
+      ...BASE,
+      ...askedAndSpoken(1000, q("q0")), // agent turn ends at 4000
+      { kind: "local_speech", t: 4300, value: 1 }, // "Well, let me think."
+      { kind: "local_speech", t: 5800, value: 0 },
+      { kind: "user_transcript", t: 6300 },
+    ];
+    expect(evalAt(pausing, 9000).decision).toBe("wait"); // 3.2 s into the pause: still the expert's floor
+    const resumed: GateEvent[] = [...pausing, { kind: "local_speech", t: 9300, value: 1 }, { kind: "local_speech", t: 15_000, value: 0 }, { kind: "user_transcript", t: 15_500 }];
+    expect(stateOf(resumed).answering).toBe(true);
+    expect(evalAt(resumed, 19_499).decision).toBe("wait");
+    expect(evalAt(resumed, 19_500).decision).toBe("authorize");
+    // Talk after the answer ended (a gap ≥ answerSilenceMs) is ordinary speech again: 1.2 s.
+    const later: GateEvent[] = [...resumed, { kind: "local_speech", t: 30_000, value: 1 }, { kind: "local_speech", t: 31_000, value: 0 }, { kind: "user_transcript", t: 31_400 }];
+    expect(stateOf(later).answering).toBe(false);
+    expect(evalAt(later, 32_600).decision).toBe("authorize");
   });
 
   it("never authorizes the same question twice", () => {
@@ -222,7 +315,7 @@ describe("evaluateGate: each condition", () => {
 });
 
 describe("live budget through the controller (simulation)", () => {
-  it("authorizes 7 debrief questions and then still 5 live ones, holding back only the 6th live question", () => {
+  it("authorizes 7 debrief questions and then still 5 live ones, holding back only the 6th live question", async () => {
     const debrief = Array.from({ length: 7 }, (_, i) =>
       queue(i * 20_000, q(`d${i}`, { kind: i % 2 === 0 ? "witness" : "teach_back", t: i * 20_000 })),
     );
@@ -230,7 +323,7 @@ describe("live budget through the controller (simulation)", () => {
       queue(140_000 + i * 20_000, q(`l${i}`, { kind: "why_probe", t: 140_000 + i * 20_000 })),
     );
     const script = [{ kind: "breakpoint", t: 0, at: true } as const, ...debrief, ...live];
-    const { authorizations } = runScript(script, {}, { untilMs: 300_000 });
+    const { authorizations } = await runScript(script, {}, { untilMs: 300_000 });
     expect(authorizations.map((a) => a.questionId)).toEqual([
       ...debrief.map((_, i) => `d${i}`),
       ...live.slice(0, 5).map((_, i) => `l${i}`),
@@ -260,10 +353,7 @@ describe("evaluateGate: tutor mode", () => {
   it("still never speaks over the agent, over an in-flight authorization, or off the record", () => {
     const stop = queue(9995, q("stop", { kind: "intervention" }));
     expect(evalAt([...rude, stop, { kind: "agent_speaking", t: 9000, value: 1 }], NOW, "tutor").decision).toBe("wait");
-    expect(
-      evalAt([...rude, stop, { kind: "authorized", t: 9000, question: q("x"), expiresAt: 13_000 }], NOW, "tutor")
-        .decision,
-    ).toBe("wait");
+    expect(evalAt([...rude, stop, { kind: "authorized", t: 9000, question: q("x") }], NOW, "tutor").decision).toBe("wait");
     expect(evalAt([...rude, stop, { kind: "off_record", t: 9000, on: true }], NOW, "tutor").decision).toBe("wait");
   });
 
@@ -355,7 +445,7 @@ describe("hudModel", () => {
     const speaking = hudModel(
       evalAt([
         ...BASE,
-        { kind: "authorized", t: 9000, question: q("q1"), expiresAt: 13_000 },
+        { kind: "authorized", t: 9000, question: q("q1") },
         { kind: "agent_speaking", t: 9500 },
       ]),
     );
@@ -397,16 +487,21 @@ describe("createGateController", () => {
     const huds: string[] = [];
     const onError = vi.fn();
     const onHoldAgentHint = vi.fn();
+    const onWithdraw = vi.fn();
     const gate = createGateController({
       mode: "interviewer",
       clock,
       issue,
-      onAuthorize: (_a, question, sample) => authorized.push({ question: question.id, sample }),
+      onAuthorize: (_a, question, sample) => {
+        authorized.push({ question: question.id, sample });
+        return true;
+      },
       onHudUpdate: (hud) => huds.push(hud.line),
       onHoldAgentHint,
       onError,
+      onWithdraw,
     });
-    return { clock, gate, authorized, huds, onError, onHoldAgentHint };
+    return { clock, gate, authorized, huds, onError, onHoldAgentHint, onWithdraw };
   }
 
   it("wakes exactly when the conditions become valid and authorizes once", () => {
@@ -423,8 +518,22 @@ describe("createGateController", () => {
         sample: { questionId: "q1", becameValidAt: 1500, decidedAt: 1500, authorizedAt: 1500, latencyMs: 0 },
       },
     ]);
-    clock.advanceTo(60_000);
+    gate.feed({ kind: "agent_speaking", t: 60_000, value: 1 });
+    clock.advanceTo(65_000);
+    gate.feed({ kind: "agent_speaking", t: 65_000, value: 0 });
+    clock.advanceTo(120_000);
     expect(authorized).toHaveLength(1);
+  });
+
+  it("re-authorizes a question whose authorization lapsed unspoken (the server re-queued it)", () => {
+    const { clock, gate, authorized } = setup();
+    gate.feed({ kind: "breakpoint", t: 0, at: true });
+    gate.feed(queue(0, q("q1")));
+    expect(authorized).toHaveLength(1);
+    clock.advanceTo(5499); // TTL 4 s + grace 1.5 s
+    expect(authorized).toHaveLength(1);
+    clock.advanceTo(5550);
+    expect(authorized.map((a) => a.question)).toEqual(["q1", "q1"]);
   });
 
   it("passes issue the decision it authorized on: becameValidAt, decidedAt and every condition", () => {
@@ -485,18 +594,109 @@ describe("createGateController", () => {
     ]);
   });
 
-  it("reports an issuer failure or a mismatched authorization, and does not retry the question", async () => {
+  it("holds the floor through a slow issue and after it, until the agent has spoken (live bug #2: two control messages 23 ms apart)", async () => {
+    let resolve: () => void = () => {};
+    const issue = vi.fn((question: Question) => new Promise<GateAuthorization>((r) => (resolve = () => r(authorization(question)))));
+    const { clock, gate, authorized } = setup(issue);
+    gate.feed({ kind: "breakpoint", t: 0, at: true });
+    gate.feed(queue(0, q("q1")));
+    gate.feed(queue(1, q("q2")));
+    clock.advanceTo(4910); // the live round trip
+    expect(issue).toHaveBeenCalledTimes(1);
+    resolve();
+    await Promise.resolve();
+    clock.advanceTo(4933);
+    expect(authorized.map((a) => a.question)).toEqual(["q1"]);
+    expect(issue).toHaveBeenCalledTimes(1);
+    gate.feed({ kind: "agent_speaking", t: 5600, value: 1 });
+    clock.advanceTo(9000);
+    gate.feed({ kind: "agent_speaking", t: 9000, value: 0 });
+    clock.advanceTo(13_999); // the answer window after the agent's turn
+    expect(issue).toHaveBeenCalledTimes(1);
+    clock.advanceTo(14_000);
+    expect(issue).toHaveBeenCalledTimes(2);
+  });
+
+  it("reports an issuer failure or a mismatched authorization; retries the question only once the queue is re-read", async () => {
     const { clock, gate, authorized, onError } = setup(() => authorization(q("other")));
     gate.feed({ kind: "breakpoint", t: 0, at: true });
     gate.feed(queue(0, q("q1")));
+    expect(onError).toHaveBeenCalledTimes(1);
+    clock.advanceTo(30_000);
     expect(onError).toHaveBeenCalledTimes(1);
     const failing = setup(() => Promise.reject(new Error("503")));
     failing.gate.feed({ kind: "breakpoint", t: 0, at: true });
     failing.gate.feed(queue(0, q("q1")));
     await Promise.resolve();
     expect(failing.onError).toHaveBeenCalledWith(new Error("503"), expect.objectContaining({ id: "q1" }));
-    clock.advanceTo(30_000);
+    failing.clock.advanceTo(1000);
+    failing.gate.feed(queue(1000, q("q1")));
+    await Promise.resolve();
+    expect(failing.onError).toHaveBeenCalledTimes(2);
     expect(authorized).toEqual([]);
+  });
+
+  it("a refused authorization gives its live-budget slot back (live bug #4)", () => {
+    let refuse = true;
+    const { clock, gate, authorized } = setup((question) => {
+      if (refuse) throw new Error("409 question_not_queued");
+      return authorization(question);
+    });
+    gate.feed({ kind: "breakpoint", t: 0, at: true });
+    for (let i = 0; i < 5; i += 1) {
+      clock.advanceTo(i * 1000);
+      gate.feed(queue(i * 1000, q(`r${i}`)));
+    }
+    refuse = false;
+    clock.advanceTo(10_000);
+    gate.feed(queue(10_000, q("live")));
+    expect(authorized.map((a) => a.question)).toEqual(["live"]);
+  });
+
+  it("withdraws an authorization that arrives after the expert started speaking: no control message, slot released", async () => {
+    let resolve: () => void = () => {};
+    const issue = (question: Question) => new Promise<GateAuthorization>((r) => (resolve = () => r(authorization(question))));
+    const { clock, gate, authorized, onWithdraw } = setup(issue);
+    gate.feed({ kind: "breakpoint", t: 0, at: true });
+    gate.feed(queue(0, q("q1")));
+    clock.advanceTo(150);
+    gate.feed({ kind: "local_speech", t: 150, value: 1 });
+    clock.advanceTo(270);
+    resolve();
+    await Promise.resolve();
+    expect(authorized).toEqual([]);
+    expect(onWithdraw).toHaveBeenCalledWith(expect.objectContaining({ questionId: "q1" }), expect.objectContaining({ id: "q1" }), ["userSilent"]);
+    // Released at once: the question is asked again once the expert is done.
+    gate.feed({ kind: "local_speech", t: 900, value: 0 });
+    gate.feed({ kind: "user_transcript", t: 1300 });
+    clock.advanceTo(2499);
+    expect(authorized).toEqual([]);
+    clock.advanceTo(2500);
+    resolve();
+    await Promise.resolve();
+    expect(authorized.map((a) => a.question)).toEqual(["q1"]);
+  });
+
+  it("a control message the session could not send gives the authorization up until the queue is re-read", () => {
+    const clock = fakeClock();
+    let sends = 0;
+    const gate = createGateController({
+      mode: "interviewer",
+      clock,
+      issue: (question) => authorization(question),
+      onAuthorize: () => {
+        sends += 1;
+        return sends > 1;
+      },
+      onHudUpdate: () => {},
+    });
+    gate.feed({ kind: "breakpoint", t: 0, at: true });
+    gate.feed(queue(0, q("q1")));
+    clock.advanceTo(10_000);
+    expect(sends).toBe(1); // released (no hold left behind), not retried blindly
+    gate.feed(queue(10_000, q("q1")));
+    expect(sends).toBe(2);
+    expect(gate.latencySamples()).toHaveLength(1);
   });
 
   it("validates inputs at the boundary", () => {
@@ -509,6 +709,26 @@ describe("createGateController", () => {
     const { gate, onHoldAgentHint } = setup();
     for (let t = 0; t < 2500; t += 100) gate.feed({ kind: "typing", t });
     expect(onHoldAgentHint).toHaveBeenCalledTimes(3);
+  });
+
+  it("never hints once the expert has spoken, until the provider finalized the turn (live bug #1), nor while holding the floor", () => {
+    const { clock, gate, onHoldAgentHint } = setup();
+    gate.feed({ kind: "local_speech", t: 0, value: 1 });
+    gate.feed({ kind: "local_speech", t: 2000, value: 0 });
+    for (let t = 2000; t < 8000; t += 100) {
+      clock.advanceTo(t);
+      gate.feed({ kind: "typing", t });
+    }
+    expect(onHoldAgentHint).not.toHaveBeenCalled(); // speech, then its open turn (no transcript before the cap)
+    gate.feed({ kind: "user_transcript", t: 8000 });
+    gate.feed({ kind: "typing", t: 8000 });
+    expect(onHoldAgentHint).toHaveBeenCalledTimes(1);
+    gate.feed({ kind: "breakpoint", t: 8000, at: true });
+    gate.feed(queue(8000, q("q1", { ephemeral: true })));
+    clock.advanceTo(10_000); // authorized at 9500 and issued; the agent never speaks: held until 15 000
+    const before = onHoldAgentHint.mock.calls.length;
+    gate.feed({ kind: "typing", t: 11_000 });
+    expect(onHoldAgentHint).toHaveBeenCalledTimes(before);
   });
 
   it("publishes the HUD only when it changes and stops ticking once disposed", () => {

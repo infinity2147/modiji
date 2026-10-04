@@ -117,12 +117,13 @@ export function EngineeringView({ sessionId, gate }: { sessionId: string; gate: 
           {visibility !== "visible" && " (This tab is in the background now.)"}
         </p>
         <p className="text-muted-foreground">
-          Gate sensing (timing only, not recorded): keystrokes, scrolling and content changes in the case area; voice activity and agent mode
-          from the voice provider.
+          Gate sensing (timing only, not recorded): keystrokes anywhere in CaseDesk except the voice panel; scrolling and content changes in
+          the case area; the microphone&apos;s level in this browser (speech onset, from the voice session&apos;s own input); voice activity,
+          transcript arrival and agent mode from the voice provider.
         </p>
         {gate !== null && gate.refusals.length > 0 && (
           <>
-            <h4 className="mt-1 font-medium">Refused authorizations</h4>
+            <h4 className="mt-1 font-medium">Refused or withdrawn authorizations</h4>
             <ul className="grid gap-0.5">
               {gate.refusals.map((r) => (
                 <li key={`${r.questionId}-${r.at}`} className="text-amber-800">

@@ -155,6 +155,11 @@ export const StatedRuleSchema = z
     exactQuote: z.string().trim().min(1),
     t0Ms: z.int().nonnegative(),
     t1Ms: z.int().nonnegative(),
+    /**
+     * An answer given in several transcript segments: the segment the quote is verbatim in (its span is
+     * `t0Ms`–`t1Ms`). Absent: the answer's own `utteranceId`.
+     */
+    utteranceId: IdSchema.optional(),
   })
   .transform((rule, ctx) => {
     const effect: StatedRuleEffect | undefined = rule.effect ?? (rule.kind === "guardrail" ? undefined : { type: "recommend", action: rule.action });
@@ -187,7 +192,13 @@ export type ProposedConcept = z.infer<typeof ProposedConceptSchema>;
  */
 export const ParsedAnswerSchema = z.strictObject({
   questionId: IdSchema,
+  /** The answer's (first) transcript segment. */
   utteranceId: IdSchema,
+  /**
+   * Every transcript segment of the answer in order, `utteranceId` first, when the provider split it
+   * into several (absent: one segment). Each stays its own `utterance.transcript` evidence entry.
+   */
+  segmentIds: z.array(IdSchema).min(2).optional(),
   survivingCandidateIds: z.array(IdSchema),
   eliminatedCandidateIds: z.array(IdSchema),
   statedRules: z.array(StatedRuleSchema),

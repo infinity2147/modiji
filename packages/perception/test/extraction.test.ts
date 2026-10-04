@@ -434,6 +434,35 @@ describe("interpretReading (code derives events from two readings)", () => {
     expect(switched.snapshot.conceptsRead).toBe(false);
   });
 
+  it("drops concepts grounded in the screen's chrome or that only combine feature labels, deterministically", () => {
+    const chromeProfile = screenProfile(KYC_DOMAIN, ["riskRating"], ["Case queue", "Screening", "Source of funds", "Documents", "Customer", "Beneficial owners", "Save decision"]);
+    const read = (concepts: FullRead["concepts"]) =>
+      interpretReading(full({ concepts }), context({ profile: chromeProfile, previous: snapshot({ conceptsRead: false }) }));
+    const reasons = (concepts: FullRead["concepts"]) => read(concepts).dropped.map((d) => [d.key, d.reason]);
+    expect(
+      reasons([
+        // A name made of section headings; a description naming UI parts; a value that only says "shown".
+        { name: "screeningDocuments", description: "Documents status shown", observedValue: "Missing" },
+        { name: "caseLayout", description: "Tabs for the case file", observedValue: null },
+      ]),
+    ).toEqual([
+      ["screeningDocuments", "screen_chrome"],
+      ["caseLayout", "screen_chrome"],
+    ]);
+    expect(reasons([{ name: "registryExtract", description: "Registry extract present", observedValue: "displayed" }])).toEqual([["registryExtract", "screen_chrome"]]);
+    expect(reasons([{ name: "ownerList", description: "Customer and beneficial owners", observedValue: null }])).toEqual([["ownerList", "screen_chrome"]]);
+    // Two catalogue features under one name: not a new concept.
+    expect(reasons([{ name: "pepAndAdverseMedia", description: "Owner is a PEP with adverse media", observedValue: "yes" }])).toEqual([["pepAndAdverseMedia", "known_concept"]]);
+    // Case content that merely uses a chrome word is kept.
+    const kept = read([
+      { name: "documentExpiry", description: "Registry extract expired 14 months ago", observedValue: "2025-01-01" },
+      { name: "complianceSignOff", description: "Compliance officer sign-off recorded", observedValue: "pending" },
+    ]);
+    expect(kept.concepts.map((c) => c.name)).toEqual(["documentExpiry", "complianceSignOff"]);
+    expect(kept.dropped).toEqual([]);
+    expect(() => screenProfile(KYC_DOMAIN, ["riskRating"], ["  "])).toThrow(/chrome label/);
+  });
+
   it("refuses a reading of the wrong mode (an extractor bug) instead of guessing", () => {
     expect(() => interpretReading(local("low"), context({ previous: snapshot() }))).toThrow(/local read for a full request/);
   });

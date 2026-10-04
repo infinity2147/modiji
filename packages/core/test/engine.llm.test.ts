@@ -120,6 +120,36 @@ describe("answer parser contract", () => {
     expect(applied.set.candidates.some((c) => eliminated.has(c.id))).toBe(false);
   });
 
+  it("an answer in several transcript segments (live bug #3): quotes must be verbatim within one segment, which they cite", () => {
+    const first = { id: "utt-a", text: "Well, the country matters here.", t0Ms: 1_000, t1Ms: 2_400 };
+    const second = { id: "utt-b", text: "Never approve a politically exposed person without compliance sign-off.", t0Ms: 3_100, t1Ms: 6_000 };
+    const signOff: LlmAnswer["statedRules"][number] = {
+      when: { combinator: "all", conditions: [{ feature: "pep", op: "==", value: true }] },
+      polarity: "require_approval",
+      action: "approve",
+      approvalRole: "compliance_officer",
+      kind: "guardrail",
+      exactQuote: second.text,
+    };
+    const across = { ...signOff, exactQuote: "the country matters here. Never approve" };
+    const { answer, rejected } = toParsedAnswer(
+      { ...output, statedRules: [signOff, across], answeredAction: null },
+      { questionId: QUESTION.id, utterance: first, continuation: [second], domain: KYC, pendingConcepts: [] },
+    );
+    expect(rejected).toEqual([{ item: "statedRules[1]", reason: "quote is not verbatim within one segment of the answer" }]);
+    expect(answer.utteranceId).toBe("utt-a");
+    expect(answer.segmentIds).toEqual(["utt-a", "utt-b"]);
+    expect(answer.statedRules).toEqual([expect.objectContaining({ exactQuote: second.text, t0Ms: 3_100, t1Ms: 6_000, utteranceId: "utt-b" })]);
+    // A single-segment answer carries no segment list and no per-rule segment id.
+    const single = toParsedAnswer({ ...output, statedRules: [signOff], answeredAction: null }, { questionId: QUESTION.id, utterance: second, domain: KYC, pendingConcepts: [] });
+    expect(single.answer.segmentIds).toBeUndefined();
+    expect(single.answer.statedRules[0]?.utteranceId).toBeUndefined();
+
+    const prompt = buildAnswerParserPrompt({ domain: promptDomain(KYC), decisionFamily: "reviewOutcome", question: QUESTION, utterance: first, continuation: [second], candidates: [] });
+    expect(prompt.user).toContain(`<expert_answer segments="2">\n<segment n="1">${first.text}</segment>\n<segment n="2">${second.text}</segment>\n</expert_answer>`);
+    expect(prompt.system).toContain("copy each exactQuote from a single segment");
+  });
+
   it("a prohibition is a forbid guardrail (never a recommendation of the same action) and stays out of the posterior", () => {
     const utterance = { id: "utt-stop", text: "Never approve a customer on a high-risk country list at desk level.", t0Ms: 3_000, t1Ms: 6_200 };
     const stop: LlmAnswer["statedRules"][number] = {

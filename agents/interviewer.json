@@ -109,6 +109,7 @@
           "audio",
           "interruption",
           "user_transcript",
+          "tentative_user_transcript",
           "agent_response",
           "agent_response_correction",
           "agent_tool_response",

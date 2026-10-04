@@ -37,7 +37,7 @@ import type { z } from "zod";
 import { ReviewEditsSchema } from "../../contracts/casedesk";
 import type { ConceptActionRequest, ConceptActionResponseSchema, ConceptsState, ExpertWordsInputSchema } from "../../contracts/concepts";
 import { ApiFailure } from "../casedesk/http";
-import { CASEDESK_SCHEMA_VERSION, loadSession, type InterviewHooks, type LoadedSession } from "../casedesk/session";
+import { CASEDESK_SCHEMA_VERSION, loadSession, requireNotArchived, type InterviewHooks, type LoadedSession } from "../casedesk/session";
 import { engineState, topCandidates } from "../interview/engine-state";
 import { entry, type EntryContext } from "../interview/ledger";
 import type { RereadFrame, RereadResult, SchemaDeps, SchemaStore } from "./deps";
@@ -199,6 +199,7 @@ function pendingProposal(schema: SessionSchema, name: string): SessionSchema["un
 
 export function applyConceptAction(deps: SchemaDeps, sessionId: string, body: ConceptActionRequest): ActionResponse {
   const loaded = loadExpert(deps, sessionId);
+  requireNotArchived(loaded.session);
   const id = loaded.session.id;
   const schema = sessionSchema(deps.ledger, id);
   const proposal = pendingProposal(schema, body.name);

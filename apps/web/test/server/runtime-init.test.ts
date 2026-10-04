@@ -93,6 +93,7 @@ describe("deep health response", () => {
     db: () => ({ ok: true as const, ms: 1 }),
     dataDir: async () => ({ ok: true as const, ms: 1 }),
     z3: async () => (z3 ? { ok: true as const, ms: 1 } : { ok: false as const, error: "boom" }),
+    eventLoop: () => ({ p50Ms: 0, p99Ms: 1, maxMs: 2, samples: 10, sinceMs: 100 }),
   });
 
   it("reports llmCalls from the environment, without letting it affect ok", async () => {

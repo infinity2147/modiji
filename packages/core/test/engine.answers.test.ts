@@ -82,6 +82,24 @@ describe("applyAnswer", () => {
     expect(result.knowledge.statedCandidates.map((c) => c.id)).toContain(candidate?.id);
   });
 
+  it("applies explicit statements on their own evidence at low parse confidence; only inferences are gated (live bug #5)", () => {
+    const q = counterfactual("jurisdictionRisk", "high");
+    const decision = stated({ and: [{ ">": [{ var: "uboOwnershipPct" }, 25] }, { "==": [{ var: "uboVerified" }, false] }] }, "enhancedReview");
+    const guardrail = {
+      ...stated({ "==": [{ var: "jurisdictionRisk" }, "high"] }, "approve", "never approve a customer from a high-risk country"),
+      kind: "guardrail",
+      effect: { type: "forbid", action: "approve" },
+    } as StatedRule;
+    const result = apply(q, answer(q, { statedRules: [decision, guardrail], eliminatedCandidateIds: jurisdictionIds, confidence: 0.4 }));
+    expect(result.status).toBe("low_confidence");
+    expect(result.statedRules.map((o) => o.status)).toEqual(["candidate", "guardrail"]);
+    const added = result.statedRules[0];
+    expect(result.set.candidates.some((c) => added?.status === "candidate" && c.id === added.candidateId && c.origin === "expert_statement")).toBe(true);
+    // The parser's inferred eliminations are not applied.
+    expect(result.knowledge.eliminatedIds).toEqual([]);
+    expect(jurisdictionIds.every((id) => result.set.candidates.some((c) => c.id === id))).toBe(true);
+  });
+
   it("rejects an invalid stated rule with reasons instead of dropping it", () => {
     const q = counterfactual("jurisdictionRisk", "high");
     const result = apply(
@@ -130,9 +148,12 @@ describe("applyAnswer", () => {
     expect(mixed.ignored.map((i) => i.reason)).toEqual(["not a candidate of this hypothesis set", "listed as both surviving and eliminated"]);
     expect(mixed.set.candidates.map((c) => c.id)).toContain(first);
 
-    const low = apply(q, answer(q, { eliminatedCandidateIds: jurisdictionIds, confidence: 0.2 }));
+    const low = apply(q, answer(q, { eliminatedCandidateIds: jurisdictionIds, answeredAction: "enhancedReview" as never, confidence: 0.2 }));
     expect(low.status).toBe("low_confidence");
     expect(low.set).toBe(SET);
+    expect(low.observation).toBeUndefined();
+    expect(low.ignored).toHaveLength(jurisdictionIds.length + 1);
+    expect(low.ignored.every((i) => i.reason.startsWith("parse confidence 0.2 is below 0.5"))).toBe(true);
 
     const why = { ...q, kind: "why_probe" as const, target: { candidateIds: [] } };
     const noCase = apply(why, answer(why, { answeredAction: "approve" as never }));

@@ -25,7 +25,7 @@ import { EngineStateResponseSchema, GateAuthorizeResponseSchema, QuestionQueueRe
 import { handleCommitDecision, handleInterlockCheck } from "../../lib/server/casedesk/interlock";
 import { handlePostEvents } from "../../lib/server/casedesk/events";
 import { createDebriefStore, type DebriefDeps } from "../../lib/server/debrief/deps";
-import { createWitnessSolver } from "../../lib/server/debrief/solver";
+import { searchWitnesses } from "@vashistha/solver";
 import { coverageOf, snapshot } from "../../lib/server/debrief/state";
 import { engineState } from "../../lib/server/interview/engine-state";
 import { interviewHooks } from "../../lib/server/interview/orchestrator";
@@ -98,7 +98,7 @@ describe("P4 acceptance: an unresolved concept is surfaced, confirmed, and absor
     if (why === undefined) throw new Error("no why-probe queued after case 1");
     const granted = GateAuthorizeResponseSchema.parse((await h.authorize(s, gateRequest(why.id, contextVersion))).body);
     expect(await readTurn(await h.llmTurn(s, granted.controlMessage))).toMatchObject({ kind: "speech", text: why.text });
-    expect((await h.utter(s, utterance(h, s, `Mostly because ${QUOTE}.`, { questionId: why.id }))).status).toBe(200);
+    expect((await h.answerWith(s, utterance(h, s, `Mostly because ${QUOTE}.`, { questionId: why.id }))).status).toBe(200);
     await work(h, s, TWO.id, "approve", "high");
 
     // ≥1 unresolved concept surfaced, with the expert's quote, on the engine state and the concepts list.
@@ -151,7 +151,7 @@ describe("P4 acceptance: an unresolved concept is surfaced, confirmed, and absor
       engineConfig: engineConfig(),
       authorizations: h.authorizations,
       rulebook: () => rulebookFromLedger(h.ledger.list(s, { kinds: Object.values(RULE_EVENT_KINDS) })),
-      solver: createWitnessSolver(),
+      solver: searchWitnesses,
       claude: null,
       models: { prose: CLAUDE_MODELS.prose },
       exports: { workMapJson: exportWorkMapJson, procedure: compileProcedure },

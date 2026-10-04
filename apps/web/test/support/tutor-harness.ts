@@ -18,9 +18,10 @@ import { createLedgerRulebook } from "../../lib/server/debrief/rulebook-store";
 import { createInterviewStore } from "../../lib/server/interview/engine-state";
 import { handleEngineState, handleGateAuthorize, handleOffRecord, handleQuestionQueue } from "../../lib/server/interview/handlers";
 import { interviewHooks, type InterviewDeps } from "../../lib/server/interview/orchestrator";
+import { inProcessQuestions } from "./engine";
 import type { TutorDeps } from "../../lib/server/tutor/deps";
 import { handleIntent, handleJudgeCase, handlePractice, handlePrediction, handleTutorState, tutorHooks } from "../../lib/server/tutor/handlers";
-import { createPracticeSolver } from "../../lib/server/tutor/solver";
+import { practiceCases } from "@vashistha/solver";
 import { T0, jsonRequest, type Reply } from "./casedesk-harness";
 
 type RuleInput = z.input<typeof ConfirmedRuleSchema>;
@@ -131,8 +132,9 @@ export function createTutorHarness(): TutorHarness {
   const log = { info: capture, warn: capture, error: capture };
   const rulebook = createLedgerRulebook(opened.sqlite);
   const store = createCaseDeskStore();
-  const tutor: TutorDeps = { ledger, casedesk: store, rulebook, authorizations, practice: createPracticeSolver(), now, log };
-  const interview: InterviewDeps = { ledger, casedesk: store, store: createInterviewStore(), authorizations, claude: null, config: engineConfig(), now, log };
+  const tutor: TutorDeps = { ledger, casedesk: store, rulebook, authorizations, practice: practiceCases, now, log };
+  // No answer parser in tutor sessions, so no answer window ever opens: `schedule` is never called.
+  const interview: InterviewDeps = { ledger, casedesk: store, store: createInterviewStore(), authorizations, claude: null, config: engineConfig(), questions: inProcessQuestions, rulebook, now, schedule: () => () => undefined, log };
   const casedesk: CaseDeskDeps = {
     ledger,
     store,

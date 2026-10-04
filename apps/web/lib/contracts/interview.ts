@@ -9,7 +9,6 @@ import {
   GateAuthorizationSchema,
   IdSchema,
   MasteryLevelSchema,
-  ParsedAnswerSchema,
   QuestionSchema,
 } from "@vashistha/core";
 
@@ -43,11 +42,22 @@ export const GateAuthorizeResponseSchema = z.strictObject({
   text: z.string().min(1),
 });
 /** 409 reasons for a refused authorization. */
-export const GateRefusalSchema = z.enum(["context_changed", "question_not_queued", "off_record", "agent_mismatch"]);
+export const GateRefusalSchema = z.enum([
+  "context_changed",
+  "question_not_queued",
+  "off_record",
+  "agent_mismatch",
+  "session_archived",
+  /** An earlier authorization of the session is still outstanding (unspent, unexpired). */
+  "authorization_pending",
+]);
 
 /**
  * POST /api/sessions/:sessionId/utterances — a final expert transcript from ElevenLabs (`onMessage` with
- * role "user"). The browser must never post control messages; the server rejects them anyway (400).
+ * role "user"): one segment of what the expert said, recorded as its own evidence entry. The browser
+ * must never post control messages; the server rejects them anyway (400). Segments tagged with the same
+ * asked question form one answer, parsed once its window closes (the next agent turn or authorization,
+ * or no further segment for a while) — never in this request.
  */
 export const PostUtteranceRequestSchema = z.strictObject({
   conversationId: z.string().min(1),
@@ -55,7 +65,7 @@ export const PostUtteranceRequestSchema = z.strictObject({
   /** Milliseconds since the conversation started (client clock, from onConnect). */
   t0Ms: z.int().nonnegative(),
   t1Ms: z.int().nonnegative(),
-  /** The question this utterance answers, if one was just asked. */
+  /** The question this utterance answers: set on every segment from the agent's question until its next turn. */
   questionId: IdSchema.optional(),
   privacyEpoch: z.int().nonnegative(),
   /**
@@ -75,8 +85,6 @@ export const PostUtteranceResponseSchema = z.strictObject({
   translation: z
     .discriminatedUnion("status", [z.strictObject({ status: z.literal("translated"), text: z.string().min(1) }), z.strictObject({ status: z.literal("pending") })])
     .optional(),
-  /** Present once the answer parser has run (it runs synchronously when a question was pending). */
-  parsed: ParsedAnswerSchema.optional(),
 });
 
 /** POST /api/sessions/:sessionId/agent-utterances — what the agent said (`onMessage` role "agent"); never evidence. */

@@ -11,6 +11,7 @@ export * from "./questions";
 export * from "./answers";
 export * from "./promotion";
 export * from "./rulebook";
+export * from "./dedupe";
 export * from "./team";
 export * from "./mastery";
 export * from "./llm/inputs";

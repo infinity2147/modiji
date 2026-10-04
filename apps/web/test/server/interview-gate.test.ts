@@ -27,6 +27,13 @@ async function expertAfterOneCase(): Promise<{ h: InterviewHarness; s: string; d
   return { h, s, decision };
 }
 
+function only<T>(xs: readonly T[]): T {
+  expect(xs).toHaveLength(1);
+  const [x] = xs;
+  if (x === undefined) throw new Error("unreachable");
+  return x;
+}
+
 function refusal(body: unknown): string {
   return GateRefusalSchema.parse(ApiErrorSchema.parse(body).error);
 }
@@ -231,5 +238,74 @@ describe("POST agent-utterances", () => {
     expect((await h.agentSaid(s, { conversationId: "conv-1", text: granted.controlMessage })).status).toBe(400);
     expect((await h.agentSaid(s, { conversationId: "conv-1", text: "x", questionId: queue[1]?.id ?? "q" })).status).toBe(409);
     expect(h.ledger.list(s, { kinds: ["agent.utterance"] })).toHaveLength(1);
+  });
+});
+
+describe("authorization lifecycle", () => {
+  it("refuses a second authorization while the session's first is outstanding (409 authorization_pending, live bug #2)", async () => {
+    const { h, s } = await expertAfterOneCase();
+    const { queue, contextVersion } = await queueOf(h, s);
+    const [first, second] = queue;
+    if (first === undefined || second === undefined) throw new Error("need two queued questions");
+    const granted = GateAuthorizeResponseSchema.parse((await h.authorize(s, gateRequest(first.id, contextVersion))).body);
+    const entries = h.ledger.list(s).length;
+    const pending = await h.authorize(s, gateRequest(second.id, contextVersion));
+    expect([pending.status, refusal(pending.body)]).toEqual([409, "authorization_pending"]);
+    expect(h.ledger.list(s)).toHaveLength(entries);
+    // Spoken: the floor is the agent's, and the server accepts the next authorization.
+    expect(await readTurn(await h.llmTurn(s, granted.controlMessage))).toMatchObject({ kind: "speech" });
+    expect((await h.authorize(s, gateRequest(second.id, contextVersion))).status).toBe(200);
+  });
+
+  it("an authorization that expires unspoken re-queues its question: not asked, no live budget spent (live bug #1)", async () => {
+    const { h, s } = await expertAfterOneCase();
+    const { queue, contextVersion } = await queueOf(h, s);
+    const top = queue[0];
+    if (top === undefined) throw new Error("empty queue");
+    const granted = GateAuthorizeResponseSchema.parse((await h.authorize(s, gateRequest(top.id, contextVersion))).body);
+    h.advance(3999);
+    expect((await queueOf(h, s)).queue.some((q) => q.id === top.id)).toBe(false);
+    h.advance(1); // the 4 s TTL: the custom LLM never got (or never accepted) the control message
+    const after = await queueOf(h, s);
+    expect(after.queue.some((q) => q.id === top.id)).toBe(true);
+    expect(after.asked).toEqual([]);
+    const [authorized] = h.ledger.list(s, { kinds: ["gate.authorized"] });
+    const requeued = only(h.ledger.list(s, { kinds: ["question.requeued"] }));
+    expect(requeued.parentIds).toEqual([authorized?.id]);
+    expect(parseLedgerPayload(requeued, "question.requeued")).toEqual({ questionId: top.id, reason: "authorization_unspoken" });
+    // The expired nonce never speaks; the re-queued question is authorized (and spoken) afresh.
+    expect(await readTurn(await h.llmTurn(s, granted.controlMessage))).toMatchObject({ kind: "skip" });
+    const again = GateAuthorizeResponseSchema.parse((await h.authorize(s, gateRequest(top.id, contextVersion))).body);
+    expect(await readTurn(await h.llmTurn(s, again.controlMessage))).toMatchObject({ kind: "speech", text: top.text });
+    h.advance(10_000);
+    expect((await queueOf(h, s)).asked.map((a) => a.questionId)).toEqual([top.id]);
+    expect(h.ledger.list(s, { kinds: ["question.requeued"] })).toHaveLength(1);
+  });
+
+  it("a control message merged into the expert's open turn (skipped) and then expired re-queues the question", async () => {
+    const { h, s } = await expertAfterOneCase();
+    const { queue, contextVersion } = await queueOf(h, s);
+    const top = queue[0];
+    if (top === undefined) throw new Error("empty queue");
+    GateAuthorizeResponseSchema.parse((await h.authorize(s, gateRequest(top.id, contextVersion))).body);
+    // ElevenLabs saw the expert's words last in the same user turn: not a control message → skip_turn.
+    expect(await readTurn(await h.llmTurn(s, "Let me jot down the ownership details while I read through this file."))).toMatchObject({ kind: "skip", reason: "not_control_message" });
+    h.advance(4000);
+    expect((await queueOf(h, s)).queue.some((q) => q.id === top.id)).toBe(true);
+  });
+
+  it("a lapsed question about a case that is no longer the latest decision is re-queued, then dropped as superseded", async () => {
+    const { h, s } = await expertAfterOneCase();
+    const { queue, contextVersion } = await queueOf(h, s);
+    const top = queue[0];
+    if (top === undefined) throw new Error("empty queue");
+    GateAuthorizeResponseSchema.parse((await h.authorize(s, gateRequest(top.id, contextVersion))).body);
+    await h.work(s, TWO.id, "approve", "high");
+    h.advance(4000);
+    const after = await queueOf(h, s);
+    expect(after.queue.some((q) => q.id === top.id)).toBe(false);
+    const dropped = h.ledger.list(s, { kinds: ["question.dropped"] }).map((e) => parseLedgerPayload(e, "question.dropped"));
+    expect(dropped).toContainEqual({ questionId: top.id, reason: "superseded" });
+    expect(h.ledger.list(s, { kinds: ["question.requeued"] })).toHaveLength(1);
   });
 });

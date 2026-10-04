@@ -83,8 +83,9 @@ test("@live @p4 hypothesis engine on the 3 training cases (real Sonnet)", async 
   }
   // Remaining questions about the last case, until every teaching answer (incl. both stop-rules) was said.
   for (let n = 0; n < 4 && (n < 2 || pending.length > 0); n += 1) if (!(await ask("NS-2026-0103", 12_000))) break;
-  // Let the last answer be parsed (Sonnet) before reading the ledger.
-  await page.waitForTimeout(12_000);
+  // Let the last answer be parsed (Sonnet) before reading the ledger: with no next question, its answer window
+  // closes after 12 s without a new transcript segment (ANSWER_WINDOW_IDLE_MS), then the parse runs.
+  await page.waitForTimeout(25_000);
   const analysis = await finishRun(expert, {
     group: GROUP,
     name: `p4-run-${expert.sessionId}`,

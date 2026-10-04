@@ -87,5 +87,16 @@ export const CommitDecisionResponseSchema = z.discriminatedUnion("status", [
   z.strictObject({ status: z.literal("blocked"), result: GuardrailResultSchema }),
 ]);
 
+/**
+ * POST /api/sessions/:sessionId/archive — operator only (`Authorization: Bearer CUSTOM_LLM_SECRET`). Closes
+ * the session for writing (a `session.archived` ledger entry): afterwards every write route answers 409
+ * `session_archived`, reads keep working, and rules confirmed in the session stay in the rulebook.
+ */
+export const ArchiveSessionRequestSchema = z.strictObject({
+  by: z.enum(["operator", "replay_export"]).default("operator"),
+  note: z.string().trim().min(1).max(500).optional(),
+});
+export const ArchiveSessionResponseSchema = z.strictObject({ sessionId: IdSchema, archived: z.literal(true), entryId: IdSchema, sequence: z.int().nonnegative() });
+
 /** Error body for every non-2xx CaseDesk response. */
 export const ApiErrorSchema = z.strictObject({ error: z.string(), detail: z.string().optional() });

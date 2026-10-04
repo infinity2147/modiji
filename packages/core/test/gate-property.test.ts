@@ -51,6 +51,23 @@ const episodeArb: fc.Arbitrary<Episode> = fc.oneof(
       ]),
   },
   {
+    weight: 3,
+    arbitrary: fc
+      .record({ ms: fc.integer({ min: 60, max: 3000 }), final: fc.option(fc.integer({ min: 0, max: 2500 }), { nil: null }) })
+      .map(({ ms, final }): Episode => (t) => [
+        { kind: "local_speech", t, value: 1 },
+        { kind: "local_speech", t: t + ms, value: 0 },
+        ...(final === null ? [] : [{ kind: "user_transcript", t: t + ms + final } as const]),
+      ]),
+  },
+  {
+    weight: 1,
+    arbitrary: fc.constantFrom<"tentative_transcript" | "user_transcript">("tentative_transcript", "user_transcript").map(
+      (kind): Episode =>
+        (t) => [{ kind, t }],
+    ),
+  },
+  {
     weight: 4,
     arbitrary: fc.integer({ min: 0, max: 8 }).map(
       (n): Episode =>
@@ -112,7 +129,11 @@ const scriptArb: fc.Arbitrary<GateInput[]> = fc
 
 const simArb = fc.record({ script: scriptArb, jitter: fc.integer({ min: 0, max: 100 }), seed: fc.integer() });
 
-/** Replays the script up to `at` (inputs at `at` included: they were fed before the authorization). */
+/**
+ * Replays the script up to `at` (inputs at `at` included: they were fed before the authorization): an
+ * independent model of what the expert is doing. Speech is any level channel; it opens a user turn that
+ * a final transcript (or `turn_end`) closes; a transcript is speech evidence at its arrival.
+ */
 function worldAt(script: readonly GateInput[], at: number) {
   let offRecord = false;
   let offRecordEnd = -Infinity;
@@ -121,12 +142,15 @@ function worldAt(script: readonly GateInput[], at: number) {
   let top: { t: number; ephemeral: boolean; value: number; kind: QuestionKind } | null = null;
   let vad = false;
   let explicit = false;
+  let local = false;
+  let speechStart = -Infinity;
   let speechEnd = -Infinity;
+  let turnOpen = false;
   let typing = -Infinity;
   let motion = -Infinity;
   for (const e of script) {
     if (e.t > at) break;
-    const wasSpeaking = vad || explicit;
+    const wasSpeaking = vad || explicit || local;
     if (e.kind === "off_record") {
       if (offRecord && !e.on) offRecordEnd = e.t;
       offRecord = e.on;
@@ -137,10 +161,23 @@ function worldAt(script: readonly GateInput[], at: number) {
       top = e.top && { t: e.t, ephemeral: e.top.ephemeral, value: e.top.value, kind: e.top.kind };
     else if (e.kind === "vad") vad = (e.value ?? 0) >= cfg.vadSpeakingThreshold;
     else if (e.kind === "user_speaking") explicit = e.value !== 0;
+    else if (e.kind === "local_speech") local = e.value !== 0;
     else if (e.kind === "turn_end") explicit = false;
     else if (e.kind === "typing") typing = e.t;
     else if (e.kind === "screen_motion") motion = e.t;
-    if (wasSpeaking && !(vad || explicit)) speechEnd = e.t;
+    const speaking = vad || explicit || local;
+    if (!wasSpeaking && speaking) {
+      speechStart = e.t;
+      turnOpen = true;
+    }
+    if (wasSpeaking && !speaking) speechEnd = e.t;
+    if (e.kind === "turn_end") turnOpen = speaking;
+    if (e.kind === "tentative_transcript" || e.kind === "user_transcript") {
+      if (!speaking) {
+        speechEnd = Math.max(speechEnd, e.t);
+        turnOpen = e.kind === "tentative_transcript";
+      } else if (e.kind === "user_transcript" && e.t - speechStart >= 1000) turnOpen = false;
+    }
   }
   return {
     offRecord,
@@ -148,8 +185,9 @@ function worldAt(script: readonly GateInput[], at: number) {
     atBreakpoint,
     breakpointSince,
     top,
-    speaking: vad || explicit,
+    speaking: vad || explicit || local,
     speechEnd,
+    turnOpen,
     typing,
     motion,
   };
@@ -168,10 +206,10 @@ function simulate(script: GateInput[], jitter: number, seed: number, mode: GateM
 }
 
 describe("gate properties (random interleavings, fixed seed)", () => {
-  it("never interrupts, and every authorization meets the conditions when issued (never early)", () => {
-    fc.assert(
-      fc.property(simArb, ({ script, jitter, seed }) => {
-        const { authorizations, interruptions } = simulate(script, jitter, seed);
+  it("never interrupts, and every authorization meets the conditions when issued (never early)", async () => {
+    await fc.assert(
+      fc.asyncProperty(simArb, async ({ script, jitter, seed }) => {
+        const { authorizations, interruptions } = await simulate(script, jitter, seed);
         expect(interruptions).toBe(0);
         authorizations.forEach((a, i) => {
           const w = worldAt(script, a.at);
@@ -181,6 +219,7 @@ describe("gate properties (random interleavings, fixed seed)", () => {
           expect(w.top!.ephemeral || w.atBreakpoint).toBe(true);
           expect(w.speaking).toBe(false);
           expect(a.at - w.speechEnd).toBeGreaterThanOrEqual(cfg.userSilenceMs);
+          if (w.turnOpen) expect(a.at - w.speechEnd).toBeGreaterThanOrEqual(cfg.transcriptWaitMs);
           expect(a.at - w.typing).toBeGreaterThanOrEqual(cfg.typingIdleMs);
           expect(a.at - w.motion).toBeGreaterThanOrEqual(cfg.screenIdleMs);
           if (!budgeted(w.top!.kind)) return;
@@ -195,11 +234,11 @@ describe("gate properties (random interleavings, fixed seed)", () => {
     );
   });
 
-  it(`authorizes within ${AUTHORIZATION_LATENCY_BOUND_MS} ms of the conditions becoming valid, never before`, () => {
+  it(`authorizes within ${AUTHORIZATION_LATENCY_BOUND_MS} ms of the conditions becoming valid, never before`, async () => {
     const latencies: number[] = [];
-    fc.assert(
-      fc.property(simArb, fc.constantFrom<GateMode>("interviewer", "tutor"), ({ script, jitter, seed }, mode) => {
-        for (const a of simulate(script, jitter, seed, mode).authorizations) {
+    await fc.assert(
+      fc.asyncProperty(simArb, fc.constantFrom<GateMode>("interviewer", "tutor"), async ({ script, jitter, seed }, mode) => {
+        for (const a of (await simulate(script, jitter, seed, mode)).authorizations) {
           latencies.push(a.latencyMs);
           expect(a.becameValidAt).toBeLessThanOrEqual(a.at);
           expect(a.latencyMs).toBeGreaterThanOrEqual(0);
@@ -211,17 +250,17 @@ describe("gate properties (random interleavings, fixed seed)", () => {
     expect(latencies.length).toBeGreaterThan(50);
   });
 
-  it("measures the onset independently: the first authorization's becameValidAt is when the world became valid", () => {
-    fc.assert(
-      fc.property(simArb, ({ script, jitter, seed }) => {
-        const first = simulate(script, jitter, seed).authorizations[0];
+  it("measures the onset independently: the first authorization's becameValidAt is when the world became valid", async () => {
+    await fc.assert(
+      fc.asyncProperty(simArb, async ({ script, jitter, seed }) => {
+        const first = (await simulate(script, jitter, seed)).authorizations[0];
         if (!first) return;
         const w = worldAt(script, first.at);
         const onset = Math.max(
           w.offRecordEnd,
           w.top!.t,
           w.top!.ephemeral ? -Infinity : w.breakpointSince,
-          w.speechEnd + cfg.userSilenceMs,
+          w.speechEnd + (w.turnOpen ? Math.max(cfg.userSilenceMs, cfg.transcriptWaitMs) : cfg.userSilenceMs),
           w.typing + cfg.typingIdleMs,
           w.motion + cfg.screenIdleMs,
         );
@@ -231,10 +270,10 @@ describe("gate properties (random interleavings, fixed seed)", () => {
     );
   });
 
-  it("never authorizes anything while off the record, in either mode", () => {
-    fc.assert(
-      fc.property(simArb, fc.constantFrom<GateMode>("interviewer", "tutor"), ({ script, jitter, seed }, mode) => {
-        for (const a of simulate(script, jitter, seed, mode).authorizations)
+  it("never authorizes anything while off the record, in either mode", async () => {
+    await fc.assert(
+      fc.asyncProperty(simArb, fc.constantFrom<GateMode>("interviewer", "tutor"), async ({ script, jitter, seed }, mode) => {
+        for (const a of (await simulate(script, jitter, seed, mode)).authorizations)
           expect(worldAt(script, a.at).offRecord).toBe(false);
       }),
       RUNS,

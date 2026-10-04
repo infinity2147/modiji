@@ -14,6 +14,7 @@ const KINDS = [
   "question.queued",
   "question.dropped",
   "gate.authorized",
+  "question.requeued",
   "case.decision",
   "case.generated",
   "mastery.updated",
@@ -74,6 +75,10 @@ export function tutorRecord(ledger: Pick<Ledger, "list">, sessionId: string): Tu
         break;
       case "gate.authorized":
         record.spoken.add(parseLedgerPayload(entry, "gate.authorized").questionId);
+        break;
+      // Its authorization expired unspoken: the intervention is waiting to be spoken again.
+      case "question.requeued":
+        record.spoken.delete(parseLedgerPayload(entry, "question.requeued").questionId);
         break;
       case "case.decision": {
         const payload = parseLedgerPayload(entry, "case.decision");

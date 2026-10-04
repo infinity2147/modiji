@@ -8,7 +8,7 @@ import { checkAnthropic } from "../preflight/checks/anthropic";
 import { checkEnv } from "../preflight/checks/env";
 import { checkPermissions } from "../preflight/checks/permissions";
 import { checkPublicLlm } from "../preflight/checks/public-llm";
-import { checkSandbox, checkServerDeep } from "../preflight/checks/server";
+import { MAX_EVENT_LOOP_P99_MS, checkSandbox, checkServerDeep } from "../preflight/checks/server";
 import { checkToken } from "../preflight/checks/token";
 import type { PreflightElevenLabs } from "../preflight/types";
 import {
@@ -293,8 +293,20 @@ describe("server-deep and sandbox", () => {
   it("passes when health is up, deep refuses anonymous callers and every probe is ok", async () => {
     const r = await checkServerDeep(makeContext());
     expect(r.status).toBe("pass");
-    expect(r.detail).toBe("health 200; deep 401 without bearer; db ok 1.5 ms, dataDir ok 1.5 ms, z3 ok 1.5 ms; model calls on");
+    expect(r.detail).toBe("health 200; deep 401 without bearer; db ok 1.5 ms, dataDir ok 1.5 ms, z3 ok 1.5 ms; model calls on; event-loop delay p99 4 ms");
     expect(r.facts?.llmCalls).toBe("on");
+    expect(r.facts?.eventLoop).toMatchObject({ p99Ms: 4, samples: 6000 });
+  });
+
+  it("fails a target whose event-loop delay p99 exceeds the bound, or that does not report it", async () => {
+    const atBound = await checkServerDeep(makeContext({ fetch: fakeServer({ eventLoopP99Ms: MAX_EVENT_LOOP_P99_MS }).fetch }));
+    expect(atBound.status).toBe("pass");
+    const slow = await checkServerDeep(makeContext({ fetch: fakeServer({ eventLoopP99Ms: 250 }).fetch }));
+    expect(slow.status).toBe("fail");
+    expect(slow.detail).toBe("event-loop delay p99 250 ms > 200 ms (max 750 ms, 6000 samples since boot)");
+    const missing = await checkServerDeep(makeContext({ fetch: fakeServer({ eventLoopP99Ms: null }).fetch }));
+    expect(missing.status).toBe("fail");
+    expect(missing.detail).toContain("does not report eventLoop");
   });
 
   it("fails a target that reports LLM_CALLS=off, or does not report it at all", async () => {

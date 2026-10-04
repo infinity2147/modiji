@@ -27,10 +27,10 @@ import {
 } from "../../contracts/interview";
 import type { SessionMode } from "../../contracts/casedesk";
 import { ApiFailure, NO_STORE, json, readJson, respond } from "../casedesk/http";
-import { loadSession, requireOnRecord, type LoadedSession } from "../casedesk/session";
+import { loadSession, requireNotArchived, requireOnRecord, type LoadedSession } from "../casedesk/session";
 import { askedQuestions, engineState, engineStateResponse, queuedQuestions } from "./engine-state";
 import { entry } from "./ledger";
-import { recordUtterance, type InterviewDeps } from "./orchestrator";
+import { closeAnswer, recordUtterance, requeueLapsed, type InterviewDeps } from "./orchestrator";
 
 /** Every control message starts with this token (plan §7.2); no utterance may contain it. */
 const CONTROL_TOKEN_PREFIX = "⟦ctl:";
@@ -57,10 +57,15 @@ function requireNoControlText(text: string): void {
     throw new ApiFailure(400, "control_message", "control messages are never recorded as utterances");
 }
 
-/** `GET /api/sessions/:sessionId/questions`: live questions are valid at the current context version (questions.ts). */
+/**
+ * `GET /api/sessions/:sessionId/questions`: live questions are valid at the current context version
+ * (questions.ts). Questions whose authorization expired unspoken are re-queued first (the browser gate
+ * polls this every second, so a lost question is back in its queue within about a second of lapsing).
+ */
 export function handleQuestionQueue(sessionId: string, deps: InterviewDeps): Promise<Response> {
   return respond(deps.log, () => {
     const { session } = load(deps, sessionId);
+    requeueLapsed(deps);
     const state = engineState(deps, session.id);
     const contextVersion = deps.authorizations.getContextVersion(session.id);
     const body: z.infer<typeof QuestionQueueResponseSchema> = {
@@ -76,17 +81,24 @@ export function handleQuestionQueue(sessionId: string, deps: InterviewDeps): Pro
 /**
  * `POST /api/sessions/:sessionId/gate/authorize`. Synchronous from the checks to the nonce, so nothing
  * can change the context in between; `gate.authorized` is written before the nonce exists (no
- * unrecorded authorization).
+ * unrecorded authorization). Refused while the session still has an outstanding authorization
+ * (`authorization_pending`: never two control messages racing, live bug #2). A new authorization
+ * closes the expert's open answer: the gate only asks once that answer has ended.
  */
 export function handleGateAuthorize(request: Request, sessionId: string, deps: InterviewDeps): Promise<Response> {
   return respond(deps.log, async () => {
     const body = await readJson(request, GateAuthorizeRequestSchema);
     if (body.decidedAt < body.becameValidAt) throw new ApiFailure(400, "invalid_request", "decidedAt is before becameValidAt");
     const { session, info } = load(deps, sessionId);
+    requireNotArchived(session);
     if (session.offRecord) throw refuse("off_record", "the session is off the record");
     const contextVersion = deps.authorizations.getContextVersion(session.id);
     if (body.contextVersion !== contextVersion)
       throw refuse("context_changed", `context version ${body.contextVersion} is stale (current ${contextVersion})`);
+    requeueLapsed(deps);
+    const pending = deps.authorizations.pending(session.id, deps.now());
+    if (pending !== undefined)
+      throw refuse("authorization_pending", `the authorization for ${pending.questionId} is outstanding until ${new Date(pending.expiresAt).toISOString()}`);
     const record = engineState(deps, session.id).questions.get(body.questionId);
     if (record?.status !== "queued") throw refuse("question_not_queued", `question ${body.questionId} is not queued`);
     const agent = AGENT_FOR_MODE[info.mode];
@@ -116,6 +128,7 @@ export function handleGateAuthorize(request: Request, sessionId: string, deps: I
       contextVersion,
       ttlMs: DEFAULT_GATE_CONFIG.authorizationTtlMs,
     });
+    void closeAnswer(deps, session.id);
     const response: z.infer<typeof GateAuthorizeResponseSchema> = {
       authorization,
       controlMessage: formatControlMessage(authorization.nonce),
@@ -139,7 +152,10 @@ export function handlePostUtterance(request: Request, sessionId: string, deps: I
   });
 }
 
-/** `POST /api/sessions/:sessionId/agent-utterances`: what the agent said, recorded by the engine (never evidence of the expert). */
+/**
+ * `POST /api/sessions/:sessionId/agent-utterances`: what the agent said, recorded by the engine (never
+ * evidence of the expert). The agent's turn closes the expert's open answer (it is then parsed).
+ */
 export function handlePostAgentUtterance(request: Request, sessionId: string, deps: InterviewDeps): Promise<Response> {
   return respond(deps.log, async () => {
     const body = await readJson(request, PostAgentUtteranceRequestSchema);
@@ -158,6 +174,7 @@ export function handlePostAgentUtterance(request: Request, sessionId: string, de
         { conversationId: body.conversationId, text: body.text, ...(body.questionId !== undefined && { questionId: body.questionId }) },
       ),
     );
+    void closeAnswer(deps, session.id);
     return new Response(null, { status: 204, headers: NO_STORE });
   });
 }
@@ -171,6 +188,7 @@ export function handleOffRecord(request: Request, sessionId: string, deps: Inter
   return respond(deps.log, async () => {
     const { offRecord } = await readJson(request, OffRecordRequestSchema);
     const { session } = load(deps, sessionId);
+    requireNotArchived(session);
     if (session.offRecord !== offRecord) {
       deps.ledger.setOffRecord(session.id, offRecord, { occurredAt: deps.now(), traceId: randomUUID() });
       deps.authorizations.bumpContextVersion(session.id);

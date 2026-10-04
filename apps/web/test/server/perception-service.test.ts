@@ -3,6 +3,7 @@ import { ScreenEventSchema, parseLedgerPayload } from "@vashistha/core";
 import { EnvError, createLedger, openDatabase } from "@vashistha/core/server";
 import { PostFrameResponseSchema, VisionStateSchema } from "../../lib/contracts/frames";
 import { createPerception } from "../../lib/server/perception/init";
+import { prepareFrame, type FrameToRead } from "../../lib/server/perception/prepare";
 import { toConceptPayload } from "../../lib/server/perception/service";
 import { T0, domEvent } from "../support/casedesk-harness";
 import {
@@ -271,22 +272,23 @@ describe("proposed concepts", () => {
 
 describe("composition: when is extraction available?", () => {
   const ledger = () => createLedger(openDatabase({ memory: true }).db);
+  const prepare = async (input: FrameToRead) => prepareFrame(input);
 
   it("is unavailable without a model (no_api_key) or when switched off (disabled)", () => {
     const session = { id: "s", privacyEpoch: 0, offRecord: false };
-    expect(createPerception({ source: {}, ledger: ledger(), claude: null }).state(session)).toMatchObject({
+    expect(createPerception({ source: {}, ledger: ledger(), claude: null, prepare }).state(session)).toMatchObject({
       extraction: "unavailable",
       unavailableReason: "no_api_key",
     });
     const claude = { structured: () => Promise.reject(new Error("unused")), text: () => Promise.reject(new Error("unused")) };
-    expect(createPerception({ source: { VISION_EXTRACTION: "off" }, ledger: ledger(), claude }).state(session)).toMatchObject({
+    expect(createPerception({ source: { VISION_EXTRACTION: "off" }, ledger: ledger(), claude, prepare }).state(session)).toMatchObject({
       extraction: "unavailable",
       unavailableReason: "disabled",
     });
-    expect(createPerception({ source: {}, ledger: ledger(), claude }).state(session)).toMatchObject({
+    expect(createPerception({ source: {}, ledger: ledger(), claude, prepare }).state(session)).toMatchObject({
       extraction: "available",
       unavailableReason: null,
     });
-    expect(() => createPerception({ source: { VISION_EXTRACTION: "maybe" }, ledger: ledger(), claude })).toThrow(EnvError);
+    expect(() => createPerception({ source: { VISION_EXTRACTION: "maybe" }, ledger: ledger(), claude, prepare })).toThrow(EnvError);
   });
 });

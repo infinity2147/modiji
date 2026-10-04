@@ -62,6 +62,15 @@ export function replayHud(entries: readonly LedgerEntry[]): ReplayHud {
         }
         break;
       }
+      case "question.requeued": {
+        const p = safely(() => parseLedgerPayload(e, "question.requeued"));
+        const q = p === undefined ? undefined : questions.get(p.questionId);
+        if (p && q) {
+          queued.set(p.questionId, q);
+          if (asking?.questionId === p.questionId) asking = null;
+        }
+        break;
+      }
       // The expert answered: the floor is theirs again.
       case "utterance.transcript":
       case "expert.statement":

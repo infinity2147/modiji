@@ -14,18 +14,22 @@ import { randomUUID } from "node:crypto";
 import {
   RULE_PRIORITY_BY_KIND,
   RuleConfirmedPayloadSchema,
+  RuleRevisedPayloadSchema,
   canonicalJson,
   contentId,
   isContradiction,
   isLiveQuestionKind,
   legacyExpertId,
+  planConfirmation,
   promoteToConfirmedRule,
+  type AnswerSegments,
   type AnsweredUtterance,
   type EngineConfig,
   type ExpertLanguage,
   type LedgerEntry,
   type ParsedAnswer,
   type Question,
+  type Rulebook,
 } from "@vashistha/core";
 import type { Claude, Ledger } from "@vashistha/core/server";
 import type { z } from "zod";
@@ -46,17 +50,23 @@ import {
 import { entry, type EntryContext } from "./ledger";
 import { quoteLanguageFields, utteranceLanguage } from "./language";
 import { REASONING_MODEL, localizeQuestion, parseAnswer, proposeConcepts, rephraseQuestion, translateUtterance } from "./llm";
-import { planQueue } from "./questions";
+import { planQueue, type QuestionGenerator } from "./questions";
 
 export type InterviewDeps = {
   ledger: Ledger;
   casedesk: CaseDeskStore;
   store: InterviewStore;
-  authorizations: Pick<AuthorizationStore, "issue" | "getContextVersion" | "bumpContextVersion">;
+  authorizations: Pick<AuthorizationStore, "issue" | "getContextVersion" | "bumpContextVersion" | "pending" | "sweep">;
   /** Null without ANTHROPIC_API_KEY: utterances are still recorded, answers stay unparsed. */
   claude: Claude | null;
   config: EngineConfig;
+  /** Question generation (the engine worker in the server; in process in tests). */
+  questions: QuestionGenerator;
+  /** The global confirmed rulebook (every expert session): a stated rule the expert already has revises it instead of duplicating it. */
+  rulebook: () => Rulebook;
   now: () => number;
+  /** Runs `fn` once after `delayMs` (the answer window's idle timer); returns the cancel function. */
+  schedule: (fn: () => void, delayMs: number) => () => void;
   log: Pick<Console, "info" | "warn" | "error">;
 };
 
@@ -150,7 +160,8 @@ async function requeue(
   const before = engineState(deps, sessionId);
   const family = before.families.get(familyId);
   if (family === undefined) return;
-  const planned = planQueue({
+  const wasLive = new Set(queuedQuestions(before).map((r) => r.question.id));
+  const planned = await planQueue({
     state: before,
     family,
     withWhyProbe: opts.withWhyProbe,
@@ -158,8 +169,8 @@ async function requeue(
     parentIds: opts.parentIds,
     now: deps.now(),
     config: deps.config,
+    generate: deps.questions,
   });
-  const wasLive = new Set(queuedQuestions(before).map((r) => r.question.id));
   const fresh = await rephrased(
     deps,
     planned.filter((q) => !wasLive.has(q.id)),
@@ -229,9 +240,11 @@ function utteranceFrames(ledger: Pick<Ledger, "list">, sessionId: string, privac
 /**
  * Records a final expert transcript (`voice` / `utterance.transcript`) with its language (detected by
  * code, `utteranceLanguage`); a non-English one is then translated (`translate`) before anything reads
- * it. When it answers an asked question and a parser is available, the answer is parsed (Sonnet), recorded as `answer.parsed`,
- * applied by the engine, explicit statements are promoted, and the queue is regenerated. Without a
- * parser the utterance is recorded and the answer stays unparsed (`unparsedAnswers`), never guessed.
+ * it. Every segment is its own evidence entry. A segment that answers an asked question joins the
+ * session's open answer (live bug #3: the voice provider splits an answer at sentence boundaries, and
+ * the stop-rule was often in the second segment); the answer is parsed once its window closes
+ * (`closeAnswer`), and then applied, its explicit statements promoted and the queue regenerated.
+ * Without a parser the utterance is recorded and the answer stays unparsed (`unparsedAnswers`), never guessed.
  */
 export function recordUtterance(deps: InterviewDeps, sessionId: string, body: PostUtteranceRequest): Promise<PostUtteranceResponse> {
   return serially(deps, sessionId, async () => {
@@ -265,14 +278,91 @@ export function recordUtterance(deps: InterviewDeps, sessionId: string, body: Po
       deps.log.info(`[interview] no answer parser configured; answer ${utterance.id} to ${record.question.id} recorded unparsed`);
       return recorded;
     }
-    const parsed = await interpretAnswer(deps, deps.claude, {
-      sessionId,
-      record,
-      utterance: { id: utterance.id, text: body.text, t0Ms: body.t0Ms, t1Ms: body.t1Ms, language, ...(translation !== undefined && { translation }) },
-      traceId: ctx.traceId,
+    if (record.answeredBy !== undefined) {
+      deps.log.info(`[interview] ${utterance.id} arrived after the answer to ${record.question.id} was parsed: recorded, not parsed again`);
+      return recorded;
+    }
+    collectSegment(deps, sessionId, record.question.id, ctx.traceId, {
+      id: utterance.id,
+      text: body.text,
+      t0Ms: body.t0Ms,
+      t1Ms: body.t1Ms,
+      language,
+      ...(translation !== undefined && { translation }),
     });
-    return parsed === undefined ? recorded : { ...recorded, parsed };
+    return recorded;
   });
+}
+
+/**
+ * How long the server waits for another transcript segment of an answer before parsing it, when no
+ * agent turn or new authorization closes the answer first. The server hears no audio, so this is
+ * measured between segment arrivals: it spans the gate's answer silence (4 s), the next sentence and
+ * its transcription.
+ */
+export const ANSWER_WINDOW_IDLE_MS = 12_000;
+
+/** Adds a segment to the session's open answer (closing another question's open answer first) and re-arms its idle timer. */
+function collectSegment(deps: InterviewDeps, sessionId: string, questionId: string, traceId: string, segment: AnsweredUtterance): void {
+  if (deps.store.answers.get(sessionId)?.questionId !== questionId) void closeAnswer(deps, sessionId);
+  const open = deps.store.answers.get(sessionId);
+  open?.cancel();
+  deps.store.answers.set(sessionId, {
+    questionId,
+    segments: open === undefined ? [segment] : [...open.segments, segment],
+    traceId: open?.traceId ?? traceId,
+    cancel: deps.schedule(() => void closeAnswer(deps, sessionId), ANSWER_WINDOW_IDLE_MS),
+  });
+}
+
+/**
+ * Closes the session's open answer — the next agent turn, a new authorization, or the idle timer — and
+ * parses it in the session's serial queue: all its segments in one parse, each segment still its own
+ * evidence entry, and every quote verbatim within one segment. Resolves once the parse has settled.
+ */
+export function closeAnswer(deps: InterviewDeps, sessionId: string): Promise<void> {
+  const open = deps.store.answers.get(sessionId);
+  if (open === undefined) return Promise.resolve();
+  open.cancel();
+  deps.store.answers.delete(sessionId);
+  const [utterance, ...continuation] = open.segments;
+  return serially(deps, sessionId, async () => {
+    const record = engineState(deps, sessionId).questions.get(open.questionId);
+    if (deps.claude === null || record?.asked === undefined) {
+      deps.log.info(`[interview] answer ${utterance.id} to ${open.questionId} left unparsed (no parser, or the question is no longer asked)`);
+      return;
+    }
+    await interpretAnswer(deps, deps.claude, { sessionId, record, utterance, continuation, traceId: open.traceId });
+  }).catch((error: unknown) => deps.log.error(`[interview] parsing answer ${utterance.id} failed: ${describeError(error)}`));
+}
+
+/**
+ * Re-queues the questions whose authorization expired unspoken (live bug #1: the control message was
+ * merged into an open user turn and skipped, yet the question counted as asked, spent budget and was
+ * never asked again). Each is recorded as `question.requeued` (it was not asked; the live budget does
+ * not count it). A live question about a case that is no longer the family's latest decision is then
+ * dropped as superseded: the queue only holds questions about the case just decided (questions.ts).
+ */
+export function requeueLapsed(deps: InterviewDeps): void {
+  for (const lapsed of deps.authorizations.sweep(deps.now())) {
+    const state = engineState(deps, lapsed.sessionId);
+    const record = state.questions.get(lapsed.questionId);
+    // Only the question's latest authorization re-queues it (an older lapsed one says nothing about a newer).
+    if (record?.status !== "asked" || record.asked === undefined || record.asked.at > lapsed.issuedAt) continue;
+    try {
+      const ctx = entryContext(deps, lapsed.sessionId, randomUUID());
+      const requeued = deps.ledger.append(
+        entry(ctx, "question.requeued", "engine", [record.asked.entryId], { questionId: lapsed.questionId, reason: "authorization_unspoken" }),
+      );
+      deps.log.info(`[interview] authorization ${lapsed.nonceDigest} for ${lapsed.questionId} expired unspoken; question re-queued`);
+      const latest = questionFamily(state, record.question)?.decisions.at(-1)?.caseId;
+      const { caseId } = record.question.target;
+      if (isLiveQuestionKind(record.question.kind) && caseId !== undefined && caseId !== latest)
+        deps.ledger.append(entry(ctx, "question.dropped", "engine", [record.queuedEntryId, requeued.id], { questionId: lapsed.questionId, reason: "superseded" }));
+    } catch (error) {
+      deps.log.warn(`[interview] re-queueing ${lapsed.questionId} after its authorization lapsed failed: ${describeError(error)}`);
+    }
+  }
 }
 
 /**
@@ -317,15 +407,16 @@ async function translate(
 async function interpretAnswer(
   deps: InterviewDeps,
   claude: Claude,
-  input: { sessionId: string; record: QuestionRecord; utterance: AnsweredUtterance; traceId: string },
-): Promise<ParsedAnswer | undefined> {
+  input: { sessionId: string; record: QuestionRecord; traceId: string } & AnswerSegments,
+): Promise<void> {
   const { sessionId, record } = input;
   const utteranceId = input.utterance.id;
+  const segmentIds = [utteranceId, ...(input.continuation ?? []).map((u) => u.id)];
   const state = engineState(deps, sessionId);
   const family = questionFamily(state, record.question);
   if (family === undefined) {
     deps.log.warn(`[interview] no decision family for question ${record.question.id}; answer ${utteranceId} left unparsed`);
-    return undefined;
+    return;
   }
   let conversion;
   try {
@@ -333,27 +424,33 @@ async function interpretAnswer(
       decisionFamily: family.model.family.id,
       question: record.question,
       utterance: input.utterance,
+      ...(input.continuation !== undefined && { continuation: input.continuation }),
       set: family.set,
       domain: family.model.domain,
       pendingConcepts: state.undefinedConcepts,
     });
   } catch (error) {
     deps.log.warn(`[interview] answer parser failed; answer ${utteranceId} left unparsed: ${describeError(error)}`);
-    return undefined;
+    return;
   }
   for (const r of conversion.rejected) deps.log.info(`[interview] parser output rejected (${r.item}): ${r.reason}`);
 
   const ctx = entryContext(deps, sessionId, input.traceId);
-  const parsedEntry = deps.ledger.append(entry(ctx, "answer.parsed", "engine", [utteranceId, record.queuedEntryId], conversion.answer));
+  const parsedEntry = deps.ledger.append(entry(ctx, "answer.parsed", "engine", [...segmentIds, record.queuedEntryId], conversion.answer));
   const after = engineState(deps, sessionId);
   const outcome = after.answers.get(parsedEntry.id);
-  if (outcome?.status !== "applied") {
-    deps.log.info(`[interview] answer ${parsedEntry.id} not applied (${outcome?.status ?? "skipped"}); question stays open`);
-    return conversion.answer;
+  const applied = outcome === undefined ? undefined : after.families.get(outcome.decisionFamily);
+  if (outcome === undefined || applied === undefined) {
+    deps.log.info(`[interview] answer ${parsedEntry.id} skipped by the engine; question stays open`);
+    return;
   }
   for (const i of outcome.ignored) deps.log.info(`[interview] answer item ignored (${i.item}): ${i.reason}`);
-  const applied = after.families.get(outcome.decisionFamily);
-  if (applied === undefined) return conversion.answer;
+  // Explicit statements stand on their own quote and frames, whatever the parse confidence (live bug #5).
+  promoteStatements(deps, ctx, { answer: conversion.answer, answerEntryId: parsedEntry.id, decisionFamily: outcome.decisionFamily });
+  if (outcome.status !== "applied" && !outcome.statedRules.some((r) => r.status === "candidate")) {
+    deps.log.info(`[interview] answer ${parsedEntry.id} below the parse-confidence floor: inferences not applied; question stays open`);
+    return;
+  }
   const updated = deps.ledger.append(
     entry(ctx, "hypotheses.updated", "engine", [parsedEntry.id], {
       decisionFamily: outcome.decisionFamily,
@@ -362,17 +459,16 @@ async function interpretAnswer(
       contradiction: false,
     }),
   );
-  promoteStatements(deps, ctx, { answer: conversion.answer, answerEntryId: parsedEntry.id, decisionFamily: outcome.decisionFamily });
-  if (record.question.kind === "why_probe") await proposeNewConcepts(deps, claude, ctx, { family: applied, utterance: utteranceId });
+  if (outcome.status === "applied" && record.question.kind === "why_probe") await proposeNewConcepts(deps, claude, ctx, { family: applied, utterance: utteranceId });
   await requeue(deps, sessionId, outcome.decisionFamily, { withWhyProbe: false, parentIds: [parsedEntry.id, updated.id], traceId: input.traceId });
-  return conversion.answer;
 }
 
 /**
  * Explicit-statement promotion (plan §7.3): a rule the expert stated outright, quoted verbatim, becomes
- * a ConfirmedRule — evidence-validated by `promoteToConfirmedRule` against the ledger. Promotion needs
- * at least one frame on screen while the expert spoke; without frames the statement stays an
- * `expert_statement` candidate for the debrief.
+ * a ConfirmedRule — evidence-validated by `promoteToConfirmedRule` against the ledger. Its evidence is
+ * the transcript segment the quote is verbatim in (`rule.utteranceId`, else the answer's utterance) and
+ * the frames on screen while it was said; without frames the statement stays an `expert_statement`
+ * candidate for the debrief.
  */
 function promoteStatements(deps: InterviewDeps, ctx: EntryContext, input: { answer: ParsedAnswer; answerEntryId: string; decisionFamily: string }): void {
   const { answer } = input;
@@ -380,14 +476,15 @@ function promoteStatements(deps: InterviewDeps, ctx: EntryContext, input: { answ
   const state = engineState(deps, ctx.sessionId);
   // Rules are stated in the session's feature model (base + confirmed concepts) and record its version.
   const { domain, schemaVersion } = state.schema.model;
-  const utterance = state.utterances.get(answer.utteranceId);
-  const [frame, ...frames] = utterance?.frameIds ?? [];
-  if (frame === undefined) {
-    deps.log.info(`[interview] ${answer.statedRules.length} stated rule(s) in ${answer.utteranceId} not promoted: no frame on record for the utterance`);
-    return;
-  }
   const expertId = state.expert?.id ?? legacyExpertId(ctx.sessionId);
   answer.statedRules.forEach((rule, index) => {
+    const utteranceId = rule.utteranceId ?? answer.utteranceId;
+    const utterance = state.utterances.get(utteranceId);
+    const [frame, ...frames] = utterance?.frameIds ?? [];
+    if (frame === undefined) {
+      deps.log.info(`[interview] stated rule ${index} in ${utteranceId} not promoted: no frame on record for the utterance`);
+      return;
+    }
     const result = promoteToConfirmedRule({
       ruleId: contentId("rule", canonicalJson({ utteranceId: answer.utteranceId, index })),
       domain,
@@ -398,7 +495,7 @@ function promoteStatements(deps: InterviewDeps, ctx: EntryContext, input: { answ
       evidence: [
         {
           kind: "expert_quote",
-          utteranceId: answer.utteranceId,
+          utteranceId,
           exactQuote: rule.exactQuote,
           t0Ms: rule.t0Ms,
           t1Ms: rule.t1Ms,
@@ -410,18 +507,26 @@ function promoteStatements(deps: InterviewDeps, ctx: EntryContext, input: { answ
           ...quoteLanguageFields(utterance, rule.exactQuote),
         },
       ],
-      confirmation: { expertId, at: ctx.occurredAt, method: "explicit_statement", ledgerEntryId: answer.utteranceId },
+      confirmation: { expertId, at: ctx.occurredAt, method: "explicit_statement", ledgerEntryId: utteranceId },
       expertId,
       schemaVersion,
       ledger: deps.ledger,
     });
     if (!result.ok) {
-      deps.log.warn(`[interview] stated rule ${index} of ${answer.utteranceId} not promoted: ${result.errors.map((e) => e.code).join(", ")}`);
+      deps.log.warn(`[interview] stated rule ${index} of ${utteranceId} not promoted: ${result.errors.map((e) => e.code).join(", ")}`);
       return;
     }
-    deps.ledger.append(
-      entry(ctx, "rule.confirmed", "engine", [input.answerEntryId, answer.utteranceId], RuleConfirmedPayloadSchema.parse({ rule: result.rule })),
-    );
+    // Rule de-duplication: the same rule restated (in this session or an earlier one of the same expert) revises it.
+    const book = deps.rulebook();
+    const plan = planConfirmation(book.rules, result.rule);
+    const parents = [input.answerEntryId, utteranceId];
+    if (plan.kind === "duplicate") deps.log.info(`[interview] stated rule ${index} of ${utteranceId} adds nothing to ${plan.existing.id}; not recorded again`);
+    else if (plan.kind === "merge") {
+      const existingEntry = book.history.findLast((h) => h.ruleId === plan.existing.id)?.ledgerEntryId;
+      deps.ledger.append(
+        entry(ctx, "rule.revised", "engine", existingEntry === undefined ? parents : [...parents, existingEntry], RuleRevisedPayloadSchema.parse({ rule: plan.rule, reason: plan.reason })),
+      );
+    } else deps.ledger.append(entry(ctx, "rule.confirmed", "engine", parents, RuleConfirmedPayloadSchema.parse({ rule: plan.rule })));
   });
 }
 

@@ -1,0 +1,44 @@
+Full e2e suite, run twice back to back: one server + fresh DATA_DIR per spec file (apps/web/playwright.config.ts).
+Tree: HEAD 1532a3d + this change only (git worktree; concurrent work excluded). NEXT_DIST_DIR=.next-fx3, E2E_PORT=4471 (ports 4471-4478: 8 spec files with default tests), --output outside the repo.
+
+== run 1
+✓   1 [casedesk] › e2e/casedesk.spec.ts:92:1 › P1 acceptance: an expert processes the three training cases by hand (6.9s)
+✓   2 [casedesk] › e2e/casedesk.spec.ts:168:1 › a forbid from the interlock blocks the commit and shows the expert's quote (2.3s)
+✓   3 [casedesk] › e2e/casedesk.spec.ts:203:1 › needs_approval requires a note; acknowledging commits through the real server (2.5s)
+✓   4 [casedesk] › e2e/casedesk.spec.ts:238:1 › insufficient_information lists the missing features by their domain labels and can be escalated (1.8s)
+✓   5 [casedesk] › e2e/casedesk.spec.ts:261:1 › reloading the session URL resumes it with decided cases still marked (3.1s)
+✓   6 [concepts] › e2e/concepts.spec.ts:67:1 › concepts: undefined concept → expert confirms → Model updated banner → backfill shown → coverage under v2 (2.0s)
+✓   7 [debrief] › e2e/debrief.spec.ts:70:1 › debrief: witnesses → typed answers → teach-back correction → coverage closed; Work Map with lineage (11.1s)
+✓   8 [debrief] › e2e/debrief.spec.ts:168:1 › debrief: a session whose screen was never shared cannot confirm a rule (409 no_screen_frame) (220ms)
+✓   9 [judge-view] › e2e/judge-view.spec.ts:42:1 › judge view: gate HUD reacts to typing, ticker follows the ledger, strip stays honestly pending, voice not configured (8.0s)
+✓  10 [judge-view] › e2e/judge-view.spec.ts:110:1 › tutor voice on a server without voice credentials: a clear not-configured state, CaseDesk keeps working (2.3s)
+✓  11 [judge-view] › e2e/judge-view.spec.ts:123:1 › off the record: red banner, capture paused, nothing recorded, resume with a new epoch (2.3s)
+✓  12 [judge-view] › e2e/judge-view.spec.ts:183:1 › a session reloaded while off the record stays off the record (1.7s)
+✓  13 [perception] › e2e/perception.spec.ts:55:1 › share screen → change-detected, redacted frames are uploaded, stored and ledgered; off the record stops them (7.7s)
+✓  14 [replay] › e2e/replay.spec.ts:119:1 › verified replay: genuine run → export → verified replay through the same UI; seek/play in step; one byte tampered → refused (11.2s)
+✓  15 [tutor] › e2e/tutor.spec.ts:98:1 › tutor: predict → reveal in the expert's words → commit → mastery → unseen practice case decided (6.6s)
+✓  16 [tutor] › e2e/tutor.spec.ts:198:1 › tutor: a real stop-rule from the debrief → intervention on selection, before Save → Save blocked (3.5s)
+✓  17 [two-experts] › e2e/two-experts.spec.ts:72:1 › two experts: Z3 disagreement case → both answer → revision with both quotes → team rulebook (3.1s)
+17 passed (1.8m)
+real	1m49.181s
+
+== run 2
+✓   1 [casedesk] › e2e/casedesk.spec.ts:92:1 › P1 acceptance: an expert processes the three training cases by hand (6.7s)
+✓   2 [casedesk] › e2e/casedesk.spec.ts:168:1 › a forbid from the interlock blocks the commit and shows the expert's quote (2.3s)
+✓   3 [casedesk] › e2e/casedesk.spec.ts:203:1 › needs_approval requires a note; acknowledging commits through the real server (2.5s)
+✓   4 [casedesk] › e2e/casedesk.spec.ts:238:1 › insufficient_information lists the missing features by their domain labels and can be escalated (1.7s)
+✓   5 [casedesk] › e2e/casedesk.spec.ts:261:1 › reloading the session URL resumes it with decided cases still marked (3.0s)
+✓   6 [concepts] › e2e/concepts.spec.ts:67:1 › concepts: undefined concept → expert confirms → Model updated banner → backfill shown → coverage under v2 (2.1s)
+✓   7 [debrief] › e2e/debrief.spec.ts:70:1 › debrief: witnesses → typed answers → teach-back correction → coverage closed; Work Map with lineage (11.5s)
+✓   8 [debrief] › e2e/debrief.spec.ts:168:1 › debrief: a session whose screen was never shared cannot confirm a rule (409 no_screen_frame) (225ms)
+✓   9 [judge-view] › e2e/judge-view.spec.ts:42:1 › judge view: gate HUD reacts to typing, ticker follows the ledger, strip stays honestly pending, voice not configured (7.8s)
+✓  10 [judge-view] › e2e/judge-view.spec.ts:110:1 › tutor voice on a server without voice credentials: a clear not-configured state, CaseDesk keeps working (2.4s)
+✓  11 [judge-view] › e2e/judge-view.spec.ts:123:1 › off the record: red banner, capture paused, nothing recorded, resume with a new epoch (2.3s)
+✓  12 [judge-view] › e2e/judge-view.spec.ts:183:1 › a session reloaded while off the record stays off the record (1.7s)
+✓  13 [perception] › e2e/perception.spec.ts:55:1 › share screen → change-detected, redacted frames are uploaded, stored and ledgered; off the record stops them (7.7s)
+✓  14 [replay] › e2e/replay.spec.ts:119:1 › verified replay: genuine run → export → verified replay through the same UI; seek/play in step; one byte tampered → refused (11.1s)
+✓  15 [tutor] › e2e/tutor.spec.ts:98:1 › tutor: predict → reveal in the expert's words → commit → mastery → unseen practice case decided (6.4s)
+✓  16 [tutor] › e2e/tutor.spec.ts:198:1 › tutor: a real stop-rule from the debrief → intervention on selection, before Save → Save blocked (3.3s)
+✓  17 [two-experts] › e2e/two-experts.spec.ts:72:1 › two experts: Z3 disagreement case → both answer → revision with both quotes → team rulebook (3.2s)
+17 passed (1.8m)
+real	1m46.519s

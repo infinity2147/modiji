@@ -102,7 +102,7 @@ const lines: string[] = [
       `  ${r.file.split("/").pop()?.slice(0, 14)} session ${r.sessionId} conv ${r.conversationIds.join(",")}\n` +
       `    questions authorized ${r.questionsAuthorized}, spoken ${r.questionsSpoken}; INTERRUPTIONS ${r.interruptions}${r.interruptionDetail.length ? ` (${r.interruptionDetail.join("; ")})` : ""}; talk-over ${r.talkOver.length}${r.talkOver.length ? ` (${r.talkOver.join(", ")})` : ""}\n` +
       `    auth latency ${fmt(stat(r.authorizationLatency))}; authorize RTT ${fmt(stat(r.authorizeRtt))}; first audio ${fmt(stat(r.firstAudio))}\n` +
-      `    control never evidence ${r.controlNeverEvidence}; authorized-but-never-spoken ${r.lostAuthorizations.length}; refused authorizations (each spent a budget slot) ${r.refusedAuthorizations.join(", ") || "none"}`,
+      `    control never evidence ${r.controlNeverEvidence}; authorized-but-never-spoken ${r.lostAuthorizations.length}; refused authorizations ${r.refusedAuthorizations.join(", ") || "none"}`,
   ),
   `  TOTAL interruptions across the 5 runs: ${p3Rows.reduce((n, r) => n + r.interruptions, 0)} (threshold 0)`,
   `  Gate decision latency (decidedAt − becameValidAt), all 5 runs: ${fmt(all("authorizationLatency"))} (bound 250 ms)`,

@@ -32,7 +32,6 @@ import type { Ledger } from "@vashistha/core/server";
 import { createStateApplier, percentile, type StateApplier } from "@vashistha/perception";
 import {
   interpretReading,
-  prepareRead,
   type CaseSnapshot,
   type EncodedImage,
   type ExtractionResult,
@@ -40,9 +39,9 @@ import {
   type PreparedRead,
   type ScreenProfile,
 } from "@vashistha/perception/extraction";
-import { decodePng } from "@vashistha/perception/png";
 import type { VisionState } from "../../contracts/frames";
 import { CASEDESK_SCHEMA_VERSION } from "../casedesk/session";
+import type { ReadPreparer } from "./prepare";
 
 export type VisionFrame = EncodedImage & { sourceWidth: number; sourceHeight: number };
 export type VisionCrop = EncodedImage & { rect: { x: number; y: number; width: number; height: number } };
@@ -74,6 +73,8 @@ export type PerceptionServiceOptions = {
   /** What the app on screen lets the reviewer edit (declared by the app, see screen-profile.ts). */
   profile: ScreenProfile;
   extractor: { run: VisionExtractor } | { unavailable: UnavailableReason };
+  /** Decodes a frame and plans its read (prepare.ts): the vision worker thread in the server, in process in tests. */
+  prepare: ReadPreparer;
   now: () => number;
   log: Pick<Console, "error">;
 };
@@ -101,7 +102,7 @@ const MAX_ERROR_LENGTH = 300;
 
 const FrameSeqPayloadSchema = z.object({ frameSeq: z.int().nonnegative() });
 const ConceptNamePayloadSchema = z.object({ name: z.string() });
-const LEDGER_REFUSALS = new Set(["StaleEpochError", "OffRecordError"]);
+const LEDGER_REFUSALS = new Set(["StaleEpochError", "OffRecordError", "SessionArchivedError"]);
 
 function describe(error: unknown): string {
   const text = error instanceof Error ? `${error.name}: ${error.message}` : "non-Error thrown";
@@ -156,7 +157,7 @@ type Worker = {
 };
 
 export function createPerceptionService(options: PerceptionServiceOptions): PerceptionService {
-  const { ledger, domain, profile, now, log } = options;
+  const { ledger, domain, profile, prepare, now, log } = options;
   const extractor = "run" in options.extractor ? options.extractor.run : null;
   const unavailableReason = "unavailable" in options.extractor ? options.extractor.unavailable : null;
   const lastFrameSeqs = new Map<string, number>();
@@ -179,7 +180,7 @@ export function createPerceptionService(options: PerceptionServiceOptions): Perc
   /** Appends a fresh result, unless the session left this epoch or went off the record meanwhile. */
   function commit(worker: Worker, job: VisionJob, result: ExtractionResult): void {
     const session = ledger.getSession(job.sessionId);
-    if (!session || session.offRecord || session.privacyEpoch !== job.epoch) {
+    if (!session || session.offRecord || session.archived || session.privacyEpoch !== job.epoch) {
       worker.counts.staleDropped += 1;
       return;
     }
@@ -282,10 +283,8 @@ export function createPerceptionService(options: PerceptionServiceOptions): Perc
     const context = { domain, profile, previous: w.snapshot, frameSeq: job.frameSeq, captureTime: job.captureTime, sessionEpoch: job.epoch };
     Promise.resolve()
       .then(async () => {
-        // Decoded here, only for frames that reach the model (coalesced ones never are): code compares it with the last reading.
-        const image = decodePng(Buffer.from(job.frame.base64Png, "base64"));
-        const { sourceWidth, sourceHeight, base64Png } = job.frame;
-        const read = prepareRead({ ...context, frame: { image, base64Png, sourceWidth, sourceHeight }, ...(job.crop !== null && { crop: job.crop }) });
+        // Decoded only for frames that reach the model (coalesced ones never are): code compares it with the last reading.
+        const read = await prepare({ ...context, frame: job.frame, crop: job.crop });
         return interpretReading(await run(read), read.context);
       })
       .then(

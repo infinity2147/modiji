@@ -118,6 +118,8 @@ export type FakeServerBehaviour = {
   deep?: { db?: boolean; dataDir?: boolean; z3?: boolean };
   /** What `/api/health/deep` reports as `llmCalls` (default "on"); null omits the field, as an older server would. */
   llmCalls?: "on" | "off" | null;
+  /** Event-loop delay p99 `/api/health/deep` reports (default 4 ms); null omits `eventLoop`, as an older server would. */
+  eventLoopP99Ms?: number | null;
   sandboxHtml?: string;
   voiceTokenStatus?: number;
 };
@@ -146,7 +148,9 @@ export function fakeServer(behaviour: FakeServerBehaviour = {}, wallClock: () =>
         const part = (ok: boolean) => (ok ? { ok: true, ms: 1.5 } : { ok: false, error: "EACCES: permission denied" });
         const ok = d.db && d.dataDir && d.z3;
         const llmCalls = behaviour.llmCalls === undefined ? "on" : behaviour.llmCalls;
-        const body = { ok, db: part(d.db), dataDir: part(d.dataDir), z3: part(d.z3), ...(llmCalls !== null && { llmCalls }) };
+        const p99Ms = behaviour.eventLoopP99Ms === undefined ? 4 : behaviour.eventLoopP99Ms;
+        const eventLoop = p99Ms === null ? null : { p50Ms: 0.5, p99Ms, maxMs: p99Ms * 3, samples: 6000, sinceMs: 60_000 };
+        const body = { ok, db: part(d.db), dataDir: part(d.dataDir), z3: part(d.z3), ...(llmCalls !== null && { llmCalls }), ...(eventLoop !== null && { eventLoop }) };
         return json(body, ok ? 200 : 503);
       }
       case "GET /sandbox":

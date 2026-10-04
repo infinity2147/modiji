@@ -9,6 +9,7 @@ import { KYC_DOMAIN } from "@vashistha/core/domains/kyc";
 import { EnvError, type Claude, type Ledger } from "@vashistha/core/server";
 import { warmUpExtraction } from "@vashistha/perception/extraction";
 import { createClaudeVisionExtractor } from "./extractor";
+import type { ReadPreparer } from "./prepare";
 import { CASEDESK_SCREEN } from "./screen-profile";
 import { createPerceptionService, type PerceptionService } from "./service";
 
@@ -18,6 +19,8 @@ export function createPerception(options: {
   source: Readonly<Record<string, string | undefined>>;
   ledger: Ledger;
   claude: Claude | null;
+  /** Frame decoding and read planning: the vision worker thread (workers/vision.ts). */
+  prepare: ReadPreparer;
 }): PerceptionService {
   const visionSwitch = VisionSwitchSchema.safeParse(options.source.VISION_EXTRACTION?.trim() || undefined);
   if (!visionSwitch.success)
@@ -36,6 +39,7 @@ export function createPerception(options: {
     extractor: on
       ? { run: createClaudeVisionExtractor(claude) }
       : { unavailable: visionSwitch.data === "off" ? "disabled" : "no_api_key" },
+    prepare: options.prepare,
     now: Date.now,
     log: console,
   });

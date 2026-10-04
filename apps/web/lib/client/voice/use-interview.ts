@@ -18,6 +18,7 @@ import { createGateSession, type GateSession, type GateSnapshot } from "../gate/
 import { createLedgerTail, type LedgerTail, type LedgerTailState } from "../judge/ledger-tail";
 import { fetchVoiceToken } from "./api";
 import { createConversationBridge, type ConversationBridge, type TranscriptTurn, type UploadStatus } from "./bridge";
+import { startLocalSpeechSensor, type LocalSpeechSensor } from "./local-speech";
 import { createPrivacyController, privacyServer, type PrivacyBase, type PrivacyController, type PrivacyState } from "./privacy";
 import { browserCueDom, createCueScheduler, type CueResult } from "./question-cues";
 
@@ -75,7 +76,11 @@ export type InterviewLoop = {
  */
 const SetOffRecordParamsSchema = z.object({ offRecord: z.boolean() });
 
+/** ElevenLabs `tentative_user_transcript` (agent `client_events`), delivered through `onDebug` by the SDK. */
+const TentativeTranscriptSchema = z.object({ type: z.literal("tentative_user_transcript") });
+
 const EMPTY_TRANSCRIPT: readonly TranscriptTurn[] = [];
+const NO_SPECTRUM = new Uint8Array(0);
 const NO_UPLOADS: UploadStatus = { pending: 0, failed: 0, lastError: undefined };
 const NO_LEDGER: LedgerTailState = { entries: [], caughtUp: false, error: undefined };
 const noop = (): void => {};
@@ -123,6 +128,7 @@ export function useInterviewLoop(options: {
   const [cue, setCue] = useState<CueResult | null>(null);
   const [cues] = useState(() => createCueScheduler({ dom: browserCueDom, now: systemClock.now, onCue: setCue }));
   const loopRef = useRef<Loop | null>(null);
+  const localSpeechRef = useRef<LocalSpeechSensor | null>(null);
   const privacyRef = useRef<PrivacyController | null>(null);
   const captureRef = useRef(options.capture);
 
@@ -131,10 +137,25 @@ export function useInterviewLoop(options: {
       // Defence in depth: connecting is disabled off the record, but never let a mic go live then.
       if (privacyRef.current?.state().offRecord) muteMic(true);
       loopRef.current?.bridge.connected(conversationId);
+      // The local microphone detector reads the conversation's own input analyser while it is live.
+      localSpeechRef.current?.stop();
+      localSpeechRef.current = startLocalSpeechSensor({
+        readSpectrum: () => {
+          try {
+            return conversationRef.current.getInputByteFrequencyData();
+          } catch {
+            return NO_SPECTRUM; // between sessions: nothing is capturing audio
+          }
+        },
+        clock: systemClock,
+        onChange: (speaking) => loopRef.current?.bridge.localSpeech(speaking),
+      });
       setVoice({ state: "connected", conversationId });
     },
     onDisconnect: (details) => {
       cues.reset();
+      localSpeechRef.current?.stop();
+      localSpeechRef.current = null;
       loopRef.current?.bridge.disconnected();
       setVoice(
         details.reason === "error"
@@ -145,6 +166,9 @@ export function useInterviewLoop(options: {
     onError: (message) => setVoice({ state: "error", message }),
     onMessage: (message) => loopRef.current?.bridge.message(message),
     onVadScore: ({ vadScore }) => loopRef.current?.bridge.vad(vadScore),
+    onDebug: (event: unknown) => {
+      if (TentativeTranscriptSchema.safeParse(event).success) loopRef.current?.bridge.tentative();
+    },
     onModeChange: ({ mode: agentMode }) => {
       loopRef.current?.bridge.mode(agentMode);
       cues.agentMode(agentMode);
@@ -179,6 +203,8 @@ export function useInterviewLoop(options: {
       now: systemClock.now,
       gate: {
         vad: (score) => gate.vad(score),
+        localSpeech: (speaking) => gate.localSpeech(speaking),
+        transcript: (final) => gate.transcript(final),
         agentSpeaking: (speaking) => gate.agentSpeaking(speaking),
         setVoiceLive: (live) => gate.setVoiceLive(live),
       },
@@ -205,6 +231,8 @@ export function useInterviewLoop(options: {
     setLoop(next);
     return () => {
       loopRef.current = null;
+      localSpeechRef.current?.stop();
+      localSpeechRef.current = null;
       gate.dispose();
       tail.dispose();
       try {

@@ -18,10 +18,15 @@ const granted: Authorize = (body) =>
 
 function setup(opts: { queue?: Question[]; authorize?: Authorize } = {}) {
   const time = manualClock();
-  const queue = opts.queue ?? [question("q-1")];
+  /** The server's queue: an authorized question leaves it (until the server re-queues it). */
+  const queue = [...(opts.queue ?? [question("q-1")])];
   const net = scriptedFetch((url, body) => {
     if (url.endsWith("/questions")) return jsonResponse({ queue, contextVersion: 7, asked: [], offRecord: false });
-    if (url.endsWith("/gate/authorize")) return (opts.authorize ?? granted)(body as { questionId: string });
+    if (url.endsWith("/gate/authorize")) {
+      const response = (opts.authorize ?? granted)(body as { questionId: string });
+      if (response.ok) queue.splice(queue.findIndex((q) => q.id === (body as { questionId: string }).questionId), 1);
+      return response;
+    }
     return jsonResponse({ error: "not_found" }, 404);
   });
   const sent: string[] = [];
@@ -44,7 +49,7 @@ function setup(opts: { queue?: Question[]; authorize?: Authorize } = {}) {
       await tick();
     }
   };
-  return { time, net, gate, sent, asked, authorizeCalls, queueCalls, run };
+  return { time, net, gate, sent, asked, authorizeCalls, queueCalls, run, queue };
 }
 
 describe("browser gate session", () => {
@@ -67,10 +72,49 @@ describe("browser gate session", () => {
     expect(asked).toEqual(["q-1"]);
     expect(gate.snapshot().latency).toHaveLength(1);
 
-    // The question stays queued on the server for a while: it is never asked twice.
+    // Spoken by the agent: it is never asked twice.
+    gate.agentSpeaking(true);
+    await run(4000);
+    gate.agentSpeaking(false);
     await run(30_000);
     expect(authorizeCalls()).toHaveLength(1);
     expect(sent).toEqual([CONTROL]);
+  });
+
+  it("an authorization the agent never speaks lapses: the slot is released and the question, re-queued by the server, is asked again", async () => {
+    const { gate, sent, authorizeCalls, run, queue } = setup();
+    await tick();
+    gate.setVoiceLive(true);
+    gate.committed();
+    await tick();
+    expect(authorizeCalls()).toHaveLength(1);
+    await run(5000);
+    expect(authorizeCalls()).toHaveLength(1); // held: TTL 4 s + grace 1.5 s
+    queue.push(question("q-1")); // the server's sweep re-queued it
+    await run(2000);
+    expect(authorizeCalls()).toHaveLength(2);
+    expect(sent).toEqual([CONTROL, CONTROL]);
+  });
+
+  it("waits for the expert's turn heard only by the local microphone detector, and for its transcript", async () => {
+    const { gate, authorizeCalls, time } = setup();
+    await tick();
+    gate.setVoiceLive(true);
+    gate.localSpeech(true); // a word the provider's VAD scored 0.000
+    gate.committed();
+    await tick();
+    expect(authorizeCalls()).toHaveLength(0);
+    expect(gate.snapshot().hud.judge.find((r) => r.key === "userSilent")).toMatchObject({ ok: false });
+    time.advance(800);
+    gate.localSpeech(false);
+    time.advance(500);
+    gate.transcript(true);
+    time.advance(1199);
+    await tick();
+    expect(authorizeCalls()).toHaveLength(0);
+    time.advance(1);
+    await tick();
+    expect(authorizeCalls()).toHaveLength(1);
   });
 
   it("waits while the user types, then authorizes once typing has been idle for 1.5 s", async () => {
@@ -164,7 +208,7 @@ describe("browser gate session", () => {
     release();
     await tick();
     expect(sent).toEqual([]);
-    expect(gate.snapshot().refusals[0]?.code).toBe("off_record");
+    expect(gate.snapshot().refusals[0]).toMatchObject({ code: "withdrawn", message: expect.stringContaining("Off record") });
     gate.dispose();
   });
 });

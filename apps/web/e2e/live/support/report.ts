@@ -38,7 +38,7 @@ export function summarizeRun(title: string, sessionId: string, convIds: string[]
     `Agent audio turns measured on the WebRTC track: ${a.counts.agentAudioTurns}`,
     `Expert lines spoken: ${a.counts.expertLinesSpoken} · expert utterances ledgered: ${a.counts.expertUtterancesLedger}`,
     `Keystrokes: ${a.counts.keystrokes} · wheel (scroll input) events: ${a.counts.wheelEvents} · scroll events (incl. programmatic): ${a.counts.scrollEvents}`,
-    `Questions queued / dropped: ${a.counts.questionsQueued} / ${a.counts.questionsDropped}`,
+    `Questions queued / dropped / re-queued (authorized, never spoken): ${a.counts.questionsQueued} / ${a.counts.questionsDropped} / ${a.counts.questionsRequeued}`,
     "",
     `INTERRUPTIONS (authorization or agent audio onset inside [speech, +1.2 s], [keystroke, +1.5 s], [wheel scroll, +1.5 s]): ${a.interruptions.count}`,
     ...a.interruptions.authorizationsInsideProtectedWindows.map((v) => `  auth ${String(v.questionId)} at ${v.decidedAt} inside ${v.window.kind} ${v.window.start}..${v.window.guardEnd}`),

@@ -46,7 +46,7 @@ async function fullLoop(h: InterviewHarness): Promise<string> {
   expect(await readTurn(await h.llmTurn(s, granted.controlMessage))).toMatchObject({ kind: "speech" });
   expect((await h.agentSaid(s, { conversationId: "conv-1", text: asked.text, questionId: asked.id })).status).toBe(204);
   h.frame(s);
-  expect((await h.utter(s, utterance(h, s, `Look. ${QUOTE}`, { questionId: asked.id }))).status).toBe(200);
+  expect((await h.answerWith(s, utterance(h, s, `Look. ${QUOTE}`, { questionId: asked.id }))).status).toBe(200);
   await h.offRecord(s, true);
   await h.offRecord(s, false);
   await h.work(s, TWO.id, "approve", "high");

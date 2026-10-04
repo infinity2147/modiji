@@ -63,3 +63,46 @@ read on 2026-12-01 (docs.railway.com/infrastructure-as-code). The IaC SDK (`rail
    the `env` check fails if the local `.env` sets it, and `server-deep` fails unless the target's
    `/api/health/deep` reports `"llmCalls": "on"` (the only check that sees the deployed environment;
    `--target http://127.0.0.1:<port> --only server-deep` likewise fails a local server started with it off).
+
+## Fresh demo ledger
+
+Before the judged demo, the lead starts the service on an empty ledger, so the shared rulebook, the
+expert directory and the session list hold only what the demo itself records. Nothing is deleted: the
+ledger is append-only and the old data stays on the volume.
+
+Why: production is at rulebook revision 23 — 23 confirmed rules, 9 distinct (BUGS #9, before rule
+de-duplication existed). Those `rule.*` entries stay in the append-only ledger. The server now merges
+identical rules (a re-confirmation by the same expert is a `rule.revised` of the existing rule; the team
+rulebook view shows semantically identical rules of different experts once), but the demo should not
+start from the test history.
+
+1. **Export (and archive) the replay bundle of the live acceptance run first**, from the current
+   ledger. A production export archives the sessions it exports by default (`--archive`; see
+   `docs/replay.md`), so their ids — published in the bundle — can no longer write. It needs
+   `CUSTOM_LLM_SECRET` in the local `.env`:
+   ```sh
+   pnpm replay:export --base https://vashistha-production.up.railway.app \
+     --sessions <expertSessionId>,<noviceSessionId> \
+     --out apps/web/data/replays --manifest-copy docs/replay
+   ```
+2. **Point `DATA_DIR` at a fresh directory on the same volume.** This redeploys; the entrypoint creates
+   the directory and hands it to the `node` user, and the server migrates an empty database there:
+   ```sh
+   railway variable set DATA_DIR=/data/demo-$(date -u +%Y%m%d)
+   ```
+   The previous database, media and bundles stay untouched under `/data` (the old `DATA_DIR`).
+3. **Wait for the deploy, then check it is empty and healthy:**
+   ```sh
+   curl -s https://vashistha-production.up.railway.app/api/health
+   curl -s https://vashistha-production.up.railway.app/api/rulebook    # {"revision":0,"rules":[]}
+   ```
+4. **Import the bundle** into the new `DATA_DIR/replays` (bundles live in `DATA_DIR`, so the old ones are
+   not served from the fresh directory):
+   ```sh
+   pnpm replay:import --base https://vashistha-production.up.railway.app --bundle apps/web/data/replays/<bundleId>
+   ```
+5. **Run `pnpm preflight`.** It must be all green.
+
+To go back to the previous ledger, run `railway variable set DATA_DIR=/data` (another redeploy). Note
+that `railway config apply` also sets `DATA_DIR=/data` (it is declared in `.railway/railway.ts`), so
+applying the IaC file switches back to the old ledger too. Both ledgers share the 500 MB volume.

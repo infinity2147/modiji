@@ -14,7 +14,7 @@ import { createCaseDeskStore } from "../../lib/server/casedesk/session";
 import { createDebriefStore, type DebriefDeps } from "../../lib/server/debrief/deps";
 import { handleExpertAction, handleGetDebrief, handleRebuildWitnesses } from "../../lib/server/debrief/handlers";
 import { createLedgerRulebook } from "../../lib/server/debrief/rulebook-store";
-import { createWitnessSolver } from "../../lib/server/debrief/solver";
+import { searchWitnesses } from "@vashistha/solver";
 import { TEACHBACK_SYSTEM } from "../../lib/server/debrief/teachback";
 import { WORKMAP_PROSE_SYSTEM } from "../../lib/server/debrief/workmap";
 import { createInterviewStore } from "../../lib/server/interview/engine-state";
@@ -165,7 +165,7 @@ export async function world(options: { screenFrames?: boolean } = {}): Promise<W
     engineConfig: engineConfig(),
     authorizations: createAuthorizationStore(),
     rulebook: createLedgerRulebook(opened.sqlite),
-    solver: createWitnessSolver(),
+    solver: searchWitnesses,
     claude: createClaude({ client: fakeOpus(calls), forbiddenMarkers: [ORACLE_MARKER] }),
     models: { prose: CLAUDE_MODELS.prose },
     exports: { workMapJson: exportWorkMapJson, procedure: compileProcedure },

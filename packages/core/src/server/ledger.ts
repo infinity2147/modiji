@@ -9,7 +9,9 @@ import {
   LedgerEntrySchema,
   NewLedgerEntrySchema,
   isEvidenceEligible,
+  ledgerPayloadSchema,
   type LedgerEntry,
+  type LedgerPayload,
   type LedgerSource,
   type NewLedgerEntry,
 } from "../schemas";
@@ -23,7 +25,8 @@ export type LedgerErrorCode =
   | "stale_epoch"
   | "off_record"
   | "invalid_entry"
-  | "state_unchanged";
+  | "state_unchanged"
+  | "session_archived";
 
 export class LedgerError extends Error {
   override readonly name: string = "LedgerError";
@@ -57,7 +60,17 @@ export class OffRecordError extends LedgerError {
   }
 }
 
-export type Session = { id: string; createdAt: number; privacyEpoch: number; offRecord: boolean };
+/** The session was archived (`session.archived`): its ledger is closed, every further append is refused. */
+export class SessionArchivedError extends LedgerError {
+  override readonly name: string = "SessionArchivedError";
+
+  constructor(sessionId: string) {
+    super("session_archived", `session ${sessionId} is archived; it is read-only`);
+  }
+}
+
+/** `archived`: the session's ledger holds a `session.archived` entry (derived from the ledger, never stored). */
+export type Session = { id: string; createdAt: number; privacyEpoch: number; offRecord: boolean; archived: boolean };
 
 export type LedgerFilter = {
   sources?: readonly LedgerSource[];
@@ -73,6 +86,12 @@ export type LedgerOptions = { now?: () => number; newId?: () => string };
 
 /** Schema version of the payload of `privacy.*` control entries. */
 const PRIVACY_CONTROL_SCHEMA_VERSION = 1;
+
+/** The ledger kind that closes a session, and its payload's schema version. */
+export const SESSION_ARCHIVED_KIND = "session.archived";
+const SESSION_ARCHIVED_SCHEMA_VERSION = 1;
+
+export type ArchiveMeta = PrivacyTransitionMeta & LedgerPayload<typeof SESSION_ARCHIVED_KIND>;
 
 const PrivacyTransitionMetaSchema = z.strictObject({ occurredAt: EpochMsSchema, traceId: IdSchema });
 
@@ -100,8 +119,8 @@ function prepare(input: NewLedgerEntry): PreparedEntry {
   return { entry: parsed.data, payloadJson };
 }
 
-function toSession(row: SessionRow): Session {
-  return { id: row.id, createdAt: row.createdAt, privacyEpoch: row.privacyEpoch, offRecord: row.offRecord };
+function toSession(row: SessionRow, archived: boolean): Session {
+  return { id: row.id, createdAt: row.createdAt, privacyEpoch: row.privacyEpoch, offRecord: row.offRecord, archived };
 }
 
 function toEntry(row: EntryRow): LedgerEntry {
@@ -134,9 +153,21 @@ export function createLedger(db: Db, opts: LedgerOptions = {}) {
     return conn.select().from(sessions).where(eq(sessions.id, id)).get();
   }
 
+  /** Whether the session's ledger holds its `session.archived` entry (indexed by session and source). */
+  function isArchived(conn: Db | Tx, id: string): boolean {
+    const row = conn
+      .select({ id: ledgerEntries.id })
+      .from(ledgerEntries)
+      .where(and(eq(ledgerEntries.sessionId, id), eq(ledgerEntries.source, "engine"), eq(ledgerEntries.kind, SESSION_ARCHIVED_KIND)))
+      .get();
+    return row !== undefined;
+  }
+
   function insert(tx: Tx, { entry, payloadJson }: PreparedEntry): LedgerEntry {
     const session = sessionRow(tx, entry.sessionId);
     if (!session) throw new LedgerError("session_not_found", `session ${entry.sessionId} not found`);
+    // Archived is final: nothing more is appended to the session, by any source (the archive entry included).
+    if (isArchived(tx, session.id)) throw new SessionArchivedError(session.id);
     if (CAPTURE_SOURCES.includes(entry.source)) {
       if (session.offRecord) throw new OffRecordError(session.id);
       if (entry.privacyEpoch !== session.privacyEpoch)
@@ -216,7 +247,7 @@ export function createLedger(db: Db, opts: LedgerOptions = {}) {
       return db.transaction(
         (tx) => {
           if (sessionRow(tx, id)) throw new LedgerError("session_exists", `session ${id} already exists`);
-          return toSession(tx.insert(sessions).values({ id, createdAt: now() }).returning().get());
+          return toSession(tx.insert(sessions).values({ id, createdAt: now() }).returning().get(), false);
         },
         { behavior: "immediate" },
       );
@@ -224,7 +255,7 @@ export function createLedger(db: Db, opts: LedgerOptions = {}) {
 
     getSession(id: string): Session | undefined {
       const row = sessionRow(db, id);
-      return row && toSession(row);
+      return row && toSession(row, isArchived(db, id));
     },
 
     append(entry: NewLedgerEntry): LedgerEntry {
@@ -266,6 +297,41 @@ export function createLedger(db: Db, opts: LedgerOptions = {}) {
               schemaVersion: PRIVACY_CONTROL_SCHEMA_VERSION,
               privacyEpoch,
               payload: { offRecord, privacyEpoch },
+            }),
+          );
+        },
+        { behavior: "immediate" },
+      );
+    },
+
+    /**
+     * Archives the session (session lifecycle): appends its `engine` / `session.archived` entry, after
+     * which every append to the session is refused (`session_archived`), this one included. The ledger
+     * stays append-only — archiving is an entry, not a change to any recorded entry — and every read
+     * keeps working.
+     */
+    archive(sessionId: string, meta: ArchiveMeta): LedgerEntry {
+      const { occurredAt, traceId, ...payload } = meta;
+      const parsedMeta = PrivacyTransitionMetaSchema.safeParse({ occurredAt, traceId });
+      if (!parsedMeta.success) throw invalid(`invalid archive request: ${z.prettifyError(parsedMeta.error)}`);
+      const parsedPayload = ledgerPayloadSchema(SESSION_ARCHIVED_KIND).safeParse(payload);
+      if (!parsedPayload.success) throw invalid(`invalid archive request: ${z.prettifyError(parsedPayload.error)}`);
+      return db.transaction(
+        (tx) => {
+          const session = sessionRow(tx, sessionId);
+          if (!session) throw new LedgerError("session_not_found", `session ${sessionId} not found`);
+          return insert(
+            tx,
+            prepare({
+              sessionId,
+              source: "engine",
+              kind: SESSION_ARCHIVED_KIND,
+              occurredAt: parsedMeta.data.occurredAt,
+              traceId: parsedMeta.data.traceId,
+              parentIds: [],
+              schemaVersion: SESSION_ARCHIVED_SCHEMA_VERSION,
+              privacyEpoch: session.privacyEpoch,
+              payload: parsedPayload.data,
             }),
           );
         },

@@ -27,3 +27,4 @@ export {
   type PracticeQuery,
   type UnresolvedWitness,
 } from "./witnesses";
+export { UNRESOLVED_LIMIT, searchWitnesses, type WitnessSearch, type WitnessSearchResult } from "./search";

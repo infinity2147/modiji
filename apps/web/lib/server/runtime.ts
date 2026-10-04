@@ -2,7 +2,8 @@
  * The process-wide runtime, as route handlers see it. It is built once by the custom server
  * (`server.ts` → `runtime-init.ts`, run unbundled by tsx) and shared through `globalThis`, so
  * Next's route bundles never load SQLite, Drizzle or Z3 themselves: everything from
- * `@vashistha/core/server` is imported here as a type only.
+ * `@vashistha/core/server` is imported here as a type only. Z3 and the hypothesis engine's question
+ * generation run in worker threads (lib/server/workers) that only the composition root starts.
  */
 import type { ConfirmedRule, Rulebook, TeamRulebook } from "@vashistha/core";
 import type { Claude, ElevenLabsClient, Ledger, ServerEnv } from "@vashistha/core/server";
@@ -12,7 +13,9 @@ import type { DebriefExports, DebriefModels, DebriefStore } from "./debrief/deps
 import type { ExpertRecord } from "./debrief/rulebook-store";
 import type { WitnessSolver } from "./debrief/solver";
 import type { DisagreementSolver } from "./disagreements/deps";
+import type { EventLoopDelay } from "./event-loop";
 import type { InterviewStore } from "./interview/engine-state";
+import type { QuestionGenerator } from "./interview/questions";
 import type { PerceptionService } from "./perception/service";
 import type { RateLimiter } from "./rate-limit";
 import type { ConceptReread, SchemaStore } from "./schema/deps";
@@ -53,6 +56,8 @@ export type Runtime = {
   casedesk: CaseDeskStore;
   /** Derived hypothesis-engine state per session (a cache over the ledger) and its serial work queues. */
   interview: InterviewStore;
+  /** The hypothesis engine's heavy steps, run in the engine worker thread off the request event loop. */
+  engine: { questions: QuestionGenerator };
   /**
    * Vision channel: per-session frame order and the extraction worker. `perception.cancel(sessionId,
    * epoch)` is the off-the-record hook (abandons in-flight extraction for the new epoch).
@@ -66,7 +71,7 @@ export type Runtime = {
   tutor: { practice: PracticeSolver };
   voiceTokenLimiter: RateLimiter;
   /** Probes behind `GET /api/health/deep`. */
-  checks: { db: () => CheckResult; dataDir: () => Promise<CheckResult>; z3: () => Promise<CheckResult> };
+  checks: { db: () => CheckResult; dataDir: () => Promise<CheckResult>; z3: () => Promise<CheckResult>; eventLoop: () => EventLoopDelay };
 };
 
 const RUNTIME_KEY: unique symbol = Symbol.for("vashistha.runtime");

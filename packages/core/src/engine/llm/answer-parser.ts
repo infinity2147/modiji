@@ -57,6 +57,8 @@ Rules:
 - newConcepts: notions the expert relied on that no listed feature captures; quote them verbatim.
 - answeredAction: for a "what would you decide" question, the action id the expert chose; otherwise null.
 - confidence: low when the answer is hedged, off-topic or ambiguous.
+- The answer may arrive as several transcript <segment>s (the speech recognizer split it). Read them as one
+  answer, but copy each exactQuote from a single segment: a quote that runs across two segments is rejected.
 - The expert may answer in another language. Then <expert_answer> holds their original words and
   <english_translation> a machine translation, given only to help you understand them: read both, but
   copy exactQuote and evidenceQuote character for character from <expert_answer>, in its own script —
@@ -64,19 +66,26 @@ Rules:
 Never invent features, actions, thresholds or quotes. Everything you return is verified by code.`;
 
 /**
- * The answered utterance as transcribed (no `system_control` traffic). Its span bounds every quote.
- * `text` is always the expert's original words; for a non-English answer, `translation` (when one was
- * verified) is its English machine translation, shown to the parser for meaning only.
+ * One transcript segment of the answer (no `system_control` traffic). Its span bounds every quote taken
+ * from it. `text` is always the expert's original words; for a non-English answer, `translation` (when
+ * one was verified) is its English machine translation, shown to the parser for meaning only.
  */
 export type AnsweredUtterance = { id: string; text: string; t0Ms: number; t1Ms: number; language?: ExpertLanguage; translation?: string };
 
-export function buildAnswerParserPrompt(input: {
-  domain: PromptDomain;
-  decisionFamily: string;
-  question: { id: string; kind: string; text: string };
-  utterance: AnsweredUtterance;
-  candidates: readonly CandidateSummary[];
-}): BuiltPrompt {
+/**
+ * The answer: its first transcript segment (`utterance`) and the segments that continued it until the
+ * answer window closed (`continuation`, in order; ASR splits long answers at sentence boundaries).
+ */
+export type AnswerSegments = { utterance: AnsweredUtterance; continuation?: readonly AnsweredUtterance[] };
+
+export function buildAnswerParserPrompt(
+  input: {
+    domain: PromptDomain;
+    decisionFamily: string;
+    question: { id: string; kind: string; text: string };
+    candidates: readonly CandidateSummary[];
+  } & AnswerSegments,
+): BuiltPrompt {
   return {
     system: `${ANSWER_PARSER_SYSTEM}\n\n${renderDomain(input.domain)}`,
     user: [
@@ -85,18 +94,34 @@ export function buildAnswerParserPrompt(input: {
       "<candidates>",
       renderCandidates(input.candidates),
       "</candidates>",
-      ...expertAnswer(input.utterance),
+      ...expertAnswer(input.utterance, input.continuation ?? []),
     ].join("\n"),
   };
 }
 
-function expertAnswer(u: AnsweredUtterance): string[] {
-  if (u.language === undefined || u.language === "en") return [`<expert_answer>${u.text}</expert_answer>`];
+const english = (u: AnsweredUtterance): boolean => u.language === undefined || u.language === "en";
+
+function translationLine(u: AnsweredUtterance, segment?: number): string {
+  const n = segment === undefined ? "" : ` segment="${segment}"`;
+  return u.translation === undefined
+    ? `<english_translation${n}>unavailable: read the original</english_translation>`
+    : `<english_translation${n} note="machine translation, for meaning only; never quote it">${u.translation}</english_translation>`;
+}
+
+function expertAnswer(first: AnsweredUtterance, continuation: readonly AnsweredUtterance[]): string[] {
+  if (continuation.length === 0) {
+    if (english(first)) return [`<expert_answer>${first.text}</expert_answer>`];
+    return [`<expert_answer language="${first.language}">${first.text}</expert_answer>`, translationLine(first)];
+  }
+  const segments = [first, ...continuation];
   return [
-    `<expert_answer language="${u.language}">${u.text}</expert_answer>`,
-    u.translation === undefined
-      ? "<english_translation>unavailable: read the original</english_translation>"
-      : `<english_translation note="machine translation, for meaning only; never quote it">${u.translation}</english_translation>`,
+    `<expert_answer segments="${segments.length}">`,
+    ...segments.flatMap((u, i) =>
+      english(u)
+        ? [`<segment n="${i + 1}">${u.text}</segment>`]
+        : [`<segment n="${i + 1}" language="${u.language}">${u.text}</segment>`, translationLine(u, i + 1)],
+    ),
+    "</expert_answer>",
   ];
 }
 
@@ -105,17 +130,20 @@ export type AnswerConversion = { answer: ParsedAnswer; rejected: { item: string;
 /**
  * Code-side conversion to the engine's `ParsedAnswer`: condition lists become predicates that must
  * type-check against the domain, actions must be domain actions, the polarity becomes the stated
- * rule's effect and kind (`statedShape`), every quote must be verbatim in the utterance's original
- * text — never in its translation (its timestamps are the utterance span — the quote lies within it), concepts go through
- * `toProposedConcepts`. Anything that fails is returned in `rejected` with a reason. Family-level
- * checks (the action belongs to the asked family) happen in `applyAnswer` and promotion.
+ * rule's effect and kind (`statedShape`), every quote must be verbatim in ONE transcript segment's
+ * original text — never in a translation, never across a segment boundary — and takes that segment's
+ * span as its timestamps (and, for a later segment, its id), so each quote's evidence is a single
+ * `utterance.transcript` entry that contains it; concepts go through `toProposedConcepts`. Anything
+ * that fails is returned in `rejected` with a reason. Family-level checks (the action belongs to the
+ * asked family) happen in `applyAnswer` and promotion.
  */
 export function toParsedAnswer(
   output: LlmAnswer,
-  ctx: { questionId: string; utterance: AnsweredUtterance; domain: DomainConfig; pendingConcepts: readonly string[] },
+  ctx: { questionId: string; domain: DomainConfig; pendingConcepts: readonly string[] } & AnswerSegments,
 ): AnswerConversion {
   const rejected: AnswerConversion["rejected"] = [];
   const { utterance } = ctx;
+  const segments = [utterance, ...(ctx.continuation ?? [])];
   const statedRules: StatedRule[] = [];
   output.statedRules.forEach((r, i) => {
     const item = `statedRules[${i}]`;
@@ -128,14 +156,24 @@ export function toParsedAnswer(
     if (!action.success || !ctx.domain.actions.some((a) => a.id === action.data)) return reject(`"${r.action}" is not an action of the domain`);
     const shape = statedShape(r, action.data);
     if ("reason" in shape) return reject(shape.reason);
-    if (!containsQuote(utterance.text, r.exactQuote)) return reject("quote is not verbatim in the answer");
-    const rule = StatedRuleSchema.safeParse({ predicate: predicate.predicate, action: action.data, ...shape, exactQuote: r.exactQuote.trim(), t0Ms: utterance.t0Ms, t1Ms: utterance.t1Ms });
+    const segment = segments.find((u) => containsQuote(u.text, r.exactQuote));
+    if (segment === undefined)
+      return reject(segments.length === 1 ? "quote is not verbatim in the answer" : "quote is not verbatim within one segment of the answer");
+    const rule = StatedRuleSchema.safeParse({
+      predicate: predicate.predicate,
+      action: action.data,
+      ...shape,
+      exactQuote: r.exactQuote.trim(),
+      t0Ms: segment.t0Ms,
+      t1Ms: segment.t1Ms,
+      ...(segment !== utterance && { utteranceId: segment.id }),
+    });
     if (rule.success) statedRules.push(rule.data);
     else reject(rule.error.issues.map((issue) => issue.message).join("; "));
   });
   const concepts = toProposedConcepts(
     { concepts: output.newConcepts },
-    { domain: ctx.domain, transcript: [{ speaker: "expert", text: utterance.text }], pendingConcepts: ctx.pendingConcepts },
+    { domain: ctx.domain, transcript: segments.map((u) => ({ speaker: "expert" as const, text: u.text })), pendingConcepts: ctx.pendingConcepts },
   );
   for (const r of concepts.rejected) rejected.push({ item: `newConcepts.${r.name}`, reason: r.reason });
   let answeredAction: ParsedAnswer["answeredAction"];
@@ -153,6 +191,7 @@ export function toParsedAnswer(
   const answer = ParsedAnswerSchema.parse({
     questionId: ctx.questionId,
     utteranceId: utterance.id,
+    ...(segments.length > 1 && { segmentIds: segments.map((u) => u.id) }),
     survivingCandidateIds: ids(output.survivingCandidateIds, "survivingCandidateIds"),
     eliminatedCandidateIds: ids(output.eliminatedCandidateIds, "eliminatedCandidateIds"),
     statedRules,

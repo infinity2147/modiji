@@ -207,3 +207,55 @@ describe("nonceDigest", () => {
     expect(nonce).not.toContain(nonceDigest(nonce));
   });
 });
+
+describe("pending and sweep (one outstanding authorization per session; lapses reported once)", () => {
+  it("an issued, unexpired authorization at the current context version is pending until spent, burned, expired or stale", () => {
+    const { store, issue, consume, setClock } = setup();
+    const a = issue();
+    expect(store.pending("s1", T0)?.nonce).toBe(a.nonce);
+    expect(store.pending("s2", T0)).toBeUndefined();
+    const taken = consume(a.nonce);
+    if (!taken.ok) throw new Error("consume failed");
+    expect(store.pending("s1", T0)?.nonce).toBe(a.nonce); // its speech is in flight
+    taken.lease.complete();
+    expect(store.pending("s1", T0)).toBeUndefined();
+
+    issue();
+    store.bumpContextVersion("s1");
+    expect(store.pending("s1", T0)).toBeUndefined(); // it can never be consumed now
+    issue();
+    expect(store.pending("s1", T0)).toBeDefined();
+    setClock(T0 + 4_000);
+    expect(store.pending("s1", T0 + 4_000)).toBeUndefined();
+  });
+
+  it("reports each authorization that expired without a speak decision exactly once, with its session and question", () => {
+    const { store, issue, consume, setClock } = setup();
+    const spoken = issue();
+    const taken = consume(spoken.nonce);
+    if (!taken.ok) throw new Error("consume failed");
+    taken.lease.complete();
+    const lost = issue({ sessionId: "s2" });
+    const burned = issue({ sessionId: "s3" });
+    expect(consume(burned.nonce, { sessionId: "s3", agent: "tutor" })).toEqual({ ok: false, reason: "wrong_agent" });
+    expect(store.sweep(T0 + 3_999)).toEqual([]);
+    setClock(T0 + 4_000);
+    const lapsed = store.sweep(T0 + 4_000);
+    expect(lapsed.map((l) => [l.sessionId, l.questionId])).toEqual([
+      ["s2", "q1"],
+      ["s3", "q1"],
+    ]);
+    expect(lapsed[0]).toEqual({ sessionId: "s2", questionId: "q1", agent: "interviewer", nonceDigest: nonceDigest(lost.nonce), issuedAt: T0, expiresAt: T0 + 4_000 });
+    expect(store.sweep(T0 + 10_000)).toEqual([]);
+  });
+
+  it("an aborted stream that is never retried still counts as spoken (the speak decision was made)", () => {
+    const { store, issue, consume, setClock } = setup();
+    const a = issue();
+    const taken = consume(a.nonce);
+    if (!taken.ok) throw new Error("consume failed");
+    taken.lease.release();
+    setClock(T0 + 5_000);
+    expect(store.sweep(T0 + 5_000)).toEqual([]);
+  });
+});

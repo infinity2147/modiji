@@ -12,6 +12,7 @@ import { ORACLE_MARKER } from "@vashistha/core/domains/kyc/oracle";
 import { EngineStateResponseSchema, GateAuthorizeResponseSchema, PostUtteranceResponseSchema, QuestionQueueResponseSchema } from "../../lib/contracts/interview";
 import { ApiErrorSchema } from "../../lib/contracts/casedesk";
 import { engineState, unparsedAnswers } from "../../lib/server/interview/engine-state";
+import { ANSWER_WINDOW_IDLE_MS } from "../../lib/server/interview/orchestrator";
 import { createInterviewHarness, gateRequest, utterance, type InterviewHarness, trainingCases } from "../support/interview-harness";
 import { readTurn } from "../support/llm-harness";
 
@@ -85,10 +86,10 @@ describe("POST utterances", () => {
   it("without a parser: the answer is recorded and left unparsed (never guessed)", async () => {
     const h = createInterviewHarness();
     const { s, question } = await asked(h, "why_probe");
-    const r = await h.utter(s, utterance(h, s, ANSWER_TEXT, { questionId: question.id }));
+    const r = await h.answerWith(s, utterance(h, s, ANSWER_TEXT, { questionId: question.id }));
     expect(r.status).toBe(200);
     const body = PostUtteranceResponseSchema.parse(r.body);
-    expect(body.parsed).toBeUndefined();
+    expect(r.parsed).toBeUndefined();
     const e = only(h.ledger.list(s, { kinds: ["utterance.transcript"] }));
     expect(e.id).toBe(body.utteranceId);
     expect(e.parentIds).toEqual([only(h.ledger.list(s, { kinds: ["gate.authorized"] })).id]);
@@ -102,9 +103,9 @@ describe("POST utterances", () => {
     const h = createInterviewHarness();
     h.setModel({});
     const { s, question } = await asked(h, "why_probe");
-    const r = await h.utter(s, utterance(h, s, ANSWER_TEXT, { questionId: question.id }));
+    const r = await h.answerWith(s, utterance(h, s, ANSWER_TEXT, { questionId: question.id }));
     expect(r.status).toBe(200);
-    expect(PostUtteranceResponseSchema.parse(r.body).parsed).toBeUndefined();
+    expect(r.parsed).toBeUndefined();
     expect(h.ledger.list(s, { kinds: ["answer.parsed"] })).toEqual([]);
     expect(unparsedAnswers(engineState(h.deps, s))).toHaveLength(1);
   });
@@ -119,10 +120,10 @@ describe("POST utterances", () => {
       answer: () => answer({ survivingCandidateIds: [kept], eliminatedCandidateIds: [ruledOut], answeredAction: "enhancedReview" }),
     });
     const before = EngineStateResponseSchema.parse((await h.engine(s)).body);
-    const r = await h.utter(s, utterance(h, s, "Still enhanced review, the ownership alone does it.", { questionId: question.id }));
+    const r = await h.answerWith(s, utterance(h, s, "Still enhanced review, the ownership alone does it.", { questionId: question.id }));
     expect(r.status).toBe(200);
-    const { utteranceId, parsed } = PostUtteranceResponseSchema.parse(r.body);
-    expect(ParsedAnswerSchema.parse(parsed)).toMatchObject({
+    const { utteranceId } = PostUtteranceResponseSchema.parse(r.body);
+    expect(ParsedAnswerSchema.parse(r.parsed)).toMatchObject({
       questionId: question.id,
       utteranceId,
       survivingCandidateIds: [kept],
@@ -166,8 +167,8 @@ describe("POST utterances", () => {
     h.setModel({ answer: () => answer({ confidence: 0.2, eliminatedCandidateIds: [] }) });
     const { s, question } = await asked(h, "why_probe");
     const before = engineState(h.deps, s).families.get("reviewOutcome")?.set;
-    const r = await h.utter(s, utterance(h, s, "Hmm, not sure, maybe the country?", { questionId: question.id }));
-    expect(PostUtteranceResponseSchema.parse(r.body).parsed?.confidence).toBe(0.2);
+    const r = await h.answerWith(s, utterance(h, s, "Hmm, not sure, maybe the country?", { questionId: question.id }));
+    expect(r.parsed?.confidence).toBe(0.2);
     expect(h.ledger.list(s, { kinds: ["answer.parsed"] })).toHaveLength(1);
     expect(h.ledger.list(s, { kinds: ["hypotheses.updated"] })).toHaveLength(1);
     expect(engineState(h.deps, s).families.get("reviewOutcome")?.set).toBe(before);
@@ -186,7 +187,7 @@ describe("POST utterances", () => {
       }),
     });
     const { s, question } = await asked(h, "why_probe");
-    const r = await h.utter(s, utterance(h, s, `Well, ${quote}.`, { questionId: question.id }));
+    const r = await h.answerWith(s, utterance(h, s, `Well, ${quote}.`, { questionId: question.id }));
     expect(r.status).toBe(200);
     const proposed = only(h.ledger.list(s, { kinds: ["concept.proposed"] }));
     expect(parseLedgerPayload(proposed, "concept.proposed")).toMatchObject({ name: "boardTrackRecord", exactQuote: quote });
@@ -205,8 +206,8 @@ describe("explicit-statement promotion", () => {
     const h = createInterviewHarness();
     h.setModel({ answer: () => answer({ statedRules: [STATED_RULE] }) });
     const { s, question } = await asked(h, "why_probe");
-    const r = await h.utter(s, utterance(h, s, ANSWER_TEXT, { questionId: question.id }));
-    expect(PostUtteranceResponseSchema.parse(r.body).parsed?.statedRules).toHaveLength(1);
+    const r = await h.answerWith(s, utterance(h, s, ANSWER_TEXT, { questionId: question.id }));
+    expect(r.parsed?.statedRules).toHaveLength(1);
     expect(h.ledger.list(s, { kinds: ["rule.confirmed"] })).toEqual([]);
     expect(h.logs.some((l) => l.includes("no frame on record"))).toBe(true);
     expect(engineState(h.deps, s).families.get("reviewOutcome")?.set.candidates.some((c) => c.origin === "expert_statement")).toBe(true);
@@ -218,7 +219,7 @@ describe("explicit-statement promotion", () => {
     h.setModel({ answer: () => answer({ statedRules: [STATED_RULE] }) });
     const { s, question } = await asked(h, "why_probe");
     const frame = h.frame(s);
-    const r = await h.utter(s, utterance(h, s, ANSWER_TEXT, { questionId: question.id }));
+    const r = await h.answerWith(s, utterance(h, s, ANSWER_TEXT, { questionId: question.id }));
     const { utteranceId } = PostUtteranceResponseSchema.parse(r.body);
     const utteranceEntry = h.ledger.get(utteranceId);
     if (utteranceEntry === undefined) throw new Error("utterance missing");
@@ -256,8 +257,8 @@ describe("explicit-statement promotion", () => {
     h.setModel({ answer: () => answer({ statedRules: [{ ...STATED_RULE, exactQuote: "Anything above a quarter, unverified, is enhanced review." }] }) });
     const { s, question } = await asked(h, "why_probe");
     h.frame(s);
-    const r = await h.utter(s, utterance(h, s, ANSWER_TEXT, { questionId: question.id }));
-    expect(PostUtteranceResponseSchema.parse(r.body).parsed?.statedRules).toEqual([]);
+    const r = await h.answerWith(s, utterance(h, s, ANSWER_TEXT, { questionId: question.id }));
+    expect(r.parsed?.statedRules).toEqual([]);
     expect(h.ledger.list(s, { kinds: ["rule.confirmed"] })).toEqual([]);
     expect(h.logs.some((l) => l.includes("quote is not verbatim"))).toBe(true);
   });
@@ -275,5 +276,123 @@ describe("question rephrasing", () => {
     // Counterfactuals must keep their moved value; this rewording drops it, so the template stands.
     for (const q of queue.filter((x) => x.kind === "counterfactual")) expect(q.text.startsWith("If ")).toBe(true);
     expect(h.modelCalls.filter((c) => c.kind === "rephrase")).toHaveLength(queue.length);
+  });
+});
+
+describe("answers given in several transcript segments (live bug #3)", () => {
+  const PART_1 = "Well, the country isn't really it.";
+  const STOP = "Never approve a politically exposed person without compliance sign-off.";
+  const SIGN_OFF: LlmAnswer["statedRules"][number] = {
+    when: { combinator: "all", conditions: [{ feature: "pep", op: "==", value: true }] },
+    polarity: "require_approval",
+    action: "approve",
+    approvalRole: "compliance_officer",
+    kind: "guardrail",
+    exactQuote: STOP,
+  };
+  const segment = (h: InterviewHarness, s: string, text: string, questionId: string, t0Ms: number, t1Ms: number) =>
+    h.utter(s, utterance(h, s, text, { questionId, t0Ms, t1Ms })).then((r) => PostUtteranceResponseSchema.parse(r.body).utteranceId);
+
+  it("every segment until the agent's next turn is one answer: parsed once, each segment its own evidence, the quote citing its segment", async () => {
+    const h = createInterviewHarness();
+    h.setModel({ answer: () => answer({ statedRules: [SIGN_OFF] }) });
+    const { s, question } = await asked(h, "why_probe");
+    h.frame(s);
+    const first = await segment(h, s, PART_1, question.id, 10_000, 11_500);
+    const second = await segment(h, s, STOP, question.id, 12_100, 15_800);
+    await h.idle(s);
+    expect(h.ledger.list(s, { kinds: ["answer.parsed"] })).toEqual([]); // the window is still open
+    expect((await h.agentSaid(s, { conversationId: "conv-1", text: "Thank you." })).status).toBe(204);
+    await h.idle(s);
+
+    const authorized = only(h.ledger.list(s, { kinds: ["gate.authorized"] }));
+    const transcripts = h.ledger.list(s, { kinds: ["utterance.transcript"] });
+    expect(transcripts.map((e) => e.id)).toEqual([first, second]);
+    for (const e of transcripts) expect(e.parentIds).toEqual([authorized.id]);
+    const queuedEntry = h.ledger.list(s, { kinds: ["question.queued"] }).find((e) => parseLedgerPayload(e, "question.queued").id === question.id);
+    const parsedEntry = only(h.ledger.list(s, { kinds: ["answer.parsed"] }));
+    expect(parsedEntry.parentIds).toEqual([first, second, queuedEntry?.id]);
+    expect(parseLedgerPayload(parsedEntry, "answer.parsed")).toMatchObject({ utteranceId: first, segmentIds: [first, second] });
+    const call = only(h.modelCalls.filter((c) => c.kind === "answer"));
+    expect(call.user).toContain(`<segment n="1">${PART_1}</segment>\n<segment n="2">${STOP}</segment>`);
+
+    const confirmed = only(h.ledger.list(s, { kinds: ["rule.confirmed"] }));
+    expect(confirmed.parentIds).toEqual([parsedEntry.id, second]);
+    const { rule } = RuleConfirmedPayloadSchema.parse(confirmed.payload);
+    expect(rule).toMatchObject({ kind: "guardrail", effect: { type: "require_approval", role: "compliance_officer" }, confirmedBy: [{ ledgerEntryId: second }] });
+    expect(rule.evidence[0]).toMatchObject({ utteranceId: second, exactQuote: STOP, t0Ms: 12_100, t1Ms: 15_800 });
+    expect(unparsedAnswers(engineState(h.deps, s))).toEqual([]);
+  });
+
+  it("a quote running across two segments is rejected (quotes stay verbatim within one segment)", async () => {
+    const h = createInterviewHarness();
+    h.setModel({ answer: () => answer({ statedRules: [{ ...SIGN_OFF, exactQuote: "isn't really it. Never approve a politically exposed person" }] }) });
+    const { s, question } = await asked(h, "why_probe");
+    h.frame(s);
+    await segment(h, s, PART_1, question.id, 10_000, 11_500);
+    await segment(h, s, STOP, question.id, 12_100, 15_800);
+    await h.closeAnswer(s);
+    expect(parseLedgerPayload(only(h.ledger.list(s, { kinds: ["answer.parsed"] })), "answer.parsed").statedRules).toEqual([]);
+    expect(h.ledger.list(s, { kinds: ["rule.confirmed"] })).toEqual([]);
+    expect(h.logs.some((l) => l.includes("quote is not verbatim within one segment of the answer"))).toBe(true);
+  });
+
+  it("closes on the idle window, or on the next authorization; a segment after the parse is recorded, never parsed twice", async () => {
+    const h = createInterviewHarness();
+    h.setModel({ answer: () => answer() });
+    const { s, question } = await asked(h, "why_probe");
+    await segment(h, s, PART_1, question.id, 10_000, 11_500);
+    h.advance(ANSWER_WINDOW_IDLE_MS - 1);
+    await h.idle(s);
+    expect(h.ledger.list(s, { kinds: ["answer.parsed"] })).toEqual([]);
+    h.advance(1);
+    await h.idle(s);
+    expect(h.ledger.list(s, { kinds: ["answer.parsed"] })).toHaveLength(1);
+    const late = await segment(h, s, "Oh, and one more thing.", question.id, 30_000, 31_000);
+    h.advance(ANSWER_WINDOW_IDLE_MS);
+    await h.idle(s);
+    expect(h.ledger.list(s, { kinds: ["answer.parsed"] })).toHaveLength(1);
+    expect(h.logs.some((l) => l.includes(`${late} arrived after the answer to ${question.id} was parsed`))).toBe(true);
+
+    // A new authorization closes the open answer to the previous question.
+    const { queue, contextVersion } = QuestionQueueResponseSchema.parse((await h.questions(s)).body);
+    const next = queue[0];
+    if (next === undefined) throw new Error("empty queue");
+    const granted = GateAuthorizeResponseSchema.parse((await h.authorize(s, gateRequest(next.id, contextVersion))).body);
+    expect(await readTurn(await h.llmTurn(s, granted.controlMessage))).toMatchObject({ kind: "speech" });
+    await segment(h, s, "Still enhanced review.", next.id, 40_000, 41_000);
+    const { queue: after, contextVersion: v2 } = QuestionQueueResponseSchema.parse((await h.questions(s)).body);
+    expect((await h.authorize(s, gateRequest(after[0]?.id ?? "", v2))).status).toBe(200);
+    await h.idle(s);
+    expect(h.ledger.list(s, { kinds: ["answer.parsed"] }).map((e) => parseLedgerPayload(e, "answer.parsed").questionId)).toEqual([question.id, next.id]);
+  });
+});
+
+describe("explicit statements at low parse confidence (live bug #5)", () => {
+  const STOP = "Never approve a customer from a high-risk country at desk level.";
+  const FORBID: LlmAnswer["statedRules"][number] = {
+    when: { combinator: "all", conditions: [{ feature: "jurisdictionRisk", op: "==", value: "high" }] },
+    polarity: "forbid",
+    action: "approve",
+    approvalRole: null,
+    kind: "guardrail",
+    exactQuote: STOP,
+  };
+
+  it("a stated stop-rule with its exact quote and a frame is promoted although the parse confidence is 0.4; inferred eliminations are not applied", async () => {
+    const h = createInterviewHarness();
+    h.setModel({ answer: () => answer() });
+    const { s, question } = await asked(h, "counterfactual");
+    const ruledOut = question.target.candidateIds[0];
+    if (ruledOut === undefined) throw new Error("a counterfactual pits candidates");
+    h.setModel({ answer: () => answer({ statedRules: [FORBID], eliminatedCandidateIds: [ruledOut], confidence: 0.4 }) });
+    h.frame(s);
+    const r = await h.answerWith(s, utterance(h, s, `Hmm. ${STOP}`, { questionId: question.id }));
+    expect(r.parsed?.confidence).toBe(0.4);
+    const { rule } = RuleConfirmedPayloadSchema.parse(only(h.ledger.list(s, { kinds: ["rule.confirmed"] })).payload);
+    expect(rule).toMatchObject({ kind: "guardrail", effect: { type: "forbid", action: "approve" }, confirmedBy: [{ method: "explicit_statement" }] });
+    expect(rule.evidence[0]).toMatchObject({ exactQuote: STOP, provenance: "human_voice" });
+    expect(engineState(h.deps, s).families.get("reviewOutcome")?.knowledge.eliminatedIds).not.toContain(ruledOut);
+    expect(h.logs.some((l) => l.includes("below the parse-confidence floor"))).toBe(true);
   });
 });

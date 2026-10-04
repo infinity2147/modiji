@@ -2,6 +2,8 @@ import { evaluatePredicate } from "../logic/evaluate";
 import { recordLookup } from "./model";
 import type { Assignment } from "../schemas/engine";
 import type { ConfirmedRule } from "../schemas/rules";
+import { canonicalJson } from "./canonical";
+import { absorb, ruleIdentity } from "./dedupe";
 import { ruleExperts, type Rulebook } from "./rulebook";
 
 /**
@@ -23,6 +25,13 @@ import { ruleExperts, type Rulebook } from "./rulebook";
  *
  * A disagreement is open from its `witness.found` until its `witness.resolved`; the rulebook revision
  * counts rule events only, so a hold shows up in `held`, not in the revision.
+ *
+ * Semantically identical rules are merged in the team view (`merged`): two experts who each confirmed
+ * the same rule (`ruleIdentity`: decision family, canonical predicate, effect) appear once, as the
+ * earlier rule carrying both experts' confirmations and evidence (`absorb`). Only rules that also have
+ * the same override edges in both directions (what they override, and which rules override them) are
+ * merged, so the merge changes no decision: every check over the team rulebook gives the same result,
+ * citing one rule with both experts' quotes instead of two. Per-expert rulebooks keep both rules.
  */
 export type DisagreementHold = {
   witnessId: string;
@@ -31,7 +40,11 @@ export type DisagreementHold = {
   assignment: Assignment;
 };
 
-export type TeamRulebook = Rulebook & { held: { ruleId: string; witnessId: string }[] };
+export type TeamRulebook = Rulebook & {
+  held: { ruleId: string; witnessId: string }[];
+  /** Rules shown as part of an identical earlier rule (`into`), whose confirmations and evidence it carries. */
+  merged: { ruleId: string; into: string }[];
+};
 
 function isDecisionRule(rule: ConfirmedRule): boolean {
   return rule.effect.type === "recommend" || rule.effect.type === "route";
@@ -46,10 +59,32 @@ export function heldBy(rule: ConfirmedRule, hold: DisagreementHold): boolean {
 
 export function teamRulebook(book: Rulebook, holds: readonly DisagreementHold[]): TeamRulebook {
   const held: TeamRulebook["held"] = [];
-  const rules = book.rules.filter((rule) => {
+  const inForce = book.rules.filter((rule) => {
     const hold = holds.find((h) => heldBy(rule, h));
     if (hold !== undefined) held.push({ ruleId: rule.id, witnessId: hold.witnessId });
     return hold === undefined;
   });
-  return { ...book, rules, held };
+  const { rules, merged } = mergeIdentical(inForce);
+  return { ...book, rules, held, merged };
+}
+
+/** Folds each rule into the first earlier rule with the same identity and the same override edges (see the module comment). */
+function mergeIdentical(rules: readonly ConfirmedRule[]): { rules: ConfirmedRule[]; merged: TeamRulebook["merged"] } {
+  const overriddenBy = new Map<string, string[]>();
+  for (const r of rules) for (const id of r.overrides) overriddenBy.set(id, [...(overriddenBy.get(id) ?? []), r.id]);
+  const signature = (r: ConfirmedRule): string =>
+    canonicalJson([ruleIdentity(r), [...r.overrides].sort(), [...(overriddenBy.get(r.id) ?? [])].sort()]);
+  const kept = new Map<string, ConfirmedRule>();
+  const merged: TeamRulebook["merged"] = [];
+  for (const rule of rules) {
+    const key = signature(rule);
+    const into = kept.get(key);
+    if (into === undefined) kept.set(key, rule);
+    else {
+      // Shown at its own revision: the team view adds the other expert's confirmations and quotes, it records nothing.
+      kept.set(key, { ...(absorb(into, rule) ?? into), revision: into.revision });
+      merged.push({ ruleId: rule.id, into: into.id });
+    }
+  }
+  return { rules: [...kept.values()], merged };
 }

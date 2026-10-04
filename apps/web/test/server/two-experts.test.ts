@@ -19,7 +19,7 @@ import {
 import { KYC_DOMAIN } from "@vashistha/core/domains/kyc";
 import { handleGetDebrief } from "../../lib/server/debrief/handlers";
 import { createDebriefStore, type DebriefDeps } from "../../lib/server/debrief/deps";
-import { createWitnessSolver } from "../../lib/server/debrief/solver";
+import { searchWitnesses } from "@vashistha/solver";
 import { DebriefStateSchema } from "../../lib/contracts/debrief";
 import { compileProcedure, exportWorkMapJson } from "@vashistha/mcp-guardrails";
 import { CLAUDE_MODELS } from "@vashistha/core/server";
@@ -218,6 +218,19 @@ describe("two experts disagree, are asked, and reconcile (P10 acceptance)", () =
     expect(await h.getStatus("?experts=asha-rao,asha-rao&family=reviewOutcome")).toBe(400);
   });
 
+  it("an archived session is closed to the reconciliation too: answers and searches that would write into it are refused, its rules stay", async () => {
+    await h.search();
+    const w = (await h.get()).state.pair?.witnesses[0]?.witness;
+    if (w === undefined) throw new Error("witness expected");
+    h.ledger.archive(sessions.asha, { occurredAt: 1, traceId: "archive-asha", by: "operator" });
+    const before = h.ledger.list(sessions.asha).length;
+    const answered = await h.answer(ASHA.id, w.id, "enhancedReview", QUOTES.ashaAnswer);
+    expect(answered).toMatchObject({ status: 409, body: { error: "session_archived" } });
+    expect(await h.search()).toMatchObject({ status: 409, body: { error: "session_archived" } });
+    expect(h.ledger.list(sessions.asha)).toHaveLength(before);
+    expect(h.disagreements.rulebook().rules.map((r) => r.id)).toEqual(expect.arrayContaining([rules.ashaEdd.id, rules.ashaExc.id]));
+  });
+
   it("each expert's debrief reads only their own rulebook and ignores the disagreement (it belongs to this flow)", async () => {
     await h.search();
     const deps: DebriefDeps = {
@@ -227,7 +240,7 @@ describe("two experts disagree, are asked, and reconcile (P10 acceptance)", () =
       engineConfig: h.disagreements.engineConfig,
       authorizations: h.disagreements.authorizations,
       rulebook: h.disagreements.rulebook,
-      solver: createWitnessSolver(),
+      solver: searchWitnesses,
       claude: null,
       models: { prose: CLAUDE_MODELS.prose },
       exports: { workMapJson: exportWorkMapJson, procedure: compileProcedure },

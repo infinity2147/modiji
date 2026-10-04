@@ -9,6 +9,7 @@ import type { FrameReading, FullRead, ReadMode } from "@vashistha/perception/ext
 import { encodePng } from "../../../../packages/perception/src/png";
 import type { FrameMetadata } from "../../lib/contracts/frames";
 import { handlePostFrame, handleVisionState, type PerceptionDeps } from "../../lib/server/perception/frames";
+import { prepareFrame } from "../../lib/server/perception/prepare";
 import { createPerceptionService, type PerceptionServiceOptions, type VisionExtractor } from "../../lib/server/perception/service";
 import { T0, createCaseDeskHarness, type CaseDeskHarness, type Reply } from "./casedesk-harness";
 
@@ -111,7 +112,7 @@ export function createPerceptionHarness(extractor: PerceptionServiceOptions["ext
   const dataDir = mkdtempSync(join(tmpdir(), "vashistha-perception-"));
   const clock = { now: T0 + 500 };
   const build = (ex: PerceptionServiceOptions["extractor"]) =>
-    createPerceptionService({ ledger: h.ledger, domain: KYC_DOMAIN, profile: CASEDESK_SCREEN, extractor: ex, now: () => clock.now, log: h.deps.log });
+    createPerceptionService({ ledger: h.ledger, domain: KYC_DOMAIN, profile: CASEDESK_SCREEN, extractor: ex, prepare: async (input) => prepareFrame(input), now: () => clock.now, log: h.deps.log });
   const perceptionDeps: PerceptionDeps = {
     ledger: h.ledger,
     store: h.deps.store,

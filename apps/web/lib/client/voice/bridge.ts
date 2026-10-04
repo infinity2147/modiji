@@ -1,11 +1,13 @@
 /**
  * Framework-free wiring between the ElevenLabs conversation callbacks and the rest of the system:
  *
- * - VAD scores and agent mode feed the gate;
+ * - VAD scores, agent mode and the arrival of transcripts (tentative and final: proof the expert
+ *   spoke, and a final one closes their turn at the provider) feed the gate;
  * - final expert transcripts (`onMessage` role "user") are posted as utterances, tagged with the
- *   question the agent just asked, the privacy epoch they were captured in and (non-English sessions)
- *   the session's language; agent turns are posted
- *   as agent utterances (never evidence);
+ *   question the agent asked last before the expert began that segment — every segment until the
+ *   agent's next turn (an answer often arrives in several) — the privacy epoch they were captured in
+ *   and (non-English sessions) the session's language; agent turns are posted as agent utterances
+ *   (never evidence);
  * - control messages (`⟦ctl:…⟧`, plan §7.2 provenance) are never posted and never shown;
  * - an expert turn that is an off-record phrase (plan §7.8) is never posted or shown either: it goes off
  *   the record at once (the server's `set_off_record` tool call follows; going off is idempotent);
@@ -37,6 +39,9 @@ export type UploadStatus = { pending: number; failed: number; lastError: string 
 
 export type BridgeGate = {
   vad: (score: number) => void;
+  localSpeech: (speaking: boolean) => void;
+  /** The provider transcribed the expert: `final` for a finished user turn, else a tentative transcript. */
+  transcript: (final: boolean) => void;
   agentSpeaking: (speaking: boolean) => void;
   setVoiceLive: (live: boolean) => void;
 };
@@ -62,6 +67,10 @@ export type ConversationBridge = {
   connected: (conversationId: string) => void;
   disconnected: () => void;
   vad: (score: number) => void;
+  /** The browser's own microphone detector: when the expert started speaking (it hears speech the VAD misses, and earlier). */
+  localSpeech: (speaking: boolean) => void;
+  /** A tentative transcript of the expert arrived (the provider's ASR is mid-turn). */
+  tentative: () => void;
   mode: (mode: "speaking" | "listening") => void;
   message: (message: { message: string; role: "user" | "agent" }) => void;
   /** The gate authorized `questionId` and sent its control message: the next agent turn asks it. */
@@ -76,14 +85,30 @@ export type ConversationBridge = {
 
 type Job = { epoch: number; run: () => Promise<void> };
 
+/** An agent turn: when its audio began, and the question it asked (every agent turn is an authorized question). */
+type AgentTurn = { questionId: string; startedAt: number; textPosted: boolean };
+
+const MAX_AGENT_TURNS = 20;
+/**
+ * A segment starts at the first onset since the last transcript — unless that speech ended this long
+ * before the next onset with nothing transcribed (a cough, a key click): then the next onset starts it.
+ */
+const UNTRANSCRIBED_ONSET_MS = 3000;
+
 export function createConversationBridge(options: BridgeOptions): ConversationBridge {
   const { gate, now } = options;
   const listeners = new Set<() => void>();
   let conversation: { id: string; startedAt: number } | undefined;
   let speaking = false;
+  let localSpeaking = false;
+  let agentSpeaking = false;
   let speechStartedAt: number | undefined;
-  /** The question the gate just had asked: tagged on the agent turn that asks it and the answer after it. */
-  let asked: { questionId: string; agentSpoke: boolean } | undefined;
+  /** When both level channels last fell silent. */
+  let silentSince: number | undefined;
+  /** The question whose control message went out; its agent turn has not begun yet. */
+  let armed: string | undefined;
+  /** Agent turns, oldest first: a segment answers the latest one that began before the expert started it. */
+  let turns: readonly AgentTurn[] = [];
   let transcript: readonly TranscriptTurn[] = [];
   let nextTurnId = 1;
   const queue: Job[] = [];
@@ -134,6 +159,16 @@ export function createConversationBridge(options: BridgeOptions): ConversationBr
     pump();
   };
 
+  /** A level channel changed: track when the current segment's speech began and when it last went quiet. */
+  const level = (wasSpeaking: boolean): void => {
+    const isSpeaking = speaking || localSpeaking;
+    const t = now();
+    if (isSpeaking && !wasSpeaking) {
+      if (speechStartedAt === undefined || (silentSince !== undefined && t - silentSince > UNTRANSCRIBED_ONSET_MS)) speechStartedAt = t;
+      silentSince = undefined;
+    } else if (!isSpeaking && wasSpeaking) silentSince = t;
+  };
+
   const addTurn = (role: TranscriptTurn["role"], text: string, questionId: string | undefined): void => {
     transcript = [...transcript, { id: nextTurnId++, role, text, at: now(), questionId }].slice(-MAX_TRANSCRIPT_TURNS);
     notify();
@@ -143,28 +178,53 @@ export function createConversationBridge(options: BridgeOptions): ConversationBr
     connected(conversationId) {
       conversation = { id: conversationId, startedAt: now() };
       speaking = false;
+      localSpeaking = false;
+      agentSpeaking = false;
       speechStartedAt = undefined;
+      silentSince = undefined;
       gate.setVoiceLive(true);
       notify();
     },
     disconnected() {
       conversation = undefined;
-      asked = undefined;
+      armed = undefined;
+      turns = [];
       gate.setVoiceLive(false);
       notify();
     },
     vad(score) {
       gate.vad(score);
-      const isSpeaking = score >= options.vadThreshold;
-      if (isSpeaking && !speaking) speechStartedAt ??= now();
-      speaking = isSpeaking;
+      const wasSpeaking = speaking || localSpeaking;
+      speaking = score >= options.vadThreshold;
+      level(wasSpeaking);
+    },
+    localSpeech(isSpeaking) {
+      gate.localSpeech(isSpeaking);
+      const wasSpeaking = speaking || localSpeaking;
+      localSpeaking = isSpeaking;
+      level(wasSpeaking);
+    },
+    tentative() {
+      if (conversation === undefined) return;
+      speechStartedAt ??= now();
+      gate.transcript(false);
     },
     mode(mode) {
-      gate.agentSpeaking(mode === "speaking");
+      const isSpeaking = mode === "speaking";
+      gate.agentSpeaking(isSpeaking);
+      // A new agent turn begins only with an authorized question; audio gaps inside one turn do not start another.
+      if (isSpeaking && !agentSpeaking && armed !== undefined) {
+        turns = [...turns, { questionId: armed, startedAt: now(), textPosted: false }].slice(-MAX_AGENT_TURNS);
+        armed = undefined;
+      }
+      agentSpeaking = isSpeaking;
     },
     message({ message, role }) {
+      if (conversation === undefined) return;
       const text = message.trim();
-      if (text === "" || isControlText(text) || conversation === undefined) return;
+      // A finished user turn at the provider, whatever its words: the gate stops waiting for it.
+      if (role === "user" && !isControlText(text)) gate.transcript(true);
+      if (text === "" || isControlText(text)) return;
       if (role === "user" && isOffRecordPhrase(text)) {
         speechStartedAt = undefined;
         options.onOffRecordPhrase();
@@ -176,8 +236,9 @@ export function createConversationBridge(options: BridgeOptions): ConversationBr
       const epoch = privacy.epoch;
 
       if (role === "agent") {
-        const questionId = asked !== undefined && !asked.agentSpoke ? asked.questionId : undefined;
-        if (asked !== undefined) asked = { ...asked, agentSpoke: true };
+        const turn = turns.at(-1);
+        const questionId = turn !== undefined && !turn.textPosted ? turn.questionId : undefined;
+        if (turn !== undefined) turns = [...turns.slice(0, -1), { ...turn, textPosted: true }];
         addTurn("agent", text, questionId);
         enqueue({
           epoch,
@@ -191,10 +252,10 @@ export function createConversationBridge(options: BridgeOptions): ConversationBr
         return;
       }
 
-      const questionId = asked?.agentSpoke ? asked.questionId : undefined;
-      if (questionId !== undefined) asked = undefined;
+      const begun = speechStartedAt ?? now();
+      const questionId = turns.findLast((turn) => turn.startedAt <= begun)?.questionId;
       const t1Ms = Math.max(0, now() - startedAt);
-      const t0Ms = speechStartedAt === undefined ? t1Ms : Math.min(t1Ms, Math.max(0, speechStartedAt - startedAt));
+      const t0Ms = Math.min(t1Ms, Math.max(0, begun - startedAt));
       speechStartedAt = undefined;
       addTurn("user", text, questionId);
       enqueue({
@@ -213,7 +274,7 @@ export function createConversationBridge(options: BridgeOptions): ConversationBr
       });
     },
     asked(questionId) {
-      asked = { questionId, agentSpoke: false };
+      armed = questionId;
     },
     cancelQueued() {
       queue.length = 0;

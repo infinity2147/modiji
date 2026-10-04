@@ -24,6 +24,7 @@ import {
   contentId,
   explainObserved,
   parseLedgerPayload,
+  planConfirmation,
   promoteToConfirmedRule,
   typecheckPredicate,
   type ActionId,
@@ -99,6 +100,39 @@ class Writer {
     this.ids.push(written.id);
     return written;
   }
+
+  /**
+   * Confirms `rule` with rule de-duplication (core `planConfirmation`): a new `rule.confirmed`, or — when
+   * this expert already has the same rule (family, canonical predicate, effect) — a `rule.revised` of
+   * that rule carrying the new confirmation and evidence. Callers check `requireSomethingNew` before
+   * writing the statement the rule rests on.
+   */
+  confirmRule(snap: Snapshot, parents: readonly (string | undefined)[], rule: ConfirmedRule): RuleChange {
+    const plan = planConfirmation(snap.book.rules, rule);
+    switch (plan.kind) {
+      case "new":
+        return { entry: this.append("rule.confirmed", "engine", parents, { rule }), kind: "rule_added" };
+      case "merge":
+        return {
+          entry: this.append("rule.revised", "engine", [...parents, ruleEntries(snap.book).get(plan.existing.id)], { rule: plan.rule, reason: plan.reason }),
+          kind: "rule_revised",
+        };
+      case "duplicate":
+        throw duplicateRule(plan.existing);
+    }
+  }
+}
+
+type RuleChange = { entry: LedgerEntry; kind: "rule_added" | "rule_revised" };
+
+function duplicateRule(existing: ConfirmedRule): ApiFailure {
+  return new ApiFailure(409, "rule_exists", `this rule is already confirmed as ${existing.id} with this evidence; nothing new to record`);
+}
+
+/** 409 `rule_exists` before anything is written when `rule` (validated with the pending statement) adds nothing to this expert's identical rule. */
+function requireSomethingNew(snap: Snapshot, rule: ConfirmedRule): void {
+  const plan = planConfirmation(snap.book.rules, rule);
+  if (plan.kind === "duplicate") throw duplicateRule(plan.existing);
 }
 
 /** The session's redacted screen frames (perception uploads), in ledger order. */
@@ -285,7 +319,8 @@ function statedQuotes(snap: Snapshot, candidate: CandidateRule, moment: [string,
     const outcome = snap.engine.answers.get(e.id);
     const stated = outcome?.statedRules.find((s) => s.status === "candidate" && s.candidateId === candidate.id);
     if (stated === undefined) return [];
-    const { utteranceId } = parseLedgerPayload(e, "answer.parsed");
+    // The transcript segment the quote is verbatim in (an answer may span several).
+    const utteranceId = stated.rule.utteranceId ?? parseLedgerPayload(e, "answer.parsed").utteranceId;
     const utterance = snap.engine.utterances.get(utteranceId);
     const [first, ...rest] = utterance?.frameIds ?? [];
     const quote: ExpertQuoteEvidence = {
@@ -367,7 +402,7 @@ async function recordAndAsk(deps: DebriefDeps, snap: Snapshot, w: Writer): Promi
  * the current teach-back confirms it; an unresolved witness answered with an action (answer parser)
  * gains the rule for its decision cell, quoted from the utterance. Returns the rule change, if any.
  */
-function applyVoiceAnswer(deps: DebriefDeps, snap: Snapshot, w: Writer, utterance: LedgerEntry): { entry: LedgerEntry } | undefined {
+function applyVoiceAnswer(deps: DebriefDeps, snap: Snapshot, w: Writer, utterance: LedgerEntry): RuleChange | undefined {
   const record = snap.engine.utterances.get(utterance.id);
   const question = record?.questionId === undefined ? undefined : snap.engine.questions.get(record.questionId)?.question;
   if (record === undefined || question === undefined) return undefined;
@@ -411,15 +446,18 @@ function applyVoiceAnswer(deps: DebriefDeps, snap: Snapshot, w: Writer, utteranc
     confirmationEntryId: utterance.id,
     ledger: deps.ledger,
   });
-  const ruleEntry = w.append("rule.confirmed", "engine", [parsed.id, utterance.id, snap.found.get(wit.id)?.entry.id, ...explainedBy(snap, rule)], { rule });
-  return { entry: ruleEntry };
+  if (planConfirmation(snap.book.rules, rule).kind === "duplicate") {
+    deps.log.info(`[debrief] voice answer ${utterance.id} not applied: the expert's identical rule already carries this evidence`);
+    return undefined;
+  }
+  return w.confirmRule(snap, [parsed.id, utterance.id, snap.found.get(wit.id)?.entry.id, ...explainedBy(snap, rule)], rule);
 }
 
 async function rebuild(deps: DebriefDeps, sessionId: string, w: Writer): Promise<Snapshot> {
   let snap = await snapshot(deps, sessionId);
   for (const utterance of pendingVoiceAnswers(snap)) {
     const change = applyVoiceAnswer(deps, snap, w, utterance);
-    snap = change === undefined ? await snapshot(deps, sessionId) : await resolveVanished(deps, snap, w, change.entry, "rule_added");
+    snap = change === undefined ? await snapshot(deps, sessionId) : await resolveVanished(deps, snap, w, change.entry, change.kind);
   }
   await recordAndAsk(deps, snap, w);
   return snap;
@@ -501,9 +539,6 @@ function statedStopRule(snap: Snapshot, req: Extract<ExpertActionRequest, { acti
   const effect = req.effect.type === "forbid" ? req.effect : { type: req.effect.type, role: req.effect.role };
   const stated = StatedRuleSchema.safeParse({ predicate: converted.predicate, action: req.effect.action, kind: "guardrail", effect, exactQuote: req.quote, t0Ms: 0, t1Ms: 0 });
   if (!stated.success) throw new ApiFailure(400, "invalid_stop_rule", stated.error.issues.map((i) => i.message).join("; "));
-  const same = canonicalJson([family.id, stated.data.predicate, stated.data.effect]);
-  if (snap.book.rules.some((r) => canonicalJson([r.decisionFamily, r.predicate, r.effect]) === same))
-    throw new ApiFailure(409, "rule_exists", "this stop-rule is already in the confirmed rulebook");
   return stated.data;
 }
 
@@ -527,7 +562,7 @@ export function applyExpertAction(deps: DebriefDeps, sessionId: string, req: Exp
     const statement = (parents: readonly (string | undefined)[], payload: PayloadInput<"expert.statement">): LedgerEntry =>
       w.append("expert.statement", "expert", parents, payload);
     let statementEntry: LedgerEntry;
-    let change: { entry: LedgerEntry; kind: "rule_added" | "rule_revised" } | undefined;
+    let change: RuleChange | undefined;
     let regenerateTeachBack = false;
 
     switch (req.action) {
@@ -547,11 +582,11 @@ export function applyExpertAction(deps: DebriefDeps, sessionId: string, req: Exp
             confirmationEntryId: statementId,
             ledger,
           });
-        evidence(PENDING_STATEMENT, pending);
+        requireSomethingNew(snap, evidence(PENDING_STATEMENT, pending));
         const hypotheses = snap.entries.findLast((e) => e.kind === "hypotheses.updated" && parseLedgerPayload(e, "hypotheses.updated").decisionFamily === req.decisionFamily);
         statementEntry = statement([hypotheses?.id], { text: req.quote, intent: "confirm_candidate", target: { candidateId: candidate.id } });
         const rule = evidence(statementEntry.id, deps.ledger);
-        change = { entry: w.append("rule.confirmed", "engine", [statementEntry.id, hypotheses?.id, ...explained], { rule }), kind: "rule_added" };
+        change = w.confirmRule(snap, [statementEntry.id, hypotheses?.id, ...explained], rule);
         break;
       }
       case "add_rule_for_witness": {
@@ -571,11 +606,11 @@ export function applyExpertAction(deps: DebriefDeps, sessionId: string, req: Exp
             confirmationEntryId: statementId,
             ledger,
           });
-        make(PENDING_STATEMENT, pending);
+        requireSomethingNew(snap, make(PENDING_STATEMENT, pending));
         const question = snap.questions.get(witness.id)?.queuedEntryId;
         statementEntry = statement([found.id, question], { text: req.quote, intent: "add_rule_for_witness", target: { witnessId: witness.id, action: req.decision } });
         const rule = make(statementEntry.id, deps.ledger);
-        change = { entry: w.append("rule.confirmed", "engine", [statementEntry.id, found.id, ...explainedBy(snap, rule)], { rule }), kind: "rule_added" };
+        change = w.confirmRule(snap, [statementEntry.id, found.id, ...explainedBy(snap, rule)], rule);
         break;
       }
       case "revise_rule": {
@@ -644,10 +679,10 @@ export function applyExpertAction(deps: DebriefDeps, sessionId: string, req: Exp
               ledger,
             }),
           );
-        make(PENDING_STATEMENT, pending);
+        requireSomethingNew(snap, make(PENDING_STATEMENT, pending));
         statementEntry = statement([req.momentEntryId], { text: req.quote, intent: "confirm_stop_rule", target: { action: req.effect.action } });
         const rule = make(statementEntry.id, deps.ledger);
-        change = { entry: w.append("rule.confirmed", "engine", [statementEntry.id, req.momentEntryId], { rule }), kind: "rule_added" };
+        change = w.confirmRule(snap, [statementEntry.id, req.momentEntryId], rule);
         break;
       }
       case "confirm_teachback": {

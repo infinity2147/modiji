@@ -15,10 +15,35 @@
  * which did not change), so live questions are always reported at the current version.
  */
 import "server-only";
-import { canonicalJson, generateQuestions, type DecisionContext, type EngineConfig, type Question } from "@vashistha/core";
+import {
+  canonicalJson,
+  type DecisionContext,
+  type DomainConfig,
+  type EngineConfig,
+  type HypothesisSet,
+  type ProposedConcept,
+  type Question,
+  type QuestionContext,
+  type RecentDecision,
+} from "@vashistha/core";
 import type { DecisionRecord, EngineState, FamilyState } from "./engine-state";
 
 export const QUEUE_LIMIT = 5;
+
+/**
+ * The engine's question generation for one family (`generateQuestions` over `familyModel(domain,
+ * familyId, config)`). The server runs it in its engine worker thread (workers/engine.ts): EIG over
+ * every candidate is the heaviest step of the live interview and must stay off the request event loop.
+ */
+export type QuestionGenerator = (input: {
+  domain: DomainConfig;
+  familyId: string;
+  set: HypothesisSet;
+  ctx: QuestionContext;
+  recent?: RecentDecision;
+  concepts: ProposedConcept[];
+  config: EngineConfig;
+}) => Promise<Question[]>;
 
 /** What a question asks, independent of when it was generated (ids change with the context version). */
 export function questionKey(q: Question): string {
@@ -38,7 +63,7 @@ function decisionContext(decision: DecisionRecord, now: number): DecisionContext
   };
 }
 
-export function planQueue(params: {
+export async function planQueue(params: {
   state: EngineState;
   family: FamilyState;
   /** Include the why-probe for the latest decision (only right after it was committed). */
@@ -47,13 +72,16 @@ export function planQueue(params: {
   parentIds: string[];
   now: number;
   config: EngineConfig;
-}): Question[] {
-  const { state, family, withWhyProbe, contextVersion, parentIds, now, config } = params;
+  generate: QuestionGenerator;
+}): Promise<Question[]> {
+  const { state, family, withWhyProbe, contextVersion, parentIds, now, config, generate } = params;
   const latest = family.decisions.at(-1);
   if (latest === undefined) return [];
+  // Read before generating: the session's state object is folded forward in place meanwhile.
   const asked = new Set([...state.questions.values()].filter((r) => r.status === "asked").map((r) => questionKey(r.question)));
-  const generated = generateQuestions({
-    model: family.model,
+  const generated = await generate({
+    domain: family.model.domain,
+    familyId: family.model.family.id,
     set: family.set,
     ctx: {
       sessionId: state.sessionId,
@@ -64,7 +92,7 @@ export function planQueue(params: {
       parentIds,
     },
     ...(withWhyProbe && { recent: latest.recent }),
-    concepts: state.undefinedConcepts,
+    concepts: [...state.undefinedConcepts],
     config,
   });
   const slots = new Set<string>();

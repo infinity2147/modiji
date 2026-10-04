@@ -1,5 +1,5 @@
 /**
- * `pnpm replay:export --base <url> --sessions <id,id,…> --out <dir> [--audio] [--manifest-copy <dir>]`
+ * `pnpm replay:export --base <url> --sessions <id,id,…> --out <dir> [--audio] [--manifest-copy <dir>] [--archive | --no-archive]`
  *
  * Exports a GENUINE recorded run into an immutable, integrity-checked run bundle (format:
  * apps/web/lib/replay/format.ts) for the labelled verified replay mode (plan §10–12, P11):
@@ -13,8 +13,15 @@
  *   provider still has it. Nothing is ever synthesised; whatever is unavailable is listed in the
  *   manifest's `missing` with the reason.
  *
- * Only read APIs are called. The ledger is re-read at the end: if the run grew during the export, the
- * export is refused (export when the run is idle). The bundle is written to `<out>/<bundleId>` (use
+ * Archiving (session lifecycle): a published replay exposes its sessions' ids, and a session id is a
+ * write capability. With `--archive` — the DEFAULT when `--base` is not a loopback address, i.e. for
+ * every production export; `--no-archive` opts out — each session is archived first
+ * (`POST /api/sessions/:id/archive`, bearer `CUSTOM_LLM_SECRET`, required): the server then refuses every
+ * write to it (409 `session_archived`) while reads keep working, so the run is frozen before it is read
+ * and the bundle ends with its `session.archived` entries. Rules confirmed in it stay in the rulebook.
+ *
+ * Apart from archiving, only read APIs are called. The ledger is re-read at the end: if the run grew
+ * during the export, the export is refused (export when the run is idle). The bundle is written to `<out>/<bundleId>` (use
  * `--out $DATA_DIR/replays` to serve it from a local server) and verified from disk before exiting.
  * Relative paths resolve against the directory `pnpm` was started in. A bearer (CUSTOM_LLM_SECRET) is
  * sent only if a route answers 401. `--manifest-copy docs/replay` also writes the manifest there (the
@@ -42,6 +49,11 @@ function fromInvocationDir(path: string): string {
   return isAbsolute(path) ? path : resolve(process.env.INIT_CWD ?? process.cwd(), path);
 }
 
+/** Production exports archive by default: anything but a loopback host. */
+function isLoopback(base: URL): boolean {
+  return ["localhost", "127.0.0.1", "[::1]"].includes(base.hostname) || base.hostname.endsWith(".localhost");
+}
+
 function makeClient(base: string, bearer: string | undefined) {
   async function get(path: string): Promise<Response> {
     const url = new URL(path, base).toString();
@@ -55,7 +67,21 @@ function makeClient(base: string, bearer: string | undefined) {
     if (!response.ok) throw new Error(`GET ${path} → ${response.status} ${(await response.text()).slice(0, 200)}`);
     return (await response.json()) as T;
   }
-  return { get, json };
+  /** Archives a session (operator route, bearer required); a session already archived is fine. */
+  async function archive(sessionId: string): Promise<"archived" | "already"> {
+    if (bearer === undefined) throw new Error("archiving needs CUSTOM_LLM_SECRET (the operator bearer); set it, or pass --no-archive");
+    const response = await fetch(new URL(`/api/sessions/${sessionId}/archive`, base).toString(), {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${bearer}` },
+      body: JSON.stringify({ by: "replay_export" }),
+      signal: AbortSignal.timeout(60_000),
+    });
+    const text = await response.text();
+    if (response.ok) return "archived";
+    if (response.status === 409 && text.includes('"session_archived"')) return "already";
+    throw new Error(`POST /api/sessions/${sessionId}/archive → ${response.status} ${text.slice(0, 200)}`);
+  }
+  return { get, json, archive };
 }
 
 async function ledger(client: ReturnType<typeof makeClient>, sessionId: string): Promise<Entry[]> {
@@ -85,12 +111,16 @@ async function main(): Promise<number> {
       out: { type: "string" },
       audio: { type: "boolean", default: false },
       "manifest-copy": { type: "string" },
+      archive: { type: "boolean" },
     },
     strict: true,
+    allowNegative: true,
   });
   if (values.base === undefined || values.sessions === undefined || values.out === undefined)
-    throw new Error("usage: pnpm replay:export --base <url> --sessions <id,id,…> --out <dir> [--audio] [--manifest-copy <dir>]");
-  const base = new URL(values.base).toString();
+    throw new Error("usage: pnpm replay:export --base <url> --sessions <id,id,…> --out <dir> [--audio] [--manifest-copy <dir>] [--archive | --no-archive]");
+  const baseUrl = new URL(values.base);
+  const base = baseUrl.toString();
+  const archive = values.archive ?? !isLoopback(baseUrl);
   const sessionIds = [...new Set(values.sessions.split(",").map((s) => s.trim()).filter((s) => s !== ""))];
   const bad = sessionIds.filter((id) => !UUID.test(id));
   if (sessionIds.length === 0 || bad.length > 0) throw new Error(`--sessions must be session UUIDs (bad: ${bad.join(", ") || "none given"})`);
@@ -102,6 +132,11 @@ async function main(): Promise<number> {
 
   const health = await client.json<{ ok: boolean; version: string; commit?: string | null }>("/api/health");
   console.info(`source ${base} · version ${health.version} · commit ${health.commit ?? "unknown"}`);
+
+  // Freeze first: an archived session refuses every write, so the run cannot move while it is exported.
+  if (archive)
+    for (const sessionId of sessionIds) console.info(`session ${sessionId} · ${(await client.archive(sessionId)) === "archived" ? "archived (read-only from now on)" : "already archived"}`);
+  else console.warn(`warning: not archiving: the exported sessions stay writable by anyone who has their ids${isLoopback(baseUrl) ? " (local export; pass --archive to archive)" : " (--no-archive)"}`);
 
   const sessions: BundleInput["sessions"] = [];
   const files: BundleInput["files"] = [];

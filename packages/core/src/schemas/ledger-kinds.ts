@@ -45,6 +45,15 @@ const kinds = {
       expert: ExpertSchema.optional(),
     }),
   },
+  /**
+   * Session lifecycle: the session is closed for writing (a published replay exposes its id, and a
+   * session id is a write capability). Appended by the operator archive route or `replay:export
+   * --archive`; afterwards the ledger refuses every append to the session, while reads keep working.
+   */
+  "session.archived": {
+    sources: ["engine"],
+    payload: z.strictObject({ by: z.enum(["operator", "replay_export"]), note: z.string().trim().min(1).max(500).optional() }),
+  },
   "screen.event": { sources: ["dom", "vision"], payload: ScreenEventSchema },
   "interlock.check": {
     sources: ["engine"],
@@ -87,6 +96,16 @@ const kinds = {
   "question.dropped": {
     sources: ["engine"],
     payload: z.strictObject({ questionId: IdSchema, reason: z.enum(["answered_by_screen", "superseded", "context_changed", "budget"]) }),
+  },
+  /**
+   * An authorized question went unspoken: its authorization expired with no `speak` decision for its
+   * nonce (the control message never reached the agent, was withheld because the expert resumed, or was
+   * merged into an open user turn and skipped). The question is queued again — not asked, and not
+   * counted against the live budget. Parent: its `gate.authorized` entry.
+   */
+  "question.requeued": {
+    sources: ["engine"],
+    payload: z.strictObject({ questionId: IdSchema, reason: z.literal("authorization_unspoken") }),
   },
   "gate.authorized": {
     sources: ["engine"],

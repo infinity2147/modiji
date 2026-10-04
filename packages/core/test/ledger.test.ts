@@ -66,7 +66,7 @@ afterEach(() => opened.close());
 describe("sessions", () => {
   it("creates and reads sessions", () => {
     const s = ledger.createSession({ id: "s1" });
-    expect(s).toEqual({ id: "s1", createdAt: 10_000, privacyEpoch: 0, offRecord: false });
+    expect(s).toEqual({ id: "s1", createdAt: 10_000, privacyEpoch: 0, offRecord: false, archived: false });
     expect(ledger.getSession("s1")).toEqual(s);
     expect(ledger.getSession("nope")).toBeUndefined();
     expect(ledger.createSession().id).toBe("id-1");
@@ -243,6 +243,43 @@ describe("privacy", () => {
     expect(ledger.getSession("s")).toMatchObject({ privacyEpoch: 0, offRecord: false });
     expect(ledger.list("s")).toEqual([first]);
     expect(ledger.append(entry("s", { source: "client" })).sequence).toBe(1);
+  });
+});
+
+describe("archive (session lifecycle)", () => {
+  it("appends one session.archived entry, then refuses every append from any source and every transition; reads keep working", () => {
+    ledger.createSession({ id: "s" });
+    const before = ledger.append(entry("s"));
+    const archived = ledger.archive("s", { occurredAt: 5, traceId: "t-archive", by: "operator", note: "replay published" });
+    expect(archived).toMatchObject({ sessionId: "s", sequence: 1, source: "engine", kind: "session.archived", payload: { by: "operator", note: "replay published" } });
+    expect(ledger.getSession("s")).toMatchObject({ archived: true, offRecord: false });
+
+    for (const source of [...CAPTURE, ...NON_CAPTURE]) expectLedgerError(() => ledger.append(entry("s", { source })), "session_archived");
+    expectLedgerError(() => ledger.appendMany([entry("s")]), "session_archived");
+    expectLedgerError(() => ledger.setOffRecord("s", true, { occurredAt: 6, traceId: "t" }), "session_archived");
+    expectLedgerError(() => ledger.archive("s", { occurredAt: 7, traceId: "t", by: "operator" }), "session_archived");
+    // The refused transition left the session as it was.
+    expect(ledger.getSession("s")).toMatchObject({ privacyEpoch: 0, offRecord: false, archived: true });
+
+    expect(ledger.list("s").map((e) => e.id)).toEqual([before.id, archived.id]);
+    expect(ledger.get(before.id)).toEqual(before);
+  });
+
+  it("archives one session only; an entry in it can still be a parent of an entry elsewhere", () => {
+    ledger.createSession({ id: "a" });
+    ledger.createSession({ id: "b" });
+    const parent = ledger.append(entry("a"));
+    ledger.archive("a", { occurredAt: 5, traceId: "t", by: "replay_export" });
+    expect(ledger.getSession("b")?.archived).toBe(false);
+    expect(ledger.append(entry("b", { parentIds: [parent.id] })).parentIds).toEqual([parent.id]);
+  });
+
+  it("validates the archive request and the session", () => {
+    expectLedgerError(() => ledger.archive("missing", { occurredAt: 5, traceId: "t", by: "operator" }), "session_not_found");
+    ledger.createSession({ id: "s" });
+    // @ts-expect-error -- not an archiving actor
+    expectLedgerError(() => ledger.archive("s", { occurredAt: 5, traceId: "t", by: "someone" }), "invalid_entry");
+    expect(ledger.getSession("s")?.archived).toBe(false);
   });
 });
 

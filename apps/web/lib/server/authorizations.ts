@@ -7,6 +7,12 @@
  * streamed; a stream that aborts first hands the nonce back (in_flight → issued) for the retry.
  * A duplicate arriving while a stream is in flight is refused. Expired nonces never succeed.
  *
+ * At most one authorization is pending per session (`pending`): the gate holds the floor while one is
+ * outstanding, and the server refuses a second rather than let two control messages race (live bug
+ * #2). An authorization that expires without its speech ever starting — no `speak` decision for its
+ * nonce: the control message was lost, withheld, or merged into an open user turn (live bug #1) —
+ * is reported once by `sweep`, so the caller can re-queue its question.
+ *
  * In memory on purpose: there is one persistent process (D5) and an authorization lives seconds.
  * Stateless at module level: the one store instance lives on the runtime (see runtime.ts), because
  * this module is evaluated both by the custom server and inside Next's route bundles.
@@ -72,6 +78,19 @@ type Entry = {
   state: "issued" | "in_flight" | "used";
   /** Identifies the current in-flight holder, so a late release cannot undo a newer consume. */
   lease: number;
+  /** A consume succeeded at least once: the custom LLM decided to speak it. */
+  spoke: boolean;
+  issuedAt: number;
+};
+
+/** An authorization that expired unspoken (see `sweep`). */
+export type LapsedAuthorization = {
+  sessionId: string;
+  questionId: string;
+  agent: AgentRole;
+  nonceDigest: string;
+  issuedAt: number;
+  expiresAt: number;
 };
 
 /** Short, non-reversible correlation id for a nonce, for logs and the ledger (never store the nonce). */
@@ -84,10 +103,17 @@ export function createAuthorizationStore(opts: { now?: () => number } = {}) {
   /** Live and spent (tombstoned) nonces; dropped once expired, after which they read as unknown. */
   const entries = new Map<string, Entry>();
   const contextVersions = new Map<string, number>();
+  /** Expired, never spoken, not yet collected by `sweep`. */
+  const lapsed: LapsedAuthorization[] = [];
   let leases = 0;
 
   function prune(now: number): void {
-    for (const [nonce, entry] of entries) if (entry.authorization.expiresAt <= now) entries.delete(nonce);
+    for (const [nonce, entry] of entries) {
+      if (entry.authorization.expiresAt > now) continue;
+      entries.delete(nonce);
+      const { sessionId, questionId, expiresAt } = entry.authorization;
+      if (!entry.spoke) lapsed.push({ sessionId, questionId, agent: entry.agent, nonceDigest: nonceDigest(nonce), issuedAt: entry.issuedAt, expiresAt });
+    }
   }
 
   return {
@@ -102,8 +128,26 @@ export function createAuthorizationStore(opts: { now?: () => number } = {}) {
         expiresAt: now + ttlMs,
         contextVersion,
       });
-      entries.set(authorization.nonce, { authorization, agent, text, state: "issued", lease: 0 });
+      entries.set(authorization.nonce, { authorization, agent, text, state: "issued", lease: 0, spoke: false, issuedAt: now });
       return authorization;
+    },
+
+    /**
+     * The session's outstanding authorization, if any: unexpired, not spent (issued, or its speech in
+     * flight), and still consumable at the session's current context version.
+     */
+    pending(sessionId: string, now: number): GateAuthorization | undefined {
+      prune(now);
+      const version = contextVersions.get(sessionId) ?? 0;
+      for (const { authorization, state } of entries.values())
+        if (authorization.sessionId === sessionId && state !== "used" && authorization.contextVersion === version) return authorization;
+      return undefined;
+    },
+
+    /** Collects the authorizations that expired unspoken since the last sweep (each is reported once). */
+    sweep(now: number): LapsedAuthorization[] {
+      prune(now);
+      return lapsed.splice(0, lapsed.length);
     },
 
     /**
@@ -136,6 +180,7 @@ export function createAuthorizationStore(opts: { now?: () => number } = {}) {
       const lease = leases;
       entry.state = "in_flight";
       entry.lease = lease;
+      entry.spoke = true;
       const settle = (to: "used" | "issued") => {
         if (entry.state === "in_flight" && entry.lease === lease) entry.state = to;
       };

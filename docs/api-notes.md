@@ -482,3 +482,29 @@ Sources: installed `@elevenlabs/elevenlabs-js` 2.70 serialization types (`Langua
   - `/mcp` `check_action` citing both.
 
   The ElevenLabs ASR leg (`--transcript asr`) and the agents v3 sync are pending the lead's go-ahead, since they share the production agents.
+
+## 17. Gate inputs after the live P3 runs (fixes for live bugs #1–#5, #7, #8, #11) — SDK facts read from the installed source
+- **Local microphone level — VERIFIED (installed `@elevenlabs/client` 1.26):** `useConversation().getInputByteFrequencyData(): Uint8Array` (`react/dist/conversation/useConversation.d.ts:41`).
+  - On WebRTC it reads an `AnalyserNode` that the SDK attaches to the LiveKit microphone track itself (`client/dist/utils/WebRTCConnection.js` `setupInputAnalyser`, `platform/web/webAudioAdapter.js:34-49`). No second capture, no extra permission.
+  - The bytes are the analyser's dB scale (Web Audio defaults −100…−30 dB, smoothing 0.8), resampled linearly over 100–8000 Hz into 1024 bins (`client/dist/utils/volumeProvider.js` `resampleVoiceRange`).
+  - A muted microphone reads as zeros (`WebRTCConnection.js:107-118`).
+  - The browser polls it every 20 ms. The lower half of the bins (≈ 100–4000 Hz) feeds the core detector (`packages/core/src/voice/local-speech.ts`), and the result is the gate's `local_speech` input.
+- **Tentative transcripts — VERIFIED (SDK source), UNVERIFIED live:** `tentative_user_transcript` is a server event that must be listed in the agent's `conversation_config.conversation.client_events` (now in `agents/*.json`; **re-sync the agents**).
+  - The SDK has no handler for it: it falls through to `onDebug(parsedEvent)` (`client/dist/BaseConversation.js` `onMessage` default branch).
+  - `onIncomingEvent` also sees it.
+  - The browser treats its arrival as speech evidence (`tentative_transcript`); a final `user_transcript` (`onMessage` role `user`) closes the user turn.
+- **Turn semantics the gate now enforces:**
+  - Speech detected on any channel opens a user turn. The gate does not authorize until the provider's final transcript for it has arrived, or `transcriptWaitMs` (3 s) has passed since the speech, plus the usual silence counted from the last speech signal.
+  - `sendUserActivity()` hints stop while a user turn is open or an authorization holds the floor. A ping keeps the provider's turn open; that is how a control message merged into the expert's turn in live run A.
+- **Answers:** the provider splits answers at sentence boundaries.
+  - Every transcript segment until the agent's next turn is tagged with the asked question.
+  - The server parses all segments of one answer together, once its window closes (the next agent turn or authorization, or 12 s without a new segment).
+  - Each stated rule's quote must be verbatim within one segment. It cites that segment as its evidence (`StatedRule.utteranceId`), and a quote that spans a segment boundary is rejected.
+
+## 18. Gate refinements after the live P3 runs (implementation note; plan.md §7.2 is unchanged)
+- `userSpeaking` = ElevenLabs VAD ∨ a local microphone-level detector (same SDK input, ~0.1 s onset) ∨ transcript arrival.
+- Silence counts from the last of these signals.
+- An open user turn waits for its final transcript (≤ 3 s).
+- An answer in progress needs 4 s of silence.
+- The floor is held from the authorize request until the agent has spoken, or until the TTL + 1.5 s has passed.
+- A refused, withdrawn or lapsed authorization gives its budget slot back, and the server re-queues a lapsed question.

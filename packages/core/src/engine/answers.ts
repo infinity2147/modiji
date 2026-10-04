@@ -21,7 +21,12 @@ export type StatedRuleOutcome =
 export type Ignored = { item: string; reason: string };
 
 export type AnswerApplication = {
-  /** `low_confidence`: the parse was below `minParseConfidence`; nothing changed and the question stays open. */
+  /**
+   * `low_confidence`: the parse was below `minParseConfidence`. What the parser INFERRED from the answer
+   * (eliminated candidates, the answered action) is not applied — it is listed in `ignored`. What the
+   * expert STATED (stated rules and concepts, each with its verbatim quote) is applied as usual: an
+   * explicit statement stands on its own evidence, however hedged the rest of the answer was.
+   */
   status: "applied" | "low_confidence";
   knowledge: FamilyKnowledge;
   set: HypothesisSet;
@@ -44,6 +49,7 @@ export type AnswerApplication = {
  * Applies a parsed expert answer to one family (plan §7.3 "answer parsing"):
  *   - eliminated candidates leave the set for good (weight 0, then renormalised by the rebuild);
  *   - `answeredAction` on a counterfactual/witness question is an observation of the asked case;
+ *   - both are inferences, applied only at parse confidence ≥ `minParseConfidence`;
  *   - stated decision rules become `expert_statement` candidates after type-checking (a statement
  *     re-admits an identical candidate that an earlier answer eliminated: the expert's explicit words
  *     win); stated stop-rules are checked the same way and reported as `guardrail` outcomes, never
@@ -64,8 +70,8 @@ export function applyAnswer(params: {
   if (answer.questionId !== question.id) throw new RangeError(`answer is for question ${answer.questionId}, not ${question.id}`);
   if (question.decisionFamily !== undefined && question.decisionFamily !== model.family.id)
     throw new RangeError(`question ${question.id} is about family ${question.decisionFamily}, not ${model.family.id}`);
-  const unchanged = { knowledge, set, statedRules: [], undefinedConcepts: [...params.undefinedConcepts], ignored: [], unexplained: set.candidates.length === 0 };
-  if (answer.confidence < config.minParseConfidence) return { status: "low_confidence", ...unchanged };
+  const confident = answer.confidence >= config.minParseConfidence;
+  const unsure = `parse confidence ${answer.confidence} is below ${config.minParseConfidence}: inferences are not applied`;
 
   const ignored: Ignored[] = [];
   const inSet = new Set(set.candidates.map((c) => c.id));
@@ -74,6 +80,7 @@ export function applyAnswer(params: {
   for (const id of answer.eliminatedCandidateIds) {
     if (!inSet.has(id)) ignored.push({ item: id, reason: "not a candidate of this hypothesis set" });
     else if (surviving.has(id)) ignored.push({ item: id, reason: "listed as both surviving and eliminated" });
+    else if (!confident) ignored.push({ item: id, reason: unsure });
     else eliminated.add(id);
   }
   for (const id of answer.survivingCandidateIds)
@@ -99,7 +106,8 @@ export function applyAnswer(params: {
   let observation: Observation | undefined;
   if (answer.answeredAction !== undefined) {
     const assignment = question.target.assignment;
-    if ((question.kind !== "counterfactual" && question.kind !== "witness") || assignment === undefined)
+    if (!confident) ignored.push({ item: answer.answeredAction, reason: unsure });
+    else if ((question.kind !== "counterfactual" && question.kind !== "witness") || assignment === undefined)
       ignored.push({ item: answer.answeredAction, reason: `a ${question.kind} question asks about no concrete case` });
     else if (!model.family.actions.includes(answer.answeredAction))
       ignored.push({ item: answer.answeredAction, reason: `not an action of family ${model.family.id}` });
@@ -114,6 +122,10 @@ export function applyAnswer(params: {
     else undefinedConcepts.push(concept);
   }
 
+  const status = confident ? "applied" : "low_confidence";
+  const changed =
+    observation !== undefined || eliminated.size !== knowledge.eliminatedIds.length || statedRules.some((r) => r.status === "candidate");
+  if (!changed) return { status, knowledge, set, statedRules, undefinedConcepts, ignored, unexplained: set.candidates.length === 0 };
   const next: FamilyKnowledge = {
     observations: observation === undefined ? knowledge.observations : [...knowledge.observations, observation],
     statedCandidates: [...stated.values()],
@@ -121,7 +133,7 @@ export function applyAnswer(params: {
   };
   const rebuilt = buildHypothesisSet({ setId: set.id, model, knowledge: next, schemaVersion: set.schemaVersion, config, previous: set });
   return {
-    status: "applied",
+    status,
     knowledge: next,
     set: rebuilt,
     statedRules,

@@ -8,8 +8,15 @@ export const ActivitySignalSchema = z.strictObject({
 });
 export type ActivitySignal = z.infer<typeof ActivitySignalSchema>;
 
+/**
+ * Voice-side gate inputs. `vad` (provider VAD score), `user_speaking` (explicit channel),
+ * `local_speech` (the browser's own microphone-level detector, value 0 = silent) and `agent_speaking`
+ * are levels; `tentative_transcript` (provider ASR in progress) and `user_transcript` (the provider's
+ * final transcript of a user turn) are point events: evidence that the expert spoke, the final one
+ * also closing their turn; `turn_end` = the user's turn ended.
+ */
 export const VoiceSignalSchema = z.strictObject({
-  kind: z.enum(["vad", "user_speaking", "agent_speaking", "turn_end"]),
+  kind: z.enum(["vad", "user_speaking", "local_speech", "tentative_transcript", "user_transcript", "agent_speaking", "turn_end"]),
   t: EpochMsSchema,
   value: z.number().optional(),
 });

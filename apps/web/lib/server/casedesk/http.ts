@@ -39,13 +39,14 @@ function errorResponse(status: number, error: string, detail?: string): Response
   return json(body, status);
 }
 
-const LEDGER_ERROR_NAMES = new Set(["LedgerError", "StaleEpochError", "OffRecordError"]);
+const LEDGER_ERROR_NAMES = new Set(["LedgerError", "StaleEpochError", "OffRecordError", "SessionArchivedError"]);
 
 /** HTTP status per ledger error code; codes absent here indicate a server bug and become 500. */
 const LEDGER_STATUS: Partial<Record<LedgerErrorCode, number>> = {
   session_not_found: 404,
   stale_epoch: 409,
   off_record: 409,
+  session_archived: 409,
   invalid_entry: 400,
 };
 

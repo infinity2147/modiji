@@ -6,7 +6,9 @@
  *    their own typed words, states a stop-rule and confirms the (template) teach-back; then a novice
  *    selects the forbidden outcome on the unseen case NS-2026-0201, the tutor intervenes, and the novice
  *    decides as the expert would.
- * 2. `pnpm replay:export` exports both sessions from this server into DATA_DIR/replays.
+ * 2. `pnpm replay:export --archive` archives both sessions (their ids are now in a published bundle, and a
+ *    session id is a write capability), then exports them from this server into DATA_DIR/replays: every
+ *    write to them is refused (409 session_archived), every read still works.
  * 3. /replay/<id> shows the unmissable banner with integrity ✓; play, seek and speed drive the
  *    recorded timeline; ticker and compliance strip follow it entry by entry; the intervention, the
  *    debrief and the Work Map are re-rendered through the live components.
@@ -20,7 +22,9 @@ import { join } from "node:path";
 import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
 import type { LedgerEntry } from "@vashistha/core";
 import { computeCompliance } from "../lib/client/judge/compliance";
+import { E2E_OPERATOR_SECRET } from "./support/operator";
 import { uploadFrame } from "./support/screen-frame";
+import { serverDataDir } from "./support/server";
 
 const REPO = join(import.meta.dirname, "../../..");
 const EVIDENCE_DIR = join(REPO, "docs/evidence/p11");
@@ -117,13 +121,13 @@ test("verified replay: genuine run → export → verified replay through the sa
   const expert = await expertRun(request);
   const novice = await noviceRun(request);
 
-  // Export through the public read APIs into this server's DATA_DIR (the script verifies what it wrote).
-  const dataDir = process.env.E2E_DATA_DIR;
-  if (dataDir === undefined || baseURL === undefined) throw new Error("E2E_DATA_DIR / baseURL not set");
-  const out = execFileSync("pnpm", ["--silent", "replay:export", "--base", baseURL, "--sessions", `${expert},${novice}`, "--out", join(dataDir, "replays")], {
+  // Archive, then export through the public read APIs into this server's DATA_DIR (the script verifies what it wrote).
+  const dataDir = serverDataDir();
+  if (baseURL === undefined) throw new Error("baseURL not set");
+  const out = execFileSync("pnpm", ["--silent", "replay:export", "--base", baseURL, "--sessions", `${expert},${novice}`, "--out", join(dataDir, "replays"), "--archive"], {
     cwd: REPO,
     encoding: "utf8",
-    env: { ...process.env, INIT_CWD: REPO },
+    env: { ...process.env, INIT_CWD: REPO, CUSTOM_LLM_SECRET: E2E_OPERATOR_SECRET },
   });
   const bundleId = /bundle (\S+) →/.exec(out)?.[1];
   if (bundleId === undefined) throw new Error(`no bundle id in export output:\n${out}`);
@@ -132,6 +136,17 @@ test("verified replay: genuine run → export → verified replay through the sa
   const bundle = await ok<{ entries: LedgerEntry[]; manifest: { timeline: { head: string; entries: number }; files: Record<string, unknown> } }>(await request.get(`/api/replays/${bundleId}`));
   const total = bundle.entries.length;
   expect(total).toBe(bundle.manifest.timeline.entries);
+
+  // Both sessions were archived before export (their last recorded entry): writes are refused, reads work.
+  expect(bundle.entries.filter((e) => e.kind === "session.archived").map((e) => e.sessionId).sort()).toEqual([expert, novice].sort());
+  const refused = await request.post(`/api/sessions/${novice}/tutor/intent`, { data: { caseId: "NS-2026-0201", proposedAction: "approve", edits: {} } });
+  expect(refused.status()).toBe(409);
+  expect(await refused.json()).toMatchObject({ error: "session_archived" });
+  expect((await request.post(`/api/sessions/${expert}/teachback`)).status()).toBe(409);
+  expect((await request.get(`/api/sessions/${expert}/debrief`)).status()).toBe(200);
+  expect((await request.get(`/api/sessions/${novice}/tutor`)).status()).toBe(200);
+  // The expert's stop-rule stays in force.
+  expect(JSON.stringify(await ok<unknown>(await request.get("/api/rulebook")))).toContain(STOP_QUOTE);
 
   // The banner: labelled, sourced, integrity re-verified on load.
   await page.goto(`/replay/${bundleId}`);

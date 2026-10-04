@@ -74,16 +74,40 @@ The manifest records:
   - **Tutor fields compared:** rules, levels, cases.
 - **Rules from outside the bundle.** If the live rulebook held rules confirmed in sessions outside the bundle, the export warns and records it in `missing`. The fix is to add those expert sessions to `--sessions`.
 
+## Archiving the exported sessions
+
+A published bundle contains the ids of its sessions, and a session id is a write capability: anyone who
+has it can post events, frames, decisions, utterances or debrief actions to that session. So the export
+archives the sessions it exports **before** reading them:
+
+- `POST /api/sessions/<id>/archive` (operator only: `Authorization: Bearer $CUSTOM_LLM_SECRET`) appends
+  an `engine` / `session.archived` entry. The ledger stays append-only: archiving is an entry, not a
+  change to any recorded entry.
+- From then on the ledger refuses every append to the session, and every write route answers
+  `409 session_archived`: events, frames, decisions, the interlock check, utterances and agent
+  utterances, gate/authorize, off-record toggles, debrief, teach-back, witnesses, concepts, tutor
+  actions, and the two-expert reconciliation when it would write into the session. Outstanding voice
+  authorizations of the session are revoked.
+- Every read keeps working: ledger, debrief, Work Map, tutor, lineage, media. The Work Map of an
+  archived session is served without recording a new `workmap.generated` entry. Rules confirmed in the
+  session stay in the rulebook.
+- The bundle ends with the `session.archived` entries; the ticker shows "Session archived (read-only)".
+
+`--archive` is the **default when `--base` is not a loopback address** (every production export) and
+needs `CUSTOM_LLM_SECRET`; `--no-archive` opts out (the export then warns that the sessions stay
+writable). A local export (`localhost`, `127.0.0.1`) does not archive unless `--archive` is given. A
+session that is already archived is exported as is.
+
 ## Commands
 
-The export uses only public read APIs, and prefers IPv4. It sends the bearer (`CUSTOM_LLM_SECRET`) only if a route answers 401. It refuses to export if the run grew while it was being exported.
+Apart from archiving (above), the export uses only public read APIs, and prefers IPv4. For reads it sends the bearer (`CUSTOM_LLM_SECRET`) only if a route answers 401. It refuses to export if the run grew while it was being exported.
 
 ```sh
 pnpm replay:export --base https://vashistha-production.up.railway.app \
   --sessions <expertSessionId>,<noviceSessionId> \
   --out apps/web/data/replays \
   --manifest-copy docs/replay \
-  [--audio]
+  [--audio] [--no-archive]
 ```
 
 Relative paths resolve from the directory `pnpm` was started in. `apps/web/data/` is gitignored, and it is the default `DATA_DIR=./data` of a local server started from `apps/web`.
@@ -122,7 +146,7 @@ The import:
 - `apps/web/test/client/replay.test.ts`: the virtual clock, the HUD from recorded gate entries, and follow focus.
 - `apps/web/e2e/replay.spec.ts`:
   1. A genuine run is made on the local production server through public APIs (LLM_CALLS=off).
-  2. `pnpm replay:export` exports it.
+  2. `pnpm replay:export --archive` archives and exports it; writes to both sessions are then refused (409 `session_archived`), reads work, and the expert's rule stays in the rulebook.
   3. The replay page shows the banner with integrity ✓.
   4. Play, seek and speed work, with the ticker and strip in step.
   5. The intervention, debrief and Work Map are shown.

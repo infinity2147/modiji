@@ -19,6 +19,8 @@ import {
   type LlmLocalizedQuestion,
   type LlmRephrase,
   type LlmTranslation,
+  type ParsedAnswer,
+  parseLedgerPayload,
 } from "@vashistha/core";
 import { createClaude, createLedger, openDatabase, type ClaudeClient, type Ledger } from "@vashistha/core/server";
 import { kycCases, type KycCase } from "@vashistha/core/domains/kyc";
@@ -38,7 +40,9 @@ import {
   handlePostUtterance,
   handleQuestionQueue,
 } from "../../lib/server/interview/handlers";
-import { interviewHooks, interviewIdle, type InterviewDeps } from "../../lib/server/interview/orchestrator";
+import { createLedgerRulebook } from "../../lib/server/debrief/rulebook-store";
+import { closeAnswer, interviewHooks, interviewIdle, type InterviewDeps } from "../../lib/server/interview/orchestrator";
+import { inProcessQuestions } from "./engine";
 import { NO_TUTOR, T0, domEvent, jsonRequest, type Reply } from "./casedesk-harness";
 import { SECRET, chatBody, chatRequest } from "./llm-harness";
 
@@ -137,7 +141,10 @@ export type InterviewHarness = {
   modelCalls: ModelCall[];
   /** Installs a fake model (null: no ANTHROPIC key). */
   setModel: (model: FakeModel | null) => void;
+  /** Moves the clock on, firing the timers (answer windows) that fall due. */
   advance: (ms: number) => void;
+  /** Closes the session's open answer (as the next agent turn would) and waits for its parse. */
+  closeAnswer: (sessionId: string) => Promise<void>;
   /** Simulates a process restart: in-memory interview and CaseDesk state are lost, the ledger is not. */
   restart: () => void;
   /** Creates a session; an expert session may name its expert and their language (plan §7.10–7.11). */
@@ -150,6 +157,11 @@ export type InterviewHarness = {
   questions: (sessionId: string) => Promise<Reply>;
   authorize: (sessionId: string, body: unknown) => Promise<Reply>;
   utter: (sessionId: string, body: unknown) => Promise<Reply>;
+  /**
+   * Posts an utterance that answers an asked question, closes the answer window (as the agent's next
+   * turn would) and returns the reply with the answer the engine parsed from it, if any.
+   */
+  answerWith: (sessionId: string, body: unknown) => Promise<Reply & { parsed: ParsedAnswer | undefined }>;
   agentSaid: (sessionId: string, body: unknown) => Promise<{ status: number }>;
   offRecord: (sessionId: string, offRecord: boolean) => Promise<Reply>;
   engine: (sessionId: string) => Promise<Reply>;
@@ -174,6 +186,14 @@ export function createInterviewHarness(): InterviewHarness {
   const modelCalls: ModelCall[] = [];
   const frameSeqs = new Map<string, number>();
   let frames = 0;
+  const timers: { at: number; fn: () => void; live: boolean }[] = [];
+  const schedule = (fn: () => void, delayMs: number): (() => void) => {
+    const timer = { at: clock + delayMs, fn, live: true };
+    timers.push(timer);
+    return () => {
+      timer.live = false;
+    };
+  };
 
   const deps: InterviewDeps = {
     ledger,
@@ -182,7 +202,10 @@ export function createInterviewHarness(): InterviewHarness {
     authorizations,
     claude: null,
     config: engineConfig(),
+    questions: inProcessQuestions,
+    rulebook: createLedgerRulebook(opened.sqlite),
     now,
+    schedule,
     log,
   };
   const casedesk: CaseDeskDeps = {
@@ -217,7 +240,12 @@ export function createInterviewHarness(): InterviewHarness {
     },
     advance: (ms) => {
       clock += ms;
+      for (const timer of timers.filter((t) => t.live && t.at <= clock).sort((a, b) => a.at - b.at)) {
+        timer.live = false;
+        timer.fn();
+      }
     },
+    closeAnswer: (sessionId) => closeAnswer(deps, sessionId),
     restart: () => {
       deps.store = createInterviewStore();
       deps.casedesk = createCaseDeskStore();
@@ -274,6 +302,13 @@ export function createInterviewHarness(): InterviewHarness {
     questions: async (sessionId) => reply(await handleQuestionQueue(sessionId, deps)),
     authorize: async (sessionId, body) => reply(await handleGateAuthorize(jsonRequest(`/api/sessions/${sessionId}/gate/authorize`, body), sessionId, deps)),
     utter: async (sessionId, body) => reply(await handlePostUtterance(jsonRequest(`/api/sessions/${sessionId}/utterances`, body), sessionId, deps)),
+    answerWith: async (sessionId, body) => {
+      const before = ledger.list(sessionId, { kinds: ["answer.parsed"] }).length;
+      const r = await h.utter(sessionId, body);
+      await closeAnswer(deps, sessionId);
+      const parsed = ledger.list(sessionId, { kinds: ["answer.parsed"] }).slice(before).at(-1);
+      return { ...r, parsed: parsed && parseLedgerPayload(parsed, "answer.parsed") };
+    },
     agentSaid: async (sessionId, body) => ({
       status: (await handlePostAgentUtterance(jsonRequest(`/api/sessions/${sessionId}/agent-utterances`, body), sessionId, deps)).status,
     }),

@@ -4,7 +4,7 @@
  * `engineState()` folds the session's entries in sequence order: committed expert decisions become
  * observations (surprise judged before the update), `answer.parsed` entries are applied with the
  * engine's `applyAnswer`, the question queue follows `question.queued` / `question.dropped` /
- * `gate.authorized`, the rulebook is `rulebookFromLedger` over the rule events. The result is cached
+ * `gate.authorized` / `question.requeued`, the rulebook is `rulebookFromLedger` over the rule events. The result is cached
  * per session together with the last sequence folded, so each request only folds what is new and a
  * restarted process rebuilds exactly the same state from the ledger. Nothing here writes.
  *
@@ -26,6 +26,7 @@ import {
   conceptValues,
   rulebookFromLedger,
   type AnswerApplication,
+  type AnsweredUtterance,
   type EngineConfig,
   type ExpertLanguage,
   type FamilyKnowledge,
@@ -74,9 +75,14 @@ export type FamilyState = {
 export type QuestionRecord = {
   question: Question;
   queuedEntryId: string;
-  /** `asked` is final: an authorised question is never re-queued or dropped. */
+  /**
+   * An authorised question is never dropped. It returns to `queued` only when its authorization expired
+   * unspoken (`question.requeued`): it was never asked, and the live budget does not count it.
+   */
   status: "queued" | "dropped" | "asked";
   asked?: { entryId: string; at: number };
+  /** The `answer.parsed` entry of its answer, once parsed (an answer is parsed once). */
+  answeredBy?: string;
 };
 
 export type UtteranceRecord = {
@@ -131,16 +137,30 @@ export type EngineState = {
   skipped: { ledgerEntryId: string; reason: string }[];
 };
 
+/**
+ * An answer still being given: the transcript segments recorded for the asked question so far (each
+ * its own `utterance.transcript` entry), parsed together once the answer window closes (orchestrator.ts).
+ */
+export type OpenAnswer = {
+  questionId: string;
+  segments: [AnsweredUtterance, ...AnsweredUtterance[]];
+  traceId: string;
+  /** Cancels the idle timer that would close it. */
+  cancel: () => void;
+};
+
 /** Per-process interview state; one instance lives on the runtime. */
 export type InterviewStore = {
   /** Derived engine state per session (a cache: the ledger is the source of truth). */
   states: Map<string, EngineState>;
   /** Tail of each session's serial engine work (see orchestrator.ts). */
   tails: Map<string, Promise<void>>;
+  /** Each session's open answer (at most one). In memory: a restart leaves its segments recorded but unparsed (`unparsedAnswers`). */
+  answers: Map<string, OpenAnswer>;
 };
 
 export function createInterviewStore(): InterviewStore {
-  return { states: new Map(), tails: new Map() };
+  return { states: new Map(), tails: new Map(), answers: new Map() };
 }
 
 export type EngineStateDeps = { ledger: Pick<Ledger, "list">; store: InterviewStore; config: EngineConfig };
@@ -255,6 +275,14 @@ function applyEntry(state: EngineState, e: LedgerEntry, config: EngineConfig): v
       state.questionByEntry.set(e.id, questionId);
       return;
     }
+    case "question.requeued": {
+      const { questionId } = parseLedgerPayload(e, "question.requeued");
+      const record = state.questions.get(questionId);
+      if (record?.status !== "asked") throw new Error(`re-queued question ${questionId} was not asked`);
+      record.status = "queued";
+      delete record.asked;
+      return;
+    }
     case "utterance.transcript": {
       const u = parseLedgerPayload(e, "utterance.transcript");
       const questionId = e.parentIds.map((id) => state.questionByEntry.get(id)).find((id) => id !== undefined);
@@ -332,10 +360,13 @@ function applyDecision(state: EngineState, e: LedgerEntry, config: EngineConfig)
 
 function applyParsedAnswer(state: EngineState, e: LedgerEntry, config: EngineConfig): void {
   const answer = parseLedgerPayload(e, "answer.parsed");
-  const utterance = state.utterances.get(answer.utteranceId);
-  if (utterance !== undefined) utterance.parsed = true;
+  for (const id of answer.segmentIds ?? [answer.utteranceId]) {
+    const utterance = state.utterances.get(id);
+    if (utterance !== undefined) utterance.parsed = true;
+  }
   const record = state.questions.get(answer.questionId);
   if (record === undefined) throw new Error(`answer to unknown question ${answer.questionId}`);
+  record.answeredBy ??= e.id;
   const family = questionFamily(state, record.question);
   if (family === undefined) throw new Error(`no decision family to apply the answer to question ${answer.questionId} to`);
   const result = applyAnswer({
@@ -347,11 +378,10 @@ function applyParsedAnswer(state: EngineState, e: LedgerEntry, config: EngineCon
     undefinedConcepts: state.undefinedConcepts,
     config,
   });
-  if (result.status === "applied") {
-    family.set = result.set;
-    family.knowledge = result.knowledge;
-    state.undefinedConcepts = result.undefinedConcepts.filter((c) => unsettledConcept(state, c.name));
-  }
+  // A low-confidence answer still applies what the expert stated (`applyAnswer` withholds only inferences).
+  family.set = result.set;
+  family.knowledge = result.knowledge;
+  state.undefinedConcepts = result.undefinedConcepts.filter((c) => unsettledConcept(state, c.name));
   state.answers.set(e.id, {
     status: result.status,
     statedRules: result.statedRules,

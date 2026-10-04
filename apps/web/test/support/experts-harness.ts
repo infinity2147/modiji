@@ -21,7 +21,7 @@ import { createAuthorizationStore } from "../../lib/server/authorizations";
 import { createDisagreementHolds, createExpertDirectory, createLedgerRulebook, teamRulebookView } from "../../lib/server/debrief/rulebook-store";
 import type { DisagreementDeps } from "../../lib/server/disagreements/deps";
 import { handleAnswerDisagreement, handleGetDisagreements, handleSearchDisagreements } from "../../lib/server/disagreements/handlers";
-import { createDisagreementSolver } from "../../lib/server/disagreements/solver";
+import { findDisagreements } from "@vashistha/solver";
 import { createInterviewStore } from "../../lib/server/interview/engine-state";
 import { T0, jsonRequest } from "./casedesk-harness";
 import { createPerceptionHarness, metadata, png, type PerceptionHarness } from "./perception-harness";
@@ -62,7 +62,7 @@ export function createExpertsHarness(): ExpertsHarness {
     authorizations: createAuthorizationStore({ now: () => T0 }),
     rulebook: all,
     experts: createExpertDirectory(h.opened.sqlite),
-    solver: createDisagreementSolver(),
+    solver: findDisagreements,
     team: teamRulebookView(all, createDisagreementHolds(h.opened.sqlite)),
     // Records what would be translated; returns the English question (the LLM-off fallback).
     localize: async (question, language) => {

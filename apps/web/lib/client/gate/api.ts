@@ -16,10 +16,15 @@ export function fetchQuestionQueue(fetchFn: FetchFn, sessionId: string, signal?:
   return requestJson(fetchFn, sessionPath(sessionId, "questions"), QuestionQueueResponseSchema, signal ? { signal } : {});
 }
 
+/** Gives up (a `network` ApiError) after `timeoutMs`. */
 export function authorizeQuestion(
   fetchFn: FetchFn,
   sessionId: string,
   body: z.input<typeof GateAuthorizeRequestSchema>,
+  timeoutMs: number,
 ): Promise<GateAuthorizeResponse> {
-  return requestJson(fetchFn, sessionPath(sessionId, "gate/authorize"), GateAuthorizeResponseSchema, postJson(body));
+  return requestJson(fetchFn, sessionPath(sessionId, "gate/authorize"), GateAuthorizeResponseSchema, {
+    ...postJson(body),
+    signal: AbortSignal.timeout(timeoutMs),
+  });
 }

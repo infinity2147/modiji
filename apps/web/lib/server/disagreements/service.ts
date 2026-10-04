@@ -43,6 +43,7 @@ import {
   featuresReferenced,
   formatValue,
   parseLedgerPayload,
+  planConfirmation,
   promoteToConfirmedRule,
   recordLookup,
   ruleExperts,
@@ -423,7 +424,12 @@ function writeResolution(deps: DisagreementDeps, ctx: Context, record: Recorded,
   );
   const rule = ConfirmedRuleSchema.parse({ ...created, confirmedBy: [...created.confirmedBy, confirmations[1]] });
   const session = record.found[0]?.sessionId ?? latestSession(ctx.pair[0]);
-  return w.append(session, "rule.confirmed", "engine", [...answerIds, ...foundIds, ...overridden.map((id) => entryIds.get(id))], { rule });
+  const parents = [...answerIds, ...foundIds, ...overridden.map((id) => entryIds.get(id))];
+  // Rule de-duplication: an identical rule (family, canonical predicate, effect) of either expert absorbs this one.
+  const plan = planConfirmation(ctx.all.rules, rule);
+  if (plan.kind === "duplicate") throw new ApiFailure(409, "rule_exists", `this rule is already confirmed as ${plan.existing.id} with these answers`);
+  if (plan.kind === "merge") return w.append(session, "rule.revised", "engine", [...parents, entryIds.get(plan.existing.id)], { rule: plan.rule, reason: plan.reason });
+  return w.append(session, "rule.confirmed", "engine", parents, { rule });
 }
 
 function questionText(ctx: Context, w: DisagreementWitness): string {

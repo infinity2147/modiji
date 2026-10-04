@@ -1,8 +1,10 @@
-source http://127.0.0.1:4411/ · version 0.1.0 · commit unknown
-session 033bab2d-46bb-4b7c-bf49-ced05beac1e3 · expert · training · 89 entries · 3 frame(s)
-session d62d738d-43c4-4224-98ef-72aa2cdee9ea · novice · heldout · 12 entries · 0 frame(s)
+source http://127.0.0.1:4506/ · version 0.1.0 · commit unknown
+session 872d1fd7-0231-4508-a6a8-073231a85dae · archived (read-only from now on)
+session b29fdaa0-c037-4e43-9084-47cd521000b8 · archived (read-only from now on)
+session 872d1fd7-0231-4508-a6a8-073231a85dae · expert · training · 90 entries · 3 frame(s)
+session b29fdaa0-c037-4e43-9084-47cd521000b8 · novice · heldout · 13 entries · 0 frame(s)
 
-bundle 20261004-0102-a3247af1cae5 → /tmp/vashistha-e2e-Haqkdl/replays/20261004-0102-a3247af1cae5
-  101 entries · chain head a3247af1cae5c9a08f28a01e8a1438bd45ec2caf2f9e68a179f1963ef29010a7 · 9 files
-  manifest sha256 1c8ad5f67958ed2608d3e2d5659f81b83f8995eb54c9f1fe17065e88cc7ebb8d
-  replay: /replay/20261004-0102-a3247af1cae5
+bundle 20261004-0247-08222da76ef2 → /tmp/vashistha-e2e-oRf7mU/replay/replays/20261004-0247-08222da76ef2
+  103 entries · chain head 08222da76ef2cbd6793bc96663412a840b70c1020e4a25fb1556ef72055d3746 · 9 files
+  manifest sha256 58db196364f39756ba5eb8bce9c5e9ac6596eb44927447836c6d303d1e79a159
+  replay: /replay/20261004-0247-08222da76ef2

@@ -55,14 +55,18 @@ import { encodePng } from "./png";
 export type EncodedImage = { base64Png: string; width: number; height: number };
 
 /**
- * A property of the application on screen, declared by the app layer (never inferred by the model):
- * which case fields the reviewer can change in this UI. Every other field is rendered read-only, so a
- * different value there means a different case, never an edit.
+ * Properties of the application on screen, declared by the app layer (never inferred by the model):
+ *
+ * - `editableFields`: which case fields the reviewer can change in this UI. Every other field is
+ *   rendered read-only, so a different value there means a different case, never an edit.
+ * - `chrome`: the app's own labels — headings, section titles, column headers, buttons, navigation and
+ *   judge overlays — that are on screen whatever the case. A proposed concept grounded in them describes
+ *   the screen, not the case, and is dropped (`screen_chrome`).
  */
-export type ScreenProfile = { editableFields: readonly FeatureId[] };
+export type ScreenProfile = { editableFields: readonly FeatureId[]; chrome: readonly string[] };
 
-/** Validates a screen profile against the domain: editable fields must be distinct on-screen (`source: "case"`) features. */
-export function screenProfile(domain: DomainConfig, editableFields: readonly string[]): ScreenProfile {
+/** Validates a screen profile against the domain: editable fields must be distinct on-screen (`source: "case"`) features; chrome labels non-blank. */
+export function screenProfile(domain: DomainConfig, editableFields: readonly string[], chrome: readonly string[] = []): ScreenProfile {
   if (editableFields.length === 0) throw new Error("a screen profile needs at least one editable field");
   const fields = editableFields.map((id) => {
     const feature = domain.features.find((f) => f.id === id);
@@ -70,7 +74,8 @@ export function screenProfile(domain: DomainConfig, editableFields: readonly str
     return feature.id;
   });
   if (new Set(fields).size !== fields.length) throw new Error("editable fields must be distinct");
-  return { editableFields: fields };
+  if (chrome.some((label) => words(label).length === 0)) throw new Error("a chrome label needs at least one word");
+  return { editableFields: fields, chrome: [...chrome] };
 }
 
 /** The last applied reading of the session; what the next frame is compared against. */
@@ -142,6 +147,73 @@ export function planRead(previous: CaseSnapshot | null, current: Thumbnail, capt
 
 /** Words that, appended to a catalogue feature's name, still name that feature. */
 const GENERIC_SUFFIXES = ["status", "flag", "indicator", "value", "result", "check", "state", "verification"] as const;
+
+/**
+ * Words that name a part of a user interface, not information about a case: a concept described with
+ * them ("Tabs showing …", "Review sections: …") reports the screen's structure.
+ */
+const UI_STRUCTURE_WORDS: ReadonlySet<string> = new Set(["tab", "tabs", "section", "sections", "heading", "headings", "button", "buttons", "panel", "panels", "menu", "menus", "sidebar", "toolbar", "navigation", "breadcrumb", "breadcrumbs", "dialog", "ticker", "banner", "layout", "ui"]);
+/** Observed "values" that only say something is on screen: case content shows a value, not that it is shown. */
+const UI_STATE_VALUES: ReadonlySet<string> = new Set(["visible", "displayed", "shown", "on screen", "hidden", "expanded", "collapsed", "highlighted"]);
+/** Joining words a label sequence may contain ("source of funds and documents"). */
+const JOINING_WORDS: ReadonlySet<string> = new Set(["a", "an", "and", "at", "by", "for", "in", "of", "on", "or", "per", "the", "to", "with"]);
+
+/** "screeningSourceOfFunds", "Source of funds (verified)" → ["screening", "source", "of", "funds"] / ["source", "of", "funds"]; parentheticals are dropped. */
+function words(text: string): string[] {
+  return text
+    .replace(/\([^)]*\)/g, " ")
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter((w) => w !== "");
+}
+
+type Cover = { chrome: boolean; feature: boolean };
+
+/**
+ * Whether `text` is nothing but labels: every word belongs to a chrome label or a catalogue feature's
+ * label or id, matched as whole word sequences, with joining words between them. Undefined when some
+ * word is neither (the text says something of its own); otherwise which kinds of label it used.
+ */
+function labelCover(text: string, chrome: readonly string[][], features: readonly string[][]): Cover | undefined {
+  const ws = words(text);
+  if (ws.length === 0) return undefined;
+  const phrases = [...chrome.map((p) => ({ p, kind: "chrome" as const })), ...features.map((p) => ({ p, kind: "feature" as const }))];
+  // covers[i]: the label kinds of every way to cover ws[i..] (at most four combinations).
+  const covers: Cover[][] = Array.from({ length: ws.length + 1 }, () => []);
+  covers[ws.length] = [{ chrome: false, feature: false }];
+  const add = (at: number, c: Cover): void => {
+    const list = covers[at] ?? [];
+    if (!list.some((k) => k.chrome === c.chrome && k.feature === c.feature)) list.push(c);
+    covers[at] = list;
+  };
+  for (let i = ws.length - 1; i >= 0; i--) {
+    if (JOINING_WORDS.has(ws[i] ?? "")) for (const c of covers[i + 1] ?? []) add(i, c);
+    for (const { p, kind } of phrases)
+      if (p.length > 0 && p.every((w, k) => ws[i + k] === w))
+        for (const c of covers[i + p.length] ?? []) add(i, { chrome: c.chrome || kind === "chrome", feature: c.feature || kind === "feature" });
+  }
+  const labelled = (covers[0] ?? []).filter((c) => c.chrome || c.feature);
+  if (labelled.length === 0) return undefined;
+  return { chrome: labelled.some((c) => c.chrome), feature: labelled.some((c) => c.feature) };
+}
+
+/**
+ * Why a proposed concept is not about the case (deterministic grounding), or undefined when it may be:
+ * - `screen_chrome`: its description names a part of the interface (`UI_STRUCTURE_WORDS`), its observed
+ *   value only says something is on screen (`UI_STATE_VALUES`), or its name or description is nothing but
+ *   labels (`labelCover`) among which at least one is the app's chrome (`ScreenProfile.chrome`);
+ * - `known_concept`: its name is nothing but catalogue feature labels (several features under one name).
+ */
+function ungrounded(concept: { name: string; description: string; observedValue: string | null }, domain: DomainConfig, profile: ScreenProfile): DropReason | undefined {
+  const chrome = profile.chrome.map(words);
+  const features = domain.features.flatMap((f) => [words(f.id), words(f.label)]);
+  if (words(concept.description).some((w) => UI_STRUCTURE_WORDS.has(w))) return "screen_chrome";
+  if (concept.observedValue !== null && UI_STATE_VALUES.has(words(concept.observedValue).join(" "))) return "screen_chrome";
+  const name = labelCover(concept.name, chrome, features);
+  if (name?.chrome === true || labelCover(concept.description, chrome, features)?.chrome === true) return "screen_chrome";
+  return name === undefined ? undefined : "known_concept";
+}
 
 /** At most this many undefined concepts are accepted per opened case. */
 export const MAX_CONCEPTS_PER_CASE_OPEN = 2;
@@ -425,7 +497,16 @@ export async function executeRead(
   return { reading: { mode: "local", output }, usage, latencyMs };
 }
 
-export type DropReason = "invalid_case" | "invalid_value" | "invalid_action" | "invalid_name" | "known_concept" | "unexpected_concept" | "concept_cap" | "duplicate";
+export type DropReason =
+  | "invalid_case"
+  | "invalid_value"
+  | "invalid_action"
+  | "invalid_name"
+  | "known_concept"
+  | "screen_chrome"
+  | "unexpected_concept"
+  | "concept_cap"
+  | "duplicate";
 
 export type Dropped = { where: "reading" | "field" | "committed" | "concept"; key: string; reason: DropReason };
 
@@ -524,7 +605,7 @@ export function interpretReading(reading: FrameReading, context: ReadContext): E
     }
   }
 
-  // Undefined concepts: only from the frame that opens a case, capped, never a catalogue feature.
+  // Undefined concepts: only from the frame that opens a case, capped, never a catalogue feature, never the screen's own chrome.
   const concepts: ProposedConcept[] = [];
   if (reading.mode === "full") {
     // A catalogue feature under another name is not a new concept: its id or label, a prefix of either
@@ -537,12 +618,20 @@ export function interpretReading(reading: FrameReading, context: ReadContext): E
     };
     for (const c of reading.output.concepts) {
       const name = c.name.trim();
-      const drop = (reason: DropReason): void => void dropped.push({ where: "concept", key: name, reason });
-      if (opened || caseId === null || previous === null || previous.conceptsRead) drop("unexpected_concept");
-      else if (!SymbolIdSchema.safeParse(name).success) drop("invalid_name");
-      else if (isCatalogued(name)) drop("known_concept");
-      else if (concepts.some((k) => k.name.toLowerCase() === name.toLowerCase())) drop("duplicate");
-      else if (concepts.length >= MAX_CONCEPTS_PER_CASE_OPEN) drop("concept_cap");
+      const reason: DropReason | undefined =
+        opened || caseId === null || previous === null || previous.conceptsRead
+          ? "unexpected_concept"
+          : !SymbolIdSchema.safeParse(name).success
+            ? "invalid_name"
+            : isCatalogued(name)
+              ? "known_concept"
+              : (ungrounded(c, domain, profile) ??
+                (concepts.some((k) => k.name.toLowerCase() === name.toLowerCase())
+                  ? "duplicate"
+                  : concepts.length >= MAX_CONCEPTS_PER_CASE_OPEN
+                    ? "concept_cap"
+                    : undefined));
+      if (reason !== undefined) dropped.push({ where: "concept", key: name, reason });
       else concepts.push({ name, description: c.description.trim(), observedValue: c.observedValue, frameSeq, captureTime });
     }
   }

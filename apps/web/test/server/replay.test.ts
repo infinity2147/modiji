@@ -21,14 +21,14 @@ import { TutorStateSchema } from "../../lib/contracts/tutor";
 import { CHAIN_GENESIS, buildBundle, chainHead, chainLinks, sha256Hex, verifyBundle, writeBundle, type BundleInput } from "../../lib/replay/bundle";
 import { REPLAY_FORMAT, compareTimeline, framePath, ledgerPath } from "../../lib/replay/format";
 import { createDebriefStore } from "../../lib/server/debrief/deps";
-import { createWitnessSolver } from "../../lib/server/debrief/solver";
+import { searchWitnesses } from "@vashistha/solver";
 import { createPrefix } from "../../lib/server/replay/derive";
 import { handleImportCommit } from "../../lib/server/replay/handlers";
 import { REPLAYS_DIR, createReplayService, rewriteMedia } from "../../lib/server/replay/service";
 import { getState, rebuild, world } from "../support/debrief-harness";
 import { QUOTES, createTutorHarness, demoRules } from "../support/tutor-harness";
 
-const engines = { solver: createWitnessSolver(), exports: { workMapJson: exportWorkMapJson, procedure: compileProcedure } };
+const engines = { solver: searchWitnesses, exports: { workMapJson: exportWorkMapJson, procedure: compileProcedure } };
 const SOURCE = { baseUrl: "https://vashistha.example", version: "0.1.0", commit: null };
 const EXPORTER = { tool: "test", gitCommit: null };
 

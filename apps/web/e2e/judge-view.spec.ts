@@ -54,6 +54,18 @@ test("judge view: gate HUD reacts to typing, ticker follows the ledger, strip st
   await page.keyboard.press("Shift");
   await expect(conditions.getByRole("listitem", { name: /^Typing: wait/ })).toBeVisible();
   await expect(conditions.getByRole("listitem", { name: "Typing: clear" })).toBeVisible({ timeout: 4000 });
+  // Keystrokes anywhere in the window count, even with nothing focused (live bug #11)…
+  await page.evaluate(() => {
+    if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+  });
+  await page.keyboard.press("Shift");
+  await expect(conditions.getByRole("listitem", { name: /^Typing: wait/ })).toBeVisible();
+  await expect(conditions.getByRole("listitem", { name: "Typing: clear" })).toBeVisible({ timeout: 4000 });
+  // …but not on the voice panel's own controls.
+  await page.getByRole("region", { name: /^Voice/ }).getByRole("button").first().focus();
+  await page.keyboard.press("Shift");
+  await page.waitForTimeout(300);
+  await expect(conditions.getByRole("listitem", { name: "Typing: clear" })).toBeVisible();
 
   // Opening a case moves the screen: Screen moving waits, then clears.
   await queueItems(page).first().click();
