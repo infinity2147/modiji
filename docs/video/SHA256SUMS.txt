@@ -1,0 +1,6 @@
+# sha256 of the story videos (scripts/story/video.ts). Each video's end card names the commit of the local build it was recorded on.
+375015f979721da0a8d033f60c6f2e0c5bd1dca64dc03a4cba00d446d14411db  demo.mp4  15122823 bytes  191.1 s  recorded on 36cfc83
+0116359060e917472cbda19664c0f2f034a163329068e4f37ba6321dc43ad0cd  demo.srt  3905 bytes  recorded on 36cfc83
+26874f95dfea251920cc4c481b5b16992e306c09d1dca9778792a44589b5aaea  tech.mp4  9359364 bytes  157.4 s
+15762465b6725cca7e629b479b286707ebcd0e89dce8b3994a75c43254f990f2  tech.srt  3078 bytes
+5fb622e04c165a3ee8737818e08d74a155d32dd1850f7d882e7b7353f2d1e11c  architecture.svg  8534 bytes

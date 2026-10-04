@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 980" width="1600" height="980" role="img" aria-labelledby="at ad">
+<title id="at">Architecture — plan.md §5</title>
+<desc id="ad">Screen and voice in; a deterministic gate decides when to speak; Z3 and the expert's own words make the confirmed rulebook; the same rulebook drives the tutor and an MCP guardrail; an append-only ledger records everything.</desc>
+<style>svg{--bg:#fbfbfa;--ink:#16181d;--muted:#555a64;--line:#8b909a;--code:#e8f0fe;--code-b:#3b6fd8;--model:#fff1e0;--model-b:#c96a12;--mixed:#f2ecfd;--mixed-b:#7b54c9;--ext:#eef0f2;--ext-b:#7a808a;--ledger:#e9f6ef;--ledger-b:#2e8a5a;} @media (prefers-color-scheme: dark){svg{--bg:#14161a;--ink:#eef0f3;--muted:#a9afba;--line:#7d838e;--code:#16233b;--code-b:#6c9cf5;--model:#33230f;--model-b:#f0a04b;--mixed:#251c3a;--mixed-b:#a98bf0;--ext:#22252b;--ext-b:#9aa1ac;--ledger:#12291d;--ledger-b:#5cc58d;}}
+    .bg{fill:var(--bg)} text{font-family:Geist,"Liberation Sans",system-ui,sans-serif;fill:var(--ink)}
+    .t{font-size:21px;font-weight:600} .l{font-size:16px;fill:var(--muted)} .h{font-size:30px;font-weight:700} .s{font-size:17px;fill:var(--muted)}
+    .code{fill:var(--code);stroke:var(--code-b)} .model{fill:var(--model);stroke:var(--model-b)} .mixed{fill:var(--mixed);stroke:var(--mixed-b)} .ext{fill:var(--ext);stroke:var(--ext-b);stroke-dasharray:6 4}
+    .ledger{fill:var(--ledger);stroke:var(--ledger-b)} rect{stroke-width:2}
+    .e{fill:none;stroke:var(--line);stroke-width:2.2} .d{stroke-dasharray:7 6} .ah{fill:var(--line)} .el{font-size:15px;fill:var(--muted);font-style:italic}</style>
+<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker></defs>
+<rect class="bg" width="1600" height="980"/>
+<text class="h" x="40" y="52">How it works</text>
+<rect class="code" x="460" y="34" width="26" height="18" rx="4"/><text class="s" x="494" y="49">code (authoritative)</text><rect class="model" x="740" y="34" width="26" height="18" rx="4"/><text class="s" x="774" y="49">model (non-authoritative)</text><rect class="mixed" x="1020" y="34" width="26" height="18" rx="4"/><text class="s" x="1054" y="49">code + model · code decides</text><rect class="ext" x="1300" y="34" width="26" height="18" rx="4"/><text class="s" x="1334" y="49">browser / voice provider</text>
+<polyline class="e" marker-end="url(#ah)" points="250,208 250,250"/>
+<polyline class="e" marker-end="url(#ah)" points="250,362 250,404"/>
+<polyline class="e" marker-end="url(#ah)" points="250,516 250,558"/>
+<polyline class="e" marker-end="url(#ah)" points="460,614 515,614 515,152 590,152"/>
+<polyline class="e" marker-end="url(#ah)" points="359,712 359,692 535,692 535,182 590,182"/>
+<polyline class="e" marker-end="url(#ah)" points="70,824 70,852 525,852 525,460 590,460"/>
+<polyline class="e" marker-end="url(#ah)" points="800,208 800,250"/>
+<polyline class="e" marker-end="url(#ah)" points="800,362 800,404"/>
+<polyline class="e" marker-end="url(#ah)" points="800,516 800,558"/>
+<polyline class="e" marker-end="url(#ah)" points="800,670 800,712"/>
+<polyline class="e" marker-end="url(#ah)" points="1010,768 1075,768 1075,152 1140,152"/>
+<polyline class="e d" marker-end="url(#ah)" points="1140,182 1095,182 1095,306 1010,306"/><text class="el" x="1103" y="236">hypothesis update</text>
+<polyline class="e" marker-end="url(#ah)" points="1350,208 1350,250"/>
+<polyline class="e" marker-end="url(#ah)" points="1350,362 1350,404"/>
+<polyline class="e" marker-end="url(#ah)" points="1350,516 1350,558"/>
+<polyline class="e" marker-end="url(#ah)" points="1560,460 1586,460 1586,768 1560,768"/>
+<g><rect class="ext" x="40" y="96" width="420" height="112" rx="12"/><text class="t" x="58" y="132">Screen share</text><text class="l" x="58" y="162">getDisplayMedia → canvas every 500 ms</text></g>
+<g><rect class="code" x="40" y="250" width="420" height="112" rx="12"/><text class="t" x="58" y="286">Client change detector + privacy pass</text><text class="l" x="58" y="316">dHash/pixel diff · best-effort OCR/PII blur</text><text class="l" x="58" y="340">privacy epoch (off-record ⇒ nothing sent)</text></g>
+<g><rect class="code" x="40" y="404" width="420" height="112" rx="12"/><text class="t" x="58" y="440">Ordered perception queue</text><text class="l" x="58" y="470">1 in flight per session · coalesce newer frames</text><text class="l" x="58" y="494">frameSeq: stale responses never applied</text></g>
+<g><rect class="model" x="40" y="558" width="420" height="112" rx="12"/><text class="t" x="58" y="594">Vision → screen events</text><text class="l" x="58" y="624">Claude Haiku 4.5, structured output</text><text class="l" x="58" y="648">measured independently (P2: below target)</text></g>
+<g><rect class="code" x="40" y="712" width="202" height="112" rx="12"/><text class="t" x="58" y="748">Activity signals</text><text class="l" x="58" y="778">typing · motion</text><text class="l" x="58" y="802">VAD · local onset</text></g>
+<g><rect class="code" x="258" y="712" width="202" height="112" rx="12"/><text class="t" x="276" y="748">DOM events</text><text class="l" x="276" y="778">CaseDesk only</text><text class="l" x="276" y="802">disclosed in UI</text></g>
+<g><rect class="code" x="590" y="96" width="420" height="112" rx="12"/><text class="t" x="608" y="132">Decision context</text><text class="l" x="608" y="162">case · history · actor · environment</text><text class="l" x="608" y="186">schemaVersion (unknown = Kleene ‘unknown’)</text></g>
+<g><rect class="mixed" x="590" y="250" width="420" height="112" rx="12"/><text class="t" x="608" y="286">Hypothesis engine</text><text class="l" x="608" y="316">enumerated candidates + LLM latent concepts</text><text class="l" x="608" y="340">surprise · expected information gain → queue</text></g>
+<g><rect class="code" x="590" y="404" width="420" height="112" rx="12"/><text class="t" x="608" y="440">Deterministic gate</text><text class="l" x="608" y="470">silence · idle screen · no typing · budget</text><text class="l" x="608" y="494">→ GateAuthorization{nonce, +4 s, contextVersion}</text></g>
+<g><rect class="code" x="590" y="558" width="420" height="112" rx="12"/><text class="t" x="608" y="594">Custom-LLM wrapper (thin)</text><text class="l" x="608" y="624">no valid nonce ⇒ skip_turn</text><text class="l" x="608" y="648">valid ⇒ speak the precomputed question</text></g>
+<g><rect class="ext" x="590" y="712" width="420" height="112" rx="12"/><text class="t" x="608" y="748">ElevenLabs voice</text><text class="l" x="608" y="778">Scribe realtime ASR · v3 conversational TTS</text><text class="l" x="608" y="802">custom LLM = our wrapper (option A)</text></g>
+<g><rect class="mixed" x="1140" y="96" width="420" height="112" rx="12"/><text class="t" x="1158" y="132">Expert answer → evidence</text><text class="l" x="1158" y="162">provenance human_voice · exact quote + frame</text><text class="l" x="1158" y="186">parser: Claude Sonnet 5.5 (schema-bound)</text></g>
+<g><rect class="code" x="1140" y="250" width="420" height="112" rx="12"/><text class="t" x="1158" y="286">Z3 counterexamples → debrief</text><text class="l" x="1158" y="316">unresolved · conflict · boundary witnesses</text><text class="l" x="1158" y="340">within domain constraints · teach-back</text></g>
+<g><rect class="code" x="1140" y="404" width="420" height="112" rx="12"/><text class="t" x="1158" y="440">Confirmed rulebook</text><text class="l" x="1158" y="470">evidence-mandatory · versioned · code-compiled</text><text class="l" x="1158" y="494">promotion needs the expert's own words</text></g>
+<g><rect class="code" x="1140" y="558" width="420" height="112" rx="12"/><text class="t" x="1158" y="594">Human tutor</text><text class="l" x="1158" y="624">guardrail monitor · spoken intervention</text><text class="l" x="1158" y="648">deterministic Save interlock</text></g>
+<g><rect class="code" x="1140" y="712" width="420" height="112" rx="12"/><text class="t" x="1158" y="748">MCP check_action</text><text class="l" x="1158" y="778">same rulebook guards AI agents</text><text class="l" x="1158" y="802">blocks with the expert's quote</text></g>
+<rect class="ledger" x="40" y="872" width="1520" height="72" rx="12"/>
+<text class="t" x="64" y="914">Append-only ledger underneath everything</text>
+<text class="l" x="520" y="914">every input and derivation, with parent provenance · control turns are system_control, never evidence</text>
+</svg>

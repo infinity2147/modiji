@@ -1,0 +1,9 @@
+Event loop after the worker-thread fix — local production build (NODE_ENV=production, LLM_CALLS=off) on this machine — not the deployed service
+measured 2026-10-04T04:13:08.848Z · commit fd4d6fb · 64× INTEL(R) XEON(R) GOLD 6530
+
+apps/web/test/server/event-loop.test.ts (heavy flow through the real composition root): p99 24.2 ms, max 39.3 ms (538 samples), bound < 100 ms
+HTTP probe: 6 expert sessions seeded (decisions, frames, confirmed rules, Z3 witness runs), then a cold Work Map export: 29 ms
+/api/health sampled every 250 ms during the export: n=5, p50 4 ms, max 4 ms
+/api/health/deep eventLoop since boot: p50 0.1 · p99 23.7 · max 381.1 ms (304 samples)
+
+Before the fix (production): docs/evidence/live/bugs/event-loop-stall-probe.txt (production, commit 1da6e3c)

@@ -1,0 +1,26 @@
+{
+  "measuredAt": "2026-10-04T04:13:08.848Z",
+  "commit": "fd4d6fb",
+  "machine": "64× INTEL(R) XEON(R) GOLD 6530",
+  "where": "local production build (NODE_ENV=production, LLM_CALLS=off) on this machine — not the deployed service",
+  "test": {
+    "p99Ms": 24.2,
+    "maxMs": 39.3,
+    "samples": 538
+  },
+  "probe": {
+    "sessions": 6,
+    "coldExportMs": 29,
+    "healthSamples": 5,
+    "healthP50Ms": 4,
+    "healthMaxMs": 4,
+    "deep": {
+      "p50Ms": 0.1,
+      "p99Ms": 23.7,
+      "maxMs": 381.1,
+      "samples": 304,
+      "sinceMs": 4234
+    }
+  },
+  "before": "docs/evidence/live/bugs/event-loop-stall-probe.txt (production, commit 1da6e3c)"
+}

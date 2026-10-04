@@ -1,0 +1,188 @@
+1
+00:00:00,056 --> 00:00:04,723
+Every day, 11,200 Americans turn 65.
+
+2
+00:00:04,723 --> 00:00:08,833
+When an expert retires, a screen recording keeps her clicks,
+
+3
+00:00:08,833 --> 00:00:10,969
+not the judgment behind them.
+
+4
+00:00:10,969 --> 00:00:14,917
+Vashistha learns that judgment, and proves it transfers.
+
+5
+00:00:15,705 --> 00:00:20,059
+This is a verified replay of a recorded live run on production;
+
+6
+00:00:20,059 --> 00:00:23,542
+its hash chain is re-verified on load.
+
+7
+00:00:23,542 --> 00:00:26,502
+The expert is a synthetic test voice.
+
+8
+00:00:26,502 --> 00:00:29,962
+A deterministic gate waits until she is silent,
+
+9
+00:00:29,962 --> 00:00:33,120
+her screen is still and she isn't typing,
+
+10
+00:00:33,120 --> 00:00:37,346
+then the agent asks the question with the most expected information.
+
+11
+00:00:37,779 --> 00:00:45,144
+[Agent, recorded] What told you to approve onboarding here, and what would have changed your mind?
+
+12
+00:00:45,544 --> 00:00:53,032
+[Expert, recorded · synthetic voice] Never approve a customer from a high-risk country at desk level unless they've banked with us for two years with verified funds.
+
+13
+00:00:54,958 --> 00:01:01,262
+That sentence became 2 stop-rules, stored with her exact words and the screen frame.
+
+14
+00:01:01,262 --> 00:01:06,034
+After each answer the agent stays silent: no valid nonce,
+
+15
+00:01:06,034 --> 00:01:09,076
+so our custom LLM returns skip turn.
+
+16
+00:01:09,690 --> 00:01:14,787
+Then Z3 searches her rules for valid cases they leave undecided.
+
+17
+00:01:14,787 --> 00:01:18,096
+In this recorded run, the debrief was left open.
+
+18
+00:01:18,589 --> 00:01:22,455
+Here it is completed on this build, with typed answers.
+
+19
+00:01:22,455 --> 00:01:26,913
+Each witness is a concrete case to decide or escalate.
+
+20
+00:01:26,913 --> 00:01:30,385
+The teach-back uses confirmed rules only.
+
+21
+00:01:30,385 --> 00:01:33,531
+She corrects a threshold, the solver reruns,
+
+22
+00:01:33,531 --> 00:01:36,515
+and coverage closes under the current feature model.
+
+23
+00:01:38,985 --> 00:01:41,446
+The Work Map is built by code.
+
+24
+00:01:41,446 --> 00:01:45,986
+Every rule traces back through the ledger to a frame, a decision,
+
+25
+00:01:45,986 --> 00:01:48,134
+and the expert's own words.
+
+26
+00:01:49,543 --> 00:01:53,038
+A new hire gets a case the expert never saw.
+
+27
+00:01:53,038 --> 00:01:57,716
+She predicts approve; the tutor reveals the expert's decision,
+
+28
+00:01:57,716 --> 00:01:59,504
+in the expert's words.
+
+29
+00:01:59,504 --> 00:02:01,536
+She picks approve anyway.
+
+30
+00:02:01,536 --> 00:02:07,295
+The tutor intervenes before Save, and the deterministic interlock blocks the commit.
+
+31
+00:02:07,295 --> 00:02:09,048
+Her mastery ladder moves.
+
+32
+00:02:10,847 --> 00:02:13,738
+The same rulebook guards AI agents.
+
+33
+00:02:13,738 --> 00:02:19,160
+In our live run, a real Claude agent tried to approve this case through MCP,
+
+34
+00:02:19,160 --> 00:02:21,760
+and was blocked with the expert's sentence.
+
+35
+00:02:23,609 --> 00:02:26,430
+On Apprentice-Bench, with a simulated expert,
+
+36
+00:02:26,430 --> 00:02:30,610
+8 targeted questions cut unsafe approvals from 14.
+
+37
+00:02:30,610 --> 00:02:32,235
+9 percent to 1.
+
+38
+00:02:32,235 --> 00:02:33,373
+2 percent.
+
+39
+00:02:33,373 --> 00:02:39,491
+Asking why at every step reaches zero, but costs 16 to 24 interruptions.
+
+40
+00:02:39,491 --> 00:02:44,298
+Live, our first runs interrupted the expert 3 times; after the fixes,
+
+41
+00:02:44,298 --> 00:02:46,353
+the re-run had 0.
+
+42
+00:02:46,353 --> 00:02:49,638
+Still missed: live vision is below our bar,
+
+43
+00:02:49,638 --> 00:02:55,432
+so the tutor uses the disclosed DOM channel, and production showed one 13.
+
+44
+00:02:55,432 --> 00:02:57,556
+9 seconds host stall.
+
+45
+00:02:59,026 --> 00:03:00,477
+LLMs infer.
+
+46
+00:03:00,477 --> 00:03:01,859
+Experts confirm.
+
+47
+00:03:01,859 --> 00:03:03,159
+Code enforces.
+

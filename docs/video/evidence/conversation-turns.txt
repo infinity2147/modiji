@@ -1,0 +1,40 @@
+ElevenLabs conversation turns for verified replay bundle 20261004-0119-96acd563eb14 (fetched 2026-10-04T04:05:58.881Z, GET /v1/convai/conversations/{id}).
+Expert speech: synthetic voice input (ElevenLabs TTS). Control messages (one-time gate nonces, already spent) are redacted.
+
+== session cad2596d-53dd-427d-aa45-d73d91bd7844 · conv_0001m427xr96egjt9d9s1yk6yh2z · status done · 132 s
+   6 s  user   [control message from the gate — nonce redacted]
+   7 s  agent  What led you to send this to enhanced review? What would have changed your mind?
+  14 s  user   The largest owner holds 35% and isn't verified. Anything over 25% that isn't verified goes to enhanced review.
+  23 s  agent  tool: skip_turn
+  25 s  user   [control message from the gate — nonce redacted]
+  25 s  agent  If the entity type were "individual" instead of company, with the largest beneficial owner share at 100%, what would you decide?
+  36 s  user   If the largest owner holds more than 25% and isn't verified, it goes to enhanced review.
+  43 s  agent  tool: skip_turn
+  55 s  user   [control message from the gate — nonce redacted]
+  55 s  agent  What told you to approve onboarding here, and what would have changed your mind?
+  62 s  user   Never approve a customer from a high-risk country at desk level unless they've banked with us for two years with verified funds.
+  69 s  agent  tool: skip_turn
+  71 s  user   [control message from the gate — nonce redacted]
+  71 s  agent  If the country risk were "medium" instead of high, what would you decide?
+  79 s  user   Country risk alone isn't it. A long relationship with verified funds lets me approve high-risk customers.
+  85 s  agent  tool: skip_turn
+   expert answers: 4 · agent turns resolved by skip_turn: 4
+
+== session f77499f8-9078-4ea1-9beb-00fd5a335d93 · conv_5301m4287g82ebzt3ajs7sx5efej · status done · 89 s
+   8 s  user   [control message from the gate — nonce redacted]
+   9 s  agent  What made you send this one to enhanced review, and what would have changed your mind?
+  16 s  user   Anything over 25% that isn't verified goes to enhanced review, and so does a company registry extract older than six months.
+  24 s  agent  tool: skip_turn
+  29 s  user   [control message from the gate — nonce redacted]
+  29 s  agent  If the entity type were "trust" instead of company, what would you decide?
+  36 s  user   Never approve a customer from a high-risk country at desk level unless they've banked with us for two years with verified funds.
+  43 s  agent  tool: skip_turn
+  48 s  user   [control message from the gate — nonce redacted]
+  48 s  agent  What led you to approve onboarding here, and what would have changed your mind?
+  55 s  user   Never approve a politically exposed person without compliance sign-off.
+  59 s  agent  tool: skip_turn
+  76 s  user   [control message from the gate — nonce redacted]
+  76 s  user   [control message from the gate — nonce redacted]
+  77 s  agent  If the largest owner's identity were not verified, so "no" instead of yes, what would you decide?
+   expert answers: 3 · agent turns resolved by skip_turn: 3
+
