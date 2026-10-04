@@ -206,7 +206,7 @@ async function nextItem(deps: ConversationDeps, sessionId: string, h: History): 
       return { topic: "teach_back", ref: tb.entryId, text: /\?\s*$/.test(tb.text) ? tb.text : `${tb.text} Is that right?` };
   }
 
-  return { topic: "closing", ref: null, text: "That's everything I needed. Thank you. If you think of another rule, just tell me." };
+  return { topic: "closing", ref: null, text: "That's everything I needed. Thank you. If you think of another rule, or want to drop one, just tell me." };
 }
 
 // ── Reading a reply ──
@@ -268,6 +268,26 @@ function retry(origin: Origin, text: string): Item & { pending: Pending } {
   return { topic: origin.topic, ref: origin.ref, text, pending: { kind: "retry", origin } };
 }
 
+/** The expert's confirmed rules as the reply reader numbers them (a deletion names one by its number). */
+function ruleList(state: DebriefState): string[] {
+  return state.rules.map((r) => `when ${r.when}, ${r.then}`);
+}
+
+/** "Drop the rule about …": read back the exact rule; it is deleted (`retire_rule`) only after a plain yes. */
+function retireReadback(state: DebriefState, origin: Origin, reading: Extract<Reading, { kind: "retire_rule" }>, reply: Reply): Outcome | undefined {
+  const view = state.rules[reading.index];
+  if (view === undefined) return undefined;
+  const request = { action: "retire_rule", ruleId: view.rule.id };
+  return {
+    intent: "statement",
+    origin: "llm",
+    statementId: null,
+    refused: null,
+    ack: "",
+    next: readback(origin, `So I'll delete this rule: when ${view.when}, ${view.then}. Delete it?`, { kind: "expert", request, ...wordsOf(reply) }),
+  };
+}
+
 function ruleSentence(rule: ConfirmedRule): string {
   return `when ${describePredicate(rule.predicate, DOMAIN)}, ${effectPhrase(DOMAIN, rule.effect)}`;
 }
@@ -300,7 +320,8 @@ async function understand(deps: ConversationDeps, sessionId: string, asked: Aske
       if (p.kind === "expert") {
         const parsed = ExpertActionRequestSchema.safeParse({ ...p.request, quote: p.quote });
         if (!parsed.success) return { ...moveOn("yes"), refused: "the read-back no longer matches a valid action", ack: "I couldn't save that, sorry." };
-        return savedOrRefused("yes", "rule", await applyExpert(deps, sessionId, parsed.data, spokenOf(p)));
+        const outcome = savedOrRefused("yes", "rule", await applyExpert(deps, sessionId, parsed.data, spokenOf(p)));
+        return parsed.data.action === "retire_rule" && outcome.refused === null ? { ...outcome, ack: "Deleted." } : outcome;
       }
       const parsed = ConceptActionRequestSchema.safeParse({ ...p.request, statement: statementOf(p) });
       if (!parsed.success) return { ...moveOn("yes"), refused: "the read-back no longer matches a valid action", ack: "I couldn't save that, sorry." };
@@ -377,9 +398,16 @@ async function understand(deps: ConversationDeps, sessionId: string, asked: Aske
       const reading = await read(
         deps,
         snap,
-        { question: asked.text, allowed: ["stop_rule", "decision_rule"], context: "The expert is stating a hard stop (never allow an action, or only with sign-off), or another rule they follow.", actions: ALL_ACTIONS },
+        {
+          question: asked.text,
+          allowed: ["stop_rule", "decision_rule", "retire_rule"],
+          context: "The expert is stating a hard stop (never allow an action, or only with sign-off), another rule they follow, or asking to delete one of their rules.",
+          actions: ALL_ACTIONS,
+          rules: ruleList(state),
+        },
         reply.meaning,
       );
+      if (reading.kind === "retire_rule") return retireReadback(state, origin, reading, reply) ?? notUnderstood(asked, origin, "I couldn't tell which rule you want to delete", "Which rule should I delete?");
       if (reading.kind === "decision_rule") return statedRule(asked, origin, reading, reply, "Tell me the rule again in your own words.");
       if (reading.kind !== "stop_rule") return notUnderstood(asked, origin, reading.kind === "unclear" ? reading.why : "that didn't sound like a hard stop", "Tell me the hard stop again: what should never happen, and when?");
       const decisionFamily = familyOfAction(reading.action);
@@ -396,7 +424,13 @@ async function understand(deps: ConversationDeps, sessionId: string, asked: Aske
       if (plain === "skip") return moveOn("skip");
       if (plain === "no") return { intent: "no", origin: "rule", statementId: null, refused: null, ack: "", next: retry(origin, "What did I get wrong? Tell me the rule as it should be.") };
       const family = state.rules[0]?.rule.decisionFamily ?? DOMAIN.decisionFamilies[0]?.id ?? "";
-      const reading = await read(deps, snap, { question: asked.text, allowed: ["decision_rule"], context: `The teach-back said: ${tb.text}`, actions: family === "" ? ALL_ACTIONS : actionsOfFamily(family) }, reply.meaning);
+      const reading = await read(
+        deps,
+        snap,
+        { question: asked.text, allowed: ["decision_rule", "retire_rule"], context: `The teach-back said: ${tb.text}`, actions: family === "" ? ALL_ACTIONS : actionsOfFamily(family), rules: ruleList(state) },
+        reply.meaning,
+      );
+      if (reading.kind === "retire_rule") return retireReadback(state, origin, reading, reply) ?? notUnderstood(asked, origin, "I couldn't tell which rule you want to delete", "Which rule should I delete?");
       return statedRule(asked, origin, reading, reply, "Tell me the rule as it should be.");
     }
     case "closing":

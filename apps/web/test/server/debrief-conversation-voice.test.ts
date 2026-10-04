@@ -39,7 +39,7 @@ import { inProcessQuestions } from "../support/engine";
 import { createInterviewHarness, gateRequest, trainingCases, utterance, type InterviewHarness } from "../support/interview-harness";
 import { readTurn } from "../support/llm-harness";
 
-const EMPTY: LlmDebriefReply = { kind: "unclear", combinator: "all", conditions: [], action: "", effect: "none", role: "", rule: "none", min: 0, max: 0, integer: false };
+const EMPTY: LlmDebriefReply = { kind: "unclear", combinator: "all", conditions: [], action: "", effect: "none", role: "", rule: "none", min: 0, max: 0, integer: false, ruleNumber: 0 };
 const SANCTIONS = "Never approve anyone with a sanctions hit, full stop.";
 
 // A Hindi hard stop, said in two clauses; its verified English is what the conversation reads.

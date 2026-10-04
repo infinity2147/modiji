@@ -12,11 +12,13 @@ import { createSchemaStore } from "../../lib/server/schema/deps";
 import { jsonRequest } from "../support/casedesk-harness";
 import { OPUS_TEACHBACK, message, path, reply, world, type World } from "../support/debrief-harness";
 
-const EMPTY: LlmDebriefReply = { kind: "unclear", combinator: "all", conditions: [], action: "", effect: "none", role: "", rule: "none", min: 0, max: 0, integer: false };
+const EMPTY: LlmDebriefReply = { kind: "unclear", combinator: "all", conditions: [], action: "", effect: "none", role: "", rule: "none", min: 0, max: 0, integer: false, ruleNumber: 0 };
 const SANCTIONS = "Never approve anyone with a sanctions hit, full stop.";
 const PEP_SIGNOFF = "A politically exposed person can only be approved with compliance sign-off.";
 const MEDIUM_RISK = "Medium-risk country and an owner over 30% means enhanced review for me.";
 const INVENTED = "Anyone with a weird vibe gets rejected.";
+const DROP_PEP = "Drop the rule about politically exposed people, we don't do that any more.";
+const DROP_MISSING = "Delete rule number nine.";
 
 /** What the fake model says each reply means (the conversation never sends plain yes / no / skip to it). */
 const READINGS: Record<string, LlmDebriefReply> = {
@@ -45,8 +47,11 @@ function fakeModel(calls: Call[]): ClaudeClient {
         if (system === TEACHBACK_SYSTEM) return message(OPUS_TEACHBACK);
         if (system.startsWith("You read an expert's reply")) {
           const user = params.messages.map((m) => (typeof m.content === "string" ? m.content : "")).join("");
-          const expertReply = (JSON.parse(user) as { expertReply: string }).expertReply;
+          const { expertReply, confirmedRules } = JSON.parse(user) as { expertReply: string; confirmedRules: string[] };
           calls.push({ system, reply: expertReply });
+          // A deletion names the rule by its number in the list the reader was given.
+          if (expertReply === DROP_PEP) return message(JSON.stringify({ ...EMPTY, kind: "retire_rule", ruleNumber: confirmedRules.findIndex((r) => r.includes("politically exposed")) + 1 }));
+          if (expertReply === DROP_MISSING) return message(JSON.stringify({ ...EMPTY, kind: "retire_rule", ruleNumber: 9 }));
           return message(JSON.stringify(READINGS[expertReply] ?? EMPTY));
         }
         throw new Error("unexpected prompt");
@@ -204,6 +209,52 @@ describe("debrief conversation", () => {
     expect(c.llmAvailable).toBe(false);
     c = await say(SANCTIONS);
     expect(c.awaiting?.text).toMatch(/I can only understand yes, no and skip right now/);
+  });
+
+  describe("dropping a rule", () => {
+    const pep = (c: DebriefConversation) => c.state.rules.find((r) => r.rule.id === "rule-pep");
+
+    it("reads the exact rule back and deletes it only after a plain yes", async () => {
+      let c = await skipTo(await start(), "stop_rules");
+      expect(pep(c)).toBeDefined();
+      c = await say(DROP_PEP);
+      expect(c.awaiting?.topic).toBe("readback");
+      expect(c.awaiting?.text).toMatch(/^So I'll delete this rule: when politically exposed person is yes, .*\. Delete it\?$/);
+      expect(pep(c)).toBeDefined();
+      c = await say("Yes");
+      expect(pep(c)).toBeUndefined();
+      expect(c.awaiting?.text).toMatch(/^Deleted\. /);
+      const retired = w.ledger.list(w.sessionId).filter((e) => e.kind === "rule.retired");
+      expect(retired.map((e) => parseLedgerPayload(e, "rule.retired").ruleId)).toEqual(["rule-pep"]);
+      const statement = w.ledger.list(w.sessionId).filter((e) => e.kind === "expert.statement").at(-1);
+      // The deletion rests on what the expert asked for, not on the "Yes".
+      expect(statement === undefined ? undefined : parseLedgerPayload(statement, "expert.statement")).toMatchObject({ intent: "retire_rule", text: DROP_PEP, target: { ruleId: "rule-pep" } });
+    });
+
+    it("keeps the rule when the expert says no to the read-back", async () => {
+      await skipTo(await start(), "stop_rules");
+      await say(DROP_PEP);
+      const c = await say("No");
+      expect(pep(c)).toBeDefined();
+      expect(w.ledger.list(w.sessionId).some((e) => e.kind === "rule.retired")).toBe(false);
+    });
+
+    it("works after the closing too", async () => {
+      let c = await start();
+      for (let i = 0; i < 40 && !c.done; i += 1) c = await say("skip");
+      expect(c.turns.at(-1)?.text).toMatch(/or want to drop one, just tell me\.$/);
+      c = await say(DROP_PEP);
+      expect(c.awaiting?.topic).toBe("readback");
+      c = await say("Yes, delete it.");
+      expect(pep(c)).toBeUndefined();
+    });
+
+    it("a rule number the model makes up is not a deletion", async () => {
+      await skipTo(await start(), "stop_rules");
+      const c = await say(DROP_MISSING);
+      expect(c.awaiting?.text).toMatch(/^Sorry, I couldn't tell which rule you want to delete\./);
+      expect(pep(c)).toBeDefined();
+    });
   });
 
   it("refuses a reply before the conversation has started", async () => {

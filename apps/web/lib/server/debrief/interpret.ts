@@ -25,7 +25,7 @@ const DEADLINE_MS = 20_000;
 /** What the model may say a reply means. Flat and fully required, as constrained decoding needs. */
 export const LlmDebriefReplySchema = z.strictObject({
   kind: z
-    .enum(["decision_rule", "stop_rule", "choose_action", "choose_rule", "escalate", "out_of_scope", "range", "unclear"])
+    .enum(["decision_rule", "stop_rule", "choose_action", "choose_rule", "escalate", "out_of_scope", "range", "retire_rule", "unclear"])
     .describe("What the expert's reply says, from the kinds allowed for this turn"),
   combinator: z.enum(["all", "any"]).describe("all = every condition must hold; any = at least one"),
   conditions: z.array(LlmConditionSchema).max(8).describe("The conditions the expert stated; empty when none"),
@@ -36,6 +36,7 @@ export const LlmDebriefReplySchema = z.strictObject({
   min: z.number().describe("For a range: the smallest value; 0 otherwise"),
   max: z.number().describe("For a range: the largest value; 0 otherwise"),
   integer: z.boolean().describe("For a range: whole numbers only"),
+  ruleNumber: z.int().describe("For retire_rule: the number of the confirmed rule to delete, as listed; 0 otherwise"),
 });
 export type LlmDebriefReply = z.infer<typeof LlmDebriefReplySchema>;
 
@@ -50,6 +51,8 @@ export type InterpretContext = {
   context: string;
   /** Actions the reply may name (one decision family's, or all for a stop rule). */
   actions: readonly ActionId[];
+  /** The expert's confirmed rules in plain language, numbered from 1 for retire_rule; empty when deleting is not on offer. */
+  rules?: readonly string[];
 };
 
 /** A reading that passed the code-side checks, ready to be read back. */
@@ -61,6 +64,8 @@ export type Reading =
   | { kind: "escalate" }
   | { kind: "out_of_scope" }
   | { kind: "range"; min: number; max: number; integer: boolean }
+  /** `index` into `InterpretContext.rules` (0-based). */
+  | { kind: "retire_rule"; index: number }
   | { kind: "unclear"; why: string };
 
 const SYSTEM = `You read an expert's reply in a short debrief conversation about how they review customer onboarding cases (synthetic data, fictional policy).
@@ -71,6 +76,7 @@ Say what the reply means, using only the kinds allowed for this turn. Rules:
 - choose_action: the action the expert would take for the case described. choose_rule: which of the two conflicting rules should win.
 - escalate: the expert says such cases go to a controller or a human above them. out_of_scope: the expert says the case does not matter or cannot happen.
 - range: the smallest and largest value a new numeric concept takes.
+- retire_rule: the expert wants one of their confirmed rules deleted ("drop the rule about politically exposed people"); give its number from the list. Only when they clearly ask to delete or drop a rule.
 - If the reply does not clearly say one allowed thing, answer unclear. Fill unused fields with empty values (empty string, empty list, none, 0, false).`;
 
 function userPrompt(domain: DomainConfig, input: InterpretContext): string {
@@ -79,6 +85,7 @@ function userPrompt(domain: DomainConfig, input: InterpretContext): string {
     approvalRoles: APPROVAL_ROLES,
     allowedKinds: input.allowed,
     allowedActions: input.actions,
+    confirmedRules: (input.rules ?? []).map((text, i) => `Rule ${i + 1}: ${text}`),
     context: input.context,
     question: input.question,
     expertReply: input.reply,
@@ -130,6 +137,12 @@ export function checkReading(domain: DomainConfig, input: InterpretContext, out:
       return out.rule === "none" ? { kind: "unclear", why: "I couldn't tell which rule should win" } : { kind: "choose_rule", rule: out.rule };
     case "range":
       return Number.isFinite(out.min) && Number.isFinite(out.max) && out.min < out.max ? { kind: "range", min: out.min, max: out.max, integer: out.integer } : { kind: "unclear", why: "I didn't hear a smallest and largest value" };
+    case "retire_rule": {
+      const count = input.rules?.length ?? 0;
+      return Number.isInteger(out.ruleNumber) && out.ruleNumber >= 1 && out.ruleNumber <= count
+        ? { kind: "retire_rule", index: out.ruleNumber - 1 }
+        : { kind: "unclear", why: "I couldn't tell which rule you want to delete" };
+    }
     case "escalate":
     case "out_of_scope":
       return { kind: out.kind };
