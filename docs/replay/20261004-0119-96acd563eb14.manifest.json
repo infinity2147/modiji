@@ -1,0 +1,119 @@
+{
+  "manifestSha256": "e9a193c122fc727b0ba83f67168644b88eeb5c78f3fe53ab480074343074ff24",
+  "manifest": {
+    "format": "vashistha.replay/1",
+    "bundleId": "20261004-0119-96acd563eb14",
+    "label": "verified-replay",
+    "exportedAt": 1791078494201,
+    "source": {
+      "baseUrl": "https://vashistha-production.up.railway.app/",
+      "version": "0.1.0",
+      "commit": null
+    },
+    "exporter": {
+      "tool": "scripts/replay-export.ts",
+      "gitCommit": "61b3e93197aa1b577a73c8ae964f4dcfa76a4dce"
+    },
+    "sessions": [
+      {
+        "id": "cad2596d-53dd-427d-aa45-d73d91bd7844",
+        "mode": "expert",
+        "caseSet": "training",
+        "entries": 206,
+        "firstReceivedAt": 1791076784234,
+        "lastReceivedAt": 1791077453762,
+        "conversationIds": [
+          "conv_0001m427xr96egjt9d9s1yk6yh2z"
+        ]
+      },
+      {
+        "id": "f77499f8-9078-4ea1-9beb-00fd5a335d93",
+        "mode": "expert",
+        "caseSet": "training",
+        "entries": 187,
+        "firstReceivedAt": 1791077101902,
+        "lastReceivedAt": 1791077226348,
+        "conversationIds": [
+          "conv_5301m4287g82ebzt3ajs7sx5efej"
+        ]
+      }
+    ],
+    "timeline": {
+      "order": [
+        "receivedAt",
+        "sessionId",
+        "sequence"
+      ],
+      "link": "sha256(prev ‖ canonicalJson(entry))",
+      "entries": 393,
+      "firstAt": 1791076784234,
+      "lastAt": 1791077453762,
+      "genesis": "b6ef5008c59f7fbf47a61987a23575a7cc9da552cee931d4743d4b6c7b6609ac",
+      "head": "96acd563eb148791836fc4ecad15b584edd7742e1de310a092a07ae595247e49"
+    },
+    "files": {
+      "audio/conv_0001m427xr96egjt9d9s1yk6yh2z.mp3": {
+        "sha256": "9abf5e055c9e280a312412e1979e97dfb0dabee1feece6d6a54991529674e8fd",
+        "bytes": 2111085
+      },
+      "audio/conv_5301m4287g82ebzt3ajs7sx5efej.mp3": {
+        "sha256": "a58c94496bf683949076f1a1098a14e027977664cb82f47000f8536cb249c5f3",
+        "bytes": 1404333
+      },
+      "cases/cad2596d-53dd-427d-aa45-d73d91bd7844.json": {
+        "sha256": "9b372f19cf94aaeb65d46c6be67802453a0b5c721abf156c4d933312c42e074e",
+        "bytes": 5639
+      },
+      "cases/f77499f8-9078-4ea1-9beb-00fd5a335d93.json": {
+        "sha256": "9b372f19cf94aaeb65d46c6be67802453a0b5c721abf156c4d933312c42e074e",
+        "bytes": 5639
+      },
+      "ledger/cad2596d-53dd-427d-aa45-d73d91bd7844.json": {
+        "sha256": "09609f9d1f81e4c9e9c987db0bfae651e6f442229da61cbdb1c55963f9703960",
+        "bytes": 316724
+      },
+      "ledger/f77499f8-9078-4ea1-9beb-00fd5a335d93.json": {
+        "sha256": "0af199cdcbb725c40bcc52938c0b1f39c02f8732d7010dd099b3d79e749b53b2",
+        "bytes": 294706
+      },
+      "media/cad2596d-53dd-427d-aa45-d73d91bd7844/frames/9edc1a2b-f6ca-4c30-82a4-899d8c60e9af.png": {
+        "sha256": "3d8f236e1c0867bf588cc19635dbc2d481e1f973e142880bb4cac080dd7c23a4",
+        "bytes": 59314
+      },
+      "media/cad2596d-53dd-427d-aa45-d73d91bd7844/frames/d0dbd3ec-0303-4856-97a9-2d75c51ce86a.png": {
+        "sha256": "f52119a721ebbfb1fd7539ccac7c30390e09d303952673ab2bbac8aa4402e9ef",
+        "bytes": 59039
+      },
+      "media/cad2596d-53dd-427d-aa45-d73d91bd7844/frames/eaf2cea3-9564-41c3-a082-4fcf8d39f0fe.png": {
+        "sha256": "9a5b702a22cc871cbc3fb0c42a69af94a14c25f1f38133b95eecbb62cf433360",
+        "bytes": 39014
+      },
+      "media/f77499f8-9078-4ea1-9beb-00fd5a335d93/frames/071be101-83c0-41fd-a38d-49b6ff9f4a46.png": {
+        "sha256": "3d8f236e1c0867bf588cc19635dbc2d481e1f973e142880bb4cac080dd7c23a4",
+        "bytes": 59314
+      },
+      "media/f77499f8-9078-4ea1-9beb-00fd5a335d93/frames/5a97b62d-b741-44ce-b613-fe9c7a104efa.png": {
+        "sha256": "9a5b702a22cc871cbc3fb0c42a69af94a14c25f1f38133b95eecbb62cf433360",
+        "bytes": 39014
+      },
+      "media/f77499f8-9078-4ea1-9beb-00fd5a335d93/frames/82444a5b-359c-4eac-9950-6b3aabc72cd5.png": {
+        "sha256": "f52119a721ebbfb1fd7539ccac7c30390e09d303952673ab2bbac8aa4402e9ef",
+        "bytes": 59039
+      },
+      "views/cad2596d-53dd-427d-aa45-d73d91bd7844.debrief.json": {
+        "sha256": "6878ebe66d3f662a104b8f7636a63f0a5337dc4b99b28b00efd8eee396dbd929",
+        "bytes": 194349
+      },
+      "views/f77499f8-9078-4ea1-9beb-00fd5a335d93.debrief.json": {
+        "sha256": "11a1c9ac9176ee1ea708938493e0d4ddc5ee62a94eb9e4846903aaf1ad4a4301",
+        "bytes": 194972
+      }
+    },
+    "missing": [
+      {
+        "ref": "rulebook",
+        "reason": "the live rulebook (revision 23) also holds 17 rule(s) confirmed in sessions not in this bundle; the replay derives with the bundled sessions' rules only"
+      }
+    ]
+  }
+}
