@@ -32,11 +32,19 @@ const SINGLE = VARIANT.startsWith("single-sentence");
  * one question per case before moving on, to leave live budget for the stop-rules.
  */
 const CONCEPT = VARIANT === "single-sentence+concept";
+/**
+ * `multi-sentence+concept` (re-check on the fixed build, after bug 3): natural multi-sentence answers —
+ * each stop-rule is the SECOND sentence of its answer — and the first answer names the same concept
+ * outside the feature model, also in its second sentence. Up to 2 questions per case (the default).
+ */
+const MULTI_CONCEPT = VARIANT === "multi-sentence+concept";
 const PER_CASE = CONCEPT ? 1 : 2;
 const TEACHING: Record<string, string> = {
   "NS-2026-0101": CONCEPT
     ? "Anything over twenty-five percent that isn't verified goes to enhanced review, and so does a company registry extract older than six months."
-    : (CASE_PLANS["NS-2026-0101"]?.why ?? ""),
+    : MULTI_CONCEPT
+      ? "The largest owner holds thirty-five percent and isn't verified. Anything over twenty-five percent that isn't verified goes to enhanced review, and so does a company registry extract older than six months."
+      : (CASE_PLANS["NS-2026-0101"]?.why ?? ""),
   "NS-2026-0102": SINGLE
     ? STOP_RULE_HIGH_RISK
     : `Country risk alone isn't it. A long relationship with verified funds lets me approve high-risk customers. But ${STOP_RULE_HIGH_RISK.charAt(0).toLowerCase()}${STOP_RULE_HIGH_RISK.slice(1)}`,

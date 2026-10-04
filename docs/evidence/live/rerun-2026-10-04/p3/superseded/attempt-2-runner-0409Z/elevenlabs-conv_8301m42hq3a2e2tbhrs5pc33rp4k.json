@@ -1,0 +1,164 @@
+{
+  "label": "synthetic voice input (ElevenLabs TTS)",
+  "conversation_id": "conv_8301m42hq3a2e2tbhrs5pc33rp4k",
+  "status": "done",
+  "sessionId": "b5d8fd71-41f7-4dca-815d-85edcb85799b",
+  "metadata": {
+    "start": 1791087056,
+    "duration": 153,
+    "termination_reason": "Client disconnected: 1000",
+    "error": null
+  },
+  "transcript": [
+    {
+      "role": "user",
+      "t": 29,
+      "msg": "..."
+    },
+    {
+      "role": "agent",
+      "t": 35,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 35,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 49,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 49,
+      "msg": "What led you to approve onboarding here, and what would have changed your mind?"
+    },
+    {
+      "role": "user",
+      "t": 56,
+      "msg": "They've banked with us for three years, and their source of funds is verified, so the high-risk country on its own doesn't send them to enhanced review."
+    },
+    {
+      "role": "agent",
+      "t": 65,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 65,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 70,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 70,
+      "msg": "If the country risk were \"medium\" instead of high, what would you decide?"
+    },
+    {
+      "role": "user",
+      "t": 77,
+      "msg": "Country risk alone, isn't it? A long relationship with verified funds lets me approve high-risk customers."
+    },
+    {
+      "role": "agent",
+      "t": 84,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 84,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 107,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 108,
+      "msg": "What made you escalate this to the compliance officer, and what would have changed your mind?"
+    },
+    {
+      "role": "user",
+      "t": 114,
+      "msg": "She's a politically exposed person, so it goes to the compliance officer."
+    },
+    {
+      "role": "agent",
+      "t": 118,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 118,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 118,
+      "msg": "Whatever else the file says."
+    },
+    {
+      "role": "agent",
+      "t": 120,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 120,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 125,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 125,
+      "msg": "If the largest beneficial owner share were 40% instead of 100%, for this company, what would you decide?"
+    },
+    {
+      "role": "user",
+      "t": 134,
+      "msg": "If the largest owner holds more than 25% and isn't verified, it goes to enhanced review."
+    },
+    {
+      "role": "agent",
+      "t": 141,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 141,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 145,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 152,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 152,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 152,
+      "msg": "⟦ctl:<redacted>⟧"
+    }
+  ]
+}

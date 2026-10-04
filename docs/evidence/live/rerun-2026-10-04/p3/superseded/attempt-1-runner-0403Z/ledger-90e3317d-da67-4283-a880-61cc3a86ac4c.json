@@ -1,0 +1,3208 @@
+{
+  "label": "synthetic voice input (ElevenLabs TTS)",
+  "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+  "entries": [
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "session.started",
+      "occurredAt": 1791086951016,
+      "traceId": "775f9224-a6b4-444a-ae78-afd4ab30f96b",
+      "parentIds": [],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "mode": "expert",
+        "caseSet": "training",
+        "domainId": "kycNorthstar",
+        "schemaVersion": 1
+      },
+      "id": "97992dba-31b3-4621-b1cd-2088382b523c",
+      "sequence": 0,
+      "receivedAt": 1791086951016
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "dom",
+      "kind": "screen.event",
+      "occurredAt": 1791086951732,
+      "traceId": "5c701fdd-1fd7-4119-966f-4938c3f664da",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "212d572d-2c7e-441e-bd58-93585ea605b4",
+        "frameSeq": 1,
+        "captureTime": 1791086951732,
+        "sessionEpoch": 0,
+        "kind": "navigate",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      "id": "f81a268d-7238-4538-811c-618241a94ff6",
+      "sequence": 1,
+      "receivedAt": 1791086952095
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "client",
+      "kind": "frame.received",
+      "occurredAt": 1791086953265,
+      "traceId": "9ca768cc-783d-4eba-b3f9-16cf30732c0d",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "frameId": "dc27209d-f0b7-46e3-a891-e9aeb8bde7c1",
+        "frameSeq": 1,
+        "captureTime": 1791086953265,
+        "width": 1280,
+        "height": 720,
+        "mediaPath": "90e3317d-da67-4283-a880-61cc3a86ac4c/frames/dc27209d-f0b7-46e3-a891-e9aeb8bde7c1.png",
+        "redactedRegions": 0,
+        "changeScore": 0
+      },
+      "id": "6fb18382-bcae-4e6b-b20d-58f0647319c5",
+      "sequence": 2,
+      "receivedAt": 1791086955353
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "vision",
+      "kind": "screen.event",
+      "occurredAt": 1791086953265,
+      "traceId": "9ca768cc-783d-4eba-b3f9-16cf30732c0d",
+      "parentIds": [
+        "6fb18382-bcae-4e6b-b20d-58f0647319c5"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "vision-0-1-0",
+        "frameSeq": 1,
+        "captureTime": 1791086953265,
+        "sessionEpoch": 0,
+        "kind": "navigate",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": false
+      },
+      "id": "21f55e16-6432-480f-a3cc-9f1ba10b4bc8",
+      "sequence": 3,
+      "receivedAt": 1791086956402
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "dom",
+      "kind": "screen.event",
+      "occurredAt": 1791086956722,
+      "traceId": "92ed389d-4772-4a7e-9b88-db3ee8c87e9a",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "1c531654-2894-48cc-a41c-a2553e77e36c",
+        "frameSeq": 2,
+        "captureTime": 1791086956722,
+        "sessionEpoch": 0,
+        "kind": "open_case",
+        "caseId": "NS-2026-0101",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      "id": "fadd8b66-2ef3-4bf9-979a-dc04ca716d1c",
+      "sequence": 4,
+      "receivedAt": 1791086957082
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "client",
+      "kind": "frame.received",
+      "occurredAt": 1791086957266,
+      "traceId": "a3c16385-6fc0-4267-a4b6-67ca3ce6dd49",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "frameId": "be404172-8399-448a-9bf4-ae26d7c5ee69",
+        "frameSeq": 2,
+        "captureTime": 1791086957266,
+        "width": 1280,
+        "height": 720,
+        "mediaPath": "90e3317d-da67-4283-a880-61cc3a86ac4c/frames/be404172-8399-448a-9bf4-ae26d7c5ee69.png",
+        "redactedRegions": 0,
+        "changeScore": 0.5622439450687833
+      },
+      "id": "a46f285c-5ee3-44bc-914b-a19b5c36e4b0",
+      "sequence": 5,
+      "receivedAt": 1791086957608
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "client",
+      "kind": "frame.received",
+      "occurredAt": 1791086957769,
+      "traceId": "7cbdc918-ef09-42eb-b766-c0e6579b1ac5",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "frameId": "53a5bd09-b76f-4398-8e9a-62f325a9e398",
+        "frameSeq": 3,
+        "captureTime": 1791086957769,
+        "width": 1280,
+        "height": 720,
+        "mediaPath": "90e3317d-da67-4283-a880-61cc3a86ac4c/frames/53a5bd09-b76f-4398-8e9a-62f325a9e398.png",
+        "redactedRegions": 0,
+        "changeScore": 0.18733399444156223
+      },
+      "id": "4d37e5ba-256b-4bf5-96ac-1ac0b8c5c36b",
+      "sequence": 6,
+      "receivedAt": 1791086958018
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "client",
+      "kind": "frame.received",
+      "occurredAt": 1791086958270,
+      "traceId": "0e8545f1-1ccb-44b2-acb1-2c92c8f12f4b",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "frameId": "e39177ba-dbf2-4320-8fa0-b163279dd023",
+        "frameSeq": 4,
+        "captureTime": 1791086958270,
+        "width": 1280,
+        "height": 720,
+        "mediaPath": "90e3317d-da67-4283-a880-61cc3a86ac4c/frames/e39177ba-dbf2-4320-8fa0-b163279dd023.png",
+        "redactedRegions": 0,
+        "changeScore": 0.19581164254082573
+      },
+      "id": "cdae774b-9f00-4fa0-ae6b-7a739d7caac1",
+      "sequence": 7,
+      "receivedAt": 1791086958502
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "dom",
+      "kind": "screen.event",
+      "occurredAt": 1791086959975,
+      "traceId": "36b474da-efd9-46db-b71b-01ddb094b11b",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "5c95d1cd-b110-4b70-903d-711bda225fa3",
+        "frameSeq": 3,
+        "captureTime": 1791086959975,
+        "sessionEpoch": 0,
+        "kind": "open_case",
+        "caseId": "NS-2026-0102",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      "id": "64cd0060-f35a-49be-b24d-cae59ded526e",
+      "sequence": 8,
+      "receivedAt": 1791086965406
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "dom",
+      "kind": "screen.event",
+      "occurredAt": 1791086960439,
+      "traceId": "ab329d89-7389-4550-9f44-b371891b3721",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "385b7c05-a7dd-440c-a5b2-79b17aa50ee0",
+        "frameSeq": 4,
+        "captureTime": 1791086960439,
+        "sessionEpoch": 0,
+        "kind": "open_case",
+        "caseId": "NS-2026-0103",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      "id": "f68638fd-728e-4fc3-887a-60336352f71d",
+      "sequence": 9,
+      "receivedAt": 1791086972505
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "dom",
+      "kind": "screen.event",
+      "occurredAt": 1791086960892,
+      "traceId": "ab329d89-7389-4550-9f44-b371891b3721",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "f4a29591-dd24-4eff-8ed4-deea4a1fede3",
+        "frameSeq": 5,
+        "captureTime": 1791086960892,
+        "sessionEpoch": 0,
+        "kind": "open_case",
+        "caseId": "NS-2026-0101",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      "id": "a38cf580-51f5-4506-917a-80fdf499184e",
+      "sequence": 10,
+      "receivedAt": 1791086972505
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "dom",
+      "kind": "screen.event",
+      "occurredAt": 1791086963226,
+      "traceId": "ab329d89-7389-4550-9f44-b371891b3721",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "df5ceef5-a713-4a86-b65c-09baeb3e2f26",
+        "frameSeq": 6,
+        "captureTime": 1791086963226,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0101",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      "id": "f54da925-6c57-4818-8336-420acfd8f7ee",
+      "sequence": 11,
+      "receivedAt": 1791086972506
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "interlock.check",
+      "occurredAt": 1791086972767,
+      "traceId": "b0454331-9a11-439e-a7c4-a4446ac0da83",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "caseId": "NS-2026-0101",
+        "action": "enhancedReview",
+        "edits": {
+          "riskRating": "medium"
+        },
+        "result": {
+          "decision": "allow",
+          "matchedRules": [],
+          "missingFeatures": [],
+          "evidence": []
+        }
+      },
+      "id": "0359a6f8-9a80-4f10-9d36-9936fe2e372d",
+      "sequence": 12,
+      "receivedAt": 1791086972768
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "dom",
+      "kind": "case.decision",
+      "occurredAt": 1791086973036,
+      "traceId": "b0454331-9a11-439e-a7c4-a4446ac0da83",
+      "parentIds": [
+        "0359a6f8-9a80-4f10-9d36-9936fe2e372d"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "caseId": "NS-2026-0101",
+        "action": "enhancedReview",
+        "edits": {
+          "riskRating": "medium"
+        },
+        "result": {
+          "decision": "allow",
+          "matchedRules": [],
+          "missingFeatures": [],
+          "evidence": []
+        }
+      },
+      "id": "0bcdfe1b-4e3a-400e-9aff-3eeae24fa138",
+      "sequence": 13,
+      "receivedAt": 1791086973036
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "hypotheses.updated",
+      "occurredAt": 1791086973041,
+      "traceId": "b0454331-9a11-439e-a7c4-a4446ac0da83",
+      "parentIds": [
+        "0bcdfe1b-4e3a-400e-9aff-3eeae24fa138"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "decisionFamily": "reviewOutcome",
+        "hypothesisSetId": "hs_0f8b3532581feb",
+        "top": [
+          {
+            "candidateId": "cand_004e9604ee6e71",
+            "description": "if entity type is company then enhancedReview",
+            "weight": 0.05087014725568941
+          },
+          {
+            "candidateId": "cand_028b3730ebb571",
+            "description": "if country risk is not low then enhancedReview",
+            "weight": 0.05087014725568941
+          },
+          {
+            "candidateId": "cand_053af2f02d1063",
+            "description": "if source of funds is verified then enhancedReview",
+            "weight": 0.05087014725568941
+          },
+          {
+            "candidateId": "cand_096df1fc74ba78",
+            "description": "if analyst risk rating is not low then enhancedReview",
+            "weight": 0.05087014725568941
+          },
+          {
+            "candidateId": "cand_098487ef3ff2d6",
+            "description": "if analyst risk rating is not high then enhancedReview",
+            "weight": 0.05087014725568941
+          }
+        ],
+        "surpriseBits": 2.9468886635404377,
+        "contradiction": false
+      },
+      "id": "754755ab-e329-464f-be54-20db2d3108fa",
+      "sequence": 14,
+      "receivedAt": 1791086973041
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "dom",
+      "kind": "screen.event",
+      "occurredAt": 1791086973194,
+      "traceId": "56193a0a-fd93-479b-8766-9014f5f1ef70",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "36a54b64-e8ac-4fff-970c-f0dbadee2b32",
+        "frameSeq": 7,
+        "captureTime": 1791086973194,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0101",
+        "action": "enhancedReview",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      "id": "705f4ce6-f587-430f-bb4c-24d56f3ca091",
+      "sequence": 15,
+      "receivedAt": 1791086973560
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "question.queued",
+      "occurredAt": 1791086975583,
+      "traceId": "b0454331-9a11-439e-a7c4-a4446ac0da83",
+      "parentIds": [
+        "0bcdfe1b-4e3a-400e-9aff-3eeae24fa138",
+        "754755ab-e329-464f-be54-20db2d3108fa"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "q_173a56e4fa3028",
+        "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+        "kind": "why_probe",
+        "text": "What led you to send this to enhanced review? And what would have changed your mind?",
+        "decisionFamily": "reviewOutcome",
+        "target": {
+          "caseId": "NS-2026-0101",
+          "candidateIds": []
+        },
+        "value": 2.9468886635404377,
+        "reason": "unexplained decision",
+        "ephemeral": true,
+        "createdAt": 1791086973042,
+        "contextVersion": 4,
+        "parentIds": [
+          "0bcdfe1b-4e3a-400e-9aff-3eeae24fa138",
+          "754755ab-e329-464f-be54-20db2d3108fa"
+        ]
+      },
+      "id": "691d443e-921b-4278-9bfe-a12c699630ce",
+      "sequence": 16,
+      "receivedAt": 1791086975584
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "question.queued",
+      "occurredAt": 1791086975583,
+      "traceId": "b0454331-9a11-439e-a7c4-a4446ac0da83",
+      "parentIds": [
+        "0bcdfe1b-4e3a-400e-9aff-3eeae24fa138",
+        "754755ab-e329-464f-be54-20db2d3108fa"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "q_112451f4dd8e00",
+        "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+        "kind": "counterfactual",
+        "text": "If the entity type were \"trust\" rather than company, what would you decide?",
+        "decisionFamily": "reviewOutcome",
+        "target": {
+          "caseId": "NS-2026-0101",
+          "candidateIds": [
+            "cand_149ba6ee566b14",
+            "cand_004e9604ee6e71"
+          ],
+          "feature": "entityType",
+          "assignment": {
+            "entityType": "trust",
+            "customerStatus": "new",
+            "accountAgeMonths": 0,
+            "jurisdictionRisk": "medium",
+            "uboOwnershipPct": 35,
+            "uboVerified": false,
+            "pep": false,
+            "sanctionsHit": false,
+            "adverseMedia": false,
+            "sourceOfFunds": "verified",
+            "expectedMonthlyVolume": 18000,
+            "riskRating": "medium"
+          }
+        },
+        "value": 0.694513234238719,
+        "reason": "competing explanations",
+        "ephemeral": false,
+        "createdAt": 1791086973042,
+        "contextVersion": 4,
+        "parentIds": [
+          "0bcdfe1b-4e3a-400e-9aff-3eeae24fa138",
+          "754755ab-e329-464f-be54-20db2d3108fa"
+        ]
+      },
+      "id": "c768ac9d-7ef9-4c48-a294-0398ef86e92a",
+      "sequence": 17,
+      "receivedAt": 1791086975585
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "question.queued",
+      "occurredAt": 1791086975583,
+      "traceId": "b0454331-9a11-439e-a7c4-a4446ac0da83",
+      "parentIds": [
+        "0bcdfe1b-4e3a-400e-9aff-3eeae24fa138",
+        "754755ab-e329-464f-be54-20db2d3108fa"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "q_18f9a5edf05e66",
+        "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+        "kind": "counterfactual",
+        "text": "If the country risk were \"low\" instead of medium, what would you decide?",
+        "decisionFamily": "reviewOutcome",
+        "target": {
+          "caseId": "NS-2026-0101",
+          "candidateIds": [
+            "cand_004e9604ee6e71",
+            "cand_138482e304d116"
+          ],
+          "feature": "jurisdictionRisk",
+          "assignment": {
+            "entityType": "company",
+            "customerStatus": "new",
+            "accountAgeMonths": 0,
+            "jurisdictionRisk": "low",
+            "uboOwnershipPct": 35,
+            "uboVerified": false,
+            "pep": false,
+            "sanctionsHit": false,
+            "adverseMedia": false,
+            "sourceOfFunds": "verified",
+            "expectedMonthlyVolume": 18000,
+            "riskRating": "medium"
+          }
+        },
+        "value": 0.694513234238719,
+        "reason": "competing explanations",
+        "ephemeral": false,
+        "createdAt": 1791086973042,
+        "contextVersion": 4,
+        "parentIds": [
+          "0bcdfe1b-4e3a-400e-9aff-3eeae24fa138",
+          "754755ab-e329-464f-be54-20db2d3108fa"
+        ]
+      },
+      "id": "fef6e20e-f93e-458b-b7d0-c326ddf58f91",
+      "sequence": 18,
+      "receivedAt": 1791086975585
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "question.queued",
+      "occurredAt": 1791086975583,
+      "traceId": "b0454331-9a11-439e-a7c4-a4446ac0da83",
+      "parentIds": [
+        "0bcdfe1b-4e3a-400e-9aff-3eeae24fa138",
+        "754755ab-e329-464f-be54-20db2d3108fa"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "q_0ef5d996c60f61",
+        "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+        "kind": "counterfactual",
+        "text": "If the source of funds were \"unverified\" instead of verified, what would you decide?",
+        "decisionFamily": "reviewOutcome",
+        "target": {
+          "caseId": "NS-2026-0101",
+          "candidateIds": [
+            "cand_004e9604ee6e71",
+            "cand_053af2f02d1063"
+          ],
+          "feature": "sourceOfFunds",
+          "assignment": {
+            "entityType": "company",
+            "customerStatus": "new",
+            "accountAgeMonths": 0,
+            "jurisdictionRisk": "medium",
+            "uboOwnershipPct": 35,
+            "uboVerified": false,
+            "pep": false,
+            "sanctionsHit": false,
+            "adverseMedia": false,
+            "sourceOfFunds": "unverified",
+            "expectedMonthlyVolume": 18000,
+            "riskRating": "medium"
+          }
+        },
+        "value": 0.6945132342387181,
+        "reason": "competing explanations",
+        "ephemeral": false,
+        "createdAt": 1791086973042,
+        "contextVersion": 4,
+        "parentIds": [
+          "0bcdfe1b-4e3a-400e-9aff-3eeae24fa138",
+          "754755ab-e329-464f-be54-20db2d3108fa"
+        ]
+      },
+      "id": "8adc9a6e-7138-4857-ac5a-27978c6bf401",
+      "sequence": 19,
+      "receivedAt": 1791086975586
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "question.queued",
+      "occurredAt": 1791086975583,
+      "traceId": "b0454331-9a11-439e-a7c4-a4446ac0da83",
+      "parentIds": [
+        "0bcdfe1b-4e3a-400e-9aff-3eeae24fa138",
+        "754755ab-e329-464f-be54-20db2d3108fa"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "q_04a12810df25ab",
+        "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+        "kind": "counterfactual",
+        "text": "If the analyst risk rating were \"high\" instead of medium, what would you decide?",
+        "decisionFamily": "reviewOutcome",
+        "target": {
+          "caseId": "NS-2026-0101",
+          "candidateIds": [
+            "cand_004e9604ee6e71",
+            "cand_1fbc199ebe389e"
+          ],
+          "feature": "riskRating",
+          "assignment": {
+            "entityType": "company",
+            "customerStatus": "new",
+            "accountAgeMonths": 0,
+            "jurisdictionRisk": "medium",
+            "uboOwnershipPct": 35,
+            "uboVerified": false,
+            "pep": false,
+            "sanctionsHit": false,
+            "adverseMedia": false,
+            "sourceOfFunds": "verified",
+            "expectedMonthlyVolume": 18000,
+            "riskRating": "high"
+          }
+        },
+        "value": 0.6945132342387177,
+        "reason": "competing explanations",
+        "ephemeral": false,
+        "createdAt": 1791086973042,
+        "contextVersion": 4,
+        "parentIds": [
+          "0bcdfe1b-4e3a-400e-9aff-3eeae24fa138",
+          "754755ab-e329-464f-be54-20db2d3108fa"
+        ]
+      },
+      "id": "113717f7-8450-47c8-8ebc-d56a2479b7c1",
+      "sequence": 20,
+      "receivedAt": 1791086976148
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "dom",
+      "kind": "screen.event",
+      "occurredAt": 1791086973738,
+      "traceId": "15686c08-5005-469d-9aa7-a1fc1d6a9df8",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "5b7ee769-f463-46ce-b806-2934eda332de",
+        "frameSeq": 8,
+        "captureTime": 1791086973738,
+        "sessionEpoch": 0,
+        "kind": "open_case",
+        "caseId": "NS-2026-0102",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      "id": "d9c7e5d9-fcf5-4691-b3d9-51d22f3a8ee5",
+      "sequence": 21,
+      "receivedAt": 1791086976814
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "dom",
+      "kind": "screen.event",
+      "occurredAt": 1791086974474,
+      "traceId": "15686c08-5005-469d-9aa7-a1fc1d6a9df8",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "801477cb-0faf-4eb9-9cd2-788df980cad8",
+        "frameSeq": 9,
+        "captureTime": 1791086974474,
+        "sessionEpoch": 0,
+        "kind": "open_case",
+        "caseId": "NS-2026-0103",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      "id": "ad3771c2-f5e6-4103-9f21-02be65a2bc72",
+      "sequence": 22,
+      "receivedAt": 1791086976814
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "dom",
+      "kind": "screen.event",
+      "occurredAt": 1791086975173,
+      "traceId": "8e971f26-9e2c-4843-a596-0227bdc09d0a",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "0c7f692b-97bf-4e8a-ab2e-fbd892844f62",
+        "frameSeq": 10,
+        "captureTime": 1791086975173,
+        "sessionEpoch": 0,
+        "kind": "open_case",
+        "caseId": "NS-2026-0101",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      "id": "7bfd8ac9-c72a-403a-8897-41073afbe3cc",
+      "sequence": 23,
+      "receivedAt": 1791086977685
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "dom",
+      "kind": "screen.event",
+      "occurredAt": 1791086975919,
+      "traceId": "8e971f26-9e2c-4843-a596-0227bdc09d0a",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "7139f006-3440-43b1-93ca-9cb163139030",
+        "frameSeq": 11,
+        "captureTime": 1791086975919,
+        "sessionEpoch": 0,
+        "kind": "open_case",
+        "caseId": "NS-2026-0102",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      "id": "555d748f-ece6-4ec4-be6d-0330aafb987a",
+      "sequence": 24,
+      "receivedAt": 1791086977685
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "dom",
+      "kind": "screen.event",
+      "occurredAt": 1791086976638,
+      "traceId": "8e971f26-9e2c-4843-a596-0227bdc09d0a",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "66025553-aa92-48e6-886d-0142d951b8aa",
+        "frameSeq": 12,
+        "captureTime": 1791086976638,
+        "sessionEpoch": 0,
+        "kind": "open_case",
+        "caseId": "NS-2026-0103",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      "id": "610ccb7b-b51e-4177-b526-a17a18af5a6d",
+      "sequence": 25,
+      "receivedAt": 1791086977686
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "dom",
+      "kind": "screen.event",
+      "occurredAt": 1791086977336,
+      "traceId": "8e971f26-9e2c-4843-a596-0227bdc09d0a",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "89dc2d5e-4176-4d40-ba3c-b77b287c0a12",
+        "frameSeq": 13,
+        "captureTime": 1791086977336,
+        "sessionEpoch": 0,
+        "kind": "open_case",
+        "caseId": "NS-2026-0101",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      "id": "426a1f8d-0024-41fa-9c3d-93d84921404e",
+      "sequence": 26,
+      "receivedAt": 1791086977686
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "dom",
+      "kind": "screen.event",
+      "occurredAt": 1791086978089,
+      "traceId": "c0b28c75-17a0-4522-a8a6-32bbe5104557",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "066e6165-4e8a-4812-b4df-6ea7b63767dc",
+        "frameSeq": 14,
+        "captureTime": 1791086978089,
+        "sessionEpoch": 0,
+        "kind": "open_case",
+        "caseId": "NS-2026-0102",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      "id": "a60340ea-f4b0-44c6-9a12-a6480a806e45",
+      "sequence": 27,
+      "receivedAt": 1791086978455
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "client",
+      "kind": "frame.received",
+      "occurredAt": 1791086963268,
+      "traceId": "4b9a150b-14a7-44ea-b6fc-e819ebacbc7e",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "frameId": "b06bd502-93ac-4fd1-b664-748f241940db",
+        "frameSeq": 13,
+        "captureTime": 1791086963268,
+        "width": 1280,
+        "height": 720,
+        "mediaPath": "90e3317d-da67-4283-a880-61cc3a86ac4c/frames/b06bd502-93ac-4fd1-b664-748f241940db.png",
+        "redactedRegions": 0,
+        "changeScore": 0.26773763365215725
+      },
+      "id": "3b96bbe0-bb7a-4589-980b-ab128d518afe",
+      "sequence": 28,
+      "receivedAt": 1791086978773
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "client",
+      "kind": "frame.received",
+      "occurredAt": 1791086978765,
+      "traceId": "a47ceea6-a5cc-45f6-9bb1-ce7c124e6a4d",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "frameId": "37ebfb35-42dc-4866-a7b9-21eb754c3deb",
+        "frameSeq": 22,
+        "captureTime": 1791086978765,
+        "width": 1280,
+        "height": 720,
+        "mediaPath": "90e3317d-da67-4283-a880-61cc3a86ac4c/frames/37ebfb35-42dc-4866-a7b9-21eb754c3deb.png",
+        "redactedRegions": 0,
+        "changeScore": 0.26664002074135673
+      },
+      "id": "19282909-25cc-46fa-a1c4-ff018f68926f",
+      "sequence": 29,
+      "receivedAt": 1791086979036
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "dom",
+      "kind": "screen.event",
+      "occurredAt": 1791086978790,
+      "traceId": "819aaff5-640d-4ae5-9956-6f73b89a9f6b",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "908d7d38-3245-42d1-8648-e981f2dcfd40",
+        "frameSeq": 15,
+        "captureTime": 1791086978790,
+        "sessionEpoch": 0,
+        "kind": "open_case",
+        "caseId": "NS-2026-0103",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      "id": "21a752fd-6c93-4a7e-9893-04124d4bb98b",
+      "sequence": 30,
+      "receivedAt": 1791086979157
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "client",
+      "kind": "frame.received",
+      "occurredAt": 1791086979267,
+      "traceId": "4d6983b9-359d-4eb8-88c2-9b3cbf32bce8",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "frameId": "60ed4ca5-9084-43ea-b488-7d18636b9c33",
+        "frameSeq": 23,
+        "captureTime": 1791086979267,
+        "width": 1280,
+        "height": 720,
+        "mediaPath": "90e3317d-da67-4283-a880-61cc3a86ac4c/frames/60ed4ca5-9084-43ea-b488-7d18636b9c33.png",
+        "redactedRegions": 0,
+        "changeScore": 0.2602033880021837
+      },
+      "id": "7765fbf4-6e78-4241-8932-3f368ba07e9b",
+      "sequence": 31,
+      "receivedAt": 1791086979500
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "dom",
+      "kind": "screen.event",
+      "occurredAt": 1791086979521,
+      "traceId": "563a9696-558f-4e59-8b4c-52019eb2b5d2",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "a719322f-f981-45f2-8019-fa4ce34f9c7f",
+        "frameSeq": 16,
+        "captureTime": 1791086979521,
+        "sessionEpoch": 0,
+        "kind": "open_case",
+        "caseId": "NS-2026-0101",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      "id": "bcabc183-bd9f-4f36-9dae-40b0f5d94db4",
+      "sequence": 32,
+      "receivedAt": 1791086980444
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "client",
+      "kind": "frame.received",
+      "occurredAt": 1791086980270,
+      "traceId": "b5da99d1-c6a5-4932-9d3f-f9fee1136ade",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "frameId": "7690203a-0496-4f1c-bb6a-a9f9d83b54cf",
+        "frameSeq": 25,
+        "captureTime": 1791086980270,
+        "width": 1280,
+        "height": 720,
+        "mediaPath": "90e3317d-da67-4283-a880-61cc3a86ac4c/frames/7690203a-0496-4f1c-bb6a-a9f9d83b54cf.png",
+        "redactedRegions": 0,
+        "changeScore": 1.9973198639021978
+      },
+      "id": "a4245bc1-ce67-4dec-9b82-f2fa109257b9",
+      "sequence": 33,
+      "receivedAt": 1791086980716
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "gate.authorized",
+      "occurredAt": 1791086982213,
+      "traceId": "972c5c12-43be-4879-8034-b84bff8fb58b",
+      "parentIds": [
+        "691d443e-921b-4278-9bfe-a12c699630ce"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "questionId": "q_173a56e4fa3028",
+        "contextVersion": 9,
+        "becameValidAt": 1791086982101,
+        "decidedAt": 1791086982102,
+        "conditions": {
+          "userSilent": true,
+          "screenIdle": true,
+          "typingIdle": true,
+          "breakpointOrEphemeral": true,
+          "valueAboveTheta": true,
+          "budget": true,
+          "notOffRecord": true,
+          "agentIdle": true
+        }
+      },
+      "id": "e2442ee6-3761-41bc-b74a-c143663748d8",
+      "sequence": 34,
+      "receivedAt": 1791086982214
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "system_control",
+      "kind": "gate.control_message",
+      "occurredAt": 1791086982674,
+      "traceId": "chatcmpl-qw5u4kuBj1zMHG6Y",
+      "parentIds": [],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "nonceDigest": "-wOQ9rq_1nEz",
+        "questionId": "q_173a56e4fa3028"
+      },
+      "id": "b4d0e71c-8489-4140-ab39-2c09d904e9c7",
+      "sequence": 35,
+      "receivedAt": 1791086982675
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "llm.turn_decision",
+      "occurredAt": 1791086982675,
+      "traceId": "chatcmpl-qw5u4kuBj1zMHG6Y",
+      "parentIds": [
+        "b4d0e71c-8489-4140-ab39-2c09d904e9c7"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "decision": "speak",
+        "questionId": "q_173a56e4fa3028",
+        "agent": "interviewer",
+        "model": "vashistha-interviewer-v3",
+        "handlerLatencyMs": 4.87
+      },
+      "id": "8ae74fc5-bfa9-4ac9-b467-d4ecd0c130b6",
+      "sequence": 36,
+      "receivedAt": 1791086982675
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "vision",
+      "kind": "screen.event",
+      "occurredAt": 1791086980270,
+      "traceId": "b5da99d1-c6a5-4932-9d3f-f9fee1136ade",
+      "parentIds": [
+        "a4245bc1-ce67-4dec-9b82-f2fa109257b9"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "vision-0-25-0",
+        "frameSeq": 25,
+        "captureTime": 1791086980270,
+        "sessionEpoch": 0,
+        "kind": "open_case",
+        "caseId": "NS-2026-0101",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": false
+      },
+      "id": "c8136e3f-ee31-4595-95f9-4c3836e9baf5",
+      "sequence": 37,
+      "receivedAt": 1791086983535
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "agent.utterance",
+      "occurredAt": 1791086987168,
+      "traceId": "f5dd6b59-134e-4760-834a-c4e26317dbd0",
+      "parentIds": [
+        "e2442ee6-3761-41bc-b74a-c143663748d8"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "conversationId": "conv_7801m42hm0jhf1ess2375h18dkan",
+        "questionId": "q_173a56e4fa3028",
+        "text": "What led you to send this to enhanced review? And what would have changed your mind?"
+      },
+      "id": "a8af51e2-2bc3-4774-ac1f-2563a27795dd",
+      "sequence": 38,
+      "receivedAt": 1791086987168
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "llm.turn_decision",
+      "occurredAt": 1791086994538,
+      "traceId": "chatcmpl-QBMXjfO8YVN5Abs2",
+      "parentIds": [],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "decision": "skip_turn",
+        "reason": "not_control_message",
+        "agent": "interviewer",
+        "model": "vashistha-interviewer-v3",
+        "handlerLatencyMs": 0.47
+      },
+      "id": "bd342377-24ee-45da-945d-27262f7eb38e",
+      "sequence": 39,
+      "receivedAt": 1791086994538
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "llm.turn_decision",
+      "occurredAt": 1791086999492,
+      "traceId": "chatcmpl-5ENT44fbfD3sQZRy",
+      "parentIds": [],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "decision": "skip_turn",
+        "reason": "not_control_message",
+        "agent": "interviewer",
+        "model": "vashistha-interviewer-v3",
+        "handlerLatencyMs": 0.77
+      },
+      "id": "6ff7ce0f-3f75-49f7-b71c-a625c42ce32a",
+      "sequence": 40,
+      "receivedAt": 1791086999492
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "voice",
+      "kind": "utterance.transcript",
+      "occurredAt": 1791086999811,
+      "traceId": "0e171640-11a6-40ad-ab2c-4d10ee7fd80f",
+      "parentIds": [
+        "e2442ee6-3761-41bc-b74a-c143663748d8"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "conversationId": "conv_7801m42hm0jhf1ess2375h18dkan",
+        "text": "The largest owner holds 35% and isn't verified. Anything over 25% that isn't verified goes to enhanced review.",
+        "t0Ms": 35482,
+        "t1Ms": 44487,
+        "frameIds": [
+          "3b96bbe0-bb7a-4589-980b-ab128d518afe",
+          "19282909-25cc-46fa-a1c4-ff018f68926f",
+          "7765fbf4-6e78-4241-8932-3f368ba07e9b",
+          "a4245bc1-ce67-4dec-9b82-f2fa109257b9"
+        ]
+      },
+      "id": "e62a01df-4908-4150-ba54-ca914b4c794b",
+      "sequence": 41,
+      "receivedAt": 1791086999811
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "gate.authorized",
+      "occurredAt": 1791087003810,
+      "traceId": "4c306f4d-5592-47ee-8b33-24b4967f5302",
+      "parentIds": [
+        "c768ac9d-7ef9-4c48-a294-0398ef86e92a"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "questionId": "q_112451f4dd8e00",
+        "contextVersion": 9,
+        "becameValidAt": 1791087003699,
+        "decidedAt": 1791087003699,
+        "conditions": {
+          "userSilent": true,
+          "screenIdle": true,
+          "typingIdle": true,
+          "breakpointOrEphemeral": true,
+          "valueAboveTheta": true,
+          "budget": true,
+          "notOffRecord": true,
+          "agentIdle": true
+        }
+      },
+      "id": "f020d86a-d91b-4e8e-8745-2af57309db3e",
+      "sequence": 42,
+      "receivedAt": 1791087003810
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "system_control",
+      "kind": "gate.control_message",
+      "occurredAt": 1791087004631,
+      "traceId": "chatcmpl-SkxKZuAbT1j2qjlY",
+      "parentIds": [],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "nonceDigest": "6FxyBL0fVAat",
+        "questionId": "q_112451f4dd8e00"
+      },
+      "id": "6e310d53-4950-4451-b97c-d4d75132c31b",
+      "sequence": 43,
+      "receivedAt": 1791087004631
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "llm.turn_decision",
+      "occurredAt": 1791087007932,
+      "traceId": "chatcmpl-SkxKZuAbT1j2qjlY",
+      "parentIds": [
+        "6e310d53-4950-4451-b97c-d4d75132c31b"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "decision": "speak",
+        "questionId": "q_112451f4dd8e00",
+        "agent": "interviewer",
+        "model": "vashistha-interviewer-v3",
+        "handlerLatencyMs": 0.5
+      },
+      "id": "d9a5d178-16e2-4492-8823-b6a02290fc07",
+      "sequence": 44,
+      "receivedAt": 1791087007933
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "answer.parsed",
+      "occurredAt": 1791087022368,
+      "traceId": "0e171640-11a6-40ad-ab2c-4d10ee7fd80f",
+      "parentIds": [
+        "e62a01df-4908-4150-ba54-ca914b4c794b",
+        "691d443e-921b-4278-9bfe-a12c699630ce"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "questionId": "q_173a56e4fa3028",
+        "utteranceId": "e62a01df-4908-4150-ba54-ca914b4c794b",
+        "survivingCandidateIds": [
+          "cand_0d3f082c08d8f5"
+        ],
+        "eliminatedCandidateIds": [],
+        "statedRules": [
+          {
+            "predicate": {
+              "and": [
+                {
+                  ">": [
+                    {
+                      "var": "uboOwnershipPct"
+                    },
+                    25
+                  ]
+                },
+                {
+                  "==": [
+                    {
+                      "var": "uboVerified"
+                    },
+                    false
+                  ]
+                }
+              ]
+            },
+            "action": "enhancedReview",
+            "kind": "decision",
+            "effect": {
+              "type": "recommend",
+              "action": "enhancedReview"
+            },
+            "exactQuote": "Anything over 25% that isn't verified goes to enhanced review.",
+            "t0Ms": 35482,
+            "t1Ms": 44487
+          }
+        ],
+        "newConcepts": [],
+        "confidence": 0.9
+      },
+      "id": "619c9328-06b3-480d-a0d3-e9430d6ce6a9",
+      "sequence": 45,
+      "receivedAt": 1791087022368
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "rule.confirmed",
+      "occurredAt": 1791087022368,
+      "traceId": "0e171640-11a6-40ad-ab2c-4d10ee7fd80f",
+      "parentIds": [
+        "619c9328-06b3-480d-a0d3-e9430d6ce6a9",
+        "e62a01df-4908-4150-ba54-ca914b4c794b"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "rule": {
+          "id": "rule_1d915c6505b702",
+          "decisionFamily": "reviewOutcome",
+          "kind": "decision",
+          "predicate": {
+            "and": [
+              {
+                ">": [
+                  {
+                    "var": "uboOwnershipPct"
+                  },
+                  25
+                ]
+              },
+              {
+                "==": [
+                  {
+                    "var": "uboVerified"
+                  },
+                  false
+                ]
+              }
+            ]
+          },
+          "effect": {
+            "type": "recommend",
+            "action": "enhancedReview"
+          },
+          "priority": 10,
+          "overrides": [],
+          "evidence": [
+            {
+              "kind": "expert_quote",
+              "utteranceId": "e62a01df-4908-4150-ba54-ca914b4c794b",
+              "exactQuote": "Anything over 25% that isn't verified goes to enhanced review.",
+              "t0Ms": 35482,
+              "t1Ms": 44487,
+              "frameIds": [
+                "3b96bbe0-bb7a-4589-980b-ab128d518afe",
+                "19282909-25cc-46fa-a1c4-ff018f68926f",
+                "7765fbf4-6e78-4241-8932-3f368ba07e9b",
+                "a4245bc1-ce67-4dec-9b82-f2fa109257b9"
+              ],
+              "eventIds": [],
+              "relation": "supports",
+              "provenance": "human_voice"
+            }
+          ],
+          "confirmedBy": [
+            {
+              "expertId": "expert-90e3317d-da67-4283-a880-61cc3a86ac4c",
+              "at": 1791087022368,
+              "method": "explicit_statement",
+              "ledgerEntryId": "e62a01df-4908-4150-ba54-ca914b4c794b"
+            }
+          ],
+          "revision": 1,
+          "schemaVersion": 1,
+          "expertId": "expert-90e3317d-da67-4283-a880-61cc3a86ac4c"
+        }
+      },
+      "id": "ac89378f-1f3d-4c54-928c-df4e1be443f4",
+      "sequence": 46,
+      "receivedAt": 1791087026052
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "hypotheses.updated",
+      "occurredAt": 1791087022368,
+      "traceId": "0e171640-11a6-40ad-ab2c-4d10ee7fd80f",
+      "parentIds": [
+        "619c9328-06b3-480d-a0d3-e9430d6ce6a9"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "decisionFamily": "reviewOutcome",
+        "hypothesisSetId": "hs_0f8b3532581feb",
+        "top": [
+          {
+            "candidateId": "cand_1d6eb373abef1a",
+            "description": "if largest beneficial owner share above 25% and largest owner identity verified is no then enhancedReview",
+            "weight": 0.15763994576505605
+          },
+          {
+            "candidateId": "cand_004e9604ee6e71",
+            "description": "if entity type is company then enhancedReview",
+            "weight": 0.04285098000124212
+          },
+          {
+            "candidateId": "cand_028b3730ebb571",
+            "description": "if country risk is not low then enhancedReview",
+            "weight": 0.04285098000124212
+          },
+          {
+            "candidateId": "cand_053af2f02d1063",
+            "description": "if source of funds is verified then enhancedReview",
+            "weight": 0.04285098000124212
+          },
+          {
+            "candidateId": "cand_096df1fc74ba78",
+            "description": "if analyst risk rating is not low then enhancedReview",
+            "weight": 0.04285098000124212
+          }
+        ],
+        "contradiction": false
+      },
+      "id": "bd3bc984-17b1-4d3f-a47a-abb5bd2bc790",
+      "sequence": 47,
+      "receivedAt": 1791087027937
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "system_control",
+      "kind": "gate.control_message",
+      "occurredAt": 1791087028583,
+      "traceId": "chatcmpl-eRTY1vXJs2pCezFI",
+      "parentIds": [],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "nonceDigest": "6FxyBL0fVAat",
+        "reason": "unknown_nonce"
+      },
+      "id": "58f00c3e-e776-422d-a6c3-de98a8ca4f86",
+      "sequence": 48,
+      "receivedAt": 1791087028584
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "llm.turn_decision",
+      "occurredAt": 1791087028597,
+      "traceId": "chatcmpl-eRTY1vXJs2pCezFI",
+      "parentIds": [
+        "58f00c3e-e776-422d-a6c3-de98a8ca4f86"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "decision": "skip_turn",
+        "reason": "unknown_nonce",
+        "agent": "interviewer",
+        "model": "vashistha-interviewer-v3",
+        "handlerLatencyMs": 0.68
+      },
+      "id": "3cc19114-cc94-4f0b-be6d-63704e51cab1",
+      "sequence": 49,
+      "receivedAt": 1791087028598
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "gate.authorized",
+      "occurredAt": 1791087028626,
+      "traceId": "7117f146-0a64-4cf1-9fc6-5b4b82e4e2f1",
+      "parentIds": [
+        "fef6e20e-f93e-458b-b7d0-c326ddf58f91"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "questionId": "q_18f9a5edf05e66",
+        "contextVersion": 9,
+        "becameValidAt": 1791087004462,
+        "decidedAt": 1791087009956,
+        "conditions": {
+          "userSilent": true,
+          "screenIdle": true,
+          "typingIdle": true,
+          "breakpointOrEphemeral": true,
+          "valueAboveTheta": true,
+          "budget": true,
+          "notOffRecord": true,
+          "agentIdle": true
+        }
+      },
+      "id": "f76fdc00-a1c5-4b98-a8ab-49a57a9ff26c",
+      "sequence": 50,
+      "receivedAt": 1791087028627
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "system_control",
+      "kind": "gate.control_message",
+      "occurredAt": 1791087028832,
+      "traceId": "chatcmpl-m7ahikcRSuN4CRwp",
+      "parentIds": [],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "nonceDigest": "6FxyBL0fVAat",
+        "reason": "unknown_nonce"
+      },
+      "id": "046a7132-91b9-4b64-81dd-5ea5dc9a8e18",
+      "sequence": 51,
+      "receivedAt": 1791087028833
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "llm.turn_decision",
+      "occurredAt": 1791087028836,
+      "traceId": "chatcmpl-m7ahikcRSuN4CRwp",
+      "parentIds": [
+        "046a7132-91b9-4b64-81dd-5ea5dc9a8e18"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "decision": "skip_turn",
+        "reason": "unknown_nonce",
+        "agent": "interviewer",
+        "model": "vashistha-interviewer-v3",
+        "handlerLatencyMs": 0.49
+      },
+      "id": "5560d213-ce36-4f6b-8404-90bc6388385b",
+      "sequence": 52,
+      "receivedAt": 1791087028837
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "dom",
+      "kind": "screen.event",
+      "occurredAt": 1791087013503,
+      "traceId": "32027bd4-e3d9-43a7-8839-c1038032bacf",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "7a0d2d02-3c4e-415b-a185-f028526467c9",
+        "frameSeq": 17,
+        "captureTime": 1791087013503,
+        "sessionEpoch": 0,
+        "kind": "open_case",
+        "caseId": "NS-2026-0102",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      "id": "8b03e7ce-1269-48de-b34c-ec00f27e6b3c",
+      "sequence": 53,
+      "receivedAt": 1791087028855
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "dom",
+      "kind": "screen.event",
+      "occurredAt": 1791087016834,
+      "traceId": "9b7d748b-0b7f-4d91-b4cb-e6205b20e02c",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "db4aebbe-5cee-4b59-83b7-3cafa97ec0e5",
+        "frameSeq": 18,
+        "captureTime": 1791087016834,
+        "sessionEpoch": 0,
+        "kind": "open_case",
+        "caseId": "NS-2026-0103",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      "id": "cbfd75ac-1d43-41bb-8706-7e3fb65a3e5a",
+      "sequence": 54,
+      "receivedAt": 1791087029124
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "dom",
+      "kind": "screen.event",
+      "occurredAt": 1791087017296,
+      "traceId": "9b7d748b-0b7f-4d91-b4cb-e6205b20e02c",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "cfec863a-036f-4788-8727-b1a6663be330",
+        "frameSeq": 19,
+        "captureTime": 1791087017296,
+        "sessionEpoch": 0,
+        "kind": "open_case",
+        "caseId": "NS-2026-0101",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      "id": "d185f1d2-6f67-486c-a616-87b605a44852",
+      "sequence": 55,
+      "receivedAt": 1791087029125
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "dom",
+      "kind": "screen.event",
+      "occurredAt": 1791087017758,
+      "traceId": "9b7d748b-0b7f-4d91-b4cb-e6205b20e02c",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "765921bc-7f59-4c81-9d62-60d94f5cb8cd",
+        "frameSeq": 20,
+        "captureTime": 1791087017758,
+        "sessionEpoch": 0,
+        "kind": "open_case",
+        "caseId": "NS-2026-0102",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      "id": "2c77a934-160b-4fe8-9268-f48a0e8eaf44",
+      "sequence": 56,
+      "receivedAt": 1791087029126
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "dom",
+      "kind": "screen.event",
+      "occurredAt": 1791087020078,
+      "traceId": "9b7d748b-0b7f-4d91-b4cb-e6205b20e02c",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "90539f57-c832-4816-8b3a-5de564a68993",
+        "frameSeq": 21,
+        "captureTime": 1791087020078,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "high",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      "id": "ec4464ab-ac39-4162-937d-8dbb02ff71e3",
+      "sequence": 57,
+      "receivedAt": 1791087029127
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "interlock.check",
+      "occurredAt": 1791087029429,
+      "traceId": "f2c9f498-bb25-464a-89e4-6d313a7c0c13",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "caseId": "NS-2026-0102",
+        "action": "approve",
+        "edits": {
+          "riskRating": "high"
+        },
+        "result": {
+          "decision": "allow",
+          "matchedRules": [],
+          "missingFeatures": [],
+          "evidence": []
+        }
+      },
+      "id": "2b54fd3a-8f5c-456a-b2c2-aa04146756ea",
+      "sequence": 58,
+      "receivedAt": 1791087029430
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "dom",
+      "kind": "case.decision",
+      "occurredAt": 1791087029794,
+      "traceId": "f2c9f498-bb25-464a-89e4-6d313a7c0c13",
+      "parentIds": [
+        "2b54fd3a-8f5c-456a-b2c2-aa04146756ea"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "caseId": "NS-2026-0102",
+        "action": "approve",
+        "edits": {
+          "riskRating": "high"
+        },
+        "result": {
+          "decision": "allow",
+          "matchedRules": [],
+          "missingFeatures": [],
+          "evidence": []
+        }
+      },
+      "id": "9fb7e59e-c4e6-4654-ad78-e746014a9d23",
+      "sequence": 59,
+      "receivedAt": 1791087029794
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "dom",
+      "kind": "screen.event",
+      "occurredAt": 1791087030634,
+      "traceId": "ba83a226-840d-4b62-9557-d197983c14ea",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "666a81df-2384-41b2-9030-09660aa78a73",
+        "frameSeq": 22,
+        "captureTime": 1791087030634,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0102",
+        "action": "approve",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      "id": "84e148bb-2d7b-4b55-a17f-0eb11abf0ccc",
+      "sequence": 60,
+      "receivedAt": 1791087030995
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "question.requeued",
+      "occurredAt": 1791087033970,
+      "traceId": "0b32de53-d4b9-46c3-96df-0e363819119f",
+      "parentIds": [
+        "f76fdc00-a1c5-4b98-a8ab-49a57a9ff26c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "questionId": "q_18f9a5edf05e66",
+        "reason": "authorization_unspoken"
+      },
+      "id": "5136dd9c-1e20-455d-b92d-d9e1632d7698",
+      "sequence": 61,
+      "receivedAt": 1791087033970
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "question.dropped",
+      "occurredAt": 1791087033970,
+      "traceId": "0b32de53-d4b9-46c3-96df-0e363819119f",
+      "parentIds": [
+        "fef6e20e-f93e-458b-b7d0-c326ddf58f91",
+        "5136dd9c-1e20-455d-b92d-d9e1632d7698"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "questionId": "q_18f9a5edf05e66",
+        "reason": "superseded"
+      },
+      "id": "a395df69-ace2-48eb-8f13-72be63d63395",
+      "sequence": 62,
+      "receivedAt": 1791087034461
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "dom",
+      "kind": "screen.event",
+      "occurredAt": 1791087031174,
+      "traceId": "b1cdf2cd-bc01-4f6e-a48f-4339df166c8a",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "11e8e1db-7cb1-46be-9519-8858bae4cc93",
+        "frameSeq": 23,
+        "captureTime": 1791087031174,
+        "sessionEpoch": 0,
+        "kind": "open_case",
+        "caseId": "NS-2026-0103",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      "id": "a1aecf84-30dc-4a8c-ad7c-cd4b73e4afaa",
+      "sequence": 63,
+      "receivedAt": 1791087034548
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "dom",
+      "kind": "screen.event",
+      "occurredAt": 1791087031921,
+      "traceId": "b1cdf2cd-bc01-4f6e-a48f-4339df166c8a",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "44ce959f-e986-49c0-b596-c885cebd0865",
+        "frameSeq": 24,
+        "captureTime": 1791087031921,
+        "sessionEpoch": 0,
+        "kind": "open_case",
+        "caseId": "NS-2026-0101",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      "id": "1b669775-b0bd-4909-adc1-184dcba268ab",
+      "sequence": 64,
+      "receivedAt": 1791087034548
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "dom",
+      "kind": "screen.event",
+      "occurredAt": 1791087032720,
+      "traceId": "b1cdf2cd-bc01-4f6e-a48f-4339df166c8a",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "f44842b4-562d-4830-aecf-df54d37bd1a9",
+        "frameSeq": 25,
+        "captureTime": 1791087032720,
+        "sessionEpoch": 0,
+        "kind": "open_case",
+        "caseId": "NS-2026-0102",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      "id": "be9cff21-2513-434a-8cd0-d3cdcb2b52e1",
+      "sequence": 65,
+      "receivedAt": 1791087034549
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "dom",
+      "kind": "screen.event",
+      "occurredAt": 1791087033490,
+      "traceId": "b1cdf2cd-bc01-4f6e-a48f-4339df166c8a",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "b5fcc834-f79b-4e4d-ab13-90171b42b347",
+        "frameSeq": 26,
+        "captureTime": 1791087033490,
+        "sessionEpoch": 0,
+        "kind": "open_case",
+        "caseId": "NS-2026-0103",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      "id": "964faf08-500f-474d-8e41-a62ad3001c9e",
+      "sequence": 66,
+      "receivedAt": 1791087034549
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "question.dropped",
+      "occurredAt": 1791087039007,
+      "traceId": "0e171640-11a6-40ad-ab2c-4d10ee7fd80f",
+      "parentIds": [
+        "8adc9a6e-7138-4857-ac5a-27978c6bf401",
+        "619c9328-06b3-480d-a0d3-e9430d6ce6a9",
+        "bd3bc984-17b1-4d3f-a47a-abb5bd2bc790"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "questionId": "q_0ef5d996c60f61",
+        "reason": "superseded"
+      },
+      "id": "b79b3004-b7b7-4f46-be23-f7f065974109",
+      "sequence": 67,
+      "receivedAt": 1791087039008
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "question.dropped",
+      "occurredAt": 1791087039007,
+      "traceId": "0e171640-11a6-40ad-ab2c-4d10ee7fd80f",
+      "parentIds": [
+        "113717f7-8450-47c8-8ebc-d56a2479b7c1",
+        "619c9328-06b3-480d-a0d3-e9430d6ce6a9",
+        "bd3bc984-17b1-4d3f-a47a-abb5bd2bc790"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "questionId": "q_04a12810df25ab",
+        "reason": "superseded"
+      },
+      "id": "e091ccc4-35e5-41a9-8b7d-3b1c1a67ddc0",
+      "sequence": 68,
+      "receivedAt": 1791087039009
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "question.queued",
+      "occurredAt": 1791087039007,
+      "traceId": "0e171640-11a6-40ad-ab2c-4d10ee7fd80f",
+      "parentIds": [
+        "619c9328-06b3-480d-a0d3-e9430d6ce6a9",
+        "bd3bc984-17b1-4d3f-a47a-abb5bd2bc790"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "q_0bd90d2efa3c1e",
+        "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+        "kind": "counterfactual",
+        "text": "If analyst risk rating were medium instead of high, what would you decide?",
+        "decisionFamily": "reviewOutcome",
+        "target": {
+          "caseId": "NS-2026-0102",
+          "candidateIds": [
+            "cand_1d6eb373abef1a",
+            "cand_1fbc199ebe389e"
+          ],
+          "feature": "riskRating",
+          "assignment": {
+            "entityType": "company",
+            "customerStatus": "existing",
+            "accountAgeMonths": 36,
+            "jurisdictionRisk": "high",
+            "uboOwnershipPct": 20,
+            "uboVerified": true,
+            "pep": false,
+            "sanctionsHit": false,
+            "adverseMedia": false,
+            "sourceOfFunds": "verified",
+            "expectedMonthlyVolume": 18000,
+            "riskRating": "medium"
+          }
+        },
+        "value": 0.5952779806710591,
+        "reason": "competing explanations",
+        "ephemeral": false,
+        "createdAt": 1791087030510,
+        "contextVersion": 12,
+        "parentIds": [
+          "619c9328-06b3-480d-a0d3-e9430d6ce6a9",
+          "bd3bc984-17b1-4d3f-a47a-abb5bd2bc790"
+        ]
+      },
+      "id": "f6f7f8e3-468a-418f-a072-c2a7193ddfb0",
+      "sequence": 69,
+      "receivedAt": 1791087039023
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "question.queued",
+      "occurredAt": 1791087039007,
+      "traceId": "0e171640-11a6-40ad-ab2c-4d10ee7fd80f",
+      "parentIds": [
+        "619c9328-06b3-480d-a0d3-e9430d6ce6a9",
+        "bd3bc984-17b1-4d3f-a47a-abb5bd2bc790"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "q_1052d90d90a830",
+        "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+        "kind": "counterfactual",
+        "text": "If country risk were medium instead of high, what would you decide?",
+        "decisionFamily": "reviewOutcome",
+        "target": {
+          "caseId": "NS-2026-0102",
+          "candidateIds": [
+            "cand_1d6eb373abef1a",
+            "cand_138482e304d116"
+          ],
+          "feature": "jurisdictionRisk",
+          "assignment": {
+            "entityType": "company",
+            "customerStatus": "existing",
+            "accountAgeMonths": 36,
+            "jurisdictionRisk": "medium",
+            "uboOwnershipPct": 20,
+            "uboVerified": true,
+            "pep": false,
+            "sanctionsHit": false,
+            "adverseMedia": false,
+            "sourceOfFunds": "verified",
+            "expectedMonthlyVolume": 18000,
+            "riskRating": "high"
+          }
+        },
+        "value": 0.5952779806710591,
+        "reason": "competing explanations",
+        "ephemeral": false,
+        "createdAt": 1791087030510,
+        "contextVersion": 12,
+        "parentIds": [
+          "619c9328-06b3-480d-a0d3-e9430d6ce6a9",
+          "bd3bc984-17b1-4d3f-a47a-abb5bd2bc790"
+        ]
+      },
+      "id": "ca2ab725-13b5-4ee0-978c-e053a2b8c74f",
+      "sequence": 70,
+      "receivedAt": 1791087039024
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "question.queued",
+      "occurredAt": 1791087039007,
+      "traceId": "0e171640-11a6-40ad-ab2c-4d10ee7fd80f",
+      "parentIds": [
+        "619c9328-06b3-480d-a0d3-e9430d6ce6a9",
+        "bd3bc984-17b1-4d3f-a47a-abb5bd2bc790"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "q_097cd3da245ad7",
+        "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+        "kind": "counterfactual",
+        "text": "If customer status were new instead of existing (relationship age 0 months), what would you decide?",
+        "decisionFamily": "reviewOutcome",
+        "target": {
+          "caseId": "NS-2026-0102",
+          "candidateIds": [
+            "cand_1d6eb373abef1a",
+            "cand_1480dde509a89e"
+          ],
+          "feature": "customerStatus",
+          "assignment": {
+            "entityType": "company",
+            "customerStatus": "new",
+            "accountAgeMonths": 0,
+            "jurisdictionRisk": "high",
+            "uboOwnershipPct": 20,
+            "uboVerified": true,
+            "pep": false,
+            "sanctionsHit": false,
+            "adverseMedia": false,
+            "sourceOfFunds": "verified",
+            "expectedMonthlyVolume": 18000,
+            "riskRating": "high"
+          }
+        },
+        "value": 0.5952779806710589,
+        "reason": "competing explanations",
+        "ephemeral": false,
+        "createdAt": 1791087030510,
+        "contextVersion": 12,
+        "parentIds": [
+          "619c9328-06b3-480d-a0d3-e9430d6ce6a9",
+          "bd3bc984-17b1-4d3f-a47a-abb5bd2bc790"
+        ]
+      },
+      "id": "f95d8fd1-1493-4362-8b62-69934155ada3",
+      "sequence": 71,
+      "receivedAt": 1791087039024
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "question.queued",
+      "occurredAt": 1791087039007,
+      "traceId": "0e171640-11a6-40ad-ab2c-4d10ee7fd80f",
+      "parentIds": [
+        "619c9328-06b3-480d-a0d3-e9430d6ce6a9",
+        "bd3bc984-17b1-4d3f-a47a-abb5bd2bc790"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "q_097cd3da245ad7",
+        "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+        "kind": "counterfactual",
+        "text": "If relationship age were 0 months instead of 36 months (customer status new), what would you decide?",
+        "decisionFamily": "reviewOutcome",
+        "target": {
+          "caseId": "NS-2026-0102",
+          "candidateIds": [
+            "cand_1d6eb373abef1a",
+            "cand_1480dde509a89e"
+          ],
+          "feature": "accountAgeMonths",
+          "assignment": {
+            "entityType": "company",
+            "customerStatus": "new",
+            "accountAgeMonths": 0,
+            "jurisdictionRisk": "high",
+            "uboOwnershipPct": 20,
+            "uboVerified": true,
+            "pep": false,
+            "sanctionsHit": false,
+            "adverseMedia": false,
+            "sourceOfFunds": "verified",
+            "expectedMonthlyVolume": 18000,
+            "riskRating": "high"
+          }
+        },
+        "value": 0.5952779806710589,
+        "reason": "competing explanations",
+        "ephemeral": false,
+        "createdAt": 1791087030510,
+        "contextVersion": 12,
+        "parentIds": [
+          "619c9328-06b3-480d-a0d3-e9430d6ce6a9",
+          "bd3bc984-17b1-4d3f-a47a-abb5bd2bc790"
+        ]
+      },
+      "id": "0aa59c81-31fc-4a5c-b1a3-c5c207707ed7",
+      "sequence": 72,
+      "receivedAt": 1791087039025
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "question.queued",
+      "occurredAt": 1791087039007,
+      "traceId": "0e171640-11a6-40ad-ab2c-4d10ee7fd80f",
+      "parentIds": [
+        "619c9328-06b3-480d-a0d3-e9430d6ce6a9",
+        "bd3bc984-17b1-4d3f-a47a-abb5bd2bc790"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "q_0947b3867b8a24",
+        "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+        "kind": "counterfactual",
+        "text": "If largest owner identity verified were no instead of yes, what would you decide?",
+        "decisionFamily": "reviewOutcome",
+        "target": {
+          "caseId": "NS-2026-0102",
+          "candidateIds": [
+            "cand_1d6eb373abef1a",
+            "cand_0d3f082c08d8f5"
+          ],
+          "feature": "uboVerified",
+          "assignment": {
+            "entityType": "company",
+            "customerStatus": "existing",
+            "accountAgeMonths": 36,
+            "jurisdictionRisk": "high",
+            "uboOwnershipPct": 20,
+            "uboVerified": false,
+            "pep": false,
+            "sanctionsHit": false,
+            "adverseMedia": false,
+            "sourceOfFunds": "verified",
+            "expectedMonthlyVolume": 18000,
+            "riskRating": "high"
+          }
+        },
+        "value": 0.384446129665507,
+        "reason": "competing explanations",
+        "ephemeral": false,
+        "createdAt": 1791087030510,
+        "contextVersion": 12,
+        "parentIds": [
+          "619c9328-06b3-480d-a0d3-e9430d6ce6a9",
+          "bd3bc984-17b1-4d3f-a47a-abb5bd2bc790"
+        ]
+      },
+      "id": "e0e94f2a-f3ba-442f-87b4-73fe95955519",
+      "sequence": 73,
+      "receivedAt": 1791087039025
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "hypotheses.updated",
+      "occurredAt": 1791087039969,
+      "traceId": "f2c9f498-bb25-464a-89e4-6d313a7c0c13",
+      "parentIds": [
+        "9fb7e59e-c4e6-4654-ad78-e746014a9d23"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "decisionFamily": "reviewOutcome",
+        "hypothesisSetId": "hs_0f8b3532581feb",
+        "top": [
+          {
+            "candidateId": "cand_1d6eb373abef1a",
+            "description": "if largest beneficial owner share above 25% and largest owner identity verified is no then enhancedReview",
+            "weight": 0.29078504857797627
+          },
+          {
+            "candidateId": "cand_098487ef3ff2d6",
+            "description": "if analyst risk rating is not high then enhancedReview",
+            "weight": 0.07904357135370935
+          },
+          {
+            "candidateId": "cand_09bb718e7fc49c",
+            "description": "if country risk is not high then enhancedReview",
+            "weight": 0.07904357135370935
+          },
+          {
+            "candidateId": "cand_0d3f082c08d8f5",
+            "description": "if largest owner identity verified is no then enhancedReview",
+            "weight": 0.07904357135370935
+          },
+          {
+            "candidateId": "cand_138482e304d116",
+            "description": "if country risk is medium then enhancedReview",
+            "weight": 0.07904357135370935
+          }
+        ],
+        "surpriseBits": 1.1969015750250003,
+        "contradiction": false
+      },
+      "id": "20fb210e-f6ee-40b3-9579-b7aac11685b0",
+      "sequence": 74,
+      "receivedAt": 1791087039970
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "dom",
+      "kind": "screen.event",
+      "occurredAt": 1791087034238,
+      "traceId": "9274b29b-5936-47e0-9716-9ec37142e942",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "ff6668f1-22b3-4c74-baa0-a68349433065",
+        "frameSeq": 27,
+        "captureTime": 1791087034238,
+        "sessionEpoch": 0,
+        "kind": "open_case",
+        "caseId": "NS-2026-0101",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      "id": "ab8b676c-953d-4650-8825-44e2fa3eeb6e",
+      "sequence": 75,
+      "receivedAt": 1791087040085
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "dom",
+      "kind": "screen.event",
+      "occurredAt": 1791087034967,
+      "traceId": "9274b29b-5936-47e0-9716-9ec37142e942",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "37370ca7-ec3a-4cba-8a6f-829a755e1628",
+        "frameSeq": 28,
+        "captureTime": 1791087034967,
+        "sessionEpoch": 0,
+        "kind": "open_case",
+        "caseId": "NS-2026-0102",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      "id": "e31b554f-5bfe-47c4-a10f-8c549081e0d3",
+      "sequence": 76,
+      "receivedAt": 1791087040085
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "dom",
+      "kind": "screen.event",
+      "occurredAt": 1791087035690,
+      "traceId": "9274b29b-5936-47e0-9716-9ec37142e942",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "af613c14-bd42-427f-bf04-1a2429a34f1d",
+        "frameSeq": 29,
+        "captureTime": 1791087035690,
+        "sessionEpoch": 0,
+        "kind": "open_case",
+        "caseId": "NS-2026-0103",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      "id": "214afbf1-135d-474a-b04b-13b8e68251d0",
+      "sequence": 77,
+      "receivedAt": 1791087040086
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "dom",
+      "kind": "screen.event",
+      "occurredAt": 1791087036416,
+      "traceId": "9274b29b-5936-47e0-9716-9ec37142e942",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "13365f31-f56d-43fc-846a-96bc158bbc67",
+        "frameSeq": 30,
+        "captureTime": 1791087036416,
+        "sessionEpoch": 0,
+        "kind": "open_case",
+        "caseId": "NS-2026-0101",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      "id": "4a2d6bbf-fc92-4694-b255-c40086b6a41f",
+      "sequence": 78,
+      "receivedAt": 1791087040086
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "dom",
+      "kind": "screen.event",
+      "occurredAt": 1791087037134,
+      "traceId": "9274b29b-5936-47e0-9716-9ec37142e942",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "841548f8-b2f0-4ac6-b2aa-5deb700e4ce7",
+        "frameSeq": 31,
+        "captureTime": 1791087037134,
+        "sessionEpoch": 0,
+        "kind": "open_case",
+        "caseId": "NS-2026-0102",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      "id": "5813412d-85b6-4475-add9-e0bf2e207dd9",
+      "sequence": 79,
+      "receivedAt": 1791087040089
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "client",
+      "kind": "frame.received",
+      "occurredAt": 1791087013765,
+      "traceId": "d25ec437-e283-4a39-9f6a-f6866e538680",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "frameId": "f183290c-24e5-47e4-aeb2-699f063427ce",
+        "frameSeq": 26,
+        "captureTime": 1791087013765,
+        "width": 1280,
+        "height": 720,
+        "mediaPath": "90e3317d-da67-4283-a880-61cc3a86ac4c/frames/f183290c-24e5-47e4-aeb2-699f063427ce.png",
+        "redactedRegions": 0,
+        "changeScore": 1.9973198639021978
+      },
+      "id": "661e480a-505b-40fe-a88a-b9258b6e410f",
+      "sequence": 80,
+      "receivedAt": 1791087040609
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "question.dropped",
+      "occurredAt": 1791087042481,
+      "traceId": "f2c9f498-bb25-464a-89e4-6d313a7c0c13",
+      "parentIds": [
+        "f6f7f8e3-468a-418f-a072-c2a7193ddfb0",
+        "9fb7e59e-c4e6-4654-ad78-e746014a9d23",
+        "20fb210e-f6ee-40b3-9579-b7aac11685b0"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "questionId": "q_0bd90d2efa3c1e",
+        "reason": "superseded"
+      },
+      "id": "df1f5098-fbc2-4474-8a3e-4f601c4634b3",
+      "sequence": 81,
+      "receivedAt": 1791087042481
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "question.dropped",
+      "occurredAt": 1791087042481,
+      "traceId": "f2c9f498-bb25-464a-89e4-6d313a7c0c13",
+      "parentIds": [
+        "ca2ab725-13b5-4ee0-978c-e053a2b8c74f",
+        "9fb7e59e-c4e6-4654-ad78-e746014a9d23",
+        "20fb210e-f6ee-40b3-9579-b7aac11685b0"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "questionId": "q_1052d90d90a830",
+        "reason": "superseded"
+      },
+      "id": "0f880a33-36c8-42f3-9bee-1296cec60436",
+      "sequence": 82,
+      "receivedAt": 1791087042482
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "question.dropped",
+      "occurredAt": 1791087042481,
+      "traceId": "f2c9f498-bb25-464a-89e4-6d313a7c0c13",
+      "parentIds": [
+        "0aa59c81-31fc-4a5c-b1a3-c5c207707ed7",
+        "9fb7e59e-c4e6-4654-ad78-e746014a9d23",
+        "20fb210e-f6ee-40b3-9579-b7aac11685b0"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "questionId": "q_097cd3da245ad7",
+        "reason": "superseded"
+      },
+      "id": "d444d5b4-5bc2-476f-9c24-ae741b1597f2",
+      "sequence": 83,
+      "receivedAt": 1791087042483
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "question.dropped",
+      "occurredAt": 1791087042481,
+      "traceId": "f2c9f498-bb25-464a-89e4-6d313a7c0c13",
+      "parentIds": [
+        "e0e94f2a-f3ba-442f-87b4-73fe95955519",
+        "9fb7e59e-c4e6-4654-ad78-e746014a9d23",
+        "20fb210e-f6ee-40b3-9579-b7aac11685b0"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "questionId": "q_0947b3867b8a24",
+        "reason": "superseded"
+      },
+      "id": "9c6d982f-55af-4a53-a0f8-3c8502133a5d",
+      "sequence": 84,
+      "receivedAt": 1791087042484
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "question.queued",
+      "occurredAt": 1791087042481,
+      "traceId": "f2c9f498-bb25-464a-89e4-6d313a7c0c13",
+      "parentIds": [
+        "9fb7e59e-c4e6-4654-ad78-e746014a9d23",
+        "20fb210e-f6ee-40b3-9579-b7aac11685b0"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "q_1c7c2aa81f7946",
+        "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+        "kind": "why_probe",
+        "text": "What led you to approve onboarding here, and what would have changed your mind?",
+        "decisionFamily": "reviewOutcome",
+        "target": {
+          "caseId": "NS-2026-0102",
+          "candidateIds": []
+        },
+        "value": 1.1969015750250003,
+        "reason": "unexplained decision",
+        "ephemeral": true,
+        "createdAt": 1791087039977,
+        "contextVersion": 13,
+        "parentIds": [
+          "9fb7e59e-c4e6-4654-ad78-e746014a9d23",
+          "20fb210e-f6ee-40b3-9579-b7aac11685b0"
+        ]
+      },
+      "id": "8110a975-ae80-476e-881f-a122612def45",
+      "sequence": 85,
+      "receivedAt": 1791087042484
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "question.queued",
+      "occurredAt": 1791087042481,
+      "traceId": "f2c9f498-bb25-464a-89e4-6d313a7c0c13",
+      "parentIds": [
+        "9fb7e59e-c4e6-4654-ad78-e746014a9d23",
+        "20fb210e-f6ee-40b3-9579-b7aac11685b0"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "q_099a2062f90fa3",
+        "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+        "kind": "counterfactual",
+        "text": "If the country risk were \"medium\" instead of high, what would you decide?",
+        "decisionFamily": "reviewOutcome",
+        "target": {
+          "caseId": "NS-2026-0102",
+          "candidateIds": [
+            "cand_1d6eb373abef1a",
+            "cand_138482e304d116"
+          ],
+          "feature": "jurisdictionRisk",
+          "assignment": {
+            "entityType": "company",
+            "customerStatus": "existing",
+            "accountAgeMonths": 36,
+            "jurisdictionRisk": "medium",
+            "uboOwnershipPct": 20,
+            "uboVerified": true,
+            "pep": false,
+            "sanctionsHit": false,
+            "adverseMedia": false,
+            "sourceOfFunds": "verified",
+            "expectedMonthlyVolume": 18000,
+            "riskRating": "high"
+          }
+        },
+        "value": 0.5952779806710591,
+        "reason": "competing explanations",
+        "ephemeral": false,
+        "createdAt": 1791087039977,
+        "contextVersion": 13,
+        "parentIds": [
+          "9fb7e59e-c4e6-4654-ad78-e746014a9d23",
+          "20fb210e-f6ee-40b3-9579-b7aac11685b0"
+        ]
+      },
+      "id": "b7e2cf8b-dfe7-435c-9dc7-1ac2846b955d",
+      "sequence": 86,
+      "receivedAt": 1791087042484
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "question.queued",
+      "occurredAt": 1791087042481,
+      "traceId": "f2c9f498-bb25-464a-89e4-6d313a7c0c13",
+      "parentIds": [
+        "9fb7e59e-c4e6-4654-ad78-e746014a9d23",
+        "20fb210e-f6ee-40b3-9579-b7aac11685b0"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "q_1f396f21e99686",
+        "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+        "kind": "counterfactual",
+        "text": "If the analyst risk rating were \"medium\" instead of high, what would you decide?",
+        "decisionFamily": "reviewOutcome",
+        "target": {
+          "caseId": "NS-2026-0102",
+          "candidateIds": [
+            "cand_1d6eb373abef1a",
+            "cand_1fbc199ebe389e"
+          ],
+          "feature": "riskRating",
+          "assignment": {
+            "entityType": "company",
+            "customerStatus": "existing",
+            "accountAgeMonths": 36,
+            "jurisdictionRisk": "high",
+            "uboOwnershipPct": 20,
+            "uboVerified": true,
+            "pep": false,
+            "sanctionsHit": false,
+            "adverseMedia": false,
+            "sourceOfFunds": "verified",
+            "expectedMonthlyVolume": 18000,
+            "riskRating": "medium"
+          }
+        },
+        "value": 0.5952779806710591,
+        "reason": "competing explanations",
+        "ephemeral": false,
+        "createdAt": 1791087039977,
+        "contextVersion": 13,
+        "parentIds": [
+          "9fb7e59e-c4e6-4654-ad78-e746014a9d23",
+          "20fb210e-f6ee-40b3-9579-b7aac11685b0"
+        ]
+      },
+      "id": "e98b0b4d-ffd7-46d8-a537-292cff973a49",
+      "sequence": 87,
+      "receivedAt": 1791087042486
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "question.queued",
+      "occurredAt": 1791087042481,
+      "traceId": "f2c9f498-bb25-464a-89e4-6d313a7c0c13",
+      "parentIds": [
+        "9fb7e59e-c4e6-4654-ad78-e746014a9d23",
+        "20fb210e-f6ee-40b3-9579-b7aac11685b0"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "q_0a2e3538764e2f",
+        "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+        "kind": "counterfactual",
+        "text": "If this customer were \"new\" instead of existing, with a relationship age of 0 months, what would you decide?",
+        "decisionFamily": "reviewOutcome",
+        "target": {
+          "caseId": "NS-2026-0102",
+          "candidateIds": [
+            "cand_1d6eb373abef1a",
+            "cand_1480dde509a89e"
+          ],
+          "feature": "customerStatus",
+          "assignment": {
+            "entityType": "company",
+            "customerStatus": "new",
+            "accountAgeMonths": 0,
+            "jurisdictionRisk": "high",
+            "uboOwnershipPct": 20,
+            "uboVerified": true,
+            "pep": false,
+            "sanctionsHit": false,
+            "adverseMedia": false,
+            "sourceOfFunds": "verified",
+            "expectedMonthlyVolume": 18000,
+            "riskRating": "high"
+          }
+        },
+        "value": 0.5952779806710589,
+        "reason": "competing explanations",
+        "ephemeral": false,
+        "createdAt": 1791087039977,
+        "contextVersion": 13,
+        "parentIds": [
+          "9fb7e59e-c4e6-4654-ad78-e746014a9d23",
+          "20fb210e-f6ee-40b3-9579-b7aac11685b0"
+        ]
+      },
+      "id": "98388952-3cd4-4416-af0e-54ee5e55e5ac",
+      "sequence": 88,
+      "receivedAt": 1791087042486
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "question.queued",
+      "occurredAt": 1791087042481,
+      "traceId": "f2c9f498-bb25-464a-89e4-6d313a7c0c13",
+      "parentIds": [
+        "9fb7e59e-c4e6-4654-ad78-e746014a9d23",
+        "20fb210e-f6ee-40b3-9579-b7aac11685b0"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "q_0a2e3538764e2f",
+        "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+        "kind": "counterfactual",
+        "text": "If the relationship age were 0 months instead of 36, with the customer status new, what would you decide?",
+        "decisionFamily": "reviewOutcome",
+        "target": {
+          "caseId": "NS-2026-0102",
+          "candidateIds": [
+            "cand_1d6eb373abef1a",
+            "cand_1480dde509a89e"
+          ],
+          "feature": "accountAgeMonths",
+          "assignment": {
+            "entityType": "company",
+            "customerStatus": "new",
+            "accountAgeMonths": 0,
+            "jurisdictionRisk": "high",
+            "uboOwnershipPct": 20,
+            "uboVerified": true,
+            "pep": false,
+            "sanctionsHit": false,
+            "adverseMedia": false,
+            "sourceOfFunds": "verified",
+            "expectedMonthlyVolume": 18000,
+            "riskRating": "high"
+          }
+        },
+        "value": 0.5952779806710589,
+        "reason": "competing explanations",
+        "ephemeral": false,
+        "createdAt": 1791087039977,
+        "contextVersion": 13,
+        "parentIds": [
+          "9fb7e59e-c4e6-4654-ad78-e746014a9d23",
+          "20fb210e-f6ee-40b3-9579-b7aac11685b0"
+        ]
+      },
+      "id": "fb102efd-69cf-4e2d-8952-fd9f4c7fb33e",
+      "sequence": 89,
+      "receivedAt": 1791087042486
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "client",
+      "kind": "frame.received",
+      "occurredAt": 1791087038267,
+      "traceId": "9e664c03-c5c0-44bf-9246-cc14bf0a419f",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "frameId": "ef3988f7-1655-48e1-a12f-d2917c8cd277",
+        "frameSeq": 52,
+        "captureTime": 1791087038267,
+        "width": 1280,
+        "height": 720,
+        "mediaPath": "90e3317d-da67-4283-a880-61cc3a86ac4c/frames/ef3988f7-1655-48e1-a12f-d2917c8cd277.png",
+        "redactedRegions": 0,
+        "changeScore": 2.2158283591270447
+      },
+      "id": "815aabcb-2bbc-45d1-9d01-78253971936b",
+      "sequence": 90,
+      "receivedAt": 1791087044201
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "dom",
+      "kind": "screen.event",
+      "occurredAt": 1791087051984,
+      "traceId": "400e09f5-6080-441b-9a0a-b0462d48ea20",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "bc13da3b-6ca9-452e-9bc3-a0d7b84388f1",
+        "frameSeq": 32,
+        "captureTime": 1791087051984,
+        "sessionEpoch": 0,
+        "kind": "open_case",
+        "caseId": "NS-2026-0103",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      "id": "17c0e876-c40f-4b77-8181-3982a9bd86a1",
+      "sequence": 91,
+      "receivedAt": 1791087052351
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "client",
+      "kind": "frame.received",
+      "occurredAt": 1791087052265,
+      "traceId": "9c234a03-4857-4c60-9516-31ddbaa4b688",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "frameId": "73309762-b0b6-4767-bcd1-fe86246db663",
+        "frameSeq": 53,
+        "captureTime": 1791087052265,
+        "width": 1280,
+        "height": 720,
+        "mediaPath": "90e3317d-da67-4283-a880-61cc3a86ac4c/frames/73309762-b0b6-4767-bcd1-fe86246db663.png",
+        "redactedRegions": 0,
+        "changeScore": 2.0012044111887612
+      },
+      "id": "549350d8-305b-4351-b9df-01e75f3397a1",
+      "sequence": 92,
+      "receivedAt": 1791087052506
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "client",
+      "kind": "frame.received",
+      "occurredAt": 1791087052765,
+      "traceId": "6fac4345-9d51-4680-9d6d-e0f22e509bda",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "frameId": "205a55db-de98-4414-b63a-af4bc545cc10",
+        "frameSeq": 54,
+        "captureTime": 1791087052765,
+        "width": 1280,
+        "height": 720,
+        "mediaPath": "90e3317d-da67-4283-a880-61cc3a86ac4c/frames/205a55db-de98-4414-b63a-af4bc545cc10.png",
+        "redactedRegions": 0,
+        "changeScore": 0.26664002074135673
+      },
+      "id": "d83a9179-5436-4ca1-bf5c-967435caac37",
+      "sequence": 93,
+      "receivedAt": 1791087052963
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "client",
+      "kind": "frame.received",
+      "occurredAt": 1791087053265,
+      "traceId": "b3ede82c-58d5-434c-acb3-2e926c3d464a",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "frameId": "0e269d7e-ab80-4324-9a79-31398082192a",
+        "frameSeq": 55,
+        "captureTime": 1791087053265,
+        "width": 1280,
+        "height": 720,
+        "mediaPath": "90e3317d-da67-4283-a880-61cc3a86ac4c/frames/0e269d7e-ab80-4324-9a79-31398082192a.png",
+        "redactedRegions": 0,
+        "changeScore": 0.26684292157491046
+      },
+      "id": "c5b9b88b-613f-4efc-896e-995cb8c8c808",
+      "sequence": 94,
+      "receivedAt": 1791087053597
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "client",
+      "kind": "frame.received",
+      "occurredAt": 1791087053765,
+      "traceId": "78950a60-9482-43f1-8ad5-ce70fa0029ac",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "frameId": "a5feae35-d84d-4c17-b0f2-fc42986b6682",
+        "frameSeq": 56,
+        "captureTime": 1791087053765,
+        "width": 1280,
+        "height": 720,
+        "mediaPath": "90e3317d-da67-4283-a880-61cc3a86ac4c/frames/a5feae35-d84d-4c17-b0f2-fc42986b6682.png",
+        "redactedRegions": 0,
+        "changeScore": 0.26589951912562054
+      },
+      "id": "34dc4ab8-4f72-4a57-a82f-a52a266b8cc9",
+      "sequence": 95,
+      "receivedAt": 1791087053968
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "client",
+      "kind": "frame.received",
+      "occurredAt": 1791087054266,
+      "traceId": "591b28f1-611b-4cac-8bca-45a3a2563b9e",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "frameId": "d9e6261d-010b-4f0d-a23b-b0084dd7ea37",
+        "frameSeq": 57,
+        "captureTime": 1791087054266,
+        "width": 1280,
+        "height": 720,
+        "mediaPath": "90e3317d-da67-4283-a880-61cc3a86ac4c/frames/d9e6261d-010b-4f0d-a23b-b0084dd7ea37.png",
+        "redactedRegions": 0,
+        "changeScore": 0.07192599111133152
+      },
+      "id": "e2ab8a10-54f3-40af-a24b-efbdddfadb46",
+      "sequence": 96,
+      "receivedAt": 1791087054669
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "client",
+      "kind": "frame.received",
+      "occurredAt": 1791087054765,
+      "traceId": "600665e3-3124-44fc-91f8-cc3adf51cdbc",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "frameId": "32263e91-efbe-48ce-978b-5e0028007f4e",
+        "frameSeq": 58,
+        "captureTime": 1791087054765,
+        "width": 1280,
+        "height": 720,
+        "mediaPath": "90e3317d-da67-4283-a880-61cc3a86ac4c/frames/32263e91-efbe-48ce-978b-5e0028007f4e.png",
+        "redactedRegions": 0,
+        "changeScore": 0.20689128504859078
+      },
+      "id": "3686ac00-17d3-4e9e-96b4-e88edfef3bb5",
+      "sequence": 97,
+      "receivedAt": 1791087054987
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "dom",
+      "kind": "screen.event",
+      "occurredAt": 1791087055293,
+      "traceId": "6e5f9c07-836b-4ef2-a316-70ecbf5257e3",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "6de7c41c-4942-4652-ab64-ccb239ad59ee",
+        "frameSeq": 33,
+        "captureTime": 1791087055293,
+        "sessionEpoch": 0,
+        "kind": "open_case",
+        "caseId": "NS-2026-0101",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      "id": "8d12fd95-3916-426e-b40f-3e6e543223dc",
+      "sequence": 98,
+      "receivedAt": 1791087057207
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "client",
+      "kind": "frame.received",
+      "occurredAt": 1791087057265,
+      "traceId": "b89b38b7-858d-44c6-81a0-976a9009ce50",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "frameId": "6771ebe3-0d19-45a4-9361-4bb4fcfe6824",
+        "frameSeq": 63,
+        "captureTime": 1791087057265,
+        "width": 1280,
+        "height": 720,
+        "mediaPath": "90e3317d-da67-4283-a880-61cc3a86ac4c/frames/6771ebe3-0d19-45a4-9361-4bb4fcfe6824.png",
+        "redactedRegions": 0,
+        "changeScore": 0.26664002074135673
+      },
+      "id": "aecf7679-b699-4e61-bdaf-faa556f4126e",
+      "sequence": 99,
+      "receivedAt": 1791087057470
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "dom",
+      "kind": "screen.event",
+      "occurredAt": 1791087055803,
+      "traceId": "d5a88ae3-ec69-4c23-bda8-920344a3ae17",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "9edf8512-fed6-4113-8c31-07c886ec7db7",
+        "frameSeq": 34,
+        "captureTime": 1791087055803,
+        "sessionEpoch": 0,
+        "kind": "open_case",
+        "caseId": "NS-2026-0102",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      "id": "faa2b884-015b-42c8-9696-999d59b126be",
+      "sequence": 100,
+      "receivedAt": 1791087057512
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "dom",
+      "kind": "screen.event",
+      "occurredAt": 1791087056250,
+      "traceId": "d5a88ae3-ec69-4c23-bda8-920344a3ae17",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "65eb2407-b718-4119-8b4a-7e6ee3a1367e",
+        "frameSeq": 35,
+        "captureTime": 1791087056250,
+        "sessionEpoch": 0,
+        "kind": "open_case",
+        "caseId": "NS-2026-0103",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      "id": "ebe7652f-8bd7-4c49-b8c6-dd9778a54022",
+      "sequence": 101,
+      "receivedAt": 1791087057513
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "client",
+      "kind": "frame.received",
+      "occurredAt": 1791087057765,
+      "traceId": "df7ae7e7-d73f-476d-a224-11dfea3e2ee2",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "frameId": "d4bd755c-7cbd-4219-b719-355b0211dacf",
+        "frameSeq": 64,
+        "captureTime": 1791087057765,
+        "width": 1280,
+        "height": 720,
+        "mediaPath": "90e3317d-da67-4283-a880-61cc3a86ac4c/frames/d4bd755c-7cbd-4219-b719-355b0211dacf.png",
+        "redactedRegions": 0,
+        "changeScore": 0.26684292157491046
+      },
+      "id": "8f13064a-1291-41a9-92f7-435f7525dd6f",
+      "sequence": 102,
+      "receivedAt": 1791087057962
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "client",
+      "kind": "frame.received",
+      "occurredAt": 1791087058265,
+      "traceId": "2443c96f-3e6f-4488-be09-d82c3b1804ea",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "frameId": "706355da-9c2b-41e0-8eec-28c216345c7a",
+        "frameSeq": 65,
+        "captureTime": 1791087058265,
+        "width": 1280,
+        "height": 720,
+        "mediaPath": "90e3317d-da67-4283-a880-61cc3a86ac4c/frames/706355da-9c2b-41e0-8eec-28c216345c7a.png",
+        "redactedRegions": 0,
+        "changeScore": 0.26589951912562054
+      },
+      "id": "6a468ebb-2f05-403f-aa16-1ecfdce5c236",
+      "sequence": 103,
+      "receivedAt": 1791087058671
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "dom",
+      "kind": "screen.event",
+      "occurredAt": 1791087058519,
+      "traceId": "99e835ca-df0b-44b0-8e7f-87060daccda4",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "b157b4ff-bfd3-4101-a7d2-160b7ceeae7c",
+        "frameSeq": 36,
+        "captureTime": 1791087058519,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0103",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "high",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      "id": "ff7ec555-2c4a-4717-b2fc-64db2e395940",
+      "sequence": 104,
+      "receivedAt": 1791087058892
+    },
+    {
+      "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+      "source": "engine",
+      "kind": "interlock.check",
+      "occurredAt": 1791087059219,
+      "traceId": "1515188f-d3ac-42c3-bf20-dd0ce084a866",
+      "parentIds": [
+        "97992dba-31b3-4621-b1cd-2088382b523c"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "caseId": "NS-2026-0103",
+        "action": "escalateCompliance",
+        "edits": {
+          "riskRating": "high"
+        },
+        "result": {
+          "decision": "needs_approval",
+          "matchedRules": [
+            "rule_0db2a2b89d2203"
+          ],
+          "missingFeatures": [],
+          "evidence": [
+            {
+              "kind": "expert_quote",
+              "utteranceId": "a38f33df-903f-4659-8dd9-f38f14b8997d",
+              "exactQuote": "Never approve a politically exposed person without compliance sign-off.",
+              "t0Ms": 55443,
+              "t1Ms": 60107,
+              "frameIds": [
+                "4e4eb7c1-f661-4ded-b934-077141c0988d"
+              ],
+              "eventIds": [],
+              "relation": "supports",
+              "provenance": "human_voice"
+            }
+          ]
+        }
+      },
+      "id": "0a7599c8-a65e-4c0c-92c9-7939226953da",
+      "sequence": 105,
+      "receivedAt": 1791087059220
+    }
+  ]
+}

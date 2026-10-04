@@ -1,0 +1,28 @@
+$ pnpm --filter @vashistha/web exec tsx ../../scripts/live-hindi-run.ts --out /home/24b4530/modiji/docs/evidence/live/rerun-2026-10-04/hindi
+· agent: vashistha-interviewer-v3; presets [hi]; client language override allowed; input pcm_16000
+· tts: eleven_multilingual_v2 → 7105 ms of pcm_16000
+· session: 20160724-a6e2-40a6-901a-0d48a5daf0b4 expert {"id":"priya-sharma-synthetic","name":"Priya Sharma (synthetic)","language":"hi"}
+· decision: NS-2026-0102 → enhancedReview: committed
+· frame: redacted frame 80446526-f3df-4f1e-a4ed-4ae32b17369b (docs/evidence/p1/case-1.png)
+· question: why_probe: आपको किस बात से लगा कि इस केस को एन्हांस्ड रिव्यू के लिए भेजना चाहिए, और किस बात से आपका फ़ैसला बदल सकता था? (English: What told you to send this one to enhanced review, and what would have changed your mind?)
+· voice: conversation conv_4501m42kdwt8eyjtww7bt75gbzze; input pcm_16000; ASR language hi (client override)
+PASS agent spoke exactly the authorised question: आपको किस बात से लगा कि इस केस को एन्हांस्ड रिव्यू के लिए भेजना चाहिए, और किस बात से आपका फ़ैसला बदल सकता था?
+· asr: अगर देश high-risk list पर है, तो मैं desk level पर approve नहीं करती। ऐसे case में पहले enhanced review होता है।
+PASS ASR transcribed Hindi (Devanagari): अगर देश high-risk list पर है, तो मैं desk level पर approve नहीं करती। ऐसे case में पहले enhanced review होता है।
+· utterance: adaaa92c-5b26-4b13-bcb2-fd4cbf3144f2: language hi, translation {"status":"translated","text":"If the country is on the high-risk list, I do not approve at desk level. In such a case, an enhanced review happens first."}
+PASS utterance recorded as Hindi: hi
+PASS English translation stored: {"status":"translated","text":"If the country is on the high-risk list, I do not approve at desk level. In such a case, an enhanced review happens first."}
+FAIL parser quoted the original Hindi words: []
+PASS utterance.translated entry (source engine, parent the utterance): 1d5887af-d6b7-4371-80a8-18752ced3a8d
+FAIL confirmed rule: forbid approve when jurisdictionRisk == high: "no forbid-approve rule"
+FAIL rule evidence: Hindi exactQuote + English translation: {}
+FAIL MCP check_action cites the Hindi quote with its English translation: Insufficient information: rules could block or require approval for "approve" (Approve onboarding), but these case features are unknown: accountAgeMonths (Relationship age (months)), sourceOfFunds (Source of funds). Find them and call check_action again; do not proceed in the meantime. Pending rule rule_03e987e9b68836: "Never approve a customer from a high-risk country at desk level unless they've banked with us for two years with verified funds." (expert expert-cad2596d-53dd-427d-aa45-d73d91bd7844, 1:02.9–1:10.0). Pending rule rule_1e5796de1f0929: "Never approve a customer from a high-risk country at desk level unless they've banked with us for two years with verified funds." (expert expert-cad2596d-53dd-427d-aa45-d73d91bd7844, 1:02.9–1:10.0).
+FAIL tutor shows the rule with its English translation: "rule not in the tutor's rulebook"
+
+SYNTHETIC VOICE INPUT — the expert's speech is ElevenLabs text-to-speech, not a person
+Evidence: /home/24b4530/modiji/docs/evidence/live/rerun-2026-10-04/hindi/hindi-run.{json,txt} — 5 check(s) failed
+Error: ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL
+
+  × "pnpm recursive exec" failed in /home/24b4530/modiji/apps/web
+
+[ELIFECYCLE] Command failed with exit code 1.

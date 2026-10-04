@@ -1,0 +1,29 @@
+{
+  "label": "synthetic voice input (ElevenLabs TTS)",
+  "conversation_id": "conv_8601m42hm278fe0977g41jxs0s5z",
+  "status": "done",
+  "sessionId": "a2860d2f-2fc2-45d6-9a81-97e58813c62b",
+  "metadata": {
+    "start": 1791086956,
+    "duration": 49,
+    "termination_reason": "Client disconnected: 1000",
+    "error": null
+  },
+  "transcript": [
+    {
+      "role": "user",
+      "t": 1,
+      "msg": "Let me jot down the ownership details while I read through this file."
+    },
+    {
+      "role": "agent",
+      "t": 15,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 15,
+      "msg": null
+    }
+  ]
+}

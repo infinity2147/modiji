@@ -1,0 +1,379 @@
+{
+  "label": "synthetic voice input (ElevenLabs TTS)",
+  "conversation_id": "conv_8401m42jqan4exct1n1ffmt401fz",
+  "status": "done",
+  "sessionId": "5e976f1b-925e-4227-bd54-96cff311fe86",
+  "metadata": {
+    "start": 1791088112,
+    "duration": 170,
+    "termination_reason": "Client disconnected: 1000",
+    "error": null
+  },
+  "transcript": [
+    {
+      "role": "user",
+      "t": 1,
+      "msg": "Okay. Mm-hmm."
+    },
+    {
+      "role": "agent",
+      "t": 4,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 4,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 5,
+      "msg": "Right."
+    },
+    {
+      "role": "agent",
+      "t": 6,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 6,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 8,
+      "msg": "Yeah."
+    },
+    {
+      "role": "agent",
+      "t": 9,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 9,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 10,
+      "msg": "हम्म।"
+    },
+    {
+      "role": "agent",
+      "t": 11,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 11,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 11,
+      "msg": "Okay."
+    },
+    {
+      "role": "agent",
+      "t": 12,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 12,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 13,
+      "msg": "Mm-hmm."
+    },
+    {
+      "role": "agent",
+      "t": 14,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 14,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 15,
+      "msg": "Right."
+    },
+    {
+      "role": "agent",
+      "t": 16,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 16,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 18,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 18,
+      "msg": "What led you to send this to enhanced review? And what would have changed your mind?"
+    },
+    {
+      "role": "user",
+      "t": 25,
+      "msg": "The largest owner holds 35% and isn't verified."
+    },
+    {
+      "role": "agent",
+      "t": 29,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 29,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 29,
+      "msg": "Anything over 25% that isn't verified."
+    },
+    {
+      "role": "agent",
+      "t": 32,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 32,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 32,
+      "msg": "Those to enhanced review."
+    },
+    {
+      "role": "agent",
+      "t": 34,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 34,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 38,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 39,
+      "msg": "If the entity type were \"individual\" instead of company, with the largest beneficial owner share at 100%, what would you decide?"
+    },
+    {
+      "role": "user",
+      "t": 49,
+      "msg": "If the largest owner holds more than 25% and isn't verified, it goes to enhanced review."
+    },
+    {
+      "role": "agent",
+      "t": 55,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 55,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 55,
+      "msg": "Yeah."
+    },
+    {
+      "role": "agent",
+      "t": 56,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 56,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 65,
+      "msg": "Mm-hmm."
+    },
+    {
+      "role": "agent",
+      "t": 66,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 66,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 72,
+      "msg": "Okay."
+    },
+    {
+      "role": "agent",
+      "t": 73,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 73,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 76,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 76,
+      "msg": "What made you approve onboarding here, and what would have changed your mind?"
+    },
+    {
+      "role": "user",
+      "t": 82,
+      "msg": "They've banked with us for three years, and their source of funds is verified, so the high-risk country on its own doesn't send them to enhanced review."
+    },
+    {
+      "role": "agent",
+      "t": 90,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 90,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 95,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 95,
+      "msg": "If the country risk were \"medium\" instead of high, what would you decide?"
+    },
+    {
+      "role": "user",
+      "t": 102,
+      "msg": "Country risk alone, isn't it?"
+    },
+    {
+      "role": "agent",
+      "t": 104,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 104,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 104,
+      "msg": "A long relationship with verified funds lets me approve high-risk customers."
+    },
+    {
+      "role": "agent",
+      "t": 108,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 108,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 109,
+      "msg": "Mm-hmm."
+    },
+    {
+      "role": "agent",
+      "t": 110,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 110,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 120,
+      "msg": "Okay."
+    },
+    {
+      "role": "agent",
+      "t": 121,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 121,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 122,
+      "msg": "Mm-hmm."
+    },
+    {
+      "role": "agent",
+      "t": 123,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 123,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 129,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 130,
+      "msg": "What made you escalate to the compliance officer here, and what would have changed your mind?"
+    },
+    {
+      "role": "user",
+      "t": 137,
+      "msg": "He's a politically exposed person, so it goes to the compliance officer, whatever else the file says."
+    },
+    {
+      "role": "agent",
+      "t": 143,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 143,
+      "msg": null
+    }
+  ]
+}

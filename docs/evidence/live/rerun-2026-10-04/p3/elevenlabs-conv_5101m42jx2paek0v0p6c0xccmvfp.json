@@ -1,0 +1,139 @@
+{
+  "label": "synthetic voice input (ElevenLabs TTS)",
+  "conversation_id": "conv_5101m42jx2paek0v0p6c0xccmvfp",
+  "status": "done",
+  "sessionId": "518a1610-d3e8-481d-8919-77a11ab49b8e",
+  "metadata": {
+    "start": 1791088300,
+    "duration": 174,
+    "termination_reason": "Client disconnected: 1000",
+    "error": null
+  },
+  "transcript": [
+    {
+      "role": "user",
+      "t": 10,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 10,
+      "msg": "What made you decide to approve onboarding here, and what would have changed your mind?"
+    },
+    {
+      "role": "user",
+      "t": 17,
+      "msg": "A low-risk individual we've known for years. Nothing flags it, so I approve."
+    },
+    {
+      "role": "agent",
+      "t": 22,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 22,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 27,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 27,
+      "msg": "If the entity type were \"trust\" instead of individual, what would you decide?"
+    },
+    {
+      "role": "user",
+      "t": 34,
+      "msg": "For a company or a trust, I look at the largest owner. For an individual, the owner threshold doesn't apply."
+    },
+    {
+      "role": "agent",
+      "t": 41,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 41,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 46,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 46,
+      "msg": "What led you to request documents here, and what would have changed your mind?"
+    },
+    {
+      "role": "user",
+      "t": 53,
+      "msg": "No source of funds at 85,000 a month. Above 50,000 a month without a source of funds, I request documents."
+    },
+    {
+      "role": "agent",
+      "t": 61,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 61,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 65,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 66,
+      "msg": "If the entity type were \"individual\" instead of company, with the largest beneficial owner share at 100%, what would you..."
+    },
+    {
+      "role": "user",
+      "t": 74,
+      "msg": "If the largest owner holds more than 25% and isn't verified, it goes to enhanced review."
+    },
+    {
+      "role": "agent",
+      "t": 80,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 80,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 85,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 85,
+      "msg": "What led you to send this one to enhanced review, and what would have changed your mind?"
+    },
+    {
+      "role": "user",
+      "t": 93,
+      "msg": "Adverse media in a medium-risk country sends it to enhanced review."
+    },
+    {
+      "role": "agent",
+      "t": 97,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 97,
+      "msg": null
+    }
+  ]
+}

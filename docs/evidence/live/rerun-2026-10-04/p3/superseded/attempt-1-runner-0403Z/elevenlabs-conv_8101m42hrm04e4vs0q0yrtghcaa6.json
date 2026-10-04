@@ -1,0 +1,139 @@
+{
+  "label": "synthetic voice input (ElevenLabs TTS)",
+  "conversation_id": "conv_8101m42hrm04e4vs0q0yrtghcaa6",
+  "status": "done",
+  "sessionId": "5fdd0e97-ebed-47c9-9b69-7bac3b989f54",
+  "metadata": {
+    "start": 1791087106,
+    "duration": 172,
+    "termination_reason": "Client disconnected: 1000",
+    "error": null
+  },
+  "transcript": [
+    {
+      "role": "user",
+      "t": 6,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 7,
+      "msg": "What told you to approve onboarding here, and what would have changed your mind?"
+    },
+    {
+      "role": "user",
+      "t": 14,
+      "msg": "A low-risk individual we've known for years. Nothing flags it, so I approve."
+    },
+    {
+      "role": "agent",
+      "t": 18,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 18,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 35,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 35,
+      "msg": "If the country risk were \"high\" instead of low, what would you decide?"
+    },
+    {
+      "role": "user",
+      "t": 42,
+      "msg": "Country risk matters, but a long relationship with verified funds can outweigh a high-risk country."
+    },
+    {
+      "role": "agent",
+      "t": 48,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 48,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 57,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 58,
+      "msg": "What made you decide to request documents here? And what would have changed your mind?..."
+    },
+    {
+      "role": "user",
+      "t": 61,
+      "msg": "No source of funds at 85,000 a month. Above 50,000 a month without a source of funds, I request documents."
+    },
+    {
+      "role": "agent",
+      "t": 69,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 69,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 74,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 75,
+      "msg": "What led you to send this to enhanced review? And what would have changed your mind?"
+    },
+    {
+      "role": "user",
+      "t": 82,
+      "msg": "Adverse media in a medium-risk country sends it to enhanced review."
+    },
+    {
+      "role": "agent",
+      "t": 86,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 86,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 91,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 91,
+      "msg": "If the country risk were \"low\" instead of medium, what would you decide?"
+    },
+    {
+      "role": "user",
+      "t": 98,
+      "msg": "Country risk matters, but a long relationship with verified funds can outweigh a high-risk country."
+    },
+    {
+      "role": "agent",
+      "t": 105,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 105,
+      "msg": null
+    }
+  ]
+}

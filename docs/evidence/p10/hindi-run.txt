@@ -1,0 +1,72 @@
+P10 Hindi→English LIVE run — production — SYNTHETIC VOICE INPUT — the expert's speech is ElevenLabs text-to-speech, not a person
+Session 20160724-a6e2-40a6-901a-0d48a5daf0b4 · ElevenLabs conversation conv_4501m42kdwt8eyjtww7bt75gbzze · utterance adaaa92c-5b26-4b13-bcb2-fd4cbf3144f2
+Production build f317447 (agents synced: interviewer v3 with the Hindi preset). Synthetic expert "Priya Sharma (synthetic)", language hi.
+
+RESULT: the chain worked end to end; the script's own in-line checks ran too early (harness timing, not product).
+  The script reads the answer parse from the utterance POST response and the ledger immediately. Since 1b0c089 the server
+  parses an answer only when its window closes (next agent turn / authorization, or 12 s without a new segment), so at
+  04:41:10Z there was no answer.parsed yet. answer.parsed was appended at 04:41:23.689Z (receivedAt 1791088883689),
+  18.5 s after the transcript, with rule.confirmed ×2. A read-back of the same session (no new speech) passed every check.
+
+=== 1. Run as executed (scripts/live-hindi-run.ts, unchanged output) ===
+P10 Hindi→English run — SYNTHETIC VOICE INPUT — the expert's speech is ElevenLabs text-to-speech, not a person
+target https://vashistha-production.up.railway.app · session 20160724-a6e2-40a6-901a-0d48a5daf0b4 · 2026-10-04T04:40:35.403Z → 2026-10-04T04:41:10.087Z
+transcript source: ElevenLabs agent ASR (Scribe realtime) of the synthetic speech
+
+2026-10-04T04:40:35.866Z  agent: vashistha-interviewer-v3; presets [hi]; client language override allowed; input pcm_16000
+2026-10-04T04:40:37.128Z  tts: eleven_multilingual_v2 → 7105 ms of pcm_16000
+2026-10-04T04:40:38.119Z  session: 20160724-a6e2-40a6-901a-0d48a5daf0b4 expert {"id":"priya-sharma-synthetic","name":"Priya Sharma (synthetic)","language":"hi"}
+2026-10-04T04:40:39.195Z  decision: NS-2026-0102 → enhancedReview: committed
+2026-10-04T04:40:39.791Z  frame: redacted frame 80446526-f3df-4f1e-a4ed-4ae32b17369b (docs/evidence/p1/case-1.png)
+2026-10-04T04:40:49.254Z  question: why_probe: आपको किस बात से लगा कि इस केस को एन्हांस्ड रिव्यू के लिए भेजना चाहिए, और किस बात से आपका फ़ैसला बदल सकता था? (English: What told you to send this one to enhanced review, and what would have changed your mind?)
+2026-10-04T04:40:50.143Z  voice: conversation conv_4501m42kdwt8eyjtww7bt75gbzze; input pcm_16000; ASR language hi (client override)
+2026-10-04T04:41:04.549Z  asr: अगर देश high-risk list पर है, तो मैं desk level पर approve नहीं करती। ऐसे case में पहले enhanced review होता है।
+2026-10-04T04:41:08.702Z  utterance: adaaa92c-5b26-4b13-bcb2-fd4cbf3144f2: language hi, translation {"status":"translated","text":"If the country is on the high-risk list, I do not approve at desk level. In such a case, an enhanced review happens first."}
+
+PASS  agent spoke exactly the authorised question
+      आपको किस बात से लगा कि इस केस को एन्हांस्ड रिव्यू के लिए भेजना चाहिए, और किस बात से आपका फ़ैसला बदल सकता था?
+PASS  ASR transcribed Hindi (Devanagari)
+      अगर देश high-risk list पर है, तो मैं desk level पर approve नहीं करती। ऐसे case में पहले enhanced review होता है।
+PASS  utterance recorded as Hindi
+      hi
+PASS  English translation stored
+      {"status":"translated","text":"If the country is on the high-risk list, I do not approve at desk level. In such a case, an enhanced review happens first."}
+FAIL  parser quoted the original Hindi words
+      []
+PASS  utterance.translated entry (source engine, parent the utterance)
+      1d5887af-d6b7-4371-80a8-18752ced3a8d
+FAIL  confirmed rule: forbid approve when jurisdictionRisk == high
+      "no forbid-approve rule"
+FAIL  rule evidence: Hindi exactQuote + English translation
+      {}
+FAIL  MCP check_action cites the Hindi quote with its English translation
+      Insufficient information: rules could block or require approval for "approve" (Approve onboarding), but these case features are unknown: accountAgeMonths (Relationship age (months)), sourceOfFunds (Source of funds). Find them and call check_action again; do not proceed in the meantime. Pending rule rule_03e987e9b68836: "Never approve a customer from a high-risk country at desk level unless they've banked with us for two years with verified funds." (expert expert-cad2596d-53dd-427d-aa45-d73d91bd7844, 1:02.9–1:10.0). Pending rule rule_1e5796de1f0929: "Never approve a customer from a high-risk country at desk level unless they've banked with us for two years with verified funds." (expert expert-cad2596d-53dd-427d-aa45-d73d91bd7844, 1:02.9–1:10.0).
+FAIL  tutor shows the rule with its English translation
+      "rule not in the tutor's rulebook"
+
+=== 2. Delayed read-back of the same session, 2026-10-04T04:42:47.394Z (same checks, same code path; tutor via a new novice session 6bb25bb4-984d-4b58-a56c-6db2f945b1e1) ===
+PASS  parser quoted the original Hindi words
+      ["अगर देश high-risk list पर है, तो मैं desk level पर approve नहीं करती।","ऐसे case में पहले enhanced review होता है।"]
+PASS  utterance.translated entry (source engine, parent the utterance)
+      1d5887af-d6b7-4371-80a8-18752ced3a8d
+PASS  confirmed rule: forbid approve when jurisdictionRisk == high
+      {"==":[{"var":"jurisdictionRisk"},"high"]}
+PASS  rule evidence: Hindi exactQuote + English translation
+      {"exactQuote":"अगर देश high-risk list पर है, तो मैं desk level पर approve नहीं करती।","translation":"If the country is on the high-risk list, I do not approve at desk level."}
+PASS  MCP check_action cites the Hindi quote with its English translation
+      Blocked by rule rule_07a031c00674eb: "अगर देश high-risk list पर है, तो मैं desk level पर approve नहीं करती।" [in Hindi (हिन्दी); English translation (machine, not authoritative): "If the country is on the high-risk list, I do not approve at desk level."] (expert priya-sharma-synthetic, 0:05.2–0:12.8). Do not take "approve" (Approve onboarding) on this case.
+PASS  tutor shows the rule with its English translation
+      {"ruleId":"rule_07a031c00674eb","kind":"guardrail","when":"country risk is high","then":"never approve onboarding","stopRule":true,"quote":{"text":"अगर देश high-risk list पर है, तो मैं desk level पर approve नहीं करती।","language":"hi","translation":"If the country is on the high-risk list, I do not approve at desk level.","attribution":"The expert, by voice","replay":{"frameUrl":"/api/media/20160724-a6e2-40a6-901a-0d48a5daf0b4/frames/16beb405-6101-44d1-8139-a0c5294665c5.png","frameNote":null,"screen":[],"audioNote":"Audio playback unavailable: conversation audio is not stored, only the transcript quote."}},"level":"untested"}
+
+Observations:
+  - ASR (Scribe realtime, language hi) returned code-mixed text: the English loan words came back in Latin script
+    ("high-risk list", "desk level", "approve", "case", "enhanced review") although the TTS input spelled them in
+    Devanagari. Detection still said hi (Devanagari share ≥ 20%), the translation was verified segment by segment, and every
+    quote is verbatim in the stored transcript.
+  - Production side effect (append-only, cannot be undone): the team rulebook now holds rule_07a031c00674eb
+    forbid(approve) when jurisdictionRisk == high, quoted in Hindi. Forbids are never held back, so approving ANY
+    high-risk-country customer is now blocked in production, including the long-standing, verified-funds exception
+    (MCP check_action on {high, 36 months, verified, existing} → forbid by this rule, checked 2026-10-04T04:42:49Z).
+    Plus rule_0c698542e16083 recommend(enhancedReview) when jurisdictionRisk == high.
+Files: docs/evidence/live/rerun-2026-10-04/hindi/ (hindi-run.{json,txt} as written by the script, hindi-run-readback.json,
+  hindi-run-synthetic-voice.wav = the synthetic TTS audio streamed to the agent, live-hindi-console.log).

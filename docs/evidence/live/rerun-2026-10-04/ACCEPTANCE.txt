@@ -1,0 +1,121 @@
+LIVE acceptance RE-RUN against production (https://vashistha-production.up.railway.app, build f317447; agents synced:
+interviewer v3 with the Hindi preset, tutor v2), 2026-10-04 04:03–04:45 UTC. Repo HEAD fd4d6fb.
+All expert speech is synthetic voice input (ElevenLabs TTS): "Matilda" (XrExE9yKIg1WjnnlVkGX), eleven_multilingual_v2.
+Runner: apps/web/e2e/live/** (the same runner as the first live run). Two test-side changes, not committed:
+  - support/expert.ts answers the PEP "Approval required" interlock with a note and Escalate (see BUGS R4/R6a);
+  - p4-engine.live.spec.ts adds the variant LIVE_P4_VARIANT=multi-sentence+concept.
+Per-run files: p3/, p4/, hindi/. Aggregates: SUMMARY.txt / SUMMARY.json. Findings: BUGS.txt. Production /api/health was
+polled every 1 s during P3 and P4 (p*/production-health-poll.jsonl).
+Network: IPv4 preferred. No run failed on a connect timeout before its conversation, so no connect retry was needed.
+
+Before starting: the earlier, interrupted attempt left no trace. There was no rerun-* directory and no Playwright
+output, the rulebook was still at revision 23, and the interviewer agent had no conversation after the 03:15Z preflight.
+It never started a conversation.
+
+=== P3 voice + gate — 5 scripted runs, clean attempt 04:17:10–04:34:40Z (the only live runner) ===================
+The server had been up since 03:13Z and preflight ran at 03:14–03:15Z. Run A was the first P3 run of the clean attempt,
+but not the first live traffic after the deploy: attempts 1–2 ran from 04:03Z.
+
+Run  scenario                         session                               conversation                       authorized/voiced  re-queued  interruptions  talk-over
+A    types a note while talking       656f6ea8-ebe2-49a8-927e-c601ba5505dc  conv_1101m42j2sqhfqbbdezz3py9a2xc  5/5                0          0              0
+B    long pause, resumes mid-answer   cb13274f-46f8-434f-9b58-ecb878f26a3e  conv_6401m42j7ns4fvf896sf7y8zv2f8  6/5 (1 lost, R2)   0          0              3 (agent first)
+C    rapid case navigation+scrolling  9f659c71-b22c-462a-9c4e-1fc2a1102909  conv_4901m42jf6pnfc88bdr481eq8c2s  5/5                0          0              0
+D    short noisy utterances (VAD)     5e976f1b-925e-4227-bd54-96cff311fe86  conv_8401m42jqan4exct1n1ffmt401fz  5/5                0          0              0
+E    6 decisions, live budget         518a1610-d3e8-481d-8919-77a11ab49b8e  conv_5101m42jx2paek0v0p6c0xccmvfp  5/5                0          0              1 (agent first)
+
+Interruptions, target 0, fixed threshold ............. MET. 0 across the 5 runs.
+  - The previous run had 3, all in run D.
+  - Run D: 24 murmurs; 6 of them scored ElevenLabs VAD < 0.4, as before. No authorization and no agent audio started
+    inside any speech, typing or scroll window.
+  - Also 0 in P4.
+Authorization ≤ 250 ms (decidedAt − becameValidAt) ..... NOT MET strictly. 23 of 26 within the bound.
+  - All runs: p50 0 · p95 4157 · max 5228 ms (n=26).
+  - Run A: p50 1 · p95 10 · max 10 ms (n=5).
+  - Runs B–E: p50 0 · p95 4157 · max 5228 ms (n=21).
+  - Runs A, D, E and P4: max 10 ms.
+  - The 3 outliers (1785 and 4157 ms in run C, 5228 ms in run B) are refused or held authorizations, each behind a slow
+    production round trip (BUGS R1–R3).
+Conditions valid → control message sent ................ p50 273 · p95 5505 · max 5687 ms (n=26).
+  - Run A: p50 270 · max 281 ms.
+  - Authorize round trip: p50 268 · p95 1524 · max 2956 ms.
+First audio (control sent → agent audio on the track) ... p50 691 · p95 780 · max 1024 ms (n=25).
+  - Run A: p50 656 · p95 739 · max 739.
+  - Runs B–E: p50 691 · p95 780 · max 1024.
+  - First audio event on the data channel: p50 557 · p95 593 ms. First agent_response text: p50 1759 · p95 2589 ms.
+Control turns never in evidence ......................... MET in all 5 runs and in P4. The same checks as before:
+  - no control text in any transcript, agent utterance, echoed user_transcript or posted utterance;
+  - every gate.control_message entry is system_control;
+  - no rule evidence cites one.
+Re-queues ............................................... 0 in the counted runs.
+  - The fix itself was exercised in superseded run E 5fdd0e97: 1 lapsed authorization re-queued, budget refunded.
+  - Run B's lost question was NOT re-queued (R2): the server had already recorded "speak".
+Live budget (run E) ..................................... MET. 5 questions in 10 min. The server queue at the end held
+  4 queued and 5 asked; the HUD showed "Budget wait 440560 ms".
+Talk-over (reported separately; not interruptions) ...... 4, all with the agent starting first.
+  - 2 in run B: the gate asked after ≥ 4 s of silence inside the script's 6 s thinking pause; the expert resumed 222 ms
+    and 57 ms later (design gap #8).
+  - 2 (run B q5, run E): the harness answered while the agent was still mid-question, after a > 1 s pause inside its
+    audio (R6d).
+
+=== P4 hypothesis engine — natural multi-sentence answers, real Sonnet ==========================================
+Session 83261ab1-1289-429b-88b2-63077fc81e8a, conv_5001m42k6134efpa3v0w1z5w0k5t, LIVE_P4_VARIANT=multi-sentence+concept,
+04:36:10Z. Result: MET on all four criteria, by voice. No typed confirmation was used.
+  ≥1 threshold rule ......... rule_15b8c300f021de: uboOwnershipPct > 25 ∧ ¬uboVerified → enhancedReview (explicit_statement,
+                              human_voice). 3 confirmed threshold rules; 4 stated candidates.
+  ≥1 guardrail/exception .... 4 confirmed:
+                              - rule_0fbfd467eb60e2 forbid(approve): high ∧ accountAgeMonths < 24;
+                              - rule_10d1a366449ae7 forbid(approve): high ∧ sourceOfFunds ≠ verified;
+                              - rule_00aca1f7eeb6f0 exception approve: high ∧ ≥ 24 months ∧ verified;
+                              - rule_084b77fcd528c1 require_approval(compliance_officer): pep.
+  ≥1 unresolved concept ..... registryExtractAgeMonths, from answer.parsed. The agent then asked about it ("You mentioned
+                              'Company registry extract age (months)'. What counts as that …").
+  evidence validation ....... 6/6 rule.confirmed valid: exact quote ⊂ cited utterance, ≥ 1 frame.received, human_voice.
+  Multi-sentence answers, compared with the previous P4:
+  - The PEP answer was "She's a politically exposed person, so it goes to the compliance officer. Never approve a
+    politically exposed person without compliance sign-off." ElevenLabs split it into 2 ASR segments. Both were parsed in
+    one answer, and the stop-rule in the SECOND segment was promoted, quoting that segment. Bug #3 is fixed live.
+  - The high-risk answer was "Country risk alone isn't it. … But never approve …". ASR returned it as ONE segment, so the
+    multi-segment path was not exercised there. Its stop-rule was the 3rd sentence and was promoted.
+  - The concept was named in the 2nd sentence of the first answer (one ASR segment).
+  Gate data for this run: 5 authorized and voiced, 0 interruptions, 0 talk-over, decision latency max 1 ms, first audio
+  p50 687 · p95 787 ms.
+
+=== Hindi → English, live (pnpm live:hindi, real ASR) ===========================================================
+Session 20160724-a6e2-40a6-901a-0d48a5daf0b4, conv_4501m42kdwt8eyjtww7bt75gbzze, utterance adaaa92c-5b26-4b13-bcb2-fd4cbf3144f2,
+expert "Priya Sharma (synthetic)" (hi), 04:40:35Z. The chain WORKED end to end. The script's in-line checks ran before the
+server parsed the answer (R6b).
+  - The agent spoke the authorised Hindi why-probe exactly.
+  - The synthetic Hindi speech went through ElevenLabs ASR (language hi): "अगर देश high-risk list पर है, तो मैं desk level
+    पर approve नहीं करती। ऐसे case में पहले enhanced review होता है।" The loan words came back in Latin script.
+  - The utterance was stored as hi. utterance.translated (source engine) holds a verified 3-segment translation: "If the
+    country is on the high-risk list, I do not approve at desk level. In such a case, an enhanced review happens first."
+  - answer.parsed came 18.5 s after the transcript (the answer window). Both stated rules quote the original Hindi
+    verbatim.
+  - rule.confirmed rule_07a031c00674eb: forbid(approve) when jurisdictionRisk == high. The evidence is the Hindi
+    exactQuote, language hi, plus the English translation "If the country is on the high-risk list, I do not approve at
+    desk level."
+  - MCP check_action ({high, new, company}, approve) → forbid, citing the Hindi quote and "English translation (machine,
+    not authoritative)".
+  - The tutor shows the rule with the Hindi quote and its translation.
+  Script output at 04:41:10Z: 6 PASS, 5 FAIL (parse not there yet). Read-back of the same session at 04:42:47Z, with no new
+  speech: 6/6 PASS. Both are kept: hindi/hindi-run.{json,txt}, hindi/hindi-run-readback.json, docs/evidence/p10/hindi-run.{json,txt}.
+
+=== Superseded attempts, not counted (p3/superseded/README.txt) ==============================================
+attempt 1 (04:03:55Z):
+  - Run A 2bbcae60 hit the PEP interlock dialog, which the harness did not handle. A harness defect; fixed.
+  - My stop failed (pkill matched its own shell), so runs B–E of this runner kept going on the old harness. They overlapped
+    attempt 2. These are c4286c22, 90e3317d (conversation failed: custom_llm generation failed), ffff6162 and 5fdd0e97.
+attempt 2 (04:09:08Z):
+  - Runs A a2860d2f and B 76329d42 failed on Save with 502 from the Railway edge (6.8 s and 13.0 s) while production
+    stalled (R1).
+  - Run C b5d8fd71 completed. Run D 15c1854d was killed when I found and killed both runners by PID.
+Each of these ran while another expert session was live, so none of their numbers is used. Their ledgers, ElevenLabs
+transcripts and Playwright contexts are kept.
+
+=== Side effects on production (append-only) ====================================================================
+- Rulebook revision 23 → 60; 14 team rules (rulebook-after.json). This includes the Hindi forbid, which now blocks every
+  high-risk approval (BUGS R5).
+- Sessions added: 16 expert sessions from the runs above, 1 novice session for the tutor read-back, and 2 diagnostic
+  API expert sessions (8917a862, 2f5db75a; one decision each, no voice), created to test whether a decision alone stalls
+  the server. It did not reproduce: the decisions took 529 and 567 ms.
+- ElevenLabs: 16 interviewer conversations, 32.5 min in total.

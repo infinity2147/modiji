@@ -1,0 +1,229 @@
+{
+  "label": "synthetic voice input (ElevenLabs TTS)",
+  "conversation_id": "conv_9601m42hw4gsfmvbrqnbcsfnjkz2",
+  "status": "done",
+  "sessionId": "15c1854d-3b2f-49f6-8f86-1e1e92752cb9",
+  "metadata": {
+    "start": 1791087221,
+    "duration": 98,
+    "termination_reason": "Client disconnected: 1000",
+    "error": null
+  },
+  "transcript": [
+    {
+      "role": "user",
+      "t": 1,
+      "msg": "Okay."
+    },
+    {
+      "role": "agent",
+      "t": 2,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 2,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 3,
+      "msg": "Mm-hmm."
+    },
+    {
+      "role": "agent",
+      "t": 4,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 4,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 5,
+      "msg": "Right."
+    },
+    {
+      "role": "agent",
+      "t": 5,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 5,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 8,
+      "msg": "Yeah."
+    },
+    {
+      "role": "agent",
+      "t": 9,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 9,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 10,
+      "msg": "हम्म।"
+    },
+    {
+      "role": "agent",
+      "t": 10,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 10,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 11,
+      "msg": "Okay."
+    },
+    {
+      "role": "agent",
+      "t": 12,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 12,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 13,
+      "msg": "Mm-hmm. Right."
+    },
+    {
+      "role": "agent",
+      "t": 27,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 27,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 27,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 28,
+      "msg": "What led you to send this to enhanced review? What would have changed your..."
+    },
+    {
+      "role": "user",
+      "t": 32,
+      "msg": "The largest owner holds 35% and isn't verified."
+    },
+    {
+      "role": "agent",
+      "t": 35,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 35,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 36,
+      "msg": "Anything over 25% that isn't verified goes to enhanced review."
+    },
+    {
+      "role": "agent",
+      "t": 40,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 40,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 45,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 45,
+      "msg": "If the entity type were \"trust\" instead of company, what would you decide?"
+    },
+    {
+      "role": "user",
+      "t": 52,
+      "msg": "For a company or a trust, I look at the largest owner."
+    },
+    {
+      "role": "agent",
+      "t": 56,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 56,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 56,
+      "msg": "For an individual, the owner threshold doesn't apply."
+    },
+    {
+      "role": "agent",
+      "t": 59,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 59,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 59,
+      "msg": "Yeah."
+    },
+    {
+      "role": "agent",
+      "t": 60,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 60,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 73,
+      "msg": "Okay."
+    },
+    {
+      "role": "agent",
+      "t": 74,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 74,
+      "msg": null
+    }
+  ]
+}

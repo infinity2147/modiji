@@ -1,0 +1,144 @@
+{
+  "label": "synthetic voice input (ElevenLabs TTS)",
+  "conversation_id": "conv_4501m42hagtmfn9v0sc2v2p2bvzs",
+  "status": "done",
+  "sessionId": "2bbcae60-0e66-4155-a8dc-d869c0925b5a",
+  "metadata": {
+    "start": 1791086654,
+    "duration": 154,
+    "termination_reason": "Client disconnected: 1000",
+    "error": null
+  },
+  "transcript": [
+    {
+      "role": "user",
+      "t": 1,
+      "msg": "Let me jot down the ownership details while I read through this file."
+    },
+    {
+      "role": "agent",
+      "t": 5,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 5,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 16,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 16,
+      "msg": "What led you to send this to enhanced review? What would have changed your mind?"
+    },
+    {
+      "role": "user",
+      "t": 24,
+      "msg": "The largest owner holds 35% and isn't verified. Anything over 25% that isn't verified goes to enhanced review."
+    },
+    {
+      "role": "agent",
+      "t": 32,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 32,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 38,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 39,
+      "msg": "If the entity type were \"individual\" instead of company, with the largest beneficial owner share still at 100%,..."
+    },
+    {
+      "role": "user",
+      "t": 47,
+      "msg": "If the largest owner holds more than 25% and isn't verified, it goes to enhanced review."
+    },
+    {
+      "role": "agent",
+      "t": 54,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 54,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 55,
+      "msg": "Let me jot down the ownership details while I read through this file."
+    },
+    {
+      "role": "agent",
+      "t": 59,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 59,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 71,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 72,
+      "msg": "What made you decide to approve onboarding here, and what would have changed your mind?"
+    },
+    {
+      "role": "user",
+      "t": 79,
+      "msg": "They've banked with us for three years, and their source of funds is verified, so the high-risk country on its own doesn't send them to enhanced review."
+    },
+    {
+      "role": "agent",
+      "t": 88,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 88,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 95,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 97,
+      "msg": "If the analyst risk rating were \"medium\" instead of high, what would you decide?"
+    },
+    {
+      "role": "user",
+      "t": 102,
+      "msg": "They've banked with us for three years, and their source of funds is verified, so the high-risk country on its own doesn't send them to enhanced review. Let me jot down the ownership details while I read through this file."
+    },
+    {
+      "role": "agent",
+      "t": 115,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 115,
+      "msg": null
+    }
+  ]
+}

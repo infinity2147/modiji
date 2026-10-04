@@ -1,0 +1,322 @@
+
+Running 5 tests using 1 worker
+
+P3 run A — expert types a note while talking (LIVE, production)
+Label: expert speech is synthetic voice input (ElevenLabs TTS).
+Target: https://vashistha-production.up.railway.app
+Session: 656f6ea8-ebe2-49a8-927e-c601ba5505dc
+ElevenLabs conversation(s): conv_1101m42j2sqhfqbbdezz3py9a2xc
+
+Questions authorized by the gate (ledger gate.authorized): 5
+Custom-LLM speak decisions: 5 · skip_turn decisions: 10
+Agent audio turns measured on the WebRTC track: 5
+Expert lines spoken: 6 · expert utterances ledgered: 7
+Keystrokes: 381 · wheel (scroll input) events: 0 · scroll events (incl. programmatic): 83
+Questions queued / dropped / re-queued (authorized, never spoken): 22 / 11 / 0
+
+INTERRUPTIONS (authorization or agent audio onset inside [speech, +1.2 s], [keystroke, +1.5 s], [wheel scroll, +1.5 s]): 0
+Talk-over (agent audio overlapping expert speech, either direction): 0
+
+Authorization latency (decidedAt − becameValidAt, ledger): n=5 p50=1 ms p95=10 ms max=10 ms
+gate/authorize round trip (browser → production → browser): n=5 p50=266 ms p95=268 ms max=268 ms
+Conditions valid → control message sent: n=5 p50=270 ms p95=281 ms max=281 ms
+Control messages sent: 5 · not followed by agent speech: 0
+First audio (control message sent → agent audio on the track): n=5 p50=656 ms p95=739 ms max=739 ms
+Control message sent → first ElevenLabs audio event on the data channel: n=5 p50=557 ms p95=592 ms max=592 ms
+Control message sent → agent_response text: n=5 p50=1866 ms p95=1900 ms max=1900 ms
+
+Control turns never evidence: OK {"ok":true,"controlMessagesLedgered":5,"controlInTranscripts":0,"controlInAgentUtterances":0,"controlEchoedToBrowserAsUserTranscript":0,"controlPostedAsUtterance":0,"controlEntriesNotSystemControl":0,"ruleEvidenceCitingControl":0}
+
+Agent turns (as heard):
+  1791087458090..1791087462489 "What told you to send to enhanced review here? What would have changed your mind?"
+  1791087478411..1791087481510 "If country risk were high instead of medium, what would you decide?"
+  1791087501029..1791087505829 "What pointed you toward approving onboarding here, and what would have changed your mind?"
+  1791087521991..1791087526509 "If the analyst risk rating were "medium" instead of high, what would you decide?"
+  1791087550509..1791087556129 "What led you to escalate to the compliance officer here, and what would have changed your mind?"
+
+Questions and scripted answers (synthetic voice input, ElevenLabs TTS):
+  [NS-2026-0101] Q: "What told you to send to enhanced review here? What would have changed your mind?"
+      A (why_probe): "The largest owner holds thirty-five percent and isn't verified. Anything over twenty-five percent that isn't verified goes to enhanced review."
+  [NS-2026-0101] Q: "If country risk were high instead of medium, what would you decide?"
+      A (country_on_owner_case): "No, the country doesn't drive this one. It's the unverified owner holding thirty-five percent."
+  [NS-2026-0102] Q: "What pointed you toward approving onboarding here, and what would have changed your mind?"
+      A (why_probe): "They've banked with us for three years and their source of funds is verified, so the high-risk country on its own doesn't send them to enhanced review."
+  [NS-2026-0102] Q: "If the analyst risk rating were "medium" instead of high, what would you decide?"
+      A (fallback_case_reason): "They've banked with us for three years and their source of funds is verified, so the high-risk country on its own doesn't send them to enhanced review."
+  [NS-2026-0103] Q: "What led you to escalate to the compliance officer here, and what would have changed your mind?"
+      A (why_probe): "She's a politically exposed person, so it goes to the compliance officer, whatever else the file says."
+
+  ✓  1 [chromium-live] › e2e/live/p3-gate.live.spec.ts:45:1 › @live @p3 run A: expert types a note while talking (2.7m)
+P3 run B — long pause, then resumes mid-answer (LIVE, production)
+Label: expert speech is synthetic voice input (ElevenLabs TTS).
+Target: https://vashistha-production.up.railway.app
+Session: cb13274f-46f8-434f-9b58-ecb878f26a3e
+ElevenLabs conversation(s): conv_6401m42j7ns4fvf896sf7y8zv2f8
+
+Questions authorized by the gate (ledger gate.authorized): 6
+Custom-LLM speak decisions: 6 · skip_turn decisions: 21
+Agent audio turns measured on the WebRTC track: 6
+Expert lines spoken: 14 · expert utterances ledgered: 16
+Keystrokes: 50 · wheel (scroll input) events: 0 · scroll events (incl. programmatic): 93
+Questions queued / dropped / re-queued (authorized, never spoken): 22 / 10 / 0
+
+INTERRUPTIONS (authorization or agent audio onset inside [speech, +1.2 s], [keystroke, +1.5 s], [wheel scroll, +1.5 s]): 0
+Talk-over (agent audio overlapping expert speech, either direction): 3
+  agent started first: expert 1791087670834..1791087674596 (resume), agent 1791087670601..1791087671781
+  agent started first: expert 1791087704870..1791087706313 (answer-part-1), agent 1791087701682..1791087706021
+  agent started first: expert 1791087726438..1791087730202 (resume), agent 1791087726381..1791087727241
+
+Authorization latency (decidedAt − becameValidAt, ledger): n=6 p50=0 ms p95=5228 ms max=5228 ms
+gate/authorize round trip (browser → production → browser): n=6 p50=272 ms p95=285 ms max=285 ms
+Conditions valid → control message sent: n=6 p50=279 ms p95=5505 ms max=5505 ms
+Control messages sent: 6 · not followed by agent speech: 1
+First audio (control message sent → agent audio on the track): n=5 p50=723 ms p95=1024 ms max=1024 ms
+Control message sent → first ElevenLabs audio event on the data channel: n=5 p50=567 ms p95=801 ms max=801 ms
+Control message sent → agent_response text: n=5 p50=1751 ms p95=2051 ms max=2051 ms
+
+Control turns never evidence: OK {"ok":true,"controlMessagesLedgered":7,"controlInTranscripts":0,"controlInAgentUtterances":0,"controlEchoedToBrowserAsUserTranscript":0,"controlPostedAsUtterance":0,"controlEntriesNotSystemControl":0,"ruleEvidenceCitingControl":0}
+
+Agent turns (as heard):
+  1791087618241..1791087620521 "What made you send this one to enhanced review? And what would have changed your mind?"
+  1791087621561..1791087623061 ""
+  1791087644143..1791087648601 "If the entity type were "trust" instead of company, what would you decide?"
+  1791087670601..1791087671781 "If the largest ..."
+  1791087701682..1791087706021 "If the analyst risk rating were "medium" instead of high, what would you decide?"
+  1791087726381..1791087727241 "If the country ..."
+
+Questions and scripted answers (synthetic voice input, ElevenLabs TTS):
+  [NS-2026-0101] Q: "What made you send this one to enhanced review? And what would have changed your mind?"
+      A (why_probe): "The largest owner holds thirty-five percent and isn't verified. Anything over twenty-five percent that isn't verified goes to enhanced review."
+  [NS-2026-0101] Q: "If the entity type were "trust" instead of company, what would you decide?"
+      A (entity): "For a company or a trust I look at the largest owner. For an individual the owner threshold doesn't apply."
+  [NS-2026-0102] Q: "If the largest ..."
+      A (fallback_case_reason): "They've banked with us for three years and their source of funds is verified, so the high-risk country on its own doesn't send them to enhanced review."
+  [NS-2026-0102] Q: "If the analyst risk rating were "medium" instead of high, what would you decide?"
+      A (fallback_case_reason): "They've banked with us for three years and their source of funds is verified, so the high-risk country on its own doesn't send them to enhanced review."
+  [NS-2026-0103] Q: "If the country ..."
+      A (country_on_pep_case): "The country doesn't matter here. A politically exposed person always goes to the compliance officer."
+
+  ✘  2 [chromium-live] › e2e/live/p3-gate.live.spec.ts:71:1 › @live @p3 run B: long pause, then resumes mid-answer (3.4m)
+P3 run C — rapid case navigation and scrolling (LIVE, production)
+Label: expert speech is synthetic voice input (ElevenLabs TTS).
+Target: https://vashistha-production.up.railway.app
+Session: 9f659c71-b22c-462a-9c4e-1fc2a1102909
+ElevenLabs conversation(s): conv_4901m42jf6pnfc88bdr481eq8c2s
+
+Questions authorized by the gate (ledger gate.authorized): 5
+Custom-LLM speak decisions: 5 · skip_turn decisions: 7
+Agent audio turns measured on the WebRTC track: 5
+Expert lines spoken: 5 · expert utterances ledgered: 5
+Keystrokes: 50 · wheel (scroll input) events: 138 · scroll events (incl. programmatic): 238
+Questions queued / dropped / re-queued (authorized, never spoken): 32 / 20 / 0
+
+INTERRUPTIONS (authorization or agent audio onset inside [speech, +1.2 s], [keystroke, +1.5 s], [wheel scroll, +1.5 s]): 0
+Talk-over (agent audio overlapping expert speech, either direction): 0
+
+Authorization latency (decidedAt − becameValidAt, ledger): n=5 p50=8 ms p95=4157 ms max=4157 ms
+gate/authorize round trip (browser → production → browser): n=5 p50=292 ms p95=2956 ms max=2956 ms
+Conditions valid → control message sent: n=5 p50=300 ms p95=5687 ms max=5687 ms
+Control messages sent: 5 · not followed by agent speech: 0
+First audio (control message sent → agent audio on the track): n=5 p50=707 ms p95=759 ms max=759 ms
+Control message sent → first ElevenLabs audio event on the data channel: n=5 p50=557 ms p95=589 ms max=589 ms
+Control message sent → agent_response text: n=5 p50=1789 ms p95=2035 ms max=2035 ms
+
+Control turns never evidence: OK {"ok":true,"controlMessagesLedgered":5,"controlInTranscripts":0,"controlInAgentUtterances":0,"controlEchoedToBrowserAsUserTranscript":0,"controlPostedAsUtterance":0,"controlEntriesNotSystemControl":0,"ruleEvidenceCitingControl":0}
+
+Agent turns (as heard):
+  1791087868065..1791087872425 "What led you to send this to enhanced review? And what would have changed your mind?"
+  1791087888425..1791087892765 "If the country risk were "high" instead of medium, what would you decide?"
+  1791087921985..1791087926105 "What told you to approve onboarding here, and what would have changed your mind?"
+  1791087941585..1791087945528 "If the analyst risk rating were "medium" instead of high, what would you decide?"
+  1791087981125..1791087986145 "What pushed you to escalate to the compliance officer here, and what would have changed your mind?"
+
+Questions and scripted answers (synthetic voice input, ElevenLabs TTS):
+  [NS-2026-0101] Q: "What led you to send this to enhanced review? And what would have changed your mind?"
+      A (why_probe): "The largest owner holds thirty-five percent and isn't verified. Anything over twenty-five percent that isn't verified goes to enhanced review."
+  [NS-2026-0101] Q: "If the country risk were "high" instead of medium, what would you decide?"
+      A (country_on_owner_case): "No, the country doesn't drive this one. It's the unverified owner holding thirty-five percent."
+  [NS-2026-0102] Q: "What told you to approve onboarding here, and what would have changed your mind?"
+      A (why_probe): "They've banked with us for three years and their source of funds is verified, so the high-risk country on its own doesn't send them to enhanced review."
+  [NS-2026-0102] Q: "If the analyst risk rating were "medium" instead of high, what would you decide?"
+      A (fallback_case_reason): "They've banked with us for three years and their source of funds is verified, so the high-risk country on its own doesn't send them to enhanced review."
+  [NS-2026-0103] Q: "What pushed you to escalate to the compliance officer here, and what would have changed your mind?"
+      A (why_probe): "She's a politically exposed person, so it goes to the compliance officer, whatever else the file says."
+
+  ✘  3 [chromium-live] › e2e/live/p3-gate.live.spec.ts:103:1 › @live @p3 run C: rapid case navigation and scrolling (3.7m)
+P3 run D — short noisy utterances near the VAD threshold (LIVE, production)
+Label: expert speech is synthetic voice input (ElevenLabs TTS).
+Target: https://vashistha-production.up.railway.app
+Session: 5e976f1b-925e-4227-bd54-96cff311fe86
+ElevenLabs conversation(s): conv_8401m42jqan4exct1n1ffmt401fz
+
+Questions authorized by the gate (ledger gate.authorized): 5
+Custom-LLM speak decisions: 5 · skip_turn decisions: 25
+Agent audio turns measured on the WebRTC track: 5
+Expert lines spoken: 9 · expert utterances ledgered: 21
+Keystrokes: 50 · wheel (scroll input) events: 0 · scroll events (incl. programmatic): 100
+Questions queued / dropped / re-queued (authorized, never spoken): 21 / 10 / 0
+
+INTERRUPTIONS (authorization or agent audio onset inside [speech, +1.2 s], [keystroke, +1.5 s], [wheel scroll, +1.5 s]): 0
+Talk-over (agent audio overlapping expert speech, either direction): 0
+
+Authorization latency (decidedAt − becameValidAt, ledger): n=5 p50=0 ms p95=1 ms max=1 ms
+gate/authorize round trip (browser → production → browser): n=5 p50=264 ms p95=275 ms max=275 ms
+Conditions valid → control message sent: n=5 p50=272 ms p95=279 ms max=279 ms
+Control messages sent: 5 · not followed by agent speech: 0
+First audio (control message sent → agent audio on the track): n=5 p50=737 ms p95=780 ms max=780 ms
+Control message sent → first ElevenLabs audio event on the data channel: n=5 p50=542 ms p95=586 ms max=586 ms
+Control message sent → agent_response text: n=5 p50=1705 ms p95=2589 ms max=2589 ms
+
+Control turns never evidence: OK {"ok":true,"controlMessagesLedgered":5,"controlInTranscripts":0,"controlInAgentUtterances":0,"controlEchoedToBrowserAsUserTranscript":0,"controlPostedAsUtterance":0,"controlEntriesNotSystemControl":0,"ruleEvidenceCitingControl":0}
+
+Agent turns (as heard):
+  1791088131741..1791088135981 "What led you to send this to enhanced review? And what would have changed your mind?"
+  1791088152121..1791088160303 "If the entity type were "individual" instead of company, with the largest beneficial owner share at 100%, what would you decide?"
+  1791088189161..1791088192981 "What made you approve onboarding here, and what would have changed your mind?"
+  1791088208683..1791088212521 "If the country risk were "medium" instead of high, what would you decide?"
+  1791088242941..1791088247921 "What made you escalate to the compliance officer here, and what would have changed your mind?"
+
+Questions and scripted answers (synthetic voice input, ElevenLabs TTS):
+  [NS-2026-0101] Q: "What led you to send this to enhanced review? And what would have changed your mind?"
+      A (why_probe): "The largest owner holds thirty-five percent and isn't verified. Anything over twenty-five percent that isn't verified goes to enhanced review."
+  [NS-2026-0101] Q: "If the entity type were "individual" instead of company, with the largest beneficial owner share at 100%, what would you decide?"
+      A (owner_threshold): "If the largest owner holds more than twenty-five percent and isn't verified, it goes to enhanced review."
+  [NS-2026-0102] Q: "What made you approve onboarding here, and what would have changed your mind?"
+      A (why_probe): "They've banked with us for three years and their source of funds is verified, so the high-risk country on its own doesn't send them to enhanced review."
+  [NS-2026-0102] Q: "If the country risk were "medium" instead of high, what would you decide?"
+      A (country_on_approved_high_risk): "Country risk alone isn't it. A long relationship with verified funds lets me approve high-risk customers."
+  [NS-2026-0103] Q: "What made you escalate to the compliance officer here, and what would have changed your mind?"
+      A (why_probe): "She's a politically exposed person, so it goes to the compliance officer, whatever else the file says."
+
+  ✓  4 [chromium-live] › e2e/live/p3-gate.live.spec.ts:136:1 › @live @p3 run D: short noisy utterances near the VAD threshold (3.1m)
+P3 run E — six decisions exercise the live budget (5 per 10 min) (LIVE, production)
+Label: expert speech is synthetic voice input (ElevenLabs TTS).
+Target: https://vashistha-production.up.railway.app
+Session: 518a1610-d3e8-481d-8919-77a11ab49b8e
+ElevenLabs conversation(s): conv_5101m42jx2paek0v0p6c0xccmvfp
+
+Questions authorized by the gate (ledger gate.authorized): 5
+Custom-LLM speak decisions: 5 · skip_turn decisions: 9
+Agent audio turns measured on the WebRTC track: 5
+Expert lines spoken: 5 · expert utterances ledgered: 5
+Keystrokes: 0 · wheel (scroll input) events: 0 · scroll events (incl. programmatic): 81
+Questions queued / dropped / re-queued (authorized, never spoken): 37 / 26 / 0
+
+INTERRUPTIONS (authorization or agent audio onset inside [speech, +1.2 s], [keystroke, +1.5 s], [wheel scroll, +1.5 s]): 0
+Talk-over (agent audio overlapping expert speech, either direction): 1
+  agent started first: expert 1791088375038..1791088381395 (answer), agent 1791088367564..1791088375661
+
+Authorization latency (decidedAt − becameValidAt, ledger): n=5 p50=0 ms p95=0 ms max=0 ms
+gate/authorize round trip (browser → production → browser): n=5 p50=263 ms p95=303 ms max=303 ms
+Conditions valid → control message sent: n=5 p50=269 ms p95=311 ms max=311 ms
+Control messages sent: 5 · not followed by agent speech: 0
+First audio (control message sent → agent audio on the track): n=5 p50=653 ms p95=687 ms max=687 ms
+Control message sent → first ElevenLabs audio event on the data channel: n=5 p50=573 ms p95=579 ms max=579 ms
+Control message sent → agent_response text: n=5 p50=1771 ms p95=2705 ms max=2705 ms
+
+Control turns never evidence: OK {"ok":true,"controlMessagesLedgered":5,"controlInTranscripts":0,"controlInAgentUtterances":0,"controlEchoedToBrowserAsUserTranscript":0,"controlPostedAsUtterance":0,"controlEntriesNotSystemControl":0,"ruleEvidenceCitingControl":0}
+
+Agent turns (as heard):
+  1791088312141..1791088316721 "What made you decide to approve onboarding here, and what would have changed your mind?"
+  1791088328881..1791088333401 "If the entity type were "trust" instead of individual, what would you decide?"
+  1791088348201..1791088352501 "What led you to request documents here, and what would have changed your mind?"
+  1791088367564..1791088375661 "If the entity type were "individual" instead of company, with the largest beneficial owner share at 100%, what would you decide?"
+  1791088387141..1791088392043 "What led you to send this one to enhanced review, and what would have changed your mind?"
+
+Questions and scripted answers (synthetic voice input, ElevenLabs TTS):
+  [NS-2026-0301] Q: "What made you decide to approve onboarding here, and what would have changed your mind?"
+      A (why_probe): "A low-risk individual we've known for years. Nothing flags it, so I approve."
+  [NS-2026-0301] Q: "If the entity type were "trust" instead of individual, what would you decide?"
+      A (entity): "For a company or a trust I look at the largest owner. For an individual the owner threshold doesn't apply."
+  [NS-2026-0302] Q: "What led you to request documents here, and what would have changed your mind?"
+      A (why_probe): "No source of funds at eighty-five thousand a month. Above fifty thousand a month without a source of funds, I request documents."
+  [NS-2026-0302] Q: "If the entity type were "individual" instead of company, with the largest beneficial owner share at 100%, what would you decide?"
+      A (owner_threshold): "If the largest owner holds more than twenty-five percent and isn't verified, it goes to enhanced review."
+  [NS-2026-0303] Q: "What led you to send this one to enhanced review, and what would have changed your mind?"
+      A (why_probe): "Adverse media in a medium-risk country sends it to enhanced review."
+Server queue at the end: 4 queued, 5 asked.
+Engineering view text at the end: Gate conditions (all 8)ConditionStateWaitSpeaking✓0 msScreen movingwait776 msTyping✓0 msBreakpoint✓0 msQuestion value✓0 msBudgetwait440560 msOff record✓0 msAgent speaking✓0 msThresholds: silence 1200 ms · screen 1500 ms · typing 1500 ms · θask 0.3 bits · budget 5/10 min (live questions only: why_probe, counterfactual, concept_definition)Latency · became valid → authorizedp50 263 ms · p95 306 ms · n=5Bound 250 ms; samples include the authorize round trip. First-audio latency is measured separately.Keep this tab in the foreground: browsers throttle background timers to ≥ 1 s, which breaks the 250 ms bound.Gate sensing (timing only, not recorded): keystrokes anywhere in CaseDesk except the voice panel; scrolling and content changes in the case area; the microphone's level in this browser (speech onset, from the voice session's own input); voice activity, transcript arrival and agent mode from the voice provider.Refused or withdrawn authorizationsquestion_not_queued · Request refused (409 question_not_queued) — question q_0cde4e96e8d0dd is not queuedquestion_not_queued · Request refused (409 question_not_queued) — question q_16c79473e9867e is not queuedQuestion queueContext v18 · 5 ask
+
+  ✓  5 [chromium-live] › e2e/live/p3-gate.live.spec.ts:169:1 › @live @p3 run E: several decisions exercise the live budget (3.0m)
+
+
+  1) [chromium-live] › e2e/live/p3-gate.live.spec.ts:71:1 › @live @p3 run B: long pause, then resumes mid-answer 
+
+    Error: authorization latency ≤ 250 ms
+
+    expect(received).toBeLessThanOrEqual(expected)
+
+    Expected: <= 250
+    Received:    5228
+
+      37 |   expect.soft(a.interruptions.count, "interruptions").toBe(0);
+      38 |   expect.soft(a.controlNeverEvidence.ok, "control turns never evidence").toBe(true);
+    > 39 |   for (const v of a.authorizationLatencyMs.values) expect.soft(v, "authorization latency ≤ 250 ms").toBeLessThanOrEqual(250);
+         |                                                                                                     ^
+      40 |   expect.soft(a.counts.questionsAuthorized, "at least one question asked").toBeGreaterThan(0);
+      41 | }
+      42 |
+        at expectGreen (/home/24b4530/modiji/apps/web/e2e/live/p3-gate.live.spec.ts:39:101)
+        at /home/24b4530/modiji/apps/web/e2e/live/p3-gate.live.spec.ts:100:3
+
+    Error Context: test-results/live/p3-gate.live--live-p3-run--b7b8e-use-then-resumes-mid-answer-chromium-live/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/live/p3-gate.live--live-p3-run--b7b8e-use-then-resumes-mid-answer-chromium-live/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/live/p3-gate.live--live-p3-run--b7b8e-use-then-resumes-mid-answer-chromium-live/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [chromium-live] › e2e/live/p3-gate.live.spec.ts:103:1 › @live @p3 run C: rapid case navigation and scrolling 
+
+    Error: authorization latency ≤ 250 ms
+
+    expect(received).toBeLessThanOrEqual(expected)
+
+    Expected: <= 250
+    Received:    1785
+
+      37 |   expect.soft(a.interruptions.count, "interruptions").toBe(0);
+      38 |   expect.soft(a.controlNeverEvidence.ok, "control turns never evidence").toBe(true);
+    > 39 |   for (const v of a.authorizationLatencyMs.values) expect.soft(v, "authorization latency ≤ 250 ms").toBeLessThanOrEqual(250);
+         |                                                                                                     ^
+      40 |   expect.soft(a.counts.questionsAuthorized, "at least one question asked").toBeGreaterThan(0);
+      41 | }
+      42 |
+        at expectGreen (/home/24b4530/modiji/apps/web/e2e/live/p3-gate.live.spec.ts:39:101)
+        at /home/24b4530/modiji/apps/web/e2e/live/p3-gate.live.spec.ts:133:3
+
+    Error: authorization latency ≤ 250 ms
+
+    expect(received).toBeLessThanOrEqual(expected)
+
+    Expected: <= 250
+    Received:    4157
+
+      37 |   expect.soft(a.interruptions.count, "interruptions").toBe(0);
+      38 |   expect.soft(a.controlNeverEvidence.ok, "control turns never evidence").toBe(true);
+    > 39 |   for (const v of a.authorizationLatencyMs.values) expect.soft(v, "authorization latency ≤ 250 ms").toBeLessThanOrEqual(250);
+         |                                                                                                     ^
+      40 |   expect.soft(a.counts.questionsAuthorized, "at least one question asked").toBeGreaterThan(0);
+      41 | }
+      42 |
+        at expectGreen (/home/24b4530/modiji/apps/web/e2e/live/p3-gate.live.spec.ts:39:101)
+        at /home/24b4530/modiji/apps/web/e2e/live/p3-gate.live.spec.ts:133:3
+
+    Error Context: test-results/live/p3-gate.live--live-p3-run--88ef1-se-navigation-and-scrolling-chromium-live/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/live/p3-gate.live--live-p3-run--88ef1-se-navigation-and-scrolling-chromium-live/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/live/p3-gate.live--live-p3-run--88ef1-se-navigation-and-scrolling-chromium-live/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    [chromium-live] › e2e/live/p3-gate.live.spec.ts:71:1 › @live @p3 run B: long pause, then resumes mid-answer 
+    [chromium-live] › e2e/live/p3-gate.live.spec.ts:103:1 › @live @p3 run C: rapid case navigation and scrolling 
+  3 passed (17.5m)
+EXIT 1

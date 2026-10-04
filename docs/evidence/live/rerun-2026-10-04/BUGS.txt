@@ -1,0 +1,112 @@
+Findings from the LIVE re-run against production (build f317447), 2026-10-04 04:03–04:45Z. No product code was changed.
+Expert speech in every run is synthetic voice input (ElevenLabs TTS). Paths are relative to docs/evidence/live/rerun-2026-10-04/.
+
+R1  Production responses stall for seconds; an event-loop stall of ≥ 12.8 s was recorded.  [HIGH]
+  Evidence:
+  - GET /api/health/deep eventLoop.maxMs:
+    - 1015 at the preflight (03:14Z, 87 s after boot);
+    - 12774 at 04:10:44Z;
+    - 13856 by 04:12:40Z, unchanged afterwards (p99 1.6 ms).
+    The process did not restart: uptime is continuous in p3/production-health-poll.jsonl.
+  - Two expert sessions ran at once from 04:09 to 04:15. That overlap was my operator error (see p3/superseded/README.txt).
+    - Production requests took 6–20 s.
+    - The Railway edge returned 502 on two Saves: /events after 6.8 s and 13.0 s, frames after 12.4 s.
+    - Two ElevenLabs conversations ended with "custom_llm generation failed".
+  - With one session only (the counted clean run):
+    - 34 of 727 one-second /api/health polls took more than 3 s (p50 258 ms, max 9568 ms).
+    - curl timing during run C/D: TLS done at 0.22 s, first byte at 2.5 s, 2.75 s and 6.07 s, so the delay is after the
+      connection is up.
+    - Part of the Node poller's slow samples (a steady 5.55 s every ≈24 s) looks like this network's DNS/connection reuse.
+      One curl sample also showed a 10 s DNS lookup.
+  - Consequences seen in the clean run, both coinciding with slow server responses:
+    - run B (R2): ElevenLabs's custom-LLM request for a question reached the server 4.15 s after the control message,
+      while my health poll from a different network was slow at the same moment (04:21:35.7–40.5Z);
+    - run C: two refused authorizations (409 context_changed) took 1.5 s and 3.9 s to come back.
+  Root cause: not determined; no CPU profile of production is available from here.
+    Reading the code, the decision path does no synchronous work that scales with sessions, rules or revision count.
+    These candidates were found by reading code, not measured:
+    - interview `afterDecision` runs as a microtask before the decision response is written;
+    - a full `engineState` rebuild on the main thread for `requeueLapsed`, called from every /questions poll and every
+      gate authorize;
+    - per-session engine and witness caches that are never evicted (GC pauses);
+    - Railway CPU throttling.
+  Proposed fix:
+  (a) Defer `afterDecision` and the schema backfill with setImmediate, so the decision response goes out first.
+  (b) Instrument:
+      - log any step over 50 ms with its session id (engineState, rulebook(), appends);
+      - add process.memoryUsage() and the longest GC pause (PerformanceObserver 'gc') to /api/health/deep;
+      - report the event-loop max over a rolling 60 s window, not only since boot;
+      - check Railway's CPU-throttling metrics for 04:09–04:45Z.
+  (c) Move the engine fold (observeDecision/applyAnswer/rebuild) into the engine worker, and put an LRU bound on
+      InterviewStore.states.
+  (d) Serve /api/llm on a loop that never runs engine work.
+
+R2  A question can be counted as asked although the agent never voiced it (lost on a delayed custom-LLM request).  [HIGH]
+  Evidence, run B (cb13274f-46f8-434f-9b58-ecb878f26a3e, conv_6401m42j7ns4fvf896sf7y8zv2f8), q_0bb5d328bfa5ef:
+  - control message sent 04:21:34.877Z;
+  - llm.turn_decision speak at +4.15 s;
+  - +5.49 s: the same nonce arrived again → gate.control_message reason unknown_nonce → skip_turn;
+  - ElevenLabs transcript: the control message at t=95 s, an empty agent turn at t=100 s, then the next control message;
+  - no agent audio, no agent.utterance for that question, no question.requeued; the question counts as asked.
+  The client then held the floor for TTL + 1.5 s before it authorized the next question; that hold is the 5228 ms in
+  the latency figures.
+  Proposed fix:
+  - Within a conversation, answer a retried request carrying the same nonce with the same authorized text for a short
+    window (e.g. ≤ 10 s, same conversation id) instead of unknown_nonce. A replay from any other conversation stays
+    refused.
+  - and/or: keep "speak" provisional until the browser's agent.utterance for the question arrives. If none arrives
+    within ~8 s, write question.requeued and give the budget slot back, as for a lapsed authorization.
+
+R3  The ≤ 250 ms gate-decision bound is not met when an authorization is refused or held.  [MEDIUM]
+  Measured (decidedAt − becameValidAt, ledger): 23 of 26 within 250 ms. The 3 outliers, all from slow server round trips:
+  - 1785 ms and 4157 ms (run C): a 409 context_changed came back after 1.5 s and 3.9 s, and the gate re-decided only on
+    arrival. becameValidAt is kept from the refused attempt.
+  - 5228 ms (run B): the floor hold after R2.
+  By design the gate does not authorize while an authorize call is in flight (fix for live bug #2), so a slow server
+  becomes gate latency.
+  Proposed fix:
+  - After R1, refresh the context version from the questions poll before authorizing, so context_changed refusals are
+    rarer.
+  - Report hold time and refused round trips separately from decision latency, or reset becameValidAt when a refusal
+    arrives.
+
+R4  require_approval applies to every outcome of the family, including the escalation it asks for.  [MEDIUM, design/UX]
+  - rule_0db2a2b89d2203 is PEP → require_approval(compliance_officer), from "Never approve a PEP without compliance
+    sign-off". It opens the "Approval required" interlock even when the expert chooses "Escalate to compliance officer".
+  - The expert must type a note and press Escalate.
+  - Seen in run A of attempt 1 (p3/superseded/attempt-1-runner-0403Z/playwright-error-context.md).
+  Proposed fix:
+  - keep the action the parser already returns for require_approval (its schema has `action`), so the rule gates only
+    "approve";
+  - or treat an escalation to the same role as satisfying it.
+
+R5  The production team rulebook now holds rules that change the demo's behaviour (append-only; cannot be undone).  [HIGH, data]
+  State after these runs: revision 60, 14 team rules (rulebook-after.json).
+  - rule_07a031c00674eb, from the Hindi run: forbid(approve) when jurisdictionRisk == high. Forbids are never held back.
+    It blocks every high-risk-country approval, including the long-standing, verified-funds exception: MCP check_action
+    on {high, 36 months, verified, existing, company} → forbid by this rule.
+  - rule_0c698542e16083: recommend(enhancedReview) when jurisdictionRisk == high.
+  - rule_14efc40098054a: exception approve when accountAgeMonths > 12 ∧ sourceOfFunds = verified ∧ …, from a P3
+    session's parse. Worth reviewing.
+  Proposed fix:
+  - Before the judged demo, decide whether to retire these through the product (rule.retired / a debrief revision by
+    their expert), or point the demo at a fresh data directory.
+  - Longer term: keep the team rulebook to named experts only, so test sessions don't feed it.
+
+R6  Harness defects (test-side, not product).
+  a. support/expert.ts threw on any interlock dialog. Fixed locally (uncommitted) for the escalateCompliance case: see R4.
+  b. scripts/live-hindi-run.ts checks the parse straight after posting the utterance. Since 1b0c089 the parse runs when
+     the answer window closes (12 s idle), so 5 of its checks failed at 04:41:10Z. answer.parsed arrived at 04:41:23.7Z.
+     Fix: poll the ledger for answer.parsed (≤ 30 s) before the read-back checks. The same checks on the same session,
+     re-run afterwards, all pass (hindi/hindi-run-readback.json).
+  c. p3 run E asserts gate.authorized ≤ 5. With re-queues, a lapsed authorization gives its slot back, so the assertion
+     should count spoken questions. Superseded run E 5fdd0e97: 6 authorized, 1 re-queued, 5 spoken.
+  d. The harness detects the end of an agent turn after 1000 ms of agent silence on the track. In run B (question 5,
+     with slowed streaming) and run E, the agent paused for more than 1 s inside a question. The scripted expert then
+     answered 0.6–1.2 s before the agent finished. These show up as 2 of the 4 talk-overs.
+  e. The live config writes into docs/evidence/live/<group>. I moved each run's files into this folder and restored the
+     tracked files that the runs overwrote (p3/run-a-after-first-question.png, p4/latest-session.txt).
+
+Still open from the first live run (design gap #8): the gate waits 4 s of silence, then asks. In run B the scripted expert
+paused for 6 s mid-thought and resumed 222 ms and 57 ms after the agent began, so 2 of the 4 talk-overs. ElevenLabs
+barge-in cut the agent off. These are not interruptions under the definition: the agent started inside silence ≥ 1.2 s.

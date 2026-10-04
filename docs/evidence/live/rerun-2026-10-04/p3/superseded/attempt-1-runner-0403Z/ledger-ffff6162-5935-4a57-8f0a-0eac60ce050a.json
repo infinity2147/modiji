@@ -1,0 +1,264 @@
+{
+  "label": "synthetic voice input (ElevenLabs TTS)",
+  "sessionId": "ffff6162-5935-4a57-8f0a-0eac60ce050a",
+  "entries": [
+    {
+      "sessionId": "ffff6162-5935-4a57-8f0a-0eac60ce050a",
+      "source": "engine",
+      "kind": "session.started",
+      "occurredAt": 1791087063848,
+      "traceId": "61b3e6fb-faf6-4a28-977c-1e6ee8e45d8a",
+      "parentIds": [],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "mode": "expert",
+        "caseSet": "training",
+        "domainId": "kycNorthstar",
+        "schemaVersion": 1
+      },
+      "id": "149b755c-b9cf-4fab-a0bc-c4120eecc6ae",
+      "sequence": 0,
+      "receivedAt": 1791087063848
+    },
+    {
+      "sessionId": "ffff6162-5935-4a57-8f0a-0eac60ce050a",
+      "source": "dom",
+      "kind": "screen.event",
+      "occurredAt": 1791087064783,
+      "traceId": "7725de04-e5d6-49aa-92ec-f0aa676e2942",
+      "parentIds": [
+        "149b755c-b9cf-4fab-a0bc-c4120eecc6ae"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "5e4aa61e-f0d8-47c2-99de-89da9a90181f",
+        "frameSeq": 1,
+        "captureTime": 1791087064783,
+        "sessionEpoch": 0,
+        "kind": "navigate",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      "id": "d268c180-b301-410c-98d6-c917ec10a398",
+      "sequence": 1,
+      "receivedAt": 1791087065864
+    },
+    {
+      "sessionId": "ffff6162-5935-4a57-8f0a-0eac60ce050a",
+      "source": "engine",
+      "kind": "llm.turn_decision",
+      "occurredAt": 1791087072803,
+      "traceId": "chatcmpl-iHyb11fUBq9P7ZG5",
+      "parentIds": [],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "decision": "skip_turn",
+        "reason": "not_control_message",
+        "agent": "interviewer",
+        "model": "vashistha-interviewer-v3",
+        "handlerLatencyMs": 0.36
+      },
+      "id": "0f8b676a-49da-4f6c-b264-c964f8896073",
+      "sequence": 2,
+      "receivedAt": 1791087072803
+    },
+    {
+      "sessionId": "ffff6162-5935-4a57-8f0a-0eac60ce050a",
+      "source": "engine",
+      "kind": "llm.turn_decision",
+      "occurredAt": 1791087074115,
+      "traceId": "chatcmpl-svCtOqXBg6xMnP_B",
+      "parentIds": [],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "decision": "skip_turn",
+        "reason": "not_control_message",
+        "agent": "interviewer",
+        "model": "vashistha-interviewer-v3",
+        "handlerLatencyMs": 0.43
+      },
+      "id": "0f5ef4e7-0efe-4a7a-9fb2-50c759a89065",
+      "sequence": 3,
+      "receivedAt": 1791087074115
+    },
+    {
+      "sessionId": "ffff6162-5935-4a57-8f0a-0eac60ce050a",
+      "source": "engine",
+      "kind": "llm.turn_decision",
+      "occurredAt": 1791087076238,
+      "traceId": "chatcmpl-vZ0PMYrji955MlSG",
+      "parentIds": [],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "decision": "skip_turn",
+        "reason": "not_control_message",
+        "agent": "interviewer",
+        "model": "vashistha-interviewer-v3",
+        "handlerLatencyMs": 0.32
+      },
+      "id": "98b1ef7f-5bb7-431f-b4ea-d6566e810ecd",
+      "sequence": 4,
+      "receivedAt": 1791087076238
+    },
+    {
+      "sessionId": "ffff6162-5935-4a57-8f0a-0eac60ce050a",
+      "source": "dom",
+      "kind": "screen.event",
+      "occurredAt": 1791087069866,
+      "traceId": "804330c1-439a-4594-acf3-22cf329d5670",
+      "parentIds": [
+        "149b755c-b9cf-4fab-a0bc-c4120eecc6ae"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "cdef15bb-7f92-4e7c-a325-5a9a8fc345c6",
+        "frameSeq": 2,
+        "captureTime": 1791087069866,
+        "sessionEpoch": 0,
+        "kind": "open_case",
+        "caseId": "NS-2026-0101",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      "id": "3dcb98d7-be25-4307-89df-a1960103d2c7",
+      "sequence": 5,
+      "receivedAt": 1791087076269
+    },
+    {
+      "sessionId": "ffff6162-5935-4a57-8f0a-0eac60ce050a",
+      "source": "dom",
+      "kind": "screen.event",
+      "occurredAt": 1791087075358,
+      "traceId": "804330c1-439a-4594-acf3-22cf329d5670",
+      "parentIds": [
+        "149b755c-b9cf-4fab-a0bc-c4120eecc6ae"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "5be7484e-8f1f-4c24-90c4-09b2a6c75bda",
+        "frameSeq": 3,
+        "captureTime": 1791087075358,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0101",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      "id": "164ede88-eabd-4703-9ae4-1b77c10d7ce2",
+      "sequence": 6,
+      "receivedAt": 1791087076269
+    },
+    {
+      "sessionId": "ffff6162-5935-4a57-8f0a-0eac60ce050a",
+      "source": "engine",
+      "kind": "interlock.check",
+      "occurredAt": 1791087076543,
+      "traceId": "334fcff8-5f7f-47d8-a52f-b4268e99d808",
+      "parentIds": [
+        "149b755c-b9cf-4fab-a0bc-c4120eecc6ae"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "caseId": "NS-2026-0101",
+        "action": "enhancedReview",
+        "edits": {
+          "riskRating": "medium"
+        },
+        "result": {
+          "decision": "allow",
+          "matchedRules": [],
+          "missingFeatures": [],
+          "evidence": []
+        }
+      },
+      "id": "6b5f81d6-2c42-45fb-b0e4-9b79fd08954f",
+      "sequence": 7,
+      "receivedAt": 1791087076543
+    },
+    {
+      "sessionId": "ffff6162-5935-4a57-8f0a-0eac60ce050a",
+      "source": "voice",
+      "kind": "utterance.transcript",
+      "occurredAt": 1791087077132,
+      "traceId": "798e298a-32f8-44b3-927b-819533fca5d6",
+      "parentIds": [],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "conversationId": "conv_4501m42hqf1fff7avgx1zqv4fwpy",
+        "text": "Okay. Mm-hmm. Right.",
+        "t0Ms": 1584,
+        "t1Ms": 8043,
+        "frameIds": []
+      },
+      "id": "7f4814a2-9f3f-4c6d-bd7c-d7d7d6d211ae",
+      "sequence": 8,
+      "receivedAt": 1791087077133
+    },
+    {
+      "sessionId": "ffff6162-5935-4a57-8f0a-0eac60ce050a",
+      "source": "client",
+      "kind": "frame.received",
+      "occurredAt": 1791087077305,
+      "traceId": "fc22d3d6-a8bb-4fa5-86ff-dc02d1956b84",
+      "parentIds": [
+        "149b755c-b9cf-4fab-a0bc-c4120eecc6ae"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "frameId": "919ec50d-4ae2-4f57-b22a-884dfca838a9",
+        "frameSeq": 2,
+        "captureTime": 1791087077305,
+        "width": 1280,
+        "height": 720,
+        "mediaPath": "ffff6162-5935-4a57-8f0a-0eac60ce050a/frames/919ec50d-4ae2-4f57-b22a-884dfca838a9.png",
+        "redactedRegions": 0,
+        "changeScore": 1.8280490305688646
+      },
+      "id": "77979a53-35eb-4f47-adde-1347853db517",
+      "sequence": 9,
+      "receivedAt": 1791087092164
+    },
+    {
+      "sessionId": "ffff6162-5935-4a57-8f0a-0eac60ce050a",
+      "source": "vision",
+      "kind": "screen.event",
+      "occurredAt": 1791087077305,
+      "traceId": "fc22d3d6-a8bb-4fa5-86ff-dc02d1956b84",
+      "parentIds": [
+        "77979a53-35eb-4f47-adde-1347853db517"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "vision-0-2-0",
+        "frameSeq": 2,
+        "captureTime": 1791087077305,
+        "sessionEpoch": 0,
+        "kind": "open_case",
+        "caseId": "NS-2026-0101",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": false
+      },
+      "id": "56a04c3b-6b18-4b34-99e9-2bc3586d7e79",
+      "sequence": 10,
+      "receivedAt": 1791087093251
+    }
+  ]
+}

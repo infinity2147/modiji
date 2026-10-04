@@ -1,0 +1,139 @@
+{
+  "label": "synthetic voice input (ElevenLabs TTS)",
+  "conversation_id": "conv_4901m42jf6pnfc88bdr481eq8c2s",
+  "status": "done",
+  "sessionId": "9f659c71-b22c-462a-9c4e-1fc2a1102909",
+  "metadata": {
+    "start": 1791087846,
+    "duration": 173,
+    "termination_reason": "Client disconnected: 1000",
+    "error": null
+  },
+  "transcript": [
+    {
+      "role": "user",
+      "t": 20,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 21,
+      "msg": "What led you to send this to enhanced review? And what would have changed your mind?"
+    },
+    {
+      "role": "user",
+      "t": 28,
+      "msg": "The largest owner holds 35% and isn't verified. Anything over 25% that isn't verified goes to enhanced review."
+    },
+    {
+      "role": "agent",
+      "t": 36,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 36,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 41,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 41,
+      "msg": "If the country risk were \"high\" instead of medium, what would you decide?"
+    },
+    {
+      "role": "user",
+      "t": 48,
+      "msg": "No, the country doesn't drive this one. It's the unverified owner holding 35%."
+    },
+    {
+      "role": "agent",
+      "t": 54,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 54,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 74,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 75,
+      "msg": "What told you to approve onboarding here, and what would have changed your mind?"
+    },
+    {
+      "role": "user",
+      "t": 81,
+      "msg": "They've banked with us for three years, and their source of funds is verified, so the high-risk country on its own doesn't send them to enhanced review."
+    },
+    {
+      "role": "agent",
+      "t": 90,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 90,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 94,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 94,
+      "msg": "If the analyst risk rating were \"medium\" instead of high, what would you decide?"
+    },
+    {
+      "role": "user",
+      "t": 101,
+      "msg": "They've banked with us for three years, and their source of funds is verified, so the high-risk country on its own doesn't send them to enhanced review."
+    },
+    {
+      "role": "agent",
+      "t": 109,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 109,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 134,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 134,
+      "msg": "What pushed you to escalate to the compliance officer here, and what would have changed your mind?"
+    },
+    {
+      "role": "user",
+      "t": 141,
+      "msg": "She's a politically exposed person, so it goes to the compliance officer, whatever else the file says."
+    },
+    {
+      "role": "agent",
+      "t": 147,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 147,
+      "msg": null
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "label": "synthetic voice input (ElevenLabs TTS)",
+  "conversation_id": "conv_6001m42hnf20fq69fs9e4rb6y0dv",
+  "status": "failed",
+  "sessionId": "76329d42-8b5b-4724-bb65-ad34f2546b83",
+  "metadata": {
+    "start": 1791087002,
+    "duration": 26,
+    "termination_reason": "custom_llm generation failed",
+    "error": {
+      "code": 1002,
+      "reason": "custom_llm_error: LLM Cascade Error: TimeoutError",
+      "error_type": "llm_error"
+    }
+  },
+  "transcript": [
+    {
+      "role": "user",
+      "t": 1,
+      "msg": "Hmm. Let me think about this one. Okay. The key points here are the ownership and the country."
+    }
+  ]
+}

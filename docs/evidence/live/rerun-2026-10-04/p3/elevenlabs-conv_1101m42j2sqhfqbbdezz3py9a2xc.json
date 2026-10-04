@@ -1,0 +1,169 @@
+{
+  "label": "synthetic voice input (ElevenLabs TTS)",
+  "conversation_id": "conv_1101m42j2sqhfqbbdezz3py9a2xc",
+  "status": "done",
+  "sessionId": "656f6ea8-ebe2-49a8-927e-c601ba5505dc",
+  "metadata": {
+    "start": 1791087439,
+    "duration": 151,
+    "termination_reason": "Client disconnected: 1000",
+    "error": null
+  },
+  "transcript": [
+    {
+      "role": "user",
+      "t": 1,
+      "msg": "Let me jot down the ownership details while I read through this file."
+    },
+    {
+      "role": "agent",
+      "t": 5,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 5,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 17,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 17,
+      "msg": "What told you to send to enhanced review here? What would have changed your mind?"
+    },
+    {
+      "role": "user",
+      "t": 24,
+      "msg": "The largest owner holds 35% and isn't verified. Anything over 25% that isn't verified goes to enhanced review."
+    },
+    {
+      "role": "agent",
+      "t": 33,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 33,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 37,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 38,
+      "msg": "If country risk were high instead of medium, what would you decide?"
+    },
+    {
+      "role": "user",
+      "t": 43,
+      "msg": "No, the country doesn't drive this one. It's the unverified owner holding 35%."
+    },
+    {
+      "role": "agent",
+      "t": 49,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 49,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 49,
+      "msg": "Let me jot down the ownership details while I read through this file."
+    },
+    {
+      "role": "agent",
+      "t": 53,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 53,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 60,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 60,
+      "msg": "What pointed you toward approving onboarding here, and what would have changed your mind?"
+    },
+    {
+      "role": "user",
+      "t": 68,
+      "msg": "They've banked with us for three years, and their source of funds is verified, so the high-risk country on its own doesn't send them to enhanced review."
+    },
+    {
+      "role": "agent",
+      "t": 76,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 76,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 81,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 81,
+      "msg": "If the analyst risk rating were \"medium\" instead of high, what would you decide?"
+    },
+    {
+      "role": "user",
+      "t": 88,
+      "msg": "They've banked with us for three years, and their source of funds is verified, so the high-risk country on its own doesn't send them to enhanced review. Let me jot down the ownership details while I read through this file."
+    },
+    {
+      "role": "agent",
+      "t": 100,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 100,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 109,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 110,
+      "msg": "What led you to escalate to the compliance officer here, and what would have changed your mind?"
+    },
+    {
+      "role": "user",
+      "t": 118,
+      "msg": "She's a politically exposed person, so it goes to the compliance officer, whatever else the file says."
+    },
+    {
+      "role": "agent",
+      "t": 124,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 124,
+      "msg": null
+    }
+  ]
+}

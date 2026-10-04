@@ -1,0 +1,274 @@
+{
+  "label": "synthetic voice input (ElevenLabs TTS)",
+  "conversation_id": "conv_4401m42hfshaec9vfd9fp6hwvgfs",
+  "status": "done",
+  "sessionId": "c4286c22-2a9c-4c99-98ab-dcffb6ed2496",
+  "metadata": {
+    "start": 1791086816,
+    "duration": 153,
+    "termination_reason": "Client disconnected: 1000",
+    "error": null
+  },
+  "transcript": [
+    {
+      "role": "user",
+      "t": 1,
+      "msg": "Hmm. Let me think about this one."
+    },
+    {
+      "role": "agent",
+      "t": 3,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 3,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 9,
+      "msg": "Okay. The key points here are the ownership and the country."
+    },
+    {
+      "role": "agent",
+      "t": 14,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 14,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 18,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 18,
+      "msg": "What pushed you to send this one to enhanced review, and what would have changed your mind?"
+    },
+    {
+      "role": "user",
+      "t": 26,
+      "msg": "Well, let me think."
+    },
+    {
+      "role": "agent",
+      "t": 28,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 28,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 31,
+      "msg": "The largest owner holds 35% and isn't verified. Anything over 25% that isn't verified goes to enhanced review."
+    },
+    {
+      "role": "agent",
+      "t": 39,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 39,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 44,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 44,
+      "msg": "If the entity type were \"individual\" instead of company, with the largest beneficial owner share at 100%, what would you decide?"
+    },
+    {
+      "role": "user",
+      "t": 54,
+      "msg": "Well, let me think."
+    },
+    {
+      "role": "agent",
+      "t": 59,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 59,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 59,
+      "msg": "If the largest owner holds more than 25% and isn't verified, it goes to enhanced review."
+    },
+    {
+      "role": "agent",
+      "t": 66,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 66,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 66,
+      "msg": "Hmm. Let me think about this one."
+    },
+    {
+      "role": "agent",
+      "t": 68,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 68,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 73,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 73,
+      "msg": "If the largest owner's..."
+    },
+    {
+      "role": "user",
+      "t": 74,
+      "msg": "Okay. The key points here are the ownership and the country."
+    },
+    {
+      "role": "agent",
+      "t": 79,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 79,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 81,
+      "msg": "Well, let me think."
+    },
+    {
+      "role": "agent",
+      "t": 82,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 82,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 86,
+      "msg": "If the largest owner holds more than 25% and isn't verified, it goes to enhanced review."
+    },
+    {
+      "role": "agent",
+      "t": 92,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 92,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 97,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 97,
+      "msg": "What led you to approve onboarding here, and what would have changed your mind?"
+    },
+    {
+      "role": "user",
+      "t": 104,
+      "msg": "Well, let me think."
+    },
+    {
+      "role": "agent",
+      "t": 106,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 106,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 109,
+      "msg": "They've banked with us for three years, and their source of funds is verified, so the high-risk country on its own doesn't send them to enhanced review."
+    },
+    {
+      "role": "agent",
+      "t": 117,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 117,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 118,
+      "msg": "Hmm. Let me think about this one."
+    },
+    {
+      "role": "agent",
+      "t": 120,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 120,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 124,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 125,
+      "msg": "If the country..."
+    },
+    {
+      "role": "user",
+      "t": 126,
+      "msg": "Okay. The key points here are the ownership and the country."
+    },
+    {
+      "role": "agent",
+      "t": 130,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 130,
+      "msg": null
+    }
+  ]
+}

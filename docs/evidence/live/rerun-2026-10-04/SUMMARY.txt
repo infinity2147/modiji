@@ -1,0 +1,55 @@
+Re-run aggregates — expert speech is synthetic voice input (ElevenLabs TTS)
+
+[FIRST RUN] run-a-typing-656f6ea8-ebe2-49a8-927e-c601ba5505dc.json session 656f6ea8-ebe2-49a8-927e-c601ba5505dc conv conv_1101m42j2sqhfqbbdezz3py9a2xc
+  authorized 5, spoken 5, re-queued 0, authorized-not-spoken 0, refused none; ctl sent 5 (not followed by speech 0); skip_turn 10
+  INTERRUPTIONS 0
+  talk-over 0
+  decision p50 1 · p95 10 · max 10 ms (n=5); valid→ctl p50 270 · p95 281 · max 281 ms (n=5); RTT p50 266 · p95 268 · max 268 ms (n=5); first audio p50 656 · p95 739 · max 739 ms (n=5)
+  control never evidence true (control messages ledgered 5)
+run-b-pause-cb13274f-46f8-434f-9b58-ecb878f26a3e.json session cb13274f-46f8-434f-9b58-ecb878f26a3e conv conv_6401m42j7ns4fvf896sf7y8zv2f8
+  authorized 6, spoken 6, re-queued 0, authorized-not-spoken 0, refused none; ctl sent 6 (not followed by speech 1); skip_turn 21
+  INTERRUPTIONS 0
+  talk-over 3: agent first: expert resume 1791087670834..1791087674596, agent 1791087670601..1791087671781 "If the largest ..."; agent first: expert answer-part-1 1791087704870..1791087706313, agent 1791087701682..1791087706021 "If the analyst risk rating were "medium" instead o"; agent first: expert resume 1791087726438..1791087730202, agent 1791087726381..1791087727241 "If the country ..."
+  decision p50 0 · p95 5228 · max 5228 ms (n=6); valid→ctl p50 279 · p95 5505 · max 5505 ms (n=6); RTT p50 272 · p95 285 · max 285 ms (n=6); first audio p50 723 · p95 1024 · max 1024 ms (n=5)
+  control never evidence true (control messages ledgered 7)
+run-c-scrolling-9f659c71-b22c-462a-9c4e-1fc2a1102909.json session 9f659c71-b22c-462a-9c4e-1fc2a1102909 conv conv_4901m42jf6pnfc88bdr481eq8c2s
+  authorized 5, spoken 5, re-queued 0, authorized-not-spoken 0, refused context_changed,context_changed,context_changed; ctl sent 5 (not followed by speech 0); skip_turn 7
+  INTERRUPTIONS 0
+  talk-over 0
+  decision p50 8 · p95 4157 · max 4157 ms (n=5); valid→ctl p50 300 · p95 5687 · max 5687 ms (n=5); RTT p50 292 · p95 2956 · max 2956 ms (n=5); first audio p50 707 · p95 759 · max 759 ms (n=5)
+  control never evidence true (control messages ledgered 5)
+run-d-noisy-5e976f1b-925e-4227-bd54-96cff311fe86.json session 5e976f1b-925e-4227-bd54-96cff311fe86 conv conv_8401m42jqan4exct1n1ffmt401fz
+  authorized 5, spoken 5, re-queued 0, authorized-not-spoken 0, refused context_changed; ctl sent 5 (not followed by speech 0); skip_turn 25
+  INTERRUPTIONS 0
+  talk-over 0
+  decision p50 0 · p95 1 · max 1 ms (n=5); valid→ctl p50 272 · p95 279 · max 279 ms (n=5); RTT p50 264 · p95 275 · max 275 ms (n=5); first audio p50 737 · p95 780 · max 780 ms (n=5)
+  control never evidence true (control messages ledgered 5)
+run-e-budget-518a1610-d3e8-481d-8919-77a11ab49b8e.json session 518a1610-d3e8-481d-8919-77a11ab49b8e conv conv_5101m42jx2paek0v0p6c0xccmvfp
+  authorized 5, spoken 5, re-queued 0, authorized-not-spoken 0, refused question_not_queued,question_not_queued; ctl sent 5 (not followed by speech 0); skip_turn 9
+  INTERRUPTIONS 0
+  talk-over 1: agent first: expert answer 1791088375038..1791088381395, agent 1791088367564..1791088375661 "If the entity type were "individual" instead of co"
+  decision p50 0 · p95 0 · max 0 ms (n=5); valid→ctl p50 269 · p95 311 · max 311 ms (n=5); RTT p50 263 · p95 303 · max 303 ms (n=5); first audio p50 653 · p95 687 · max 687 ms (n=5)
+  control never evidence true (control messages ledgered 5)
+
+ALL 5 P3 runs: interruptions 0; authorized 26, spoken 26, re-queued 0; talk-over 4
+  gate decision (decidedAt − becameValidAt) p50 0 · p95 4157 · max 5228 ms (n=26)
+  conditions valid → control sent p50 273 · p95 5505 · max 5687 ms (n=26)
+  gate/authorize RTT p50 268 · p95 1524 · max 2956 ms (n=26)
+  first audio (control sent → agent audio on track) p50 691 · p95 780 · max 1024 ms (n=25)
+  first audio event (data channel) p50 557 · p95 593 · max 801 ms (n=25) · first agent_response text p50 1759 · p95 2589 · max 2705 ms (n=25)
+First run only: interruptions 0; authorized 5, spoken 5, re-queued 0; talk-over 0
+  gate decision (decidedAt − becameValidAt) p50 1 · p95 10 · max 10 ms (n=5)
+  conditions valid → control sent p50 270 · p95 281 · max 281 ms (n=5)
+  gate/authorize RTT p50 266 · p95 268 · max 268 ms (n=5)
+  first audio (control sent → agent audio on track) p50 656 · p95 739 · max 739 ms (n=5)
+  first audio event (data channel) p50 557 · p95 592 · max 592 ms (n=5) · first agent_response text p50 1866 · p95 1900 · max 1900 ms (n=5)
+Runs 2–5: interruptions 0; authorized 21, spoken 21, re-queued 0; talk-over 4
+  gate decision (decidedAt − becameValidAt) p50 0 · p95 4157 · max 5228 ms (n=21)
+  conditions valid → control sent p50 279 · p95 5505 · max 5687 ms (n=21)
+  gate/authorize RTT p50 272 · p95 1524 · max 2956 ms (n=21)
+  first audio (control sent → agent audio on track) p50 691 · p95 780 · max 1024 ms (n=20)
+  first audio event (data channel) p50 548 · p95 593 · max 801 ms (n=20) · first agent_response text p50 1755 · p95 2589 · max 2705 ms (n=20)
+
+P4 gate data: p4-run-83261ab1-1289-429b-88b2-63077fc81e8a.json session 83261ab1-1289-429b-88b2-63077fc81e8a conv conv_5001m42k6134efpa3v0w1z5w0k5t
+  authorized 5, spoken 5, re-queued 0, refused question_not_queued,question_not_queued, interruptions 0, talk-over 0
+  decision p50 0 · p95 1 · max 1 ms (n=5); valid→ctl p50 271 · p95 274 · max 274 ms (n=5); first audio p50 687 · p95 787 · max 787 ms (n=5); control never evidence true

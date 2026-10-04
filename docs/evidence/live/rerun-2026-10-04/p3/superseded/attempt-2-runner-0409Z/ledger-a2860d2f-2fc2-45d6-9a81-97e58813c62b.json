@@ -1,0 +1,233 @@
+{
+  "label": "synthetic voice input (ElevenLabs TTS)",
+  "sessionId": "a2860d2f-2fc2-45d6-9a81-97e58813c62b",
+  "entries": [
+    {
+      "sessionId": "a2860d2f-2fc2-45d6-9a81-97e58813c62b",
+      "source": "engine",
+      "kind": "session.started",
+      "occurredAt": 1791086952766,
+      "traceId": "2efa51ff-90a4-42b6-95e5-a76f0cff127d",
+      "parentIds": [],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "mode": "expert",
+        "caseSet": "training",
+        "domainId": "kycNorthstar",
+        "schemaVersion": 1
+      },
+      "id": "91050235-fdc2-488a-bfca-86db8f21fb36",
+      "sequence": 0,
+      "receivedAt": 1791086952766
+    },
+    {
+      "sessionId": "a2860d2f-2fc2-45d6-9a81-97e58813c62b",
+      "source": "dom",
+      "kind": "screen.event",
+      "occurredAt": 1791086953496,
+      "traceId": "28a1ded3-608c-4a6d-8492-d03c6379be97",
+      "parentIds": [
+        "91050235-fdc2-488a-bfca-86db8f21fb36"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "d43df314-006f-4c74-8958-49cfe08cb08b",
+        "frameSeq": 1,
+        "captureTime": 1791086953496,
+        "sessionEpoch": 0,
+        "kind": "navigate",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      "id": "d79a1bad-f7d3-4d3e-9e10-7f27deb63b3c",
+      "sequence": 1,
+      "receivedAt": 1791086953852
+    },
+    {
+      "sessionId": "a2860d2f-2fc2-45d6-9a81-97e58813c62b",
+      "source": "client",
+      "kind": "frame.received",
+      "occurredAt": 1791086954989,
+      "traceId": "f50315e8-7dd1-4cd3-ad42-c8b14f12477e",
+      "parentIds": [
+        "91050235-fdc2-488a-bfca-86db8f21fb36"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "frameId": "bc0efb23-a9e3-4b44-b818-263d0e9c6fee",
+        "frameSeq": 1,
+        "captureTime": 1791086954989,
+        "width": 1280,
+        "height": 720,
+        "mediaPath": "a2860d2f-2fc2-45d6-9a81-97e58813c62b/frames/bc0efb23-a9e3-4b44-b818-263d0e9c6fee.png",
+        "redactedRegions": 0,
+        "changeScore": 0
+      },
+      "id": "237b5b1a-4dbe-497e-ae3e-c194c3b2b3c6",
+      "sequence": 2,
+      "receivedAt": 1791086957022
+    },
+    {
+      "sessionId": "a2860d2f-2fc2-45d6-9a81-97e58813c62b",
+      "source": "vision",
+      "kind": "screen.event",
+      "occurredAt": 1791086954989,
+      "traceId": "f50315e8-7dd1-4cd3-ad42-c8b14f12477e",
+      "parentIds": [
+        "237b5b1a-4dbe-497e-ae3e-c194c3b2b3c6"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "vision-0-1-0",
+        "frameSeq": 1,
+        "captureTime": 1791086954989,
+        "sessionEpoch": 0,
+        "kind": "navigate",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": false
+      },
+      "id": "2ba51915-1cd4-4f6f-bf1f-b945dffe644a",
+      "sequence": 3,
+      "receivedAt": 1791086957847
+    },
+    {
+      "sessionId": "a2860d2f-2fc2-45d6-9a81-97e58813c62b",
+      "source": "engine",
+      "kind": "llm.turn_decision",
+      "occurredAt": 1791086971080,
+      "traceId": "chatcmpl-TmXpa0mr5iJjVTDG",
+      "parentIds": [],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "decision": "skip_turn",
+        "reason": "not_control_message",
+        "agent": "interviewer",
+        "model": "vashistha-interviewer-v3",
+        "handlerLatencyMs": 0.62
+      },
+      "id": "bdd8c89c-e822-4692-bf68-add5ed53fc00",
+      "sequence": 4,
+      "receivedAt": 1791086971081
+    },
+    {
+      "sessionId": "a2860d2f-2fc2-45d6-9a81-97e58813c62b",
+      "source": "client",
+      "kind": "frame.received",
+      "occurredAt": 1791086959000,
+      "traceId": "c72ad21e-aae3-4a56-b3b5-907172320a13",
+      "parentIds": [
+        "91050235-fdc2-488a-bfca-86db8f21fb36"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "frameId": "648d813a-cdc8-4b77-ad06-8c31ca9fcdc4",
+        "frameSeq": 2,
+        "captureTime": 1791086959000,
+        "width": 1280,
+        "height": 720,
+        "mediaPath": "a2860d2f-2fc2-45d6-9a81-97e58813c62b/frames/648d813a-cdc8-4b77-ad06-8c31ca9fcdc4.png",
+        "redactedRegions": 0,
+        "changeScore": 1.8280490305688646
+      },
+      "id": "d95a7b60-d0ef-4bec-8d1d-0b55a0865cc9",
+      "sequence": 5,
+      "receivedAt": 1791086971094
+    },
+    {
+      "sessionId": "a2860d2f-2fc2-45d6-9a81-97e58813c62b",
+      "source": "engine",
+      "kind": "llm.turn_decision",
+      "occurredAt": 1791086972489,
+      "traceId": "chatcmpl-tyxBdoSWgDdZDoyt",
+      "parentIds": [],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "decision": "skip_turn",
+        "reason": "not_control_message",
+        "agent": "interviewer",
+        "model": "vashistha-interviewer-v3",
+        "handlerLatencyMs": 0.33
+      },
+      "id": "5b9c729e-e44d-46ab-a2b3-2c865741b4f0",
+      "sequence": 6,
+      "receivedAt": 1791086972489
+    },
+    {
+      "sessionId": "a2860d2f-2fc2-45d6-9a81-97e58813c62b",
+      "source": "engine",
+      "kind": "llm.turn_decision",
+      "occurredAt": 1791086972501,
+      "traceId": "chatcmpl-r_MncM1SOUIXDuxR",
+      "parentIds": [],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "decision": "skip_turn",
+        "reason": "not_control_message",
+        "agent": "interviewer",
+        "model": "vashistha-interviewer-v3",
+        "handlerLatencyMs": 0.46
+      },
+      "id": "41e11fa2-586a-4d47-b328-0cb3d30385bc",
+      "sequence": 7,
+      "receivedAt": 1791086972502
+    },
+    {
+      "sessionId": "a2860d2f-2fc2-45d6-9a81-97e58813c62b",
+      "source": "voice",
+      "kind": "utterance.transcript",
+      "occurredAt": 1791086972796,
+      "traceId": "7938460c-0f0c-410a-9716-6f3112fa964c",
+      "parentIds": [],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "conversationId": "conv_8601m42hm278fe0977g41jxs0s5z",
+        "text": "Let me jot down the ownership details while I read through this file.",
+        "t0Ms": 1788,
+        "t1Ms": 15726,
+        "frameIds": [
+          "d95a7b60-d0ef-4bec-8d1d-0b55a0865cc9"
+        ]
+      },
+      "id": "e6b942c1-12a9-4240-ac20-a7528fcdf80d",
+      "sequence": 8,
+      "receivedAt": 1791086972796
+    },
+    {
+      "sessionId": "a2860d2f-2fc2-45d6-9a81-97e58813c62b",
+      "source": "vision",
+      "kind": "screen.event",
+      "occurredAt": 1791086959000,
+      "traceId": "c72ad21e-aae3-4a56-b3b5-907172320a13",
+      "parentIds": [
+        "d95a7b60-d0ef-4bec-8d1d-0b55a0865cc9"
+      ],
+      "schemaVersion": 1,
+      "privacyEpoch": 0,
+      "payload": {
+        "id": "vision-0-2-0",
+        "frameSeq": 2,
+        "captureTime": 1791086959000,
+        "sessionEpoch": 0,
+        "kind": "open_case",
+        "caseId": "NS-2026-0101",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": false
+      },
+      "id": "cb496a11-d053-4614-b988-90219ba040c3",
+      "sequence": 9,
+      "receivedAt": 1791086974943
+    }
+  ]
+}

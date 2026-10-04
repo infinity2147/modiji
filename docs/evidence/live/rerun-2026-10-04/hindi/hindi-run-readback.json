@@ -1,0 +1,245 @@
+{
+  "label": "SYNTHETIC VOICE INPUT — the expert's speech is ElevenLabs text-to-speech, not a person",
+  "kind": "delayed read-back of the same session (no new speech)",
+  "target": "https://vashistha-production.up.railway.app",
+  "sessionId": "20160724-a6e2-40a6-901a-0d48a5daf0b4",
+  "utteranceId": "adaaa92c-5b26-4b13-bcb2-fd4cbf3144f2",
+  "startedAt": "2026-10-04T04:42:47.394Z",
+  "finishedAt": "2026-10-04T04:42:49.644Z",
+  "noviceSessionForTutor": "6bb25bb4-984d-4b58-a56c-6db2f945b1e1",
+  "answerParsed": {
+    "id": "ef0f9177-e60b-4997-80b9-a1f1c40e20bd",
+    "kind": "answer.parsed",
+    "source": "engine",
+    "parentIds": [
+      "adaaa92c-5b26-4b13-bcb2-fd4cbf3144f2",
+      "4a549746-db64-433e-84c0-271aa9483220"
+    ],
+    "payload": {
+      "questionId": "q_098faf1fb2dd50",
+      "utteranceId": "adaaa92c-5b26-4b13-bcb2-fd4cbf3144f2",
+      "survivingCandidateIds": [
+        "cand_061bb31fff6b61",
+        "cand_028b3730ebb571"
+      ],
+      "eliminatedCandidateIds": [],
+      "statedRules": [
+        {
+          "predicate": {
+            "==": [
+              {
+                "var": "jurisdictionRisk"
+              },
+              "high"
+            ]
+          },
+          "action": "approve",
+          "kind": "guardrail",
+          "effect": {
+            "type": "forbid",
+            "action": "approve"
+          },
+          "exactQuote": "अगर देश high-risk list पर है, तो मैं desk level पर approve नहीं करती।",
+          "t0Ms": 5205,
+          "t1Ms": 12850
+        },
+        {
+          "predicate": {
+            "==": [
+              {
+                "var": "jurisdictionRisk"
+              },
+              "high"
+            ]
+          },
+          "action": "enhancedReview",
+          "kind": "decision",
+          "effect": {
+            "type": "recommend",
+            "action": "enhancedReview"
+          },
+          "exactQuote": "ऐसे case में पहले enhanced review होता है।",
+          "t0Ms": 5205,
+          "t1Ms": 12850
+        }
+      ],
+      "newConcepts": [],
+      "answeredAction": "enhancedReview",
+      "confidence": 0.85
+    }
+  },
+  "rulesConfirmed": [
+    {
+      "id": "rule_07a031c00674eb",
+      "decisionFamily": "reviewOutcome",
+      "kind": "guardrail",
+      "predicate": {
+        "==": [
+          {
+            "var": "jurisdictionRisk"
+          },
+          "high"
+        ]
+      },
+      "effect": {
+        "type": "forbid",
+        "action": "approve"
+      },
+      "priority": 40,
+      "overrides": [],
+      "evidence": [
+        {
+          "kind": "expert_quote",
+          "utteranceId": "adaaa92c-5b26-4b13-bcb2-fd4cbf3144f2",
+          "exactQuote": "अगर देश high-risk list पर है, तो मैं desk level पर approve नहीं करती।",
+          "t0Ms": 5205,
+          "t1Ms": 12850,
+          "frameIds": [
+            "80446526-f3df-4f1e-a4ed-4ae32b17369b"
+          ],
+          "eventIds": [],
+          "relation": "supports",
+          "provenance": "human_voice",
+          "language": "hi",
+          "translation": "If the country is on the high-risk list, I do not approve at desk level."
+        }
+      ],
+      "confirmedBy": [
+        {
+          "expertId": "priya-sharma-synthetic",
+          "at": 1791088883689,
+          "method": "explicit_statement",
+          "ledgerEntryId": "adaaa92c-5b26-4b13-bcb2-fd4cbf3144f2"
+        }
+      ],
+      "revision": 1,
+      "schemaVersion": 1,
+      "expertId": "priya-sharma-synthetic"
+    },
+    {
+      "id": "rule_0c698542e16083",
+      "decisionFamily": "reviewOutcome",
+      "kind": "decision",
+      "predicate": {
+        "==": [
+          {
+            "var": "jurisdictionRisk"
+          },
+          "high"
+        ]
+      },
+      "effect": {
+        "type": "recommend",
+        "action": "enhancedReview"
+      },
+      "priority": 10,
+      "overrides": [],
+      "evidence": [
+        {
+          "kind": "expert_quote",
+          "utteranceId": "adaaa92c-5b26-4b13-bcb2-fd4cbf3144f2",
+          "exactQuote": "ऐसे case में पहले enhanced review होता है।",
+          "t0Ms": 5205,
+          "t1Ms": 12850,
+          "frameIds": [
+            "80446526-f3df-4f1e-a4ed-4ae32b17369b"
+          ],
+          "eventIds": [],
+          "relation": "supports",
+          "provenance": "human_voice",
+          "language": "hi",
+          "translation": "In such a case, an enhanced review happens first."
+        }
+      ],
+      "confirmedBy": [
+        {
+          "expertId": "priya-sharma-synthetic",
+          "at": 1791088883689,
+          "method": "explicit_statement",
+          "ledgerEntryId": "adaaa92c-5b26-4b13-bcb2-fd4cbf3144f2"
+        }
+      ],
+      "revision": 1,
+      "schemaVersion": 1,
+      "expertId": "priya-sharma-synthetic"
+    }
+  ],
+  "mcp": {
+    "decision": "forbid",
+    "matchedRules": [
+      "rule_07a031c00674eb"
+    ],
+    "missingFeatures": [],
+    "evidence": [
+      {
+        "kind": "expert_quote",
+        "utteranceId": "adaaa92c-5b26-4b13-bcb2-fd4cbf3144f2",
+        "exactQuote": "अगर देश high-risk list पर है, तो मैं desk level पर approve नहीं करती।",
+        "t0Ms": 5205,
+        "t1Ms": 12850,
+        "frameIds": [
+          "80446526-f3df-4f1e-a4ed-4ae32b17369b"
+        ],
+        "eventIds": [],
+        "relation": "supports",
+        "provenance": "human_voice",
+        "language": "hi",
+        "translation": "If the country is on the high-risk list, I do not approve at desk level."
+      }
+    ],
+    "rulebookRevision": 60,
+    "explanation": "Blocked by rule rule_07a031c00674eb: \"अगर देश high-risk list पर है, तो मैं desk level पर approve नहीं करती।\" [in Hindi (हिन्दी); English translation (machine, not authoritative): \"If the country is on the high-risk list, I do not approve at desk level.\"] (expert priya-sharma-synthetic, 0:05.2–0:12.8). Do not take \"approve\" (Approve onboarding) on this case."
+  },
+  "tutor": {
+    "ruleId": "rule_07a031c00674eb",
+    "kind": "guardrail",
+    "when": "country risk is high",
+    "then": "never approve onboarding",
+    "stopRule": true,
+    "quote": {
+      "text": "अगर देश high-risk list पर है, तो मैं desk level पर approve नहीं करती।",
+      "language": "hi",
+      "translation": "If the country is on the high-risk list, I do not approve at desk level.",
+      "attribution": "The expert, by voice",
+      "replay": {
+        "frameUrl": "/api/media/20160724-a6e2-40a6-901a-0d48a5daf0b4/frames/16beb405-6101-44d1-8139-a0c5294665c5.png",
+        "frameNote": null,
+        "screen": [],
+        "audioNote": "Audio playback unavailable: conversation audio is not stored, only the transcript quote."
+      }
+    },
+    "level": "untested"
+  },
+  "checks": [
+    {
+      "name": "parser quoted the original Hindi words",
+      "ok": true,
+      "detail": "[\"अगर देश high-risk list पर है, तो मैं desk level पर approve नहीं करती।\",\"ऐसे case में पहले enhanced review होता है।\"]"
+    },
+    {
+      "name": "utterance.translated entry (source engine, parent the utterance)",
+      "ok": true,
+      "detail": "1d5887af-d6b7-4371-80a8-18752ced3a8d"
+    },
+    {
+      "name": "confirmed rule: forbid approve when jurisdictionRisk == high",
+      "ok": true,
+      "detail": "{\"==\":[{\"var\":\"jurisdictionRisk\"},\"high\"]}"
+    },
+    {
+      "name": "rule evidence: Hindi exactQuote + English translation",
+      "ok": true,
+      "detail": "{\"exactQuote\":\"अगर देश high-risk list पर है, तो मैं desk level पर approve नहीं करती।\",\"translation\":\"If the country is on the high-risk list, I do not approve at desk level.\"}"
+    },
+    {
+      "name": "MCP check_action cites the Hindi quote with its English translation",
+      "ok": true,
+      "detail": "Blocked by rule rule_07a031c00674eb: \"अगर देश high-risk list पर है, तो मैं desk level पर approve नहीं करती।\" [in Hindi (हिन्दी); English translation (machine, not authoritative): \"If the country is on the high-risk list, I do not approve at desk level.\"] (expert priya-sharma-synthetic, 0:05.2–0:12.8). Do not take \"approve\" (Approve onboarding) on this case."
+    },
+    {
+      "name": "tutor shows the rule with its English translation",
+      "ok": true,
+      "detail": "{\"ruleId\":\"rule_07a031c00674eb\",\"kind\":\"guardrail\",\"when\":\"country risk is high\",\"then\":\"never approve onboarding\",\"stopRule\":true,\"quote\":{\"text\":\"अगर देश high-risk list पर है, तो मैं desk level पर approve नहीं करती।\",\"language\":\"hi\",\"translation\":\"If the country is on the high-risk list, I do not approve at desk level.\",\"attribution\":\"The expert, by voice\",\"replay\":{\"frameUrl\":\"/api/media/20160724-a6e2-40a6-901a-0d48a5daf0b4/frames/16beb405-6101-44d1-8139-a0c5294665c5.png\",\"frameNote\":null,\"screen\":[],\"audioNote\":\"Audio playback unavailable: conversation audio is not stored, only the transcript quote.\"}},\"level\":\"untested\"}"
+    }
+  ]
+}

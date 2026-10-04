@@ -1,0 +1,4 @@
+
+Running 5 tests using 1 worker
+
+  ✘  1 [chromium-live] › e2e/live/p3-gate.live.spec.ts:45:1 › @live @p3 run A: expert types a note while talking (2.5m)

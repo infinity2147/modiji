@@ -1,0 +1,48 @@
+{
+  "label": "synthetic voice input (ElevenLabs TTS)",
+  "conversation_id": "conv_7801m42hm0jhf1ess2375h18dkan",
+  "status": "failed",
+  "sessionId": "90e3317d-da67-4283-a880-61cc3a86ac4c",
+  "metadata": {
+    "start": 1791086955,
+    "duration": 61,
+    "termination_reason": "custom_llm generation failed",
+    "error": {
+      "code": 1002,
+      "reason": "custom_llm_error: LLM Cascade Error: TimeoutError",
+      "error_type": "llm_error"
+    }
+  },
+  "transcript": [
+    {
+      "role": "user",
+      "t": 27,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 28,
+      "msg": "What led you to send this to enhanced review? And what would have changed your mind?"
+    },
+    {
+      "role": "user",
+      "t": 35,
+      "msg": "The largest owner holds 35% and isn't verified. Anything over 25% that isn't verified goes to enhanced review."
+    },
+    {
+      "role": "agent",
+      "t": 44,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 44,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 49,
+      "msg": "⟦ctl:<redacted>⟧"
+    }
+  ]
+}

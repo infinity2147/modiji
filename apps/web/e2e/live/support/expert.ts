@@ -143,7 +143,19 @@ export class Expert {
     const committed = this.page.getByRole("status").filter({ hasText: "Decision committed" });
     const dialog = this.page.getByRole("dialog");
     await expect(committed.or(dialog).first()).toBeVisible({ timeout: 20_000 });
-    if (await dialog.isVisible()) throw new Error(`interlock dialog on Save: ${(await dialog.textContent())?.slice(0, 500)}`);
+    if (await dialog.isVisible()) {
+      const text = (await dialog.textContent())?.slice(0, 500) ?? "";
+      // The shared production rulebook holds "PEP → require_approval(compliance_officer)" (from the live P4
+      // run), which applies to every outcome of the family. An expert who is escalating to the compliance
+      // officer answers that interlock the way the product offers: a note and "Escalate". Anything else
+      // is unexpected for the scripted plans and stops the run.
+      if (outcome !== "escalateCompliance" || !/Approval required/.test(text)) throw new Error(`interlock dialog on Save: ${text}`);
+      await dialog.getByLabel("Note (required)").click();
+      await this.page.keyboard.type("Escalating to the compliance officer for sign-off.", { delay: 40 });
+      await dialog.getByRole("button", { name: "Escalate", exact: true }).click();
+      await expect(dialog).toBeHidden({ timeout: 20_000 });
+      await this.mark("interlock_escalated", { outcome, dialog: text });
+    }
     await this.mark("committed", { outcome });
   }
 

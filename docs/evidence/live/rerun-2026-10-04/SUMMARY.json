@@ -1,0 +1,550 @@
+{
+  "label": "synthetic voice input (ElevenLabs TTS)",
+  "p3": [
+    {
+      "file": "run-a-typing-656f6ea8-ebe2-49a8-927e-c601ba5505dc.json",
+      "sessionId": "656f6ea8-ebe2-49a8-927e-c601ba5505dc",
+      "conversationIds": [
+        "conv_1101m42j2sqhfqbbdezz3py9a2xc"
+      ],
+      "started": 1791087435547,
+      "authorized": 5,
+      "spoken": 5,
+      "skip": 10,
+      "requeued": 0,
+      "requeuedEntries": [],
+      "lostAuthorizations": [],
+      "refused": [],
+      "interruptions": 0,
+      "interruptionDetail": [],
+      "talkOver": [],
+      "decision": [
+        0,
+        0,
+        1,
+        1,
+        10
+      ],
+      "rtt": [
+        266,
+        263,
+        265,
+        268,
+        267
+      ],
+      "validToCtl": [
+        270,
+        266,
+        269,
+        273,
+        281
+      ],
+      "firstAudio": [
+        739,
+        595,
+        713,
+        656,
+        645
+      ],
+      "firstAudioEvent": [
+        592,
+        513,
+        557,
+        570,
+        553
+      ],
+      "firstText": [
+        1866,
+        1666,
+        1900,
+        1555,
+        1893
+      ],
+      "ctlSent": 5,
+      "ctlWithoutSpeech": 0,
+      "controlNeverEvidence": {
+        "ok": true,
+        "controlMessagesLedgered": 5,
+        "controlInTranscripts": 0,
+        "controlInAgentUtterances": 0,
+        "controlEchoedToBrowserAsUserTranscript": 0,
+        "controlPostedAsUtterance": 0,
+        "controlEntriesNotSystemControl": 0,
+        "ruleEvidenceCitingControl": 0
+      },
+      "counts": {
+        "questionsAuthorized": 5,
+        "llmSpeak": 5,
+        "llmSkip": 10,
+        "agentAudioTurns": 5,
+        "agentUtterancesLedger": 5,
+        "expertUtterancesLedger": 7,
+        "expertLinesSpoken": 6,
+        "keystrokes": 381,
+        "wheelEvents": 0,
+        "scrollEvents": 83,
+        "questionsQueued": 22,
+        "questionsDropped": 11,
+        "questionsRequeued": 0
+      }
+    },
+    {
+      "file": "run-b-pause-cb13274f-46f8-434f-9b58-ecb878f26a3e.json",
+      "sessionId": "cb13274f-46f8-434f-9b58-ecb878f26a3e",
+      "conversationIds": [
+        "conv_6401m42j7ns4fvf896sf7y8zv2f8"
+      ],
+      "started": 1791087594835,
+      "authorized": 6,
+      "spoken": 6,
+      "skip": 21,
+      "requeued": 0,
+      "requeuedEntries": [],
+      "lostAuthorizations": [],
+      "refused": [],
+      "interruptions": 0,
+      "interruptionDetail": [],
+      "talkOver": [
+        "agent first: expert resume 1791087670834..1791087674596, agent 1791087670601..1791087671781 \"If the largest ...\"",
+        "agent first: expert answer-part-1 1791087704870..1791087706313, agent 1791087701682..1791087706021 \"If the analyst risk rating were \"medium\" instead o\"",
+        "agent first: expert resume 1791087726438..1791087730202, agent 1791087726381..1791087727241 \"If the country ...\""
+      ],
+      "decision": [
+        0,
+        1,
+        0,
+        12,
+        5228,
+        0
+      ],
+      "rtt": [
+        270,
+        271,
+        273,
+        285,
+        272,
+        277
+      ],
+      "validToCtl": [
+        273,
+        275,
+        279,
+        300,
+        5505,
+        281
+      ],
+      "firstAudio": [
+        654,
+        723,
+        691,
+        1024,
+        773
+      ],
+      "firstAudioEvent": [
+        493,
+        548,
+        593,
+        801,
+        567
+      ],
+      "firstText": [
+        1751,
+        1679,
+        1794,
+        2051,
+        1598
+      ],
+      "ctlSent": 6,
+      "ctlWithoutSpeech": 1,
+      "controlNeverEvidence": {
+        "ok": true,
+        "controlMessagesLedgered": 7,
+        "controlInTranscripts": 0,
+        "controlInAgentUtterances": 0,
+        "controlEchoedToBrowserAsUserTranscript": 0,
+        "controlPostedAsUtterance": 0,
+        "controlEntriesNotSystemControl": 0,
+        "ruleEvidenceCitingControl": 0
+      },
+      "counts": {
+        "questionsAuthorized": 6,
+        "llmSpeak": 6,
+        "llmSkip": 21,
+        "agentAudioTurns": 6,
+        "agentUtterancesLedger": 5,
+        "expertUtterancesLedger": 16,
+        "expertLinesSpoken": 14,
+        "keystrokes": 50,
+        "wheelEvents": 0,
+        "scrollEvents": 93,
+        "questionsQueued": 22,
+        "questionsDropped": 10,
+        "questionsRequeued": 0
+      }
+    },
+    {
+      "file": "run-c-scrolling-9f659c71-b22c-462a-9c4e-1fc2a1102909.json",
+      "sessionId": "9f659c71-b22c-462a-9c4e-1fc2a1102909",
+      "conversationIds": [
+        "conv_4901m42jf6pnfc88bdr481eq8c2s"
+      ],
+      "started": 1791087842257,
+      "authorized": 5,
+      "spoken": 5,
+      "skip": 7,
+      "requeued": 0,
+      "requeuedEntries": [],
+      "lostAuthorizations": [],
+      "refused": [
+        "context_changed",
+        "context_changed",
+        "context_changed"
+      ],
+      "interruptions": 0,
+      "interruptionDetail": [],
+      "talkOver": [],
+      "decision": [
+        8,
+        5,
+        1785,
+        0,
+        4157
+      ],
+      "rtt": [
+        275,
+        292,
+        2956,
+        275,
+        1524
+      ],
+      "validToCtl": [
+        289,
+        300,
+        4749,
+        280,
+        5687
+      ],
+      "firstAudio": [
+        759,
+        636,
+        643,
+        717,
+        707
+      ],
+      "firstAudioEvent": [
+        576,
+        540,
+        557,
+        524,
+        589
+      ],
+      "firstText": [
+        1755,
+        1789,
+        1542,
+        1868,
+        2035
+      ],
+      "ctlSent": 5,
+      "ctlWithoutSpeech": 0,
+      "controlNeverEvidence": {
+        "ok": true,
+        "controlMessagesLedgered": 5,
+        "controlInTranscripts": 0,
+        "controlInAgentUtterances": 0,
+        "controlEchoedToBrowserAsUserTranscript": 0,
+        "controlPostedAsUtterance": 0,
+        "controlEntriesNotSystemControl": 0,
+        "ruleEvidenceCitingControl": 0
+      },
+      "counts": {
+        "questionsAuthorized": 5,
+        "llmSpeak": 5,
+        "llmSkip": 7,
+        "agentAudioTurns": 5,
+        "agentUtterancesLedger": 5,
+        "expertUtterancesLedger": 5,
+        "expertLinesSpoken": 5,
+        "keystrokes": 50,
+        "wheelEvents": 138,
+        "scrollEvents": 238,
+        "questionsQueued": 32,
+        "questionsDropped": 20,
+        "questionsRequeued": 0
+      }
+    },
+    {
+      "file": "run-d-noisy-5e976f1b-925e-4227-bd54-96cff311fe86.json",
+      "sessionId": "5e976f1b-925e-4227-bd54-96cff311fe86",
+      "conversationIds": [
+        "conv_8401m42jqan4exct1n1ffmt401fz"
+      ],
+      "started": 1791088108335,
+      "authorized": 5,
+      "spoken": 5,
+      "skip": 25,
+      "requeued": 0,
+      "requeuedEntries": [],
+      "lostAuthorizations": [],
+      "refused": [
+        "context_changed"
+      ],
+      "interruptions": 0,
+      "interruptionDetail": [],
+      "talkOver": [],
+      "decision": [
+        1,
+        1,
+        0,
+        0,
+        0
+      ],
+      "rtt": [
+        259,
+        264,
+        262,
+        275,
+        267
+      ],
+      "validToCtl": [
+        267,
+        272,
+        269,
+        279,
+        273
+      ],
+      "firstAudio": [
+        724,
+        766,
+        627,
+        780,
+        737
+      ],
+      "firstAudioEvent": [
+        520,
+        542,
+        538,
+        586,
+        543
+      ],
+      "firstText": [
+        1705,
+        2589,
+        1716,
+        1680,
+        1554
+      ],
+      "ctlSent": 5,
+      "ctlWithoutSpeech": 0,
+      "controlNeverEvidence": {
+        "ok": true,
+        "controlMessagesLedgered": 5,
+        "controlInTranscripts": 0,
+        "controlInAgentUtterances": 0,
+        "controlEchoedToBrowserAsUserTranscript": 0,
+        "controlPostedAsUtterance": 0,
+        "controlEntriesNotSystemControl": 0,
+        "ruleEvidenceCitingControl": 0
+      },
+      "counts": {
+        "questionsAuthorized": 5,
+        "llmSpeak": 5,
+        "llmSkip": 25,
+        "agentAudioTurns": 5,
+        "agentUtterancesLedger": 5,
+        "expertUtterancesLedger": 21,
+        "expertLinesSpoken": 9,
+        "keystrokes": 50,
+        "wheelEvents": 0,
+        "scrollEvents": 100,
+        "questionsQueued": 21,
+        "questionsDropped": 10,
+        "questionsRequeued": 0
+      }
+    },
+    {
+      "file": "run-e-budget-518a1610-d3e8-481d-8919-77a11ab49b8e.json",
+      "sessionId": "518a1610-d3e8-481d-8919-77a11ab49b8e",
+      "conversationIds": [
+        "conv_5101m42jx2paek0v0p6c0xccmvfp"
+      ],
+      "started": 1791088296596,
+      "authorized": 5,
+      "spoken": 5,
+      "skip": 9,
+      "requeued": 0,
+      "requeuedEntries": [],
+      "lostAuthorizations": [],
+      "refused": [
+        "question_not_queued",
+        "question_not_queued"
+      ],
+      "interruptions": 0,
+      "interruptionDetail": [],
+      "talkOver": [
+        "agent first: expert answer 1791088375038..1791088381395, agent 1791088367564..1791088375661 \"If the entity type were \"individual\" instead of co\""
+      ],
+      "decision": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rtt": [
+        303,
+        263,
+        261,
+        266,
+        259
+      ],
+      "validToCtl": [
+        311,
+        269,
+        264,
+        270,
+        262
+      ],
+      "firstAudio": [
+        687,
+        655,
+        636,
+        616,
+        653
+      ],
+      "firstAudioEvent": [
+        574,
+        573,
+        514,
+        547,
+        579
+      ],
+      "firstText": [
+        1827,
+        1759,
+        1488,
+        2705,
+        1771
+      ],
+      "ctlSent": 5,
+      "ctlWithoutSpeech": 0,
+      "controlNeverEvidence": {
+        "ok": true,
+        "controlMessagesLedgered": 5,
+        "controlInTranscripts": 0,
+        "controlInAgentUtterances": 0,
+        "controlEchoedToBrowserAsUserTranscript": 0,
+        "controlPostedAsUtterance": 0,
+        "controlEntriesNotSystemControl": 0,
+        "ruleEvidenceCitingControl": 0
+      },
+      "counts": {
+        "questionsAuthorized": 5,
+        "llmSpeak": 5,
+        "llmSkip": 9,
+        "agentAudioTurns": 5,
+        "agentUtterancesLedger": 5,
+        "expertUtterancesLedger": 5,
+        "expertLinesSpoken": 5,
+        "keystrokes": 0,
+        "wheelEvents": 0,
+        "scrollEvents": 81,
+        "questionsQueued": 37,
+        "questionsDropped": 26,
+        "questionsRequeued": 0
+      }
+    }
+  ],
+  "p4": [
+    {
+      "file": "p4-run-83261ab1-1289-429b-88b2-63077fc81e8a.json",
+      "sessionId": "83261ab1-1289-429b-88b2-63077fc81e8a",
+      "conversationIds": [
+        "conv_5001m42k6134efpa3v0w1z5w0k5t"
+      ],
+      "started": 1791088574608,
+      "authorized": 5,
+      "spoken": 5,
+      "skip": 10,
+      "requeued": 0,
+      "requeuedEntries": [],
+      "lostAuthorizations": [],
+      "refused": [
+        "question_not_queued",
+        "question_not_queued"
+      ],
+      "interruptions": 0,
+      "interruptionDetail": [],
+      "talkOver": [],
+      "decision": [
+        0,
+        0,
+        0,
+        1,
+        0
+      ],
+      "rtt": [
+        264,
+        269,
+        263,
+        270,
+        268
+      ],
+      "validToCtl": [
+        268,
+        273,
+        267,
+        274,
+        271
+      ],
+      "firstAudio": [
+        729,
+        636,
+        625,
+        787,
+        687
+      ],
+      "firstAudioEvent": [
+        545,
+        528,
+        536,
+        541,
+        571
+      ],
+      "firstText": [
+        2018,
+        2748,
+        1630,
+        2398,
+        2046
+      ],
+      "ctlSent": 5,
+      "ctlWithoutSpeech": 0,
+      "controlNeverEvidence": {
+        "ok": true,
+        "controlMessagesLedgered": 5,
+        "controlInTranscripts": 0,
+        "controlInAgentUtterances": 0,
+        "controlEchoedToBrowserAsUserTranscript": 0,
+        "controlPostedAsUtterance": 0,
+        "controlEntriesNotSystemControl": 0,
+        "ruleEvidenceCitingControl": 0
+      },
+      "counts": {
+        "questionsAuthorized": 5,
+        "llmSpeak": 5,
+        "llmSkip": 10,
+        "agentAudioTurns": 5,
+        "agentUtterancesLedger": 5,
+        "expertUtterancesLedger": 6,
+        "expertLinesSpoken": 5,
+        "keystrokes": 50,
+        "wheelEvents": 0,
+        "scrollEvents": 59,
+        "questionsQueued": 22,
+        "questionsDropped": 12,
+        "questionsRequeued": 0
+      }
+    }
+  ]
+}

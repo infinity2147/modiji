@@ -1,0 +1,583 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: p3-gate.live.spec.ts >> @live @p3 run C: rapid case navigation and scrolling
+- Location: e2e/live/p3-gate.live.spec.ts:103:1
+
+# Error details
+
+```
+Error: interlock dialog on Save: Approval requiredEscalate to compliance officer for NS-2026-0103 can only be committed with an acknowledgement or an escalation. Both are recorded with your note.Matched rulesrule_0db2a2b89d2203Expert evidence“Never approve a politically exposed person without compliance sign-off.”Expert, spoken · 0:55.4–1:00.1 · supports the ruleNote (required)CancelEscalateAcknowledge and commitClose
+```
+
+```
+Error: browserContext._wrapApiCall: ENOENT: no such file or directory, open '/home/24b4530/modiji/apps/web/test-results/live/.playwright-artifacts-2/traces/a9c9b3624772971cb5ec-30403a71a2be30deb27e.network'
+```
+
+# Page snapshot
+
+```yaml
+- generic:
+  - generic:
+    - banner [aria-hidden]:
+      - generic:
+        - generic: Northstar Bank
+        - heading [level=1]: CaseDesk
+      - generic: Synthetic data — fictional policy
+      - generic:
+        - paragraph: "Sensing (disclosed): DOM events · typing & scroll timing · microphone only when voice is on"
+        - paragraph:
+          - generic: Expert capture
+          - generic [aria-hidden]: ·
+          - generic: Training set
+          - generic [aria-hidden]: ·
+          - generic: 90e3317d
+        - link:
+          - /url: /sandbox
+          - text: New session
+    - generic:
+      - generic [aria-hidden]:
+        - region:
+          - generic:
+            - generic:
+              - heading [level=2]: Case queue
+              - paragraph: 2 of 3 decided
+            - progressbar
+          - list:
+            - listitem:
+              - button:
+                - generic:
+                  - generic: NS-2026-0101
+                  - generic: Decided
+                - generic: Halvorsen Marine Logistics Ltd
+                - generic:
+                  - generic: Company
+                  - generic [aria-hidden]: ·
+                  - generic: Estoria
+                  - generic: Medium risk
+                - generic: "Outcome: Send to enhanced review"
+            - listitem:
+              - button:
+                - generic:
+                  - generic: NS-2026-0102
+                  - generic: Decided
+                - generic: Quillfeather Agritrade Holdings
+                - generic:
+                  - generic: Company
+                  - generic [aria-hidden]: ·
+                  - generic: Galvania
+                  - generic: High risk
+                - generic: "Outcome: Approve onboarding"
+            - listitem:
+              - button:
+                - generic:
+                  - generic: NS-2026-0103
+                  - generic: Open
+                - generic: Valentin Ashgrove
+                - generic:
+                  - generic: Individual
+                  - generic [aria-hidden]: ·
+                  - generic: Aldermere
+                  - generic: Low risk
+      - main [aria-hidden]:
+        - article:
+          - generic:
+            - generic:
+              - paragraph: NS-2026-0103
+              - heading [level=2]: Valentin Ashgrove
+            - paragraph:
+              - text: Submitted
+              - time: 16 Sept 2026
+          - generic:
+            - region:
+              - generic:
+                - heading [level=3]: Customer
+              - generic:
+                - generic:
+                  - term: Name
+                  - definition: Valentin Ashgrove
+                  - term: Entity type
+                  - definition: Individual
+                  - term: Registration no.
+                  - definition: ALD-P615042
+                  - term: Country
+                  - definition:
+                    - generic:
+                      - text: Aldermere
+                      - generic: Low risk
+                  - term: Address
+                  - definition: 27 Cedar Court, Port Elsby, Aldermere
+            - region:
+              - generic:
+                - heading [level=3]: Relationship
+              - generic:
+                - generic:
+                  - term: Customer status
+                  - definition:
+                    - generic: New customer
+                  - term: Relationship age
+                  - definition: New relationship
+                  - term: Relationship manager
+                  - definition: Signe Valcourt
+          - region:
+            - generic:
+              - heading [level=3]: Beneficial owners
+            - generic:
+              - generic:
+                - table:
+                  - rowgroup:
+                    - row:
+                      - columnheader: Name
+                      - columnheader: Role
+                      - columnheader: Share
+                      - columnheader: ID verified
+                      - columnheader: PEP
+                  - rowgroup:
+                    - row:
+                      - cell: Valentin Ashgrove
+                      - cell: Account holder
+                      - cell: 100 %
+                      - cell:
+                        - generic: Verified
+                      - cell:
+                        - generic: "Yes"
+          - generic:
+            - region:
+              - generic:
+                - heading [level=3]: Screening
+              - generic:
+                - generic:
+                  - term: Sanctions
+                  - definition:
+                    - generic:
+                      - generic: Clear
+                      - generic: No match on the Northstar Synthetic Sanctions List.
+                  - term: Adverse media
+                  - definition:
+                    - generic:
+                      - generic: None
+                      - generic: No relevant adverse media found.
+            - region:
+              - generic:
+                - heading [level=3]: Source of funds
+              - generic:
+                - generic:
+                  - term: Status
+                  - definition:
+                    - generic: Verified
+                  - term: Description
+                  - definition: Salary as deputy minister of transport (fictional) and savings; payslips and bank statements reviewed.
+                  - term: Expected monthly volume
+                  - definition: €9,500
+          - region:
+            - generic:
+              - heading [level=3]: Documents
+            - generic:
+              - list:
+                - listitem:
+                  - generic: Passport — Valentin Ashgrove
+                  - generic: Received
+                - listitem:
+                  - generic: Proof of address
+                  - generic: Received
+                - listitem:
+                  - generic: Source-of-funds statement
+                  - generic: Received
+      - generic:
+        - region "Voice · Interviewer agent":
+          - generic [aria-hidden]:
+            - heading [level=2]: Voice · Interviewer agent
+            - status:
+              - generic: Ended
+          - generic:
+            - button [aria-hidden]:
+              - text: Go off the record
+              - generic: Alt+Shift+O
+            - button [aria-hidden]: Start interview
+            - paragraph [aria-hidden]: The agent ended the conversation.
+            - list [aria-hidden]:
+              - listitem: Microphone off (no conversation)
+              - listitem: Agent silent
+            - region "Transcript":
+              - heading [level=3] [aria-hidden]: Transcript
+              - log:
+                - listitem:
+                  - generic: "Agent:"
+                  - text: What led you to send this to enhanced review? And what would have changed your mind?
+                - listitem:
+                  - generic: "Expert:"
+                  - text: The largest owner holds 35% and isn't verified. Anything over 25% that isn't verified goes to enhanced review.
+        - region [aria-hidden]:
+          - generic:
+            - heading [level=2]: Review
+            - generic: NS-2026-0103
+          - generic:
+            - generic:
+              - generic:
+                - generic: Risk rating
+                - combobox:
+                  - generic: High
+                - combobox [aria-hidden]
+              - group:
+                - generic: Outcome
+                - radiogroup:
+                  - generic:
+                    - radio
+                    - radio [aria-hidden]
+                    - text: Approve onboarding
+                  - generic:
+                    - radio
+                    - radio [aria-hidden]
+                    - text: Send to enhanced review
+                  - generic:
+                    - radio
+                    - radio [aria-hidden]
+                    - text: Request documents
+                  - generic:
+                    - radio [checked]
+                    - radio [checked] [aria-hidden]
+                    - text: Escalate to compliance officer
+                  - generic:
+                    - radio
+                    - radio [aria-hidden]
+                    - text: Reject
+            - generic:
+              - button: Save decision
+              - paragraph: Save runs the deterministic interlock against the confirmed rulebook before anything is committed.
+        - status: All DOM events delivered
+        - region [aria-hidden]:
+          - generic:
+            - heading [level=2]: Screen capture
+            - status:
+              - generic: Capturing
+          - generic:
+            - paragraph: "Screen frames: change-detected, best-effort PII blur in your browser before upload."
+            - button: Stop sharing
+            - paragraph: "Vision: 2 events from 12 frames · p95 frame→event 32106 ms"
+            - group:
+              - generic: Perception stats
+      - generic [aria-hidden]:
+        - generic:
+          - generic:
+            - generic:
+              - region:
+                - status: LISTENING
+                - list:
+                  - listitem:
+                    - generic: Typing
+                    - generic: ✓
+                  - listitem:
+                    - generic: Speaking
+                    - generic: ✓
+                  - listitem:
+                    - generic: Screen moving
+                    - generic: wait 1.2 s
+                - generic:
+                  - generic: Question value
+                  - generic: —
+                - paragraph: "Reason: 4 questions queued · voice not connected, nothing will be asked"
+            - generic:
+              - button: Concepts 0
+            - button: Engineering view
+          - generic:
+            - region:
+              - generic:
+                - heading [level=2]:
+                  - text: Event ticker
+                  - generic: · live ledger
+              - log:
+                - listitem:
+                  - time: 09:40:04
+                  - generic: control
+                  - generic: Control message
+                - listitem:
+                  - time: 09:40:07
+                  - generic: engine
+                  - generic: Agent asks · “If the entity type were "trust" rather than company, what would you d…”
+                - listitem:
+                  - time: 09:40:22
+                  - generic: engine
+                  - generic: Answer parsed · 0 hypothesis(es) eliminated · 1 rule(s) stated · 0 new concept(s)
+                - listitem:
+                  - time: 09:40:22
+                  - generic: engine
+                  - generic: Rule confirmed
+                - listitem:
+                  - time: 09:40:22
+                  - generic: engine
+                  - generic: "Hypotheses updated · reviewOutcome · top: if largest beneficial owner share above 25% and largest owner identity verified is no then enhancedReview (0.16)"
+                - listitem:
+                  - time: 09:40:28
+                  - generic: control
+                  - generic: "Control message (refused: unknown_nonce)"
+                - listitem:
+                  - time: 09:40:28
+                  - generic: engine
+                  - generic: Agent turn skipped (Unknown nonce)
+                - listitem:
+                  - time: 09:40:28
+                  - generic: engine
+                  - generic: Gate authorized · “If the country risk were "low" instead of medium, what would you deci…” · 5494 ms after valid
+                - listitem:
+                  - time: 09:40:28
+                  - generic: control
+                  - generic: "Control message (refused: unknown_nonce)"
+                - listitem:
+                  - time: 09:40:28
+                  - generic: engine
+                  - generic: Agent turn skipped (Unknown nonce)
+                - listitem:
+                  - time: 09:40:13
+                  - generic: dom
+                  - generic: Opened case · NS-2026-0102
+                - listitem:
+                  - time: 09:40:16
+                  - generic: dom
+                  - generic: Opened case · NS-2026-0103
+                - listitem:
+                  - time: 09:40:17
+                  - generic: dom
+                  - generic: Opened case · NS-2026-0101
+                - listitem:
+                  - time: 09:40:17
+                  - generic: dom
+                  - generic: Opened case · NS-2026-0102
+                - listitem:
+                  - time: 09:40:20
+                  - generic: dom
+                  - generic: "Analyst risk rating changed: Unrated→High · NS-2026-0102"
+                - listitem:
+                  - time: 09:40:29
+                  - generic: engine
+                  - generic: Interlock check · Approve onboarding · NS-2026-0102 → Allow
+                - listitem:
+                  - time: 09:40:29
+                  - generic: dom
+                  - generic: "Decision saved: Approve onboarding · NS-2026-0102"
+                - listitem:
+                  - time: 09:40:30
+                  - generic: dom
+                  - generic: "Action: Approve onboarding · NS-2026-0102"
+                - listitem:
+                  - time: 09:40:33
+                  - generic: engine
+                  - generic: "Question re-queued: its authorization expired unspoken · “If the country risk were \"low\" instead of medium, what would you deci…”"
+                - listitem:
+                  - time: 09:40:33
+                  - generic: engine
+                  - generic: Question dropped (Superseded) · “If the country risk were "low" instead of medium, what would you deci…”
+                - listitem:
+                  - time: 09:40:31
+                  - generic: dom
+                  - generic: Opened case · NS-2026-0103
+                - listitem:
+                  - time: 09:40:31
+                  - generic: dom
+                  - generic: Opened case · NS-2026-0101
+                - listitem:
+                  - time: 09:40:32
+                  - generic: dom
+                  - generic: Opened case · NS-2026-0102
+                - listitem:
+                  - time: 09:40:33
+                  - generic: dom
+                  - generic: Opened case · NS-2026-0103
+                - listitem:
+                  - time: 09:40:39
+                  - generic: engine
+                  - generic: Question dropped (Superseded) · “If the source of funds were "unverified" instead of verified, what wo…”
+                - listitem:
+                  - time: 09:40:39
+                  - generic: engine
+                  - generic: Question dropped (Superseded) · “If the analyst risk rating were "high" instead of medium, what would …”
+                - listitem:
+                  - time: 09:40:39
+                  - generic: engine
+                  - generic: Question queued · competing explanations · EIG 0.60 bits · “If analyst risk rating were medium instead of high, what would you de…”
+                - listitem:
+                  - time: 09:40:39
+                  - generic: engine
+                  - generic: Question queued · competing explanations · EIG 0.60 bits · “If country risk were medium instead of high, what would you decide?”
+                - listitem:
+                  - time: 09:40:39
+                  - generic: engine
+                  - generic: Question queued · competing explanations · EIG 0.60 bits · “If customer status were new instead of existing (relationship age 0 m…”
+                - listitem:
+                  - time: 09:40:39
+                  - generic: engine
+                  - generic: Question queued · competing explanations · EIG 0.60 bits · “If relationship age were 0 months instead of 36 months (customer stat…”
+                - listitem:
+                  - time: 09:40:39
+                  - generic: engine
+                  - generic: Question queued · competing explanations · EIG 0.38 bits · “If largest owner identity verified were no instead of yes, what would…”
+                - listitem:
+                  - time: 09:40:39
+                  - generic: engine
+                  - generic: "Hypotheses updated · reviewOutcome · top: if largest beneficial owner share above 25% and largest owner identity verified is no then enhancedReview (0.29) · surprise 1.20 bits"
+                - listitem:
+                  - time: 09:40:34
+                  - generic: dom
+                  - generic: Opened case · NS-2026-0101
+                - listitem:
+                  - time: 09:40:34
+                  - generic: dom
+                  - generic: Opened case · NS-2026-0102
+                - listitem:
+                  - time: 09:40:35
+                  - generic: dom
+                  - generic: Opened case · NS-2026-0103
+                - listitem:
+                  - time: 09:40:36
+                  - generic: dom
+                  - generic: Opened case · NS-2026-0101
+                - listitem:
+                  - time: 09:40:37
+                  - generic: dom
+                  - generic: Opened case · NS-2026-0102
+                - listitem:
+                  - time: 09:40:13
+                  - generic: client
+                  - generic: "Frame #26 received · 0 region(s) redacted"
+                - listitem:
+                  - time: 09:40:42
+                  - generic: engine
+                  - generic: Question dropped (Superseded) · “If analyst risk rating were medium instead of high, what would you de…”
+                - listitem:
+                  - time: 09:40:42
+                  - generic: engine
+                  - generic: Question dropped (Superseded) · “If country risk were medium instead of high, what would you decide?”
+                - listitem:
+                  - time: 09:40:42
+                  - generic: engine
+                  - generic: Question dropped (Superseded) · “If relationship age were 0 months instead of 36 months (customer stat…”
+                - listitem:
+                  - time: 09:40:42
+                  - generic: engine
+                  - generic: Question dropped (Superseded) · “If largest owner identity verified were no instead of yes, what would…”
+                - listitem:
+                  - time: 09:40:42
+                  - generic: engine
+                  - generic: Question queued · unexplained decision · EIG 1.20 bits · “What led you to approve onboarding here, and what would have changed …”
+                - listitem:
+                  - time: 09:40:42
+                  - generic: engine
+                  - generic: Question queued · competing explanations · EIG 0.60 bits · “If the country risk were "medium" instead of high, what would you dec…”
+                - listitem:
+                  - time: 09:40:42
+                  - generic: engine
+                  - generic: Question queued · competing explanations · EIG 0.60 bits · “If the analyst risk rating were "medium" instead of high, what would …”
+                - listitem:
+                  - time: 09:40:42
+                  - generic: engine
+                  - generic: Question queued · competing explanations · EIG 0.60 bits · “If this customer were "new" instead of existing, with a relationship …”
+                - listitem:
+                  - time: 09:40:42
+                  - generic: engine
+                  - generic: Question queued · competing explanations · EIG 0.60 bits · “If the relationship age were 0 months instead of 36, with the custome…”
+                - listitem:
+                  - time: 09:40:38
+                  - generic: client
+                  - generic: "Frame #52 received · 0 region(s) redacted"
+                - listitem:
+                  - time: 09:40:51
+                  - generic: dom
+                  - generic: Opened case · NS-2026-0103
+                - listitem:
+                  - time: 09:40:52
+                  - generic: client
+                  - generic: "Frame #53 received · 0 region(s) redacted"
+                - listitem:
+                  - time: 09:40:52
+                  - generic: client
+                  - generic: "Frame #54 received · 0 region(s) redacted"
+                - listitem:
+                  - time: 09:40:53
+                  - generic: client
+                  - generic: "Frame #55 received · 0 region(s) redacted"
+                - listitem:
+                  - time: 09:40:53
+                  - generic: client
+                  - generic: "Frame #56 received · 0 region(s) redacted"
+                - listitem:
+                  - time: 09:40:54
+                  - generic: client
+                  - generic: "Frame #57 received · 0 region(s) redacted"
+                - listitem:
+                  - time: 09:40:54
+                  - generic: client
+                  - generic: "Frame #58 received · 0 region(s) redacted"
+                - listitem:
+                  - time: 09:40:55
+                  - generic: dom
+                  - generic: Opened case · NS-2026-0101
+                - listitem:
+                  - time: 09:40:57
+                  - generic: client
+                  - generic: "Frame #63 received · 0 region(s) redacted"
+                - listitem:
+                  - time: 09:40:55
+                  - generic: dom
+                  - generic: Opened case · NS-2026-0102
+                - listitem:
+                  - time: 09:40:56
+                  - generic: dom
+                  - generic: Opened case · NS-2026-0103
+                - listitem:
+                  - time: 09:40:57
+                  - generic: client
+                  - generic: "Frame #64 received · 0 region(s) redacted"
+          - region:
+            - heading [level=2]: Compliance · computed from the ledger
+            - list:
+              - listitem:
+                - generic: Live questions
+                - generic: 2/3
+              - listitem:
+                - generic: Guardrail
+                - generic: ✗
+              - listitem:
+                - generic: Debrief gaps closed
+                - generic: 0/3
+              - listitem:
+                - generic: Teach-back
+                - generic: ✗
+              - listitem:
+                - generic: Unseen case intercepted
+                - generic: ✗
+  - alert
+  - dialog [ref=e2]:
+    - generic [ref=e3]:
+      - heading "Approval required" [level=2] [ref=e4]
+      - paragraph [ref=e7]:
+        - strong [ref=e8]: Escalate to compliance officer
+        - text: for NS-2026-0103 can only be committed with an acknowledgement or an escalation. Both are recorded with your note.
+    - generic [ref=e9]:
+      - region [ref=e10]:
+        - heading "Matched rules" [level=3] [ref=e11]
+        - list [ref=e12]:
+          - listitem [ref=e13]: rule_0db2a2b89d2203
+      - region [ref=e14]:
+        - heading "Expert evidence" [level=3] [ref=e15]
+        - figure [ref=e17]:
+          - blockquote [ref=e18]:
+            - paragraph [ref=e22]: “Never approve a politically exposed person without compliance sign-off.”
+          - generic [ref=e23]:
+            - text: Expert, spoken ·
+            - time [ref=e24]: 0:55.4–1:00.1
+            - text: · supports the rule
+    - generic [ref=e25]:
+      - generic [ref=e26]:
+        - generic [ref=e27]: Note (required)
+        - textbox "Note (required)" [active] [ref=e28]:
+          - /placeholder: Why you are committing anyway, or what the reviewer should check
+      - generic [ref=e29]:
+        - button "Cancel" [ref=e30]
+        - button "Escalate" [disabled]
+        - button "Acknowledge and commit" [disabled]
+    - button "Close" [ref=e31]
+```

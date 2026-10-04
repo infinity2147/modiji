@@ -1,0 +1,319 @@
+{
+  "label": "synthetic voice input (ElevenLabs TTS)",
+  "conversation_id": "conv_6401m42j7ns4fvf896sf7y8zv2f8",
+  "status": "done",
+  "sessionId": "cb13274f-46f8-434f-9b58-ecb878f26a3e",
+  "metadata": {
+    "start": 1791087599,
+    "duration": 173,
+    "termination_reason": "Client disconnected: 1000",
+    "error": null
+  },
+  "transcript": [
+    {
+      "role": "user",
+      "t": 1,
+      "msg": "Hmm. Let me think about this one."
+    },
+    {
+      "role": "agent",
+      "t": 4,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 4,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 10,
+      "msg": "Okay. The key points here are the ownership and the country."
+    },
+    {
+      "role": "agent",
+      "t": 14,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 14,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 17,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 18,
+      "msg": "What made you send this one to enhanced review? And what would have changed your mind?"
+    },
+    {
+      "role": "user",
+      "t": 25,
+      "msg": "Well, let me think."
+    },
+    {
+      "role": "agent",
+      "t": 27,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 27,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 30,
+      "msg": "The largest owner holds 35% and isn't verified. Anything over 25% that isn't verified goes to enhanced review."
+    },
+    {
+      "role": "agent",
+      "t": 39,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 39,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 43,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 44,
+      "msg": "If the entity type were \"trust\" instead of company, what would you decide?"
+    },
+    {
+      "role": "user",
+      "t": 50,
+      "msg": "Well, let me think."
+    },
+    {
+      "role": "agent",
+      "t": 52,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 52,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 56,
+      "msg": "For a company or a trust, I look at the largest owner. For an individual, the owner threshold doesn't apply."
+    },
+    {
+      "role": "agent",
+      "t": 63,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 63,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 63,
+      "msg": "Hmm. Let me think about this one."
+    },
+    {
+      "role": "agent",
+      "t": 65,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 65,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 70,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 70,
+      "msg": "If the largest ..."
+    },
+    {
+      "role": "user",
+      "t": 71,
+      "msg": "Okay. The key points here are the ownership and the country."
+    },
+    {
+      "role": "agent",
+      "t": 75,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 75,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 77,
+      "msg": "Well, let me think."
+    },
+    {
+      "role": "agent",
+      "t": 79,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 79,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 82,
+      "msg": "They've banked with us for three years, and their source of funds is verified, so the high-risk country on its own doesn't send them to enhanced review."
+    },
+    {
+      "role": "agent",
+      "t": 90,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 90,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 95,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 100,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 100,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 100,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 101,
+      "msg": "If the analyst risk rating were \"medium\" instead of high, what..."
+    },
+    {
+      "role": "user",
+      "t": 105,
+      "msg": "Well, let me think."
+    },
+    {
+      "role": "agent",
+      "t": 107,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 107,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 110,
+      "msg": "They've banked with us for three years, and their source of funds is verified, so the high-risk country on its own doesn't send them to enhanced review."
+    },
+    {
+      "role": "agent",
+      "t": 118,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 118,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 118,
+      "msg": "Hmm. Let me think about this one."
+    },
+    {
+      "role": "agent",
+      "t": 121,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 121,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 125,
+      "msg": "⟦ctl:<redacted>⟧"
+    },
+    {
+      "role": "agent",
+      "t": 126,
+      "msg": "If the country ..."
+    },
+    {
+      "role": "user",
+      "t": 127,
+      "msg": "Okay. The key points here are the ownership and the country."
+    },
+    {
+      "role": "agent",
+      "t": 131,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 131,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 136,
+      "msg": "Well, let me think."
+    },
+    {
+      "role": "agent",
+      "t": 137,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 137,
+      "msg": null
+    },
+    {
+      "role": "user",
+      "t": 141,
+      "msg": "The country doesn't matter here. A politically exposed person always goes to the compliance officer."
+    },
+    {
+      "role": "agent",
+      "t": 146,
+      "msg": null
+    },
+    {
+      "role": "agent",
+      "t": 146,
+      "msg": null
+    }
+  ]
+}

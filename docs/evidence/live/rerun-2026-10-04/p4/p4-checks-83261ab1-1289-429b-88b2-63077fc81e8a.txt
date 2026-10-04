@@ -1,0 +1,27 @@
+P4 checks — session 83261ab1-1289-429b-88b2-63077fc81e8a (expert speech: synthetic voice input, ElevenLabs TTS)
+threshold-style rule or candidate: true (confirmed threshold rules: 3; stated threshold candidates: 4; hypothesis threshold candidates: 0)
+guardrail/exception confirmed: true (4)
+unresolved concept surfaced: true (registryExtractAgeMonths [answer.parsed])
+every promoted rule passes evidence validation: true (6 rule.confirmed)
+answers parsed (answer.parsed): 5
+
+rule rule_15b8c300f021de [decision] effect={"type":"recommend","action":"enhancedReview"} method=explicit_statement provenance=human_voice frames=2 valid=true
+  predicate={"and":[{">":[{"var":"uboOwnershipPct"},25]},{"==":[{"var":"uboVerified"},false]}]}
+  quote="Anything over 25% that isn't verified goes to enhanced review"
+rule rule_0fbfd467eb60e2 [guardrail] effect={"type":"forbid","action":"approve"} method=explicit_statement provenance=human_voice frames=1 valid=true
+  predicate={"and":[{"==":[{"var":"jurisdictionRisk"},"high"]},{"<":[{"var":"accountAgeMonths"},24]}]}
+  quote="never approve a customer from a high-risk country at desk level unless they've banked with us for two years with verified funds"
+rule rule_10d1a366449ae7 [guardrail] effect={"type":"forbid","action":"approve"} method=explicit_statement provenance=human_voice frames=1 valid=true
+  predicate={"and":[{"==":[{"var":"jurisdictionRisk"},"high"]},{"!=":[{"var":"sourceOfFunds"},"verified"]}]}
+  quote="never approve a customer from a high-risk country at desk level unless they've banked with us for two years with verified funds"
+rule rule_00aca1f7eeb6f0 [exception] effect={"type":"recommend","action":"approve"} method=explicit_statement provenance=human_voice frames=1 valid=true
+  predicate={"and":[{"==":[{"var":"jurisdictionRisk"},"high"]},{">=":[{"var":"accountAgeMonths"},24]},{"==":[{"var":"sourceOfFunds"},"verified"]}]}
+  quote="A long relationship with verified funds lets me approve high-risk customers."
+rule rule_107bef98d7ca62 [escalation] effect={"type":"recommend","action":"escalateCompliance"} method=explicit_statement provenance=human_voice frames=1 valid=true
+  predicate={"==":[{"var":"pep"},true]}
+  quote="She's a politically exposed person, so it goes to the compliance officer."
+rule rule_084b77fcd528c1 [guardrail] effect={"type":"require_approval","role":"compliance_officer"} method=explicit_statement provenance=human_voice frames=1 valid=true
+  predicate={"==":[{"var":"pep"},true]}
+  quote="Never approve a politically exposed person without compliance sign-off."
+
+Production rulebook after the run: revision 58, 12 rules
