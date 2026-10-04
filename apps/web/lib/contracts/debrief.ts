@@ -9,6 +9,7 @@ import {
   ApprovalRoleSchema,
   ConfirmedRuleSchema,
   CoverageSchema,
+  ExpertLanguageSchema,
   IdSchema,
   LedgerSourceSchema,
   LlmConditionSchema,
@@ -320,6 +321,8 @@ export const DebriefConversationSchema = z.strictObject({
   done: z.boolean(),
   /** Free replies can be read (a language model is configured); without it only yes / no / skip are understood. */
   llmAvailable: z.boolean(),
+  /** What the page's voice loop needs: the session's privacy state and the expert's declared language. */
+  session: z.strictObject({ offRecord: z.boolean(), privacyEpoch: z.int().nonnegative(), expertLanguage: ExpertLanguageSchema }),
   state: DebriefStateSchema,
 });
 export type DebriefConversation = z.infer<typeof DebriefConversationSchema>;

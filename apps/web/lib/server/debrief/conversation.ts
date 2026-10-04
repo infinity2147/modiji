@@ -14,7 +14,10 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
 import {
+  QuestionSchema,
   actionPhrase,
+  canonicalJson,
+  contentId,
   describePredicate,
   parseLedgerPayload,
   type ActionId,
@@ -35,6 +38,7 @@ import { numericComparisons, replaceComparison } from "../../debrief-predicate-e
 import { ApiFailure } from "../casedesk/http";
 import { requireOnRecord } from "../casedesk/session";
 import { entry, type EntryContext, type PayloadInput } from "../interview/ledger";
+import { localizeQuestion } from "../interview/llm";
 import type { SchemaDeps } from "../schema/deps";
 import { applyConceptAction, conceptsState } from "../schema/service";
 import { applyExpertAction, generateTeachBack, isAffirmative, rebuildWitnesses } from "./actions";
@@ -476,9 +480,42 @@ async function context(deps: DebriefDeps, sessionId: string): Promise<EntryConte
   return { sessionId: snap.loaded.session.id, occurredAt: deps.now(), traceId: randomUUID(), privacyEpoch: snap.loaded.session.privacyEpoch };
 }
 
-function ask(deps: DebriefDeps, ctx: EntryContext, parents: readonly string[], item: Item & { pending?: Pending }, ack = ""): LedgerEntry {
+/** The longest text a spoken question may carry (`QuestionSchema`). */
+const SPOKEN_MAX = 600;
+
+/**
+ * Records the next turn and queues it for the interviewer's voice: a `debrief_turn` question (ephemeral, so the
+ * gate need not wait for a work breakpoint), spoken only by the debrief page's voice loop and only once the gate
+ * authorises exactly this text. Any earlier turn still waiting unspoken is dropped first.
+ */
+async function ask(deps: DebriefDeps, ctx: EntryContext, parents: readonly string[], item: Item & { pending?: Pending }, ack = ""): Promise<LedgerEntry> {
   const text = [ack, item.text].filter((t) => t !== "").join(" ");
-  return deps.ledger.append(entry(ctx, "debrief.asked", "engine", parents, { promptId: randomUUID(), topic: item.topic, ref: item.ref, text, pending: (item.pending ?? null) as never }));
+  const promptId = randomUUID();
+  const asked = deps.ledger.append(entry(ctx, "debrief.asked", "engine", parents, { promptId, topic: item.topic, ref: item.ref, text, pending: (item.pending ?? null) as never }));
+  const snap = await snapshot(deps, ctx.sessionId);
+  for (const r of snap.engine.questions.values())
+    if (r.question.kind === "debrief_turn" && r.status === "queued")
+      deps.ledger.append(entry(ctx, "question.dropped", "engine", [r.queuedEntryId, asked.id], { questionId: r.question.id, reason: "superseded" }));
+  const spoken = text.length <= SPOKEN_MAX ? text : item.text.length <= SPOKEN_MAX ? item.text : undefined;
+  if (spoken === undefined) {
+    deps.log.warn(`[debrief] turn ${asked.id} is too long to speak (${text.length} characters): shown in the chat only`);
+    return asked;
+  }
+  const question = QuestionSchema.parse({
+    id: contentId("q", canonicalJson({ s: ctx.sessionId, debrief: promptId })),
+    sessionId: ctx.sessionId,
+    kind: "debrief_turn",
+    text: spoken,
+    target: { candidateIds: [] },
+    value: 1,
+    reason: "debrief conversation",
+    ephemeral: true,
+    createdAt: ctx.occurredAt,
+    contextVersion: deps.authorizations.getContextVersion(ctx.sessionId),
+    parentIds: [asked.id],
+  });
+  deps.ledger.append(entry(ctx, "question.queued", "engine", [asked.id], await localizeQuestion(deps.claude, question, snap.engine.expert?.language ?? "en", deps.log)));
+  return asked;
 }
 
 const OPENING = "Let's go over what I learned. It takes a few minutes, and you can answer however you like.";
@@ -494,7 +531,7 @@ export function startConversation(deps: ConversationDeps, sessionId: string): Pr
     const item = await nextItem(deps, sessionId, h);
     const last = h.asked.at(-1);
     if (item.topic === "closing" && last?.topic === "closing") return;
-    ask(deps.debrief, await context(deps.debrief, sessionId), last === undefined ? [] : [last.entry.id], item, h.asked.length === 0 ? OPENING : "");
+    await ask(deps.debrief, await context(deps.debrief, sessionId), last === undefined ? [] : [last.entry.id], item, h.asked.length === 0 ? OPENING : "");
   });
 }
 
@@ -527,7 +564,7 @@ export function replyToConversation(deps: ConversationDeps, sessionId: string, i
     // A confirmed or dismissed concept changes the feature model: rerun the solver under it before the next question.
     if (outcome.statementId !== null && (asked.topic === "concept" || asked.pending?.kind === "concept")) await rebuildWitnesses(deps.debrief, sessionId);
     const next = outcome.next ?? (await nextItem(deps, sessionId, history((await snapshot(deps.debrief, sessionId)).entries)));
-    ask(deps.debrief, { ...ctx, occurredAt: deps.debrief.now() }, [replied.id], next, outcome.ack);
+    await ask(deps.debrief, { ...ctx, occurredAt: deps.debrief.now() }, [replied.id], next, outcome.ack);
   });
 }
 
@@ -560,6 +597,7 @@ export async function conversationView(deps: ConversationDeps, sessionId: string
     awaiting: awaiting === undefined ? null : { promptId: awaiting.promptId, topic: awaiting.topic, text: awaiting.text },
     done: last?.topic === "closing",
     llmAvailable: deps.debrief.claude !== null,
+    session: { offRecord: snap.loaded.session.offRecord, privacyEpoch: snap.loaded.session.privacyEpoch, expertLanguage: snap.engine.expert?.language ?? "en" },
     state: debriefState(deps.debrief, snap),
   };
 }

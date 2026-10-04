@@ -60,6 +60,8 @@ export const QuestionKindSchema = z.enum([
   "concept_definition",
   "witness",
   "teach_back",
+  /** A turn of the debrief conversation (plan §7.5 as a dialogue), spoken only by the debrief page's voice loop. */
+  "debrief_turn",
   "prediction",
   "intervention",
 ]);
@@ -68,7 +70,7 @@ export type QuestionKind = z.infer<typeof QuestionKindSchema>;
 /**
  * The live interview's own questions (plan §7.2–7.3), asked while the expert works: the only kinds the
  * interview queue plans and supersedes, and the only kinds the live budget counts. Debrief (`witness`,
- * `teach_back`) and tutor (`prediction`, `intervention`) questions belong to their own flows.
+ * `teach_back`, `debrief_turn`) and tutor (`prediction`, `intervention`) questions belong to their own flows.
  */
 export const LIVE_QUESTION_KINDS = ["why_probe", "counterfactual", "concept_definition"] as const satisfies readonly QuestionKind[];
 
