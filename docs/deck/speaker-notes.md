@@ -67,7 +67,7 @@ Sources: `docs/evidence/p6/intervention-card-before-save.png`, `docs/evidence/li
 ## 8. Apprentice-Bench · the money chart
 
 - Unsafe false-negative rate (would approve when the hidden policy does not) versus expert questions asked, mean ± 1 s.d. over 5 seeds.
-- Floor: record-only 14.9%. Ours: 1.2% after 8 questions.
+- Floor: record-only 14.6%. Ours: 1.2% after 8 questions.
 - Say the loss out loud: B reaches 0.0% but costs 16–24 questions/interruptions; seeds with any unsafe approval at budget 24: D 1/5, B 0/5.
 - Why-answers at vagueness 0 are exact rules — an upper bound that favours B (disclosed in docs/evidence/bench/report.md).
 
