@@ -13,6 +13,7 @@ import { randomUUID } from "node:crypto";
 import { join } from "node:path";
 import { type APIRequestContext } from "@playwright/test";
 import { expect, test } from "./support/accounts";
+import { expectFakeVoicePatched, installFakeVoice, speakControlMessage } from "./support/fake-voice";
 import { uploadFrame } from "./support/screen-frame";
 
 const EVIDENCE_DIR = join(import.meta.dirname, "../../../docs/evidence/p5");
@@ -156,6 +157,47 @@ test("debrief: one conversation — proposals confirmed by a yes, open cases ans
   await expect(chain.locator('[data-kind="expert.statement"]').first()).toBeVisible();
   await page.waitForTimeout(1_200);
   await page.screenshot({ path: evidence("workmap-quote-lineage.png") });
+});
+
+test("debrief by voice: Talk says the waiting turn once the agent is ready, and a spoken reply gets the next turn said", async ({ page, request }) => {
+  // A fake ElevenLabs conversation (support/fake-voice.ts); the agent says only what the custom LLM streams.
+  const voice = await installFakeVoice(page);
+  const sessionId = await seedSession(request);
+  await page.goto(`/debrief/${sessionId}`);
+  const transcript = page.getByTestId("debrief-transcript");
+  const agent = transcript.getByTestId("turn-agent");
+  await expect(agent.first()).toContainText("Let's go over what I learned");
+  await expect(agent).toHaveCount(1);
+  const first = (await agent.last().textContent())?.trim();
+
+  await page.getByRole("button", { name: "Talk", exact: true }).click();
+  const voiceStatus = page.getByRole("status", { name: "Voice status" });
+  await expect(voiceStatus).toHaveText("Listening");
+  await expectFakeVoicePatched(page);
+  // Connected, but the agent has not initialised the conversation yet: a control message now could be lost.
+  await page.waitForTimeout(2000);
+  expect((await voice.sent()).length).toBe(0);
+
+  // The agent is ready: the waiting turn is said at once, without the expert speaking first, in its exact words.
+  await voice.initialise();
+  await expect.poll(async () => (await voice.sent()).length, { timeout: 5000 }).toBe(1);
+  const said = await speakControlMessage(request, sessionId, (await voice.sent())[0]?.text ?? "");
+  expect(said).toBe(first);
+  await voice.agentSays(said ?? "");
+
+  // A spoken reply: the server hands it to the conversation, the chat shows it, and the next turn is said.
+  await page.waitForTimeout(800);
+  await voice.expertSays("Skip");
+  await expect(agent).toHaveCount(2, { timeout: 15_000 });
+  await expect(transcript.getByTestId("turn-expert").last()).toHaveText("Skip");
+  await expect(transcript.getByTestId("turn-expert").last().getByRole("img", { name: "spoken" })).toBeVisible();
+  const second = (await agent.last().textContent())?.trim();
+  expect(second).not.toBe(first);
+  await expect.poll(async () => (await voice.sent()).length, { timeout: 15_000 }).toBe(2);
+  expect(await speakControlMessage(request, sessionId, (await voice.sent())[1]?.text ?? "")).toBe(second);
+
+  await page.getByRole("button", { name: "Talk", exact: true }).click();
+  await expect(voiceStatus).toHaveText("Voice off");
 });
 
 test("debrief: a session whose screen was never shared cannot confirm a rule (409 no_screen_frame)", async ({ request }) => {

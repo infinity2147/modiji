@@ -166,6 +166,8 @@ export function useInterviewLoop(options: {
       });
       setVoice({ state: "connected", conversationId });
     },
+    // The agent has initialised the conversation: from now on the gate may send it control messages (bridge.ts).
+    onConversationMetadata: () => loopRef.current?.bridge.initialised(),
     onDisconnect: (details) => {
       cues.reset();
       localSpeechRef.current?.stop();
@@ -226,6 +228,7 @@ export function useInterviewLoop(options: {
       vadThreshold: DEFAULT_GATE_CONFIG.vadSpeakingThreshold,
       onOffRecordPhrase: () => void privacyRef.current?.goOffRecord(),
       language,
+      setTimer: systemClock.setTimer,
     });
     const gate = createGateSession({
       sessionId,

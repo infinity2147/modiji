@@ -1,8 +1,9 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { formatControlMessage } from "@vashistha/core";
-import { createConversationBridge, isControlText } from "../../lib/client/voice/bridge";
+import { createConversationBridge, INITIATION_FALLBACK_MS, isControlText } from "../../lib/client/voice/bridge";
 import type { PrivacyBase } from "../../lib/client/voice/privacy";
 import { controlledFetch, jsonResponse, scriptedFetch, tick } from "./fake-fetch";
+import { manualClock } from "./interview-support";
 
 const CONTROL = formatControlMessage("nonce_0123456789abcdefghij");
 
@@ -55,6 +56,7 @@ describe("conversation bridge", () => {
   it("feeds VAD, the local detector, transcript arrivals and agent mode to the gate and marks voice live/not live", () => {
     const { bridge, gateCalls } = setup();
     bridge.connected("conv-1");
+    bridge.initialised();
     bridge.vad(0.8);
     bridge.localSpeech(true);
     bridge.tentative();
@@ -78,6 +80,71 @@ describe("conversation bridge", () => {
       "agent:false",
       "live:false",
     ]);
+  });
+
+  it("is live for the gate only once the agent has initialised the conversation, not at the SDK's onConnect", () => {
+    const { bridge, gateCalls } = setup();
+    // WebRTC: onConnect fires as soon as the browser published its initiation data; a control message sent now can be lost.
+    bridge.connected("conv-1");
+    expect(gateCalls).toEqual([]);
+    bridge.initialised();
+    expect(gateCalls).toEqual(["live:true"]);
+    bridge.disconnected();
+    expect(gateCalls).toEqual(["live:true", "live:false"]);
+    // A new conversation waits for its own initiation again.
+    bridge.connected("conv-2");
+    expect(gateCalls).toEqual(["live:true", "live:false"]);
+    bridge.initialised();
+    expect(gateCalls).toEqual(["live:true", "live:false", "live:true"]);
+  });
+
+  it("falls back to live if the agent's initiation is never reported, for the current conversation only", () => {
+    const { clock, advance: advanceClock } = manualClock();
+    const gateCalls: string[] = [];
+    const bridge = createConversationBridge({
+      sessionId: "s-1",
+      fetch: scriptedFetch(() => jsonResponse({})).fetch,
+      now: clock.now,
+      gate: { vad: () => {}, localSpeech: () => {}, transcript: () => {}, agentSpeaking: () => {}, setVoiceLive: (live) => gateCalls.push(`live:${live}`) },
+      privacy: () => ({ offRecord: false, epoch: 0 }),
+      vadThreshold: 0.4,
+      onOffRecordPhrase: () => {},
+      setTimer: clock.setTimer,
+    });
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      bridge.connected("conv-1");
+      advanceClock(INITIATION_FALLBACK_MS - 1);
+      expect(gateCalls).toEqual([]);
+      // A conversation that ended before the fallback never turns live.
+      bridge.disconnected();
+      advanceClock(10_000);
+      expect(gateCalls).toEqual(["live:false"]);
+      bridge.connected("conv-2");
+      advanceClock(INITIATION_FALLBACK_MS);
+      expect(gateCalls).toEqual(["live:false", "live:true"]);
+      expect(warn).toHaveBeenCalledTimes(1);
+      // The initiation arriving late changes nothing.
+      bridge.initialised();
+      expect(gateCalls).toEqual(["live:false", "live:true"]);
+      // Reported in time: no fallback fires.
+      bridge.disconnected();
+      bridge.connected("conv-3");
+      bridge.initialised();
+      advanceClock(10_000);
+      expect(gateCalls).toEqual(["live:false", "live:true", "live:false", "live:true"]);
+      expect(warn).toHaveBeenCalledTimes(1);
+    } finally {
+      warn.mockRestore();
+    }
+  });
+
+  it("an initiation reported before onConnect still counts once connected", () => {
+    const { bridge, gateCalls } = setup();
+    bridge.initialised();
+    expect(gateCalls).toEqual([]);
+    bridge.connected("conv-1");
+    expect(gateCalls).toEqual(["live:true"]);
   });
 
   it("tags the agent's question and the expert's answer with the asked question id and the privacy epoch", async () => {
