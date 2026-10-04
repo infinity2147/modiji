@@ -22,6 +22,8 @@ import {
   canonicalJson,
   contentId,
   describePredicate,
+  featurePhrase,
+  formatValue,
   parseLedgerPayload,
   type ActionId,
   type ConfirmedRule,
@@ -48,7 +50,7 @@ import { applyConceptAction, conceptsState } from "../schema/service";
 import { applyExpertAction, generateTeachBack, isAffirmative, rebuildWitnesses, type SpokenWords } from "./actions";
 import type { DebriefDeps } from "./deps";
 import { interpretReply, type InterpretContext, type Reading } from "./interpret";
-import { DOMAIN, debriefState, snapshot, type Snapshot } from "./state";
+import { DOMAIN, debriefState, kycCaseFeatures, snapshot, type Snapshot } from "./state";
 import { effectPhrase } from "./text";
 
 export type ConversationDeps = { debrief: DebriefDeps; schema: SchemaDeps };
@@ -147,6 +149,36 @@ const ALL_ACTIONS: ActionId[] = DOMAIN.decisionFamilies.flatMap((f) => [...f.act
 
 // ── The agenda ──
 
+/** A rule's shape with its numbers taken out and ≥/≤ folded into >/<: the same rule at another threshold has the same shape. */
+function shapeOf(family: string, action: string, predicate: unknown): string {
+  const strip = (v: unknown): unknown => {
+    if (typeof v === "number") return "#";
+    if (Array.isArray(v)) return v.map(strip);
+    if (v !== null && typeof v === "object")
+      return Object.fromEntries(Object.entries(v).map(([k, x]) => [k === ">=" ? ">" : k === "<=" ? "<" : k, strip(x)]));
+    return v;
+  };
+  return canonicalJson({ family, action, predicate: strip(predicate) as never });
+}
+
+function effectAction(effect: ConfirmedRule["effect"]): string {
+  return "action" in effect ? (effect.action ?? "") : "";
+}
+
+/** The facts of a case that the rules turn on, so a "why" question is about this case, not cases in general. */
+const CASE_FACTS = ["entityType", "customerStatus", "accountAgeMonths", "jurisdictionRisk", "uboOwnershipPct", "uboVerified", "pep", "sanctionsHit", "adverseMedia", "sourceOfFunds"] as const;
+
+function caseFacts(caseId: string): string {
+  const values = kycCaseFeatures(caseId, {});
+  if (values === undefined) return "";
+  const facts = CASE_FACTS.flatMap((id) => {
+    const feature = DOMAIN.features.find((f) => f.id === id);
+    const value = values[id];
+    return feature === undefined || value === undefined ? [] : [`${featurePhrase(feature)}: ${formatValue(feature, value)}`];
+  });
+  return facts.length === 0 ? "" : ` (${facts.join(", ")})`;
+}
+
 type Item = { topic: Topic; ref: string | null; text: string };
 
 function openWitnesses(state: DebriefState): WitnessView[] {
@@ -167,7 +199,21 @@ async function nextItem(deps: ConversationDeps, sessionId: string, h: History): 
   const unseen = (topic: Topic, ref: string) => !seen.has(`${topic}:${ref}`);
   let state = debriefState(deps.debrief, await snapshot(deps.debrief, sessionId));
 
-  const proposal = [...state.proposals].sort((a, b) => b.weight - a.weight).slice(0, MAX_PROPOSALS).find((p) => unseen("proposal", p.candidateId));
+  // One question per rule shape: near-variants ("owner share above 20%" / "at least 30%") of a rule already confirmed
+  // or already asked about are not asked again.
+  const askedProposals = new Set(h.asked.filter((a) => a.topic === "proposal").map((a) => a.ref));
+  const covered = new Set([
+    ...state.rules.map((r) => shapeOf(r.rule.decisionFamily, effectAction(r.rule.effect), r.rule.predicate)),
+    ...state.proposals.filter((p) => askedProposals.has(p.candidateId)).map((p) => shapeOf(p.decisionFamily, p.action, p.predicate)),
+  ]);
+  const distinct = new Map<string, DebriefState["proposals"][number]>();
+  for (const p of [...state.proposals].sort((a, b) => b.weight - a.weight)) {
+    const shape = shapeOf(p.decisionFamily, p.action, p.predicate);
+    if (!distinct.has(shape)) distinct.set(shape, p);
+  }
+  const proposal = [...distinct.entries()]
+    .slice(0, MAX_PROPOSALS)
+    .find(([shape, p]) => unseen("proposal", p.candidateId) && !covered.has(shape))?.[1];
   if (proposal !== undefined)
     return {
       topic: "proposal",
@@ -177,7 +223,11 @@ async function nextItem(deps: ConversationDeps, sessionId: string, h: History): 
 
   const unexplained = state.decisions.filter((d) => !d.explained).slice(0, MAX_UNEXPLAINED).find((d) => unseen("unexplained", d.entryId));
   if (unexplained !== undefined)
-    return { topic: "unexplained", ref: unexplained.entryId, text: `On case ${unexplained.caseId} you chose "${unexplained.actionLabel}". What made that the right call?` };
+    return {
+      topic: "unexplained",
+      ref: unexplained.entryId,
+      text: `On case ${unexplained.caseId}${caseFacts(unexplained.caseId)} you chose "${unexplained.actionLabel}". Which of those facts made that the right call?`,
+    };
 
   const witness = openWitnesses(state).slice(0, MAX_WITNESSES).find((v) => unseen("witness", v.witness.id));
   if (witness !== undefined) return { topic: "witness", ref: witness.witness.id, text: witnessPrompt(witness) };
