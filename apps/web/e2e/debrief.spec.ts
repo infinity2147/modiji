@@ -54,7 +54,7 @@ async function confirmProposals(request: APIRequestContext, sessionId: string): 
     await ok(await request.post(`/api/sessions/${sessionId}/debrief`, { data: { action: "confirm_candidate", candidateId: p.candidateId, decisionFamily: p.decisionFamily, quote } }));
   };
   await confirm(pick("politically exposed person is yes", "enhancedReview"), "Any politically exposed person goes to enhanced review.");
-  await confirm(pick("largest owner identity verified is no", "requestDocuments"), "If we can't verify the owner, we ask for documents.");
+  await confirm(pick("country risk is medium", "requestDocuments"), "In a medium-risk country we ask for documents.");
 }
 
 function witness(page: Page, kind: string): Locator {
@@ -84,15 +84,19 @@ test("debrief: witnesses → typed answers → teach-back correction → coverag
   const conflict = witness(page, "conflict").and(page.locator('[data-status="queued"]'));
   await expect(unresolved).toHaveCount(1);
   await expect(conflict).toHaveCount(1);
-  await expect(unresolved.getByTestId("witness-question")).toContainText("Largest owner identity verified: yes, politically exposed person: no");
+  // The question was queued when the PEP rule was the only one confirmed (a witness keeps its id, hence its question,
+  // while its assignment is unchanged), so it names the PEP condition; the card's chips are the live decision cell.
+  await expect(unresolved.getByTestId("witness-question")).toContainText("Politically exposed person: no — what would you decide?");
+  await expect(unresolved.getByText("country risk not medium", { exact: true })).toBeVisible();
+  await expect(unresolved.getByText("politically exposed person: no", { exact: true })).toBeVisible();
   await page.screenshot({ path: evidence("debrief-witnesses.png"), fullPage: true });
 
   // Typed answers (no voice): a rule for the unresolved cell, and which rule wins the conflict.
   await unresolved.getByLabel("Decision").selectOption("approve");
-  await answer(unresolved, "Verified owner and no PEP — that's a straight approval.", "Add rule for these cases");
+  await answer(unresolved, "Not a medium-risk country and no PEP — that's a straight approval.", "Add rule for these cases");
   await expect(witness(page, "unresolved").first()).toHaveAttribute("data-status", "resolved");
   await conflict.getByLabel("Request documents").check();
-  await answer(conflict, "Documents first — the PEP review comes after we know who the owner is.", "This one applies");
+  await answer(conflict, "Documents first — the PEP review comes after we have the paperwork.", "This one applies");
   await expect(page.getByTestId("rule-diff").filter({ hasText: "rule revised" })).toBeVisible();
 
   // Teach-back from confirmed rules only (template: this server has no model key).
@@ -120,9 +124,12 @@ test("debrief: witnesses → typed answers → teach-back correction → coverag
   // The solver reran on the revised rule: the new small-owner cell is escalated; the threshold is confirmed.
   const newGap = witness(page, "unresolved").and(page.locator('[data-status="queued"]'));
   await expect(newGap).toHaveCount(1);
-  await answer(newGap, "Small unverified owners aren't mine to decide — escalate to the controller.", "Escalate to controller");
+  await expect(newGap.getByText("largest beneficial owner share at most 25%", { exact: true })).toBeVisible();
+  await expect(newGap.getByText("country risk medium", { exact: true })).toBeVisible();
+  await answer(newGap, "Small owners in a medium-risk country aren't mine to decide — escalate to the controller.", "Escalate to controller");
   await expect(page.locator('[data-testid="witness"][data-status="acknowledged"]')).toHaveCount(1);
   const threshold = witness(page, "boundary").and(page.locator('[data-status="queued"]')).first();
+  await expect(threshold.getByTestId("witness-question")).toContainText("Largest beneficial owner share exactly 25%");
   await answer(threshold, "Exactly 25% is fine — only above a quarter.", "Rule is right at the threshold");
 
   // A new teach-back was written for the revised rulebook; the expert confirms it.

@@ -669,3 +669,12 @@ Source: `docs/evidence/live/ACCEPTANCE.txt` and `SUMMARY.txt`. All expert speech
 **Fresh demo ledger required before judging:** production is at rulebook revision 60 (14 team rules) from the live runs, including a Hindi rule that now forbids approval for every high-risk-country customer. Point `DATA_DIR` at a fresh path before the demo (procedure in `docs/deploy.md`); the old data stays on the volume.
 
 **P9 re-run after the demo-case redesign (2026-10-04).** The training cases 1 and 2 were redesigned (they now differ only on ownership share and jurisdiction), which changes the seed observation stream. Re-running `pnpm bench` (still deterministic, 7.5 s) moved only the record-only floor: A fidelity 0.633 → 0.645, unsafe 14.9% → 14.6%. Strategies B, C and D are unchanged at every budget (D 0.990 / 1.2% from 8 questions; B 0.0% unsafe at 24 questions), so every comparative claim above still holds. `results.json` sha256 changed from `9d8e2584…` to `c66a686a…`; the committed evidence is the new run.
+
+---
+
+## Final state notes (2026-10-04)
+
+**Known issues (not fixed).**
+1. **Stale witness question text.** A debrief witness keeps its id, and therefore its already-queued question, while its assignment is unchanged. If the confirmed rulebook changes afterwards so that the same cell now needs another condition to describe it, the spoken or displayed question can omit that condition (for example it says "Politically exposed person: no" when the live cell is also "country risk not medium"). The answer still targets the correct cell, because the card's chips and the cell rule are computed live. Candidate fix: re-queue or refresh a witness question when its cell description changes.
+2. **P2 vision thresholds not met.** See the P2 sections above. On the current fixture, with the thresholds unchanged: false critical 0.024 (pass), server p95 2.93 s (pass), critical field recall 0.846 and critical action recall 0.857 (both below 0.95). The team accepted reporting the miss. The human-paced fixture is still to be delivered and re-measured.
+3. **Host freeze.** One-off event-loop freezes of up to 13.8 s occurred in production while memory sat at about 96% of the 1 GB cap and CPU stayed near idle. Raising the memory limit to 2 GB is a dashboard action (docs/deploy.md).
