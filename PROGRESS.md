@@ -650,3 +650,20 @@ Source: `docs/evidence/live/ACCEPTANCE.txt` and `SUMMARY.txt`. All expert speech
 **Simulation after the fixes:** 0 interruptions on all 5 scripted runs and on a reproduction of run D, at authorize RTTs of 0, 270 and 2640 ms. With the local detector removed, the run-D reproduction interrupts again, as live run D did.
 
 **The live P3 re-run on the fixed build is pending.**
+
+---
+
+## Production stall diagnosis (2026-10-04, build f317447)
+
+`/api/health/deep` on production after the live re-runs:
+- `eventLoop`: **p50 0.1 ms · p99 1.8 ms · max 13,856 ms** over 542,704 samples.
+
+**Reading.** 99% of event-loop samples are ≤ 1.8 ms — the code is healthy; Z3, question generation and vision preparation are already off the main thread (FX1). A lone 13.8 s maximum with a 1.8 ms p99 is the signature of a **host-level freeze** (Railway container CPU throttling or a long GC pause), not an algorithmic stall that scales with sessions or rules (a sub-agent read the decision path and found nothing that scales). Worker threads raise total CPU, which can trigger a CPU quota sooner under the demo's multi-modal burst (vision + voice + engine).
+
+**Mitigations (in priority order).**
+1. **Run the judged demo with vision extraction off** (`LLM_CALLS`/vision off): the tutor and Save interlock use the disclosed DOM channel (D3), and vision accuracy is measured separately. This removes the heaviest live-path CPU burst (PNG decode + Haiku + OCR).
+2. **Use the verified replay** for the capture/debrief beats (plan §10); only the tutor intervention runs live, which is light.
+3. **Response-path hardening** (code): flush the custom-LLM SSE and gate/authorize responses before any post-decision engine work (`setImmediate`), so a host freeze cannot delay the live speech path. Add GC/throttle visibility to deep health.
+4. **Resource bump (cost decision, for the team):** raise the Railway service CPU/memory so the container isn't throttled under burst. Not applied unilaterally.
+
+**Fresh demo ledger required before judging:** production is at rulebook revision 60 (14 team rules) from the live runs, including a Hindi rule that now forbids approval for every high-risk-country customer. Point `DATA_DIR` at a fresh path before the demo (procedure in `docs/deploy.md`); the old data stays on the volume.
