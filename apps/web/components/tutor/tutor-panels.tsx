@@ -40,7 +40,7 @@ function MasteryPanel({ tutor }: { tutor: Tutor }) {
           Mastery ladder
         </h2>
         <CardDescription className="text-[11px]">
-          Per confirmed rule: untested → assisted → independently correct once → correct at a boundary case → mastered.{" "}
+          One bar per expert rule, from untested up to mastered. {" "}
           <span className="font-medium">{state?.masteryLabel ?? "heuristic estimate"}</span>, not a calibrated model.
         </CardDescription>
       </CardHeader>
@@ -48,7 +48,7 @@ function MasteryPanel({ tutor }: { tutor: Tutor }) {
         {state === undefined ? (
           <p className="py-2 text-xs text-muted-foreground">Loading…</p>
         ) : state.rules.length === 0 ? (
-          <p className="py-2 text-xs text-muted-foreground">The expert has not confirmed any rules yet: there is nothing to teach.</p>
+          <p className="py-2 text-xs text-muted-foreground">No expert has confirmed rules yet, so there is nothing to master. See the coach above.</p>
         ) : (
           <ul className="divide-y">
             {state.rules.map((rule) => (
@@ -177,7 +177,7 @@ function JudgeCaseForm({ tutor, onAdded }: { tutor: Tutor; onAdded: (kycCase: Ky
   );
 }
 
-function PracticePanel({ tutor, onCases }: { tutor: Tutor; onCases: (cases: readonly KycCase[]) => void }) {
+function PracticePanel({ tutor, onCases, canEnterJudgeCase }: { tutor: Tutor; onCases: (cases: readonly KycCase[]) => void; canEnterJudgeCase: boolean }) {
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState<{ tone: "info" | "error"; text: string }>();
   const [judgeOpen, setJudgeOpen] = useState(false);
@@ -203,10 +203,10 @@ function PracticePanel({ tutor, onCases }: { tutor: Tutor; onCases: (cases: read
     <Card className="gap-0 py-0 shadow-xs" role="region" aria-labelledby="practice-title">
       <CardHeader className="border-b py-3!">
         <h2 id="practice-title" className="text-sm font-semibold">
-          Unseen practice cases
+          More practice
         </h2>
         <CardDescription className="text-[11px]">
-          The solver builds valid cases at the thresholds of your weakest rules; judges can enter their own.
+          New cases built at the edge of the rules you know least, so you meet the situations an expert finds hard.
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-2 py-3">
@@ -219,10 +219,12 @@ function PracticePanel({ tutor, onCases }: { tutor: Tutor; onCases: (cases: read
             {message.text}
           </p>
         )}
-        <Button type="button" size="xs" variant="ghost" onClick={() => setJudgeOpen((o) => !o)} aria-expanded={judgeOpen}>
-          {judgeOpen ? "Hide judge case form" : "Enter a judge case"}
-        </Button>
-        {judgeOpen && (
+        {canEnterJudgeCase && (
+          <Button type="button" size="xs" variant="ghost" onClick={() => setJudgeOpen((o) => !o)} aria-expanded={judgeOpen}>
+            {judgeOpen ? "Hide judge case form" : "Enter a judge case"}
+          </Button>
+        )}
+        {canEnterJudgeCase && judgeOpen && (
           <JudgeCaseForm
             tutor={tutor}
             onAdded={(kycCase) => {
@@ -237,7 +239,7 @@ function PracticePanel({ tutor, onCases }: { tutor: Tutor; onCases: (cases: read
 }
 
 /** The tutor's side panels (novice sessions): the mastery ladder, and practice and judge cases. */
-export function TutorPanels({ tutor, onCases }: { tutor: Tutor; onCases: (cases: readonly KycCase[]) => void }) {
+export function TutorPanels({ tutor, onCases, canEnterJudgeCase = false }: { tutor: Tutor; onCases: (cases: readonly KycCase[]) => void; canEnterJudgeCase?: boolean }) {
   return (
     <>
       {tutor.error && (
@@ -248,7 +250,7 @@ export function TutorPanels({ tutor, onCases }: { tutor: Tutor; onCases: (cases:
         </Alert>
       )}
       <MasteryPanel tutor={tutor} />
-      <PracticePanel tutor={tutor} onCases={onCases} />
+      <PracticePanel tutor={tutor} onCases={onCases} canEnterJudgeCase={canEnterJudgeCase} />
     </>
   );
 }

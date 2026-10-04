@@ -103,6 +103,12 @@ test("tutor: predict → reveal in the expert's words → commit → mastery →
   await seedExpertRulebook(request);
   const sessionId = await startNovice(page);
 
+  // With rules to teach, the guide opens in "working": it numbers the three steps, and the first case is already open.
+  const guide = page.getByTestId("trainee-guide");
+  await expect(guide).toHaveAttribute("data-stage", "working");
+  await expect(guide).toContainText("Predict what the expert would decide");
+  await expect(page.getByRole("article")).toContainText("NS-2026-0201");
+
   // NS-2026-0201: new company, high-risk country. The review panel first asks for a prediction.
   await queueItem(page, "NS-2026-0201").click();
   const prompt = page.getByRole("region", { name: "What would the expert decide?" });
@@ -145,9 +151,9 @@ test("tutor: predict → reveal in the expert's words → commit → mastery →
   expect(mastery?.payload).toMatchObject({ from: "untested", to: "assisted" });
   expect(mastery?.parentIds[0]).toBe(entries.find((e) => e.kind === "case.decision")?.id);
 
-  // Unseen practice cases at the boundary of the weakest rules appear in the queue and can be decided.
+  // More practice: cases at the boundary of the weakest rules appear in the queue and can be decided.
   await page.getByRole("button", { name: "Generate practice cases" }).click();
-  const practiceStatus = page.getByRole("region", { name: "Unseen practice cases" }).getByRole("status");
+  const practiceStatus = page.getByRole("region", { name: "More practice" }).getByRole("status");
   await expect(practiceStatus).toContainText(/Added NS-2026-10\d\d/, { timeout: 30_000 });
   const added = /NS-2026-10\d\d/.exec((await practiceStatus.textContent()) ?? "")?.[0] ?? "";
   await expect(queueItem(page, added)).toBeVisible();

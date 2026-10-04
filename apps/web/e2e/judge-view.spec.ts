@@ -126,15 +126,19 @@ test("judge view: gate HUD reacts to typing, ticker follows the ledger, strip st
 
 test("tutor voice on a server without voice credentials: a clear not-configured state, CaseDesk keeps working", async ({ page }) => {
   await startSession(page, "Novice practice", "Practice");
+  // The voice coach is optional for a trainee (text coaching is already on), so it sits in a collapsed section.
+  await page.getByText("Voice coach", { exact: false }).first().click();
   const voice = page.getByRole("region", { name: /^Voice · Tutor agent/ });
   await voice.getByRole("button", { name: "Connect voice" }).click();
   await expect(voice.getByText("Voice not configured on this server")).toBeVisible();
   await expect(voice.getByRole("status", { name: "Voice status" })).toHaveText("Not configured");
   await expect(voice).toContainText("ELEVENLABS_TUTOR_AGENT_ID");
   await expect(voice).toContainText("No turns yet.");
+  // CaseDesk keeps working: the case is open and the coach still guides. A trainee has no gate HUD or event ticker.
   await queueItems(page).first().click();
-  await expect(page.getByRole("log", { name: "Ledger events" })).toContainText("Opened case");
-  await expect(page.getByRole("region", { name: "Speech gate" }).getByRole("status", { name: "Gate status: LISTENING" })).toBeVisible();
+  await expect(page.getByRole("article")).toBeVisible();
+  await expect(page.getByTestId("trainee-guide")).toBeVisible();
+  await expect(page.getByRole("region", { name: "Speech gate" })).toHaveCount(0);
 });
 
 test("off the record: red banner, capture paused, nothing recorded, resume with a new epoch", async ({ page, request }) => {
