@@ -8,7 +8,7 @@ import { checkAnthropic } from "../preflight/checks/anthropic";
 import { checkEnv } from "../preflight/checks/env";
 import { checkPermissions } from "../preflight/checks/permissions";
 import { checkPublicLlm } from "../preflight/checks/public-llm";
-import { MAX_EVENT_LOOP_P99_MS, checkSandbox, checkServerDeep } from "../preflight/checks/server";
+import { MAX_DISK_USED_PCT, MAX_EVENT_LOOP_P99_MS, MIN_FREE_DISK_MB, checkSandbox, checkServerDeep } from "../preflight/checks/server";
 import { checkToken } from "../preflight/checks/token";
 import { withConnectRetry } from "../preflight/http";
 import type { PreflightElevenLabs } from "../preflight/types";
@@ -305,7 +305,7 @@ describe("server-deep and sandbox", () => {
   it("passes when health is up, deep refuses anonymous callers and every probe is ok", async () => {
     const r = await checkServerDeep(makeContext());
     expect(r.status).toBe("pass");
-    expect(r.detail).toBe("health 200; deep 401 without bearer; db ok 1.5 ms, dataDir ok 1.5 ms, z3 ok 1.5 ms; model calls on; event-loop delay p99 4 ms");
+    expect(r.detail).toBe("health 200; deep 401 without bearer; db ok 1.5 ms, dataDir ok 1.5 ms, z3 ok 1.5 ms; model calls on; event-loop delay p99 4 ms; disk 3072 MB free (40% used)");
     expect(r.facts?.llmCalls).toBe("on");
     expect(r.facts?.eventLoop).toMatchObject({ p99Ms: 4, samples: 6000 });
   });
@@ -362,6 +362,29 @@ describe("server-deep and sandbox", () => {
 
   it("fails when the target is unreachable", async () => {
     await expect(checkServerDeep(makeContext({ cliTarget: "https://elsewhere.example" }))).rejects.toThrow("GET /api/health: fetch failed");
+  });
+
+  it("server-deep fails when the volume is nearly full and reports the numbers", async () => {
+    const ctx = makeContext({ fetch: fakeServer({ disk: { totalMB: 500, freeMB: 0, usedPct: 100 } }).fetch });
+    const r = await checkServerDeep(ctx);
+    expect(r.status).toBe("fail");
+    expect(r.detail).toContain(`volume nearly full: 0 MB free of 500 MB (100% used; need ≥ ${MIN_FREE_DISK_MB} MB free and ≤ ${MAX_DISK_USED_PCT}% used)`);
+    expect(r.facts).toMatchObject({ disk: { freeMB: 0, usedPct: 100 } });
+  });
+
+  it("server-deep passes with room to spare, reports the free space, and treats an unreadable volume as informational", async () => {
+    const ok = await checkServerDeep(makeContext());
+    expect(ok.status).toBe("pass");
+    expect(ok.detail).toContain("disk 3072 MB free (40% used)");
+    const unknown = await checkServerDeep(makeContext({ fetch: fakeServer({ disk: null }).fetch }));
+    expect(unknown.status).toBe("pass");
+    expect(unknown.facts).toMatchObject({ disk: null });
+  });
+
+  it("server-deep fails a server that does not report the disk at all", async () => {
+    const r = await checkServerDeep(makeContext({ fetch: fakeServer({ disk: "omit" }).fetch }));
+    expect(r.status).toBe("fail");
+    expect(r.detail).toContain("does not report disk");
   });
 
   it("sandbox passes when an anonymous visitor is redirected to a working /login, and fails without the gate", async () => {

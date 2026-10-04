@@ -11,8 +11,20 @@ const DEEP_PARTS = ["db", "dataDir", "z3"] as const;
  * the time this check runs, the earlier checks have warmed the target (custom LLM, authorize, token).
  */
 export const MAX_EVENT_LOOP_P99_MS = 200;
+/** A volume with less free space than this, or fuller than this, is about to fail every ledger write (sign-in included). */
+export const MIN_FREE_DISK_MB = 50;
+export const MAX_DISK_USED_PCT = 95;
 
 type EventLoop = { p50Ms: number; p99Ms: number; maxMs: number; samples: number; sinceMs: number };
+
+type Disk = { totalMB: number; freeMB: number; usedPct: number };
+function diskOf(value: unknown): Disk | null {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) return null;
+  const v = value as Record<string, unknown>;
+  return typeof v.totalMB === "number" && typeof v.freeMB === "number" && typeof v.usedPct === "number"
+    ? { totalMB: v.totalMB, freeMB: v.freeMB, usedPct: v.usedPct }
+    : null;
+}
 
 function eventLoopOf(value: unknown): EventLoop | null {
   if (value === null || typeof value !== "object" || Array.isArray(value)) return null;
@@ -95,6 +107,13 @@ export async function checkServerDeep(ctx: Ctx): Promise<CheckOutcome> {
       if (eventLoop.p99Ms > MAX_EVENT_LOOP_P99_MS)
         problems.push(`event-loop delay p99 ${eventLoop.p99Ms} ms > ${MAX_EVENT_LOOP_P99_MS} ms (max ${eventLoop.maxMs} ms, ${eventLoop.samples} samples since boot)`);
     }
+    const disk = diskOf(body.disk);
+    if (disk !== null) {
+      facts.disk = disk;
+      if (disk.freeMB < MIN_FREE_DISK_MB || disk.usedPct > MAX_DISK_USED_PCT)
+        problems.push(`volume nearly full: ${disk.freeMB} MB free of ${disk.totalMB} MB (${disk.usedPct}% used; need ≥ ${MIN_FREE_DISK_MB} MB free and ≤ ${MAX_DISK_USED_PCT}% used)`);
+    } else if (body.disk === null) facts.disk = null;
+    else problems.push("/api/health/deep does not report disk (server older than this preflight?)");
     // GC and CPU-throttle are surfaced for ops to tell a code stall from a host/GC freeze; never a reason to fail.
     const gc = gcOf(body.gc);
     if (gc !== null) facts.gc = gc;
@@ -113,10 +132,12 @@ export async function checkServerDeep(ctx: Ctx): Promise<CheckOutcome> {
   const gc = gcOf(body?.gc);
   const cpuThrottle = cpuThrottleOf(body?.cpuThrottle);
   const gcPart = gc === null ? "" : `; GC max pause ${gc.maxPauseMs} ms (${gc.count})`;
+  const diskReported = diskOf(body?.disk);
+  const diskPart = diskReported === null ? "" : `; disk ${diskReported.freeMB} MB free (${diskReported.usedPct}% used)`;
   const throttlePart = cpuThrottle === null ? (body?.cpuThrottle === null ? "; CPU throttle n/a" : "") : `; CPU throttled ${cpuThrottle.nrThrottled}×/${cpuThrottle.throttledMs} ms`;
   return {
     status: "pass",
-    detail: `health 200; deep 401 without bearer; ${parts.join(", ")}; model calls on; event-loop delay p99 ${eventLoop?.p99Ms ?? "?"} ms${gcPart}${throttlePart}`,
+    detail: `health 200; deep 401 without bearer; ${parts.join(", ")}; model calls on; event-loop delay p99 ${eventLoop?.p99Ms ?? "?"} ms${gcPart}${throttlePart}${diskPart}`,
     facts,
   };
 }

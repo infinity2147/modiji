@@ -20,7 +20,7 @@ const PUBLIC_PATHS = new Set(["/", "/login", "/signup", "/api/auth/login", "/api
 const PUBLIC_PREFIXES = ["/_next/", "/__nextjs", "/tesseract/", "/replay/", "/api/replays/"];
 const PUBLIC_EXACT_PREFIX_ROOTS = new Set(["/replay", "/api/replays"]);
 /** Checked by their own handlers against the operator bearer (CUSTOM_LLM_SECRET). */
-const BEARER_PREFIXES = ["/api/llm/", "/api/preflight/", "/api/health/deep"];
+const BEARER_PREFIXES = ["/api/llm/", "/api/preflight/", "/api/health/deep", "/api/health/disk"];
 const ARCHIVE = /^\/api\/sessions\/[^/]+\/archive$/;
 
 export type PathAccess = "public" | "bearer" | "principal";

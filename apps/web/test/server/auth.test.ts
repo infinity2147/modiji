@@ -240,7 +240,7 @@ describe("the front door", () => {
     expect(["/", "/login", "/signup", "/api/auth/login", "/api/health", "/replay", "/replay/abc", "/api/replays", "/api/replays/abc/views", "/_next/static/x.js", "/tesseract/worker.min.js"].map(pathAccess)).toEqual(
       Array(11).fill("public"),
     );
-    expect(["/api/llm/chat/completions", "/api/health/deep", "/api/preflight/authorize", "/api/sessions/s1/archive"].map(pathAccess)).toEqual(Array(4).fill("bearer"));
+    expect(["/api/llm/chat/completions", "/api/health/deep", "/api/health/disk", "/api/preflight/authorize", "/api/sessions/s1/archive"].map(pathAccess)).toEqual(Array(5).fill("bearer"));
     expect(["/sandbox", "/admin", "/debrief/s1", "/api/sessions", "/api/sessions/s1/ledger", "/api/rulebook", "/replays-elsewhere", "/api/auth/me"].map(pathAccess)).toEqual(Array(8).fill("principal"));
   });
 
@@ -323,6 +323,7 @@ describe("every API route is guarded", () => {
     "auth/logout": "public: ends this browser's sign-in",
     health: "public",
     "health/deep": "bearer",
+    "health/disk": "bearer",
     "llm/chat/completions": "bearer (ElevenLabs)",
     "preflight/authorize": "bearer",
     "sessions/[sessionId]/archive": "bearer (operator)",

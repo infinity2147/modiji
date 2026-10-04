@@ -129,6 +129,8 @@ export type FakeServerBehaviour = {
   gc?: { count: number; totalPauseMs: number; maxPauseMs: number; sinceMs: number };
   /** CPU-throttle counters `/api/health/deep` reports; `null` means the cgroup exposes none; omitted by default. */
   cpuThrottle?: { nrPeriods: number; nrThrottled: number; throttledMs: number } | null;
+  /** Volume capacity `/api/health/deep` reports (default: 5 GB, 40% used); null means the platform cannot say; `"omit"` leaves it out, as an older server would. */
+  disk?: { totalMB: number; freeMB: number; usedPct: number } | null | "omit";
   /** Behave like a server without accounts: the workbench and the voice-token endpoint answer anonymous callers. */
   accountsOff?: boolean;
 };
@@ -168,6 +170,7 @@ export function fakeServer(behaviour: FakeServerBehaviour = {}, wallClock: () =>
           ...(llmCalls !== null && { llmCalls }),
           ...(eventLoop !== null && { eventLoop }),
           ...(behaviour.gc !== undefined && { gc: behaviour.gc }),
+          ...(behaviour.disk !== "omit" && { disk: behaviour.disk === undefined ? { totalMB: 5120, freeMB: 3072, usedPct: 40 } : behaviour.disk }),
           ...("cpuThrottle" in behaviour && { cpuThrottle: behaviour.cpuThrottle }),
         };
         return json(body, ok ? 200 : 503);

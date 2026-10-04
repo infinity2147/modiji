@@ -1,4 +1,5 @@
 /** `GET /api/health/deep`: preflight's "DB and DATA_DIR writable · Z3 initialises" (plan §12), plus the model-call switch and event-loop / GC / CPU-throttle telemetry. */
+import { volumeStats, type VolumeStats } from "./disk";
 import type { CpuThrottle, EventLoopDelay, GcStats } from "./event-loop";
 import type { CheckResult, Runtime } from "./runtime";
 
@@ -15,12 +16,14 @@ export type DeepHealth = {
   gc: GcStats;
   /** CFS CPU-throttle counters when the cgroup exposes them, else null (host freeze indicator; PROGRESS.md). */
   cpuThrottle: CpuThrottle | null;
+  /** Capacity of the volume holding DATA_DIR, or null when the platform cannot say: a full volume fails every ledger write (sign-in included). */
+  disk: VolumeStats | null;
 };
 
-/** `ok` covers the probes only; `llmCalls`, `eventLoop`, `gc` and `cpuThrottle` are reported for preflight/ops to judge, never a reason for 503. */
+/** `ok` covers the probes only; `llmCalls`, `eventLoop`, `gc`, `cpuThrottle` and `disk` are reported for preflight/ops to judge, never a reason for 503. */
 export async function deepHealth(runtime: Pick<Runtime, "env" | "checks">): Promise<DeepHealth> {
   const { env, checks } = runtime;
   const db = checks.db();
   const [dataDir, z3] = await Promise.all([checks.dataDir(), checks.z3()]);
-  return { ok: db.ok && dataDir.ok && z3.ok, db, dataDir, z3, llmCalls: env.LLM_CALLS, eventLoop: checks.eventLoop(), gc: checks.gc(), cpuThrottle: checks.cpuThrottle() };
+  return { ok: db.ok && dataDir.ok && z3.ok, db, dataDir, z3, llmCalls: env.LLM_CALLS, eventLoop: checks.eventLoop(), gc: checks.gc(), cpuThrottle: checks.cpuThrottle(), disk: volumeStats(env.DATA_DIR) };
 }
