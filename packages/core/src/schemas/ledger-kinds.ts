@@ -313,6 +313,23 @@ const kinds = {
       questionId: IdSchema,
     }),
   },
+  /**
+   * The trainee's voice coach queued a turn (`coach_turn` question `questionId`). `trigger` says why: a reply to
+   * the trainee's words (`utteranceId`, or typed `text` via chat), or a nudge the tutor raised from what the
+   * trainee did. `ruleIds` are the confirmed rules the turn teaches from (checked by code against the rulebook);
+   * `origin` says who wrote the words: the model (`llm`, grounded and checked) or code (`template`).
+   */
+  "tutor.coached": {
+    sources: ["engine"],
+    payload: z.strictObject({
+      questionId: IdSchema,
+      caseId: z.string().min(1).nullable(),
+      trigger: z.enum(["reply", "case_opened", "off_track", "prediction", "committed", "idle", "stuck"]),
+      ruleIds: z.array(IdSchema),
+      utteranceId: IdSchema.nullable(),
+      origin: z.enum(["llm", "template"]),
+    }),
+  },
   "mastery.updated": {
     sources: ["engine"],
     payload: z.strictObject({ ruleId: IdSchema, from: MasteryLevelSchema, to: MasteryLevelSchema }),
