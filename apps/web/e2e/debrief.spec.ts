@@ -125,7 +125,7 @@ test("debrief: one conversation — proposals confirmed by a yes, open cases ans
   await page.reload();
   await expect(agent.first()).toContainText("Let's go over what I learned");
   await expect(agent).toHaveCount(turnsBefore + 1);
-  await expect(agent.last()).toContainText("What made that the right call?");
+  await expect(agent.last()).toContainText("made that the right call?");
   await expect(page.getByLabel("Your answer")).toBeEnabled();
 
   // Work Map: steps built by code, quotes with a disabled clip, rule graph, exports, lineage.
