@@ -11,6 +11,9 @@ import { type APIRequestContext, type Page, type Route } from "@playwright/test"
 test.use({ requestAs: ADMIN });
 import { ADMIN, ASHA, LENA, dismissCoach, expect, signInPage, test } from "./support/accounts";
 
+/** The training set: three core demo cases (NS-2026-0101..0103), then five judgment cases (0104..0108). */
+const TRAINING_CASES = 8;
+
 const EVIDENCE_DIR = join(import.meta.dirname, "../../../docs/evidence/p1");
 mkdirSync(EVIDENCE_DIR, { recursive: true });
 const evidence = (name: string): string => join(EVIDENCE_DIR, name);
@@ -98,7 +101,8 @@ function interceptCheck(page: Page, result: Record<string, unknown>, times = 1) 
 test("P1 acceptance: an expert processes the three training cases by hand", async ({ page, request }) => {
   const sessionId = await startSession(page, "Expert capture", "Training");
   await expect(page.getByLabel("Session")).toContainText("Expert capture");
-  await expect(queueItems(page)).toHaveCount(3);
+  // The three core demo cases come first; the judgment cases follow them in the queue.
+  await expect(queueItems(page)).toHaveCount(TRAINING_CASES);
   await settled(page, "queue-start.png");
 
   const plan = [
@@ -114,7 +118,7 @@ test("P1 acceptance: an expert processes the three training cases by hand", asyn
     await item.click();
     await expect(item).toHaveAttribute("aria-current", "true");
     await expect(page.getByRole("article")).toContainText(caseId);
-    for (const section of ["Customer", "Relationship", "Beneficial owners", "Screening", "Source of funds", "Documents"])
+    for (const section of ["Customer", "Relationship", "Business", "Beneficial owners", "Screening", "Source of funds", "Documents"])
       await expect(page.getByRole("region", { name: section, exact: true })).toBeVisible();
 
     await review(page, step.rating, step.outcome);
@@ -276,7 +280,7 @@ test("reloading the session URL resumes it with decided cases still marked", asy
   const url = page.url();
   await page.reload();
   expect(page.url()).toBe(url);
-  await expect(queueItems(page)).toHaveCount(3);
+  await expect(queueItems(page)).toHaveCount(TRAINING_CASES);
   await expect(queueItems(page).first()).toContainText("Outcome: Escalate to compliance officer");
   await expect(queueItems(page).nth(1)).toContainText("Open");
   await expect(page.getByRole("progressbar", { name: "Cases decided" })).toHaveAttribute("aria-valuenow", "1");

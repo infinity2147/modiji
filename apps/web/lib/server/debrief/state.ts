@@ -290,13 +290,52 @@ export function ruleEntries(book: Rulebook): Map<string, string> {
   return out;
 }
 
+/**
+ * Proposal weight compared at 12 significant digits. Hypotheses that explain the observed cases equally well get the
+ * same weight up to floating-point noise (1e-17 apart), and that noise must not decide which of them is proposed.
+ */
+function tieWeight(weight: number): number {
+  return Number(weight.toPrecision(12));
+}
+
+/** Heaviest first; equally weighted proposals keep their order (sort is stable). */
+export function byProposalWeight(a: { weight: number }, b: { weight: number }): number {
+  return tieWeight(b.weight) - tieWeight(a.weight);
+}
+
+/**
+ * Within each run of equally weighted candidates (heaviest first, then by id), alternate the predicted actions in order of
+ * first appearance. A few observed cases leave many single-condition explanations tied for one decision (every feature
+ * on which the lone PEP case differs predicts its outcome equally well); ordered by id alone, those could fill the whole
+ * proposal budget, and no rule would be proposed for the other decisions. Only ties are reordered, so a caller that
+ * re-sorts stably with `byProposalWeight` keeps this order.
+ */
+function interleaveTiedActions(candidates: readonly CandidateRule[]): CandidateRule[] {
+  const sorted = [...candidates].sort((a, b) => byProposalWeight(a, b) || (a.id < b.id ? -1 : 1));
+  const out: CandidateRule[] = [];
+  for (let start = 0; start < sorted.length; ) {
+    const weight = tieWeight(sorted[start]?.weight ?? 0);
+    let end = start;
+    while (end < sorted.length && tieWeight(sorted[end]?.weight ?? 0) === weight) end += 1;
+    const queues = new Map<string, CandidateRule[]>();
+    for (const c of sorted.slice(start, end)) queues.set(c.predictedAction, [...(queues.get(c.predictedAction) ?? []), c]);
+    for (let round = 0; out.length < end; round += 1)
+      for (const queue of queues.values()) {
+        const next = queue[round];
+        if (next !== undefined) out.push(next);
+      }
+    start = end;
+  }
+  return out;
+}
+
 /** Proposed (unconfirmed) rules: the heaviest candidates and every expert statement, minus what is confirmed already. */
 export function proposals(snap: Snapshot): { candidate: CandidateRule; family: string }[] {
   const confirmed = new Set(
     snap.book.rules.flatMap((r) => (r.effect.type === "recommend" ? [canonicalJson([r.decisionFamily, r.predicate, r.effect.action])] : [])),
   );
   return snap.families.flatMap((family) => {
-    const ranked = [...familyState(snap, family).set.candidates].sort((a, b) => b.weight - a.weight || (a.id < b.id ? -1 : 1));
+    const ranked = interleaveTiedActions(familyState(snap, family).set.candidates);
     const picked = ranked.filter((c, i) => i < PROPOSALS_PER_FAMILY || c.origin === "expert_statement");
     return picked.filter((c) => !confirmed.has(canonicalJson([family, c.predicate, c.predictedAction]))).map((candidate) => ({ candidate, family }));
   });

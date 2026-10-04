@@ -4,8 +4,8 @@
  *
  * - Editable fields, to tell an edit from a case switch. The CaseDesk review panel
  *   (`components/casedesk/review-panel.tsx`) has exactly one input over a case field: the risk-rating
- *   select. Every other case field (customer, relationship, owners, screening, source of funds) is
- *   rendered read-only; the outcome radio group is an action, read as the committed decision.
+ *   select. Every other case field (customer, relationship, business, owners, screening, source of funds)
+ *   is rendered read-only; the outcome radio group is an action, read as the committed decision.
  * - The chrome lexicon (`CASEDESK_CHROME`): the app's own labels, on screen whatever the case. A concept
  *   vision proposes from them ("screeningSourceOfFundsDocuments" from the section headings, "caseStructure"
  *   from the tabs — live run P4 attempt 1) describes the screen, not the case, and is dropped.
@@ -30,6 +30,7 @@ export const CASEDESK_CHROME: readonly string[] = [
   "Submitted",
   "Customer",
   "Relationship",
+  "Business",
   "Beneficial owners",
   "Screening",
   "Source of funds",

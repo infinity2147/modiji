@@ -729,3 +729,24 @@ Source: `docs/evidence/live/ACCEPTANCE.txt` and `SUMMARY.txt`. All expert speech
 - The browser stop-rule test sets the rule through the API, because hermetic runs have no model to read free words.
 - A spoken reply over 1000 characters is stored shortened. The full words stay in its utterances.
 - "Drop that rule" (retire) is not in the conversation yet; it waits for the other session's `retire_rule` to be committed on `main`.
+
+---
+
+## Richer KYC cases: judgment the screen does not state (2026-10-04, branch `feat/richer-cases`, NOT deployed)
+
+**Goal.** Make the synthetic cases need an expert's judgment, not only threshold reading: evidence on screen whose meaning is a policy matter.
+
+**Done.**
+- Five public decision features (`domain.public.ts`), derived from new case fields (`case.ts`): `sectorRisk` (Northstar's published sector list), `ownershipTransparency` (direct / holding company / nominee, with who stands behind it), `volumeConsistency` (expected activity against declared turnover: 1.25x and 2.5x bands), `mediaSeverity` (minor / serious) and `nameMatch` (unconfirmed name similarity: weak / strong). Six new domain constraints keep them coherent (an individual is direct-owned and low-sector; a sanctions hit has no name match; media is found exactly when it has a severity; activity above turnover needs some activity).
+- NSRP-1 gains ten rules on them (`domain.oracle.server.ts`), including a cash-business exception that carries the conditions of the rule it lifts. Recommendation priorities are distinct per action (a test checks it).
+- Cases: training 3 → 8 (0104–0108: young vs established cash business, nominee, strong name match, serious media in a low-risk country), held-out 2 → 6 (0203–0206: each a trap for a shortcut), practice 6 → 10. The original cases keep their facts and outcomes; they gain a business profile.
+- Generator: unspecified judgment features are neutral and draw no randomness. A pinned fingerprint test proves the default bench sample's original-feature rows are unchanged.
+- CaseDesk case file: a Business section (sector and tier, declared turnover or income, expected annual activity with its ratio and band), owner kind and controller, name similarity, media severity, each a highlight target. The judge form takes the five features as optional selects.
+- Debrief proposals: equally weighted candidates (equal up to floating-point noise) now alternate between predicted actions. With 16 features the lone PEP case had more tied explanations, and the id order spent all four asked proposals on "enhanced review"; the base order had worked by a 1e-17 weight difference.
+- `docs/demo/expert-cue-card.md` covers the judgment cases and the new held-out cases.
+
+**Verified.** Typecheck and lint clean; vitest whole suite green; `pnpm test:bundle` green; browser suite 22/22.
+
+**Test expectations changed (outdated by the change, not the code).** Four hypothesis-engine unit expectations were recalibrated for the larger feature space (posterior mass of the two plan §10 explanations > 0.6, was > 0.8; surprise gaps; a counterfactual repair to "individual" also needs a low sector; the HUD contradiction test uses the measured bits). The CaseDesk browser spec expects 8 training cases in the queue, not 3.
+
+**Bench (`pnpm bench`, deterministic).** Strategies B and C and D's fidelity / unsafe rate are unchanged at every non-zero budget (D 0.990 / 1.2 % from 8 questions; B 0.0 % unsafe at 16+). The record-only floor moved: fidelity 0.645 → 0.642, unsafe FN 14.6 % → 12.8 %, guardrail recall 99.5 % → 100 %. D asks fewer questions at budgets 12–24 (11.8 → 11.0, 12.8 → 11.6). Cause: the three demo cases now carry judgment features (two medium-sector companies, a low-sector individual) and the learner's hypothesis space has 16 features. `results.json` sha256 `c66a686a…` → `abab9120…`. No threshold was changed. The committed `docs/evidence/bench/` is still the pre-change run.

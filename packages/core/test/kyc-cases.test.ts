@@ -18,6 +18,8 @@ import {
 import { KYC_HIDDEN_POLICY } from "../src/domains/kyc/domain.oracle.server";
 import { lookupFrom } from "./helpers";
 
+// Fingerprint of the original-feature rows of the default bench sample, computed on the code before the judgment features existed.
+const BENCH_SAMPLE_FINGERPRINT = 4230191574;
 const ALL: KycCase[] = CASE_SETS.flatMap((set) => kycCases(set));
 const BENCH = generateBenchCases(99, 1200);
 
@@ -32,8 +34,14 @@ function expectValid(c: KycCase): void {
   // Documents agree with the decision features shown elsewhere on screen.
   const sof = c.documents.find((d) => d.name === "Source-of-funds statement");
   expect(sof?.status).toBe(c.funds.sourceOfFunds === "not_provided" ? "missing" : "received");
-  const passport = c.documents.find((d) => d.name === `Passport — ${largestOwner(c).name}`);
-  expect(passport?.status === "received", c.id).toBe(largestOwner(c).idVerified);
+  // The largest owner's identity evidence: a passport for a person, a registry extract for a holding company; a nominee is
+  // identified by the nominator declaration, which stays outstanding.
+  const owner = largestOwner(c);
+  if (owner.kind === "nominee") expect(c.documents.find((d) => d.name === "Nominator declaration")?.status, c.id).toBe("missing");
+  else {
+    const evidence = c.documents.find((d) => d.name === `${owner.kind === "holding_company" ? "Registry extract" : "Passport"} — ${owner.name}`);
+    expect(evidence?.status === "received", c.id).toBe(owner.idVerified);
+  }
 }
 
 describe("KYC case sets", () => {
@@ -43,9 +51,18 @@ describe("KYC case sets", () => {
 
   it("labels cases with their set, and has the documented sizes", () => {
     for (const set of CASE_SETS) for (const c of kycCases(set)) expect(c.set).toBe(set);
-    expect(kycCases("training").map((c) => c.id)).toEqual(["NS-2026-0101", "NS-2026-0102", "NS-2026-0103"]);
-    expect(kycCases("heldout").map((c) => c.id)).toEqual(["NS-2026-0201", "NS-2026-0202"]);
-    expect(kycCases("practice")).toHaveLength(6);
+    expect(kycCases("training").map((c) => c.id)).toEqual([
+      "NS-2026-0101",
+      "NS-2026-0102",
+      "NS-2026-0103",
+      "NS-2026-0104",
+      "NS-2026-0105",
+      "NS-2026-0106",
+      "NS-2026-0107",
+      "NS-2026-0108",
+    ]);
+    expect(kycCases("heldout").map((c) => c.id)).toEqual(["NS-2026-0201", "NS-2026-0202", "NS-2026-0203", "NS-2026-0204", "NS-2026-0205", "NS-2026-0206"]);
+    expect(kycCases("practice")).toHaveLength(10);
     expect(kycCases("bench")).toHaveLength(DEFAULT_BENCH_SIZE);
   });
 
@@ -151,8 +168,72 @@ describe("KYC case generator", () => {
       };
       const c = generateKycCase(rng, { id: "NS-2026-0001", set: "practice", ...targets });
       expectValid(c);
-      expect(caseFeatures(c)).toEqual({ ...targets, riskRating: "unrated" });
+      // The judgment features left unspecified are neutral, so cases generated before they existed do not change.
+      expect(caseFeatures(c)).toMatchObject({
+        ...targets,
+        riskRating: "unrated",
+        ownershipTransparency: "direct",
+        volumeConsistency: "consistent",
+        nameMatch: "none",
+        mediaSeverity: targets.adverseMedia ? "minor" : "none",
+      });
+      expect(["low", "medium"]).toContain(caseFeatures(c)["sectorRisk" as never]);
     }
+  });
+
+  it("realises the judgment targets exactly, and every such case is valid", () => {
+    const rng = mulberry32(11);
+    const pick = <T,>(xs: readonly T[]): T => xs[Math.floor(rng() * xs.length)] as T;
+    for (let i = 0; i < 400; i++) {
+      const entityType = pick(["individual", "company", "company", "trust"] as const);
+      const structure = entityType === "individual" ? "direct" : pick(["direct", "layered", "nominee"] as const);
+      const mediaSeverity = pick(["none", "minor", "serious"] as const);
+      const sanctionsHit = rng() < 0.15;
+      const targets = {
+        entityType,
+        ownershipTransparency: structure,
+        uboOwnershipPct: entityType === "individual" ? 100 : pick([10, 25, 26, 51, 60]),
+        sectorRisk: entityType === "company" ? pick(["low", "medium", "high"] as const) : ("low" as const),
+        volumeConsistency: pick(["consistent", "elevated", "inconsistent"] as const),
+        expectedMonthlyVolume: 1000 + Math.floor(rng() * 400) * 500,
+        mediaSeverity,
+        adverseMedia: mediaSeverity !== "none",
+        sanctionsHit,
+        nameMatch: sanctionsHit ? ("none" as const) : pick(["none", "weak", "strong"] as const),
+        pep: rng() < 0.2,
+      };
+      const c = generateKycCase(rng, { id: "NS-2026-0001", set: "practice", ...targets });
+      expectValid(c);
+      expect(caseFeatures(c), JSON.stringify(targets)).toMatchObject(targets);
+    }
+  });
+
+  it("rejects contradictory judgment targets", () => {
+    const rng = mulberry32(2);
+    const spec = { id: "NS-2026-0001", set: "practice" } as const;
+    expect(() => generateKycCase(rng, { ...spec, entityType: "individual", ownershipTransparency: "nominee" })).toThrow(/individual has no holding company/);
+    expect(() => generateKycCase(rng, { ...spec, entityType: "individual", sectorRisk: "high" })).toThrow(/only a company/);
+    expect(() => generateKycCase(rng, { ...spec, sanctionsHit: true, nameMatch: "weak" })).toThrow(/supersedes/);
+    expect(() => generateKycCase(rng, { ...spec, adverseMedia: false, mediaSeverity: "serious" })).toThrow(/severity/);
+    expect(() => generateKycCase(rng, { ...spec, expectedMonthlyVolume: 0, volumeConsistency: "elevated" })).toThrow(/no volume/);
+  });
+
+  it("leaves the benchmark sample's decision features untouched (the judgment features are neutral and draw no randomness)", () => {
+    const original = ["entityType", "customerStatus", "accountAgeMonths", "jurisdictionRisk", "uboOwnershipPct", "uboVerified", "pep", "sanctionsHit", "adverseMedia", "sourceOfFunds", "expectedMonthlyVolume"] as const;
+    const sample = generateBenchCases(7_340_211, 48).map((c) => {
+      const f = caseFeatures(c);
+      return original.map((k) => f[k as never]).join("|");
+    });
+    // A fixed fingerprint of the 48-case default sample, recorded before the judgment features existed.
+    let hash = 0;
+    for (const ch of sample.join("\n")) hash = (Math.imul(hash, 31) + ch.charCodeAt(0)) >>> 0;
+    expect(hash).toBe(BENCH_SAMPLE_FINGERPRINT);
+  });
+
+  it("can represent a PEP behind a sole corporate shareholder", () => {
+    const c = generateKycCase(mulberry32(4), { id: "NS-2026-3998", set: "practice", entityType: "company", ownershipTransparency: "layered", uboOwnershipPct: 100, pep: true });
+    expectValid(c);
+    expect(caseFeatures(c)).toMatchObject({ uboOwnershipPct: 100, ownershipTransparency: "layered", pep: true });
   });
 
   it("rejects contradictory targets", () => {

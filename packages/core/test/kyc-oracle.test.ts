@@ -87,6 +87,45 @@ describe("NSRP-1 outcomes on the demo cases", () => {
       ratingFired: ["nsrp.rating.high", "nsrp.rating.medium"],
       forbidden: ["approve"],
     },
+    "NS-2026-0104": { outcome: "enhancedReview", fired: ["nsrp.sector.cash"], rating: "rateMedium", ratingFired: ["nsrp.rating.medium"], forbidden: [] },
+    "NS-2026-0105": { outcome: "approve", fired: ["nsrp.sector.cash.established"], rating: "rateMedium", ratingFired: ["nsrp.rating.medium"], forbidden: [] },
+    "NS-2026-0106": {
+      outcome: "requestDocuments",
+      fired: ["nsrp.structure.nominee", "nsrp.ubo.threshold"],
+      rating: "rateHigh",
+      ratingFired: ["nsrp.rating.high", "nsrp.rating.medium"],
+      forbidden: [],
+    },
+    "NS-2026-0107": {
+      outcome: "escalateCompliance",
+      fired: ["nsrp.name.strong.escalate", "nsrp.name.strong.no_approve"],
+      rating: "rateHigh",
+      ratingFired: ["nsrp.rating.high"],
+      forbidden: ["approve"],
+    },
+    "NS-2026-0108": {
+      outcome: "escalateCompliance",
+      fired: ["nsrp.media.serious"],
+      rating: "rateHigh",
+      ratingFired: ["nsrp.rating.high", "nsrp.rating.medium"],
+      forbidden: [],
+    },
+    "NS-2026-0203": {
+      outcome: "requestDocuments",
+      fired: ["nsrp.volume.inconsistent", "nsrp.sector.cash"],
+      rating: "rateMedium",
+      ratingFired: ["nsrp.rating.medium"],
+      forbidden: [],
+    },
+    "NS-2026-0204": { outcome: "enhancedReview", fired: ["nsrp.structure.layered"], rating: "rateMedium", ratingFired: ["nsrp.rating.medium"], forbidden: [] },
+    "NS-2026-0205": { outcome: "approve", fired: [], rating: "rateMedium", ratingFired: ["nsrp.rating.medium"], forbidden: [] },
+    "NS-2026-0206": {
+      outcome: "escalateCompliance",
+      fired: ["nsrp.media.serious"],
+      rating: "rateHigh",
+      ratingFired: ["nsrp.rating.high", "nsrp.rating.medium"],
+      forbidden: [],
+    },
   };
 
   it.each([...kycCases("training"), ...kycCases("heldout")])("$id", (c) => {
@@ -160,6 +199,20 @@ describe("NSRP-1 exception scope", () => {
   });
 });
 
+/** Rules on features the benchmark's generator leaves neutral. */
+const JUDGMENT_RULES = new Set([
+  "nsrp.name.strong.escalate",
+  "nsrp.name.strong.no_approve",
+  "nsrp.media.serious",
+  "nsrp.volume.inconsistent",
+  "nsrp.structure.nominee",
+  "nsrp.structure.layered",
+  "nsrp.volume.elevated",
+  "nsrp.name.weak.edd",
+  "nsrp.sector.cash",
+  "nsrp.sector.cash.established",
+]);
+
 describe("NSRP-1 on the bench distribution", () => {
   const SAMPLE = generateBenchCases(20261004, 2400);
   const results = SAMPLE.map(evaluateCase);
@@ -194,8 +247,95 @@ describe("NSRP-1 on the bench distribution", () => {
         "\n  outcomes: " +
         [...outcomes].map(([a, n]) => `${a} ${pct(n)}`).join(", "),
     );
-    for (const [id, n] of fired) expect(n / SAMPLE.length, id).toBeGreaterThanOrEqual(0.04);
+    // The bench sample draws the original eleven features only; the judgment rules are exercised by the curated cases below.
+    for (const [id, n] of fired) if (!JUDGMENT_RULES.has(id)) expect(n / SAMPLE.length, id).toBeGreaterThanOrEqual(0.04);
+    for (const id of JUDGMENT_RULES) expect(fired.get(id), id).toBe(0);
     for (const action of ["approve", "enhancedReview", "requestDocuments", "escalateCompliance", "reject"])
       expect(outcomes.get(action) ?? 0, action).toBeGreaterThanOrEqual(SAMPLE.length * 0.04);
+  });
+});
+
+describe("NSRP-1 judgment cases: each carries a decision the screen does not state", () => {
+  const byId = (id: string): KycCase => {
+    const found = [...kycCases("training"), ...kycCases("heldout"), ...kycCases("practice")].find((c) => c.id === id);
+    if (found === undefined) throw new Error(`no case ${id}`);
+    return found;
+  };
+  const outcome = (id: string) => {
+    const result = evaluateCase(byId(id));
+    return { action: result.decisions.reviewOutcome?.action, fired: result.decisions.reviewOutcome?.firedRuleIds ?? [], forbidden: result.forbidden };
+  };
+
+  // [case, outcome, rule that decides it, why an expert's reasoning (not the screen) is what gets it right]
+  const EXPECTED: readonly [string, string, string, string][] = [
+    ["NS-2026-0104", "enhancedReview", "nsrp.sector.cash", "a cash business only eight months old has no track record: the exception needs 12 months"],
+    ["NS-2026-0105", "approve", "nsrp.sector.cash.established", "the same business, established and consistent, is fine"],
+    ["NS-2026-0106", "requestDocuments", "nsrp.structure.nominee", "the nominator declaration comes before any review"],
+    ["NS-2026-0107", "escalateCompliance", "nsrp.name.strong.escalate", "date of birth and nationality align: never cleared at the desk"],
+    ["NS-2026-0108", "escalateCompliance", "nsrp.media.serious", "bribery prosecution escalates even in a low-risk country"],
+    ["NS-2026-0203", "requestDocuments", "nsrp.volume.inconsistent", "an established cash business expecting three times its declared turnover"],
+    ["NS-2026-0204", "enhancedReview", "nsrp.structure.layered", "all owners verified, but a holding company sits above the customer"],
+    ["NS-2026-0205", "approve", "", "a weak name match in a low-risk country is a routine false positive"],
+    ["NS-2026-0206", "escalateCompliance", "nsrp.media.serious", "six years with the bank does not outweigh a fraud prosecution"],
+  ];
+
+  it.each(EXPECTED)("%s → %s (%s)", (id, action, rule, _why) => {
+    const got = outcome(id);
+    expect(got.action).toBe(action);
+    if (rule !== "") expect(got.fired).toContain(rule);
+    else expect(got.fired.filter((r) => !r.includes("rating"))).toEqual([]);
+  });
+
+  it("a strong name match forbids approval; the sanctions-list hit rejects", () => {
+    expect(outcome("NS-2026-0107").forbidden).toContain("approve");
+    expect(outcome("NS-2026-0202").action).toBe("reject");
+  });
+
+  it("the cash-business exception overrides only the sector rule: it never lifts anything else", () => {
+    const established = byId("NS-2026-0105");
+    const withPep = { ...established, owners: established.owners.map((o, i) => (i === 0 ? { ...o, pep: true } : o)) };
+    expect(evaluateCase(withPep).decisions.reviewOutcome?.action).toBe("escalateCompliance");
+    const nominee = { ...established, owners: established.owners.map((o, i) => (i === 0 ? { ...o, kind: "nominee" as const } : o)) };
+    expect(evaluateCase(nominee).decisions.reviewOutcome?.action).toBe("requestDocuments");
+    const young = { ...established, relationship: { ...established.relationship, accountAgeMonths: 11 } };
+    expect(evaluateCase(young).decisions.reviewOutcome?.action).toBe("enhancedReview");
+    const exactlyTwelve = { ...established, relationship: { ...established.relationship, accountAgeMonths: 12 } };
+    expect(evaluateCase(exactlyTwelve).decisions.reviewOutcome?.action).toBe("approve");
+  });
+
+  it("the volume bands are 1.25x and 2.5x of declared turnover", () => {
+    const base = byId("NS-2026-0105");
+    const withVolume = (monthly: number): KycCase => ({ ...base, funds: { ...base.funds, expectedMonthlyVolumeEur: monthly } });
+    // declared EUR 600,000 a year: 62,500 a month is exactly 1.25x, 125,000 exactly 2.5x.
+    expect(caseFeatures(withVolume(62_500))["volumeConsistency" as never]).toBe("consistent");
+    expect(caseFeatures(withVolume(62_501))["volumeConsistency" as never]).toBe("elevated");
+    expect(caseFeatures(withVolume(125_000))["volumeConsistency" as never]).toBe("elevated");
+    expect(caseFeatures(withVolume(125_001))["volumeConsistency" as never]).toBe("inconsistent");
+    // elevated activity in a high-risk sector is enhanced review; inconsistent is documents.
+    expect(evaluateCase(withVolume(100_000)).decisions.reviewOutcome?.action).toBe("enhancedReview");
+    expect(evaluateCase(withVolume(130_000)).decisions.reviewOutcome?.action).toBe("requestDocuments");
+  });
+
+  it("no two recommendations with different actions ever share a priority", () => {
+    const byPriority = new Map<number, Set<string>>();
+    for (const r of KYC_HIDDEN_POLICY.rules)
+      if (r.effect.type === "recommend") byPriority.set(r.priority, new Set([...(byPriority.get(r.priority) ?? []), `${r.decisionFamily}:${r.effect.action}`]));
+    for (const [priority, actions] of byPriority) expect([...actions].length, `priority ${priority}: ${[...actions].join(", ")}`).toBe(1);
+  });
+
+  it("every training and held-out case has a deliberate, distinct reason: the set exercises every new rule", () => {
+    const fired = new Set(
+      [...kycCases("training"), ...kycCases("heldout")].flatMap((c) => evaluateCase(c).decisions.reviewOutcome?.firedRuleIds ?? []),
+    );
+    for (const id of [
+      "nsrp.sector.cash",
+      "nsrp.sector.cash.established",
+      "nsrp.structure.nominee",
+      "nsrp.structure.layered",
+      "nsrp.name.strong.escalate",
+      "nsrp.media.serious",
+      "nsrp.volume.inconsistent",
+    ])
+      expect(fired, id).toContain(id);
   });
 });

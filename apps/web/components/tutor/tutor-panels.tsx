@@ -77,23 +77,27 @@ const DEFAULT_FEATURES: JudgeFeatures = {
 
 const FIELD_CLASS = "h-7 w-full rounded-md border bg-background px-2 text-[12px]";
 
+/** `anyLabel`: the field is optional, and this first option (value "") leaves it to the case generator. */
 function SelectField<K extends keyof JudgeFeatures>({
   name,
   label,
   options,
   value,
   onChange,
+  anyLabel,
 }: {
   name: K;
   label: string;
   options: readonly string[];
   value: string;
   onChange: (name: K, value: string) => void;
+  anyLabel?: string;
 }) {
   return (
     <label className="grid gap-0.5 text-[11px] text-muted-foreground">
       {label}
       <select name={name} className={FIELD_CLASS} value={value} onChange={(e) => onChange(name, e.target.value)}>
+        {anyLabel !== undefined && <option value="">{anyLabel}</option>}
         {options.map((o) => (
           <option key={o} value={o}>
             {o.replaceAll("_", " ")}
@@ -115,8 +119,10 @@ function JudgeCaseForm({ tutor, onAdded }: { tutor: Tutor; onAdded: (kycCase: Ky
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
+    // An optional judgment feature left on its "any" option is not sent: the generator keeps it neutral.
+    const chosen = Object.fromEntries(Object.entries(values).filter(([, v]) => v !== ""));
     const parsed = JudgeFeaturesSchema.safeParse({
-      ...values,
+      ...chosen,
       accountAgeMonths: Number(values.accountAgeMonths),
       uboOwnershipPct: Number(values.uboOwnershipPct),
       expectedMonthlyVolume: Number(values.expectedMonthlyVolume),
@@ -163,6 +169,11 @@ function JudgeCaseForm({ tutor, onAdded }: { tutor: Tutor; onAdded: (kycCase: Ky
         <SelectField name="sanctionsHit" label="Sanctions match" options={yesNo} value={values.sanctionsHit ?? ""} onChange={set} />
         <SelectField name="adverseMedia" label="Adverse media" options={yesNo} value={values.adverseMedia ?? ""} onChange={set} />
         <SelectField name="sourceOfFunds" label="Source of funds" options={["verified", "unverified", "not_provided"]} value={values.sourceOfFunds ?? ""} onChange={set} />
+        <SelectField name="sectorRisk" label="Sector risk" options={["low", "medium", "high"]} value={values.sectorRisk ?? ""} onChange={set} anyLabel="any" />
+        <SelectField name="ownershipTransparency" label="Ownership structure" options={["direct", "layered", "nominee"]} value={values.ownershipTransparency ?? ""} onChange={set} anyLabel="direct (default)" />
+        <SelectField name="volumeConsistency" label="Volume vs declared" options={["consistent", "elevated", "inconsistent"]} value={values.volumeConsistency ?? ""} onChange={set} anyLabel="consistent (default)" />
+        <SelectField name="mediaSeverity" label="Media severity" options={["none", "minor", "serious"]} value={values.mediaSeverity ?? ""} onChange={set} anyLabel="from adverse media" />
+        <SelectField name="nameMatch" label="Name match" options={["none", "weak", "strong"]} value={values.nameMatch ?? ""} onChange={set} anyLabel="none (default)" />
         <label className="col-span-2 grid gap-0.5 text-[11px] text-muted-foreground">
           Expected monthly volume (EUR)
           <input name="expectedMonthlyVolume" type="number" min={0} max={10_000_000} step={500} className={FIELD_CLASS} value={values.expectedMonthlyVolume} onChange={(e) => set("expectedMonthlyVolume", e.target.value)} />

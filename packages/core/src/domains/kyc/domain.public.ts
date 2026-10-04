@@ -68,6 +68,46 @@ const raw = {
       unit: "EUR",
     },
     {
+      id: "sectorRisk",
+      label: "Sector risk (Northstar list)",
+      description: "Risk tier of the customer's business sector on Northstar's published sector list; cash-heavy and value-transfer businesses are high.",
+      source: "case",
+      type: "enum",
+      values: ["low", "medium", "high"],
+    },
+    {
+      id: "ownershipTransparency",
+      label: "Ownership structure",
+      description: "Direct: people own the customer. Layered: a holding company sits above it. Nominee: a nominee holds shares for an undisclosed party.",
+      source: "case",
+      type: "enum",
+      values: ["direct", "layered", "nominee"],
+    },
+    {
+      id: "volumeConsistency",
+      label: "Volume vs declared turnover",
+      description: "Expected activity against the annual turnover (income) the customer declared: consistent up to 1.25x, elevated up to 2.5x, inconsistent beyond.",
+      source: "case",
+      type: "enum",
+      values: ["consistent", "elevated", "inconsistent"],
+    },
+    {
+      id: "mediaSeverity",
+      label: "Adverse media severity",
+      description: "Minor: regulatory fines, disputes. Serious: fraud, bribery, corruption or other criminal conduct.",
+      source: "case",
+      type: "enum",
+      values: ["none", "minor", "serious"],
+    },
+    {
+      id: "nameMatch",
+      label: "Sanctions name-match strength",
+      description: "An unconfirmed name similarity to a sanctions-list entry. Strong: date of birth and nationality also align. Weak: only the name is similar.",
+      source: "case",
+      type: "enum",
+      values: ["none", "weak", "strong"],
+    },
+    {
       id: "riskRating",
       label: "Analyst risk rating",
       description: "Set by the reviewer during the review.",
@@ -100,6 +140,16 @@ const raw = {
     // New customers have no relationship history; existing ones have at least a month.
     { or: [{ "!=": [{ var: "customerStatus" }, "new"] }, { "==": [{ var: "accountAgeMonths" }, 0] }] },
     { or: [{ "!=": [{ var: "customerStatus" }, "existing"] }, { ">=": [{ var: "accountAgeMonths" }, 1] }] },
+    // An individual has no holding company or nominee above them; only a company can be in a medium or high-risk sector.
+    { or: [{ "!=": [{ var: "entityType" }, "individual"] }, { "==": [{ var: "ownershipTransparency" }, "direct"] }] },
+    { or: [{ "==": [{ var: "entityType" }, "company"] }, { "==": [{ var: "sectorRisk" }, "low"] }] },
+    // A confirmed sanctions match supersedes a mere name similarity.
+    { or: [{ "==": [{ var: "sanctionsHit" }, false] }, { "==": [{ var: "nameMatch" }, "none"] }] },
+    // Adverse media is found exactly when it has a severity.
+    { or: [{ "==": [{ var: "adverseMedia" }, false] }, { "!=": [{ var: "mediaSeverity" }, "none"] }] },
+    { or: [{ "==": [{ var: "adverseMedia" }, true] }, { "==": [{ var: "mediaSeverity" }, "none"] }] },
+    // Activity can only exceed the declared turnover when some activity is expected.
+    { or: [{ "==": [{ var: "volumeConsistency" }, "consistent"] }, { ">": [{ var: "expectedMonthlyVolume" }, 0] }] },
   ],
   criticalFields: [
     "entityType",
@@ -113,6 +163,11 @@ const raw = {
     "adverseMedia",
     "sourceOfFunds",
     "expectedMonthlyVolume",
+    "sectorRisk",
+    "ownershipTransparency",
+    "volumeConsistency",
+    "mediaSeverity",
+    "nameMatch",
     "riskRating",
   ],
 } satisfies DomainConfigInput;

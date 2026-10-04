@@ -48,7 +48,7 @@ import { applyConceptAction, conceptsState } from "../schema/service";
 import { applyExpertAction, generateTeachBack, isAffirmative, rebuildWitnesses, type SpokenWords } from "./actions";
 import type { DebriefDeps } from "./deps";
 import { interpretReply, type InterpretContext, type Reading } from "./interpret";
-import { DOMAIN, debriefState, snapshot, type Snapshot } from "./state";
+import { DOMAIN, byProposalWeight, debriefState, snapshot, type Snapshot } from "./state";
 import { effectPhrase } from "./text";
 
 export type ConversationDeps = { debrief: DebriefDeps; schema: SchemaDeps };
@@ -167,7 +167,7 @@ async function nextItem(deps: ConversationDeps, sessionId: string, h: History): 
   const unseen = (topic: Topic, ref: string) => !seen.has(`${topic}:${ref}`);
   let state = debriefState(deps.debrief, await snapshot(deps.debrief, sessionId));
 
-  const proposal = [...state.proposals].sort((a, b) => b.weight - a.weight).slice(0, MAX_PROPOSALS).find((p) => unseen("proposal", p.candidateId));
+  const proposal = [...state.proposals].sort(byProposalWeight).slice(0, MAX_PROPOSALS).find((p) => unseen("proposal", p.candidateId));
   if (proposal !== undefined)
     return {
       topic: "proposal",

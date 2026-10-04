@@ -6,7 +6,18 @@
  * arithmetic (no Math.exp/log, which may differ between engines), so the same seed and specs yield
  * identical cases in the browser, on the server and in the bench.
  */
-import { KycCaseSchema, NORTHSTAR_COUNTRIES, NORTHSTAR_COUNTRY_RISK, type CaseSet, type KycCase, type NorthstarCountry } from "./case";
+import {
+  KycCaseSchema,
+  NORTHSTAR_COUNTRIES,
+  NORTHSTAR_COUNTRY_RISK,
+  NORTHSTAR_SECTORS,
+  NORTHSTAR_SECTOR_RISK,
+  volumeConsistency,
+  type CaseSet,
+  type KycCase,
+  type NorthstarCountry,
+  type NorthstarSector,
+} from "./case";
 
 /** Uniform in [0, 1). */
 export type Rng = () => number;
@@ -64,7 +75,20 @@ export type KycFeatureTargets = {
   adverseMedia: boolean;
   sourceOfFunds: KycCase["funds"]["sourceOfFunds"];
   expectedMonthlyVolume: number;
+  /**
+   * Judgment features. Left unspecified they are neutral (a low or medium sector chosen with the company name, direct
+   * ownership, consistent volume, no name match, severity minor when media is found) and draw no randomness, so cases
+   * generated before they existed are unchanged.
+   */
+  sectorRisk?: CountryRisk;
+  ownershipTransparency?: "direct" | "layered" | "nominee";
+  volumeConsistency?: "consistent" | "elevated" | "inconsistent";
+  mediaSeverity?: "none" | "minor" | "serious";
+  nameMatch?: "none" | "weak" | "strong";
 };
+/** The targets after defaults: the judgment features are all set, except a sector tier, which an untargeted company takes from its name. */
+type Resolved = Omit<KycFeatureTargets, "ownershipTransparency" | "volumeConsistency" | "mediaSeverity" | "nameMatch"> &
+  Required<Pick<KycFeatureTargets, "ownershipTransparency" | "volumeConsistency" | "mediaSeverity" | "nameMatch">>;
 
 export type KycCaseSpec = { id: string; set: CaseSet } & Partial<KycFeatureTargets>;
 
@@ -84,6 +108,42 @@ const SECTORS = [
   "Marine Logistics", "Agritrade", "Textile Imports", "Software Studio", "Renewables", "Freight Partners",
   "Medical Supplies", "Hospitality Group", "Precious Metals", "Construction", "Fine Foods", "Aviation Services",
 ] as const;
+/** The sector a company name's word stands for, none of them high risk: unspecified, a generated case never trips the sector rules. */
+const DEFAULT_SECTOR_OF_WORD: Record<(typeof SECTORS)[number], NorthstarSector> = {
+  "Marine Logistics": "Marine logistics",
+  Agritrade: "Agricultural trade",
+  "Textile Imports": "Textile imports",
+  "Software Studio": "Software and IT services",
+  Renewables: "Energy and utilities",
+  "Freight Partners": "Marine logistics",
+  "Medical Supplies": "Healthcare supplies",
+  "Hospitality Group": "Hospitality",
+  "Precious Metals": "Commodities trading",
+  Construction: "Construction",
+  "Fine Foods": "Agricultural trade",
+  "Aviation Services": "Professional services",
+};
+/** The name a company in a sector carries, when the sector is a target. */
+const WORD_OF_SECTOR: Record<NorthstarSector, string> = {
+  "Salaried or private individual": "",
+  "Private wealth (trust)": "",
+  "Professional services": "Advisory",
+  "Software and IT services": "Software Studio",
+  "Healthcare supplies": "Medical Supplies",
+  Hospitality: "Hospitality Group",
+  "Marine logistics": "Marine Logistics",
+  "Agricultural trade": "Agritrade",
+  "Textile imports": "Textile Imports",
+  "Commodities trading": "Commodities",
+  Construction: "Construction",
+  "Real estate brokerage": "Property Brokers",
+  "Energy and utilities": "Renewables",
+  "Cash-intensive retail": "Laundrettes",
+  "Currency exchange and remittance": "Exchange & Remittance",
+  "Precious metals and jewellery": "Jewellers",
+  "Online gaming": "Gaming",
+};
+const COMPANY_ONLY_SECTORS = NORTHSTAR_SECTORS.filter((x) => x !== "Salaried or private individual" && x !== "Private wealth (trust)");
 const COMPANY_SUFFIXES = ["Ltd", "Holdings Ltd", "& Co.", "LLC"] as const;
 const TRUST_KINDS = ["Family Trust", "Heritage Trust", "Legacy Trust"] as const;
 const STREETS = [
@@ -109,6 +169,11 @@ const COUNTRY_INFO: Record<NorthstarCountry, { code: string; cities: readonly [s
 
 const MEDIA_SOURCES = ["regional newspaper", "trade journal", "court bulletin"] as const;
 const MEDIA_TOPICS = ["a customs investigation", "an unpaid-supplier lawsuit", "a tax dispute", "a licensing breach"] as const;
+const SERIOUS_MEDIA_TOPICS = [
+  "a bribery prosecution of a public official",
+  "a fraud conviction",
+  "a corruption investigation involving public contracts",
+] as const;
 
 const FUNDS_DESCRIPTIONS: Record<KycCase["funds"]["sourceOfFunds"], Record<EntityType, readonly [string, ...string[]]>> = {
   verified: {
@@ -155,13 +220,21 @@ export function generateKycCase(rng: Rng, spec: KycCaseSpec): KycCase {
   const country = pick(rng, countriesWithRisk(f.jurisdictionRisk));
   const { code, cities } = COUNTRY_INFO[country];
   const names = uniqueNames(rng);
-  const customerName = companyName(rng, f.entityType, names);
+  const { name: nameTemplate, word } = companyName(rng, f.entityType, names, f.sectorRisk);
+  const sector = sectorFor(rng, f.entityType, word, f.sectorRisk);
+  const customerName = nameTemplate.replace("{sector}", WORD_OF_SECTOR[sector]);
   const owners = buildOwners(rng, f, customerName, names);
   const ubo = owners[0];
   const subject = pick(rng, [customerName, ...owners.map((o) => o.name)]);
 
   const sofDoc = f.sourceOfFunds === "not_provided" ? "missing" : "received";
   const idDoc = f.uboVerified ? "received" : pick(rng, ["missing", "expired"] as const);
+  const structureDocs: KycCase["documents"] =
+    f.ownershipTransparency === "nominee"
+      ? [{ name: "Nominator declaration", status: "missing" }]
+      : f.ownershipTransparency === "layered"
+        ? [{ name: `Registry extract — ${ubo.name}`, status: idDoc }]
+        : [{ name: `Passport — ${ubo.name}`, status: idDoc }];
   const documents: KycCase["documents"] =
     f.entityType === "individual"
       ? [
@@ -172,12 +245,12 @@ export function generateKycCase(rng: Rng, spec: KycCaseSpec): KycCase {
       : [
           { name: f.entityType === "company" ? "Company registry extract" : "Trust deed", status: "received" },
           { name: "Register of beneficial owners", status: "received" },
-          { name: `Passport — ${ubo.name}`, status: idDoc },
+          ...structureDocs,
           { name: "Source-of-funds statement", status: sofDoc },
         ];
 
   const registryKind = { individual: "P", company: "C", trust: "T" }[f.entityType];
-  return KycCaseSchema.parse({
+  const draft = {
     id: spec.id,
     set: spec.set,
     submittedAt: new Date(Date.UTC(2026, 8, 1 + intBetween(rng, 0, 32))).toISOString().slice(0, 10),
@@ -197,16 +270,21 @@ export function generateKycCase(rng: Rng, spec: KycCaseSpec): KycCase {
     screening: {
       sanctions: f.sanctionsHit
         ? {
-            status: "match",
+            status: "match" as const,
             detail: `Potential match: ${subject} — ${intBetween(rng, 88, 99)}% name similarity to entry NSL-${intBetween(rng, 1000, 9999)} on the Northstar Synthetic Sanctions List.`,
           }
-        : { status: "clear", detail: "No match on the Northstar Synthetic Sanctions List." },
+        : { status: "clear" as const, detail: "No match on the Northstar Synthetic Sanctions List." },
       adverseMedia: f.adverseMedia
         ? {
-            status: "found",
-            detail: `${subject} named in a ${pick(rng, MEDIA_SOURCES)} report on ${pick(rng, MEDIA_TOPICS)} (${intBetween(rng, 2023, 2025)}).`,
+            status: "found" as const,
+            severity: f.mediaSeverity === "serious" ? ("serious" as const) : ("minor" as const),
+            detail:
+              f.mediaSeverity === "serious"
+                ? `${subject} named in a ${pick(rng, MEDIA_SOURCES)} report on ${pick(rng, SERIOUS_MEDIA_TOPICS)} (${intBetween(rng, 2024, 2026)}).`
+                : `${subject} named in a ${pick(rng, MEDIA_SOURCES)} report on ${pick(rng, MEDIA_TOPICS)} (${intBetween(rng, 2023, 2025)}).`,
           }
-        : { status: "none", detail: "No relevant adverse media found." },
+        : { status: "none" as const, severity: "minor" as const, detail: "No relevant adverse media found." },
+      nameMatch: nameMatchFor(rng, f.nameMatch, subject),
     },
     funds: {
       sourceOfFunds: f.sourceOfFunds,
@@ -214,11 +292,80 @@ export function generateKycCase(rng: Rng, spec: KycCaseSpec): KycCase {
       expectedMonthlyVolumeEur: f.expectedMonthlyVolume,
     },
     documents,
-    review: { riskRating: "unrated" },
+    review: { riskRating: "unrated" as const },
+  };
+  const declaredAnnualEur = declaredTurnover(rng, draft, f);
+  return KycCaseSchema.parse({
+    ...draft,
+    business: { sector, description: businessDescription(sector, f.entityType), declaredAnnualEur },
   });
 }
 
-function resolveFeatures(rng: Rng, spec: KycCaseSpec): KycFeatureTargets {
+function nameMatchFor(rng: Rng, strength: Resolved["nameMatch"], subject: string): KycCase["screening"]["nameMatch"] {
+  if (strength === "none") return { strength, detail: "No similar names on the Northstar Synthetic Sanctions List." };
+  const entry = `NSL-${intBetween(rng, 1000, 9999)}`;
+  return strength === "strong"
+    ? {
+        strength,
+        detail: `${subject} — ${intBetween(rng, 95, 99)}% name similarity to entry ${entry}; date of birth and nationality also match. Not yet cleared.`,
+      }
+    : {
+        strength,
+        detail: `${subject} — ${intBetween(rng, 74, 84)}% name similarity to entry ${entry}; date of birth and nationality differ.`,
+      };
+}
+
+/** A company's sector: the one its name word stands for, or one of the targeted risk tier. Individuals and trusts have fixed low-risk profiles. */
+function sectorFor(rng: Rng, entityType: EntityType, word: (typeof SECTORS)[number] | undefined, target: CountryRisk | undefined): NorthstarSector {
+  if (entityType !== "company") {
+    if (target !== undefined && target !== "low") throw new RangeError(`only a company can be in a ${target}-risk sector`);
+    return entityType === "individual" ? "Salaried or private individual" : "Private wealth (trust)";
+  }
+  if (target === undefined) return word === undefined ? "Professional services" : DEFAULT_SECTOR_OF_WORD[word];
+  const options = COMPANY_ONLY_SECTORS.filter((x) => NORTHSTAR_SECTOR_RISK[x] === target);
+  const [first, ...rest] = options;
+  if (first === undefined) throw new RangeError(`no sector has risk "${target}"`);
+  return pick(rng, [first, ...rest]);
+}
+
+function businessDescription(sector: NorthstarSector, entityType: EntityType): string {
+  if (entityType === "individual") return "Salaried employment and personal savings.";
+  if (entityType === "trust") return "Holds family investments for its beneficiaries.";
+  return `${sector}: trades with business customers and suppliers.`;
+}
+
+/**
+ * The declared annual turnover that puts the case's expected volume in the targeted consistency band. Unspecified bands draw
+ * no randomness (about 0.9x); a band that rounding would miss falls back to the exact figure.
+ */
+function declaredTurnover(rng: Rng, draft: Parameters<typeof KycCaseSchema.parse>[0], f: Resolved): number {
+  const annual = f.expectedMonthlyVolume * 12;
+  if (annual === 0) {
+    if (f.volumeConsistency !== "consistent") throw new RangeError("no volume is expected, so it cannot exceed the declared turnover");
+    return 0;
+  }
+  const ratio =
+    f.volumeConsistency === "consistent"
+      ? 0.9
+      : f.volumeConsistency === "elevated"
+        ? 1.5 + Math.floor(rng() * 7) / 10
+        : 3 + Math.floor(rng() * 21) / 10;
+  const fits = (declared: number): boolean => {
+    try {
+      const parsed = KycCaseSchema.parse({ ...(draft as object), business: { sector: "Professional services", description: "", declaredAnnualEur: declared } });
+      return volumeConsistency(parsed) === f.volumeConsistency;
+    } catch {
+      return false;
+    }
+  };
+  const rounded = Math.max(1000, Math.round(annual / ratio / 1000) * 1000);
+  if (fits(rounded)) return rounded;
+  const exact = Math.max(1, Math.round(annual / ratio));
+  if (fits(exact)) return exact;
+  throw new RangeError(`cannot declare a turnover that makes EUR ${f.expectedMonthlyVolume} a month ${f.volumeConsistency}`);
+}
+
+function resolveFeatures(rng: Rng, spec: KycCaseSpec): Resolved {
   const entityType = spec.entityType ?? weighted(rng, [["individual", 0.4], ["company", 0.45], ["trust", 0.15]]);
   const customerStatus =
     spec.customerStatus ??
@@ -227,7 +374,7 @@ function resolveFeatures(rng: Rng, spec: KycCaseSpec): KycFeatureTargets {
   const uboOwnershipPct =
     spec.uboOwnershipPct ??
     (entityType === "individual" ? 100 : chance(rng, 0.2) ? pick(rng, UBO_BOUNDARY_SHARES) : intBetween(rng, 10, 100));
-  const f: KycFeatureTargets = {
+  const f: Resolved = {
     entityType,
     customerStatus,
     accountAgeMonths,
@@ -236,10 +383,23 @@ function resolveFeatures(rng: Rng, spec: KycCaseSpec): KycFeatureTargets {
     uboVerified: spec.uboVerified ?? chance(rng, 0.75),
     pep: spec.pep ?? chance(rng, 0.08),
     sanctionsHit: spec.sanctionsHit ?? chance(rng, 0.03),
-    adverseMedia: spec.adverseMedia ?? chance(rng, 0.12),
+    // A targeted severity decides whether there is media at all, so it replaces the random draw.
+    adverseMedia: spec.adverseMedia ?? (spec.mediaSeverity !== undefined ? spec.mediaSeverity !== "none" : chance(rng, 0.12)),
     sourceOfFunds: spec.sourceOfFunds ?? weighted(rng, [["verified", 0.6], ["unverified", 0.25], ["not_provided", 0.15]]),
     expectedMonthlyVolume: spec.expectedMonthlyVolume ?? drawVolume(rng, entityType),
+    ...(spec.sectorRisk !== undefined && { sectorRisk: spec.sectorRisk }),
+    ownershipTransparency: spec.ownershipTransparency ?? "direct",
+    volumeConsistency: spec.volumeConsistency ?? "consistent",
+    mediaSeverity: "none",
+    nameMatch: spec.nameMatch ?? "none",
   };
+  f.mediaSeverity = !f.adverseMedia ? "none" : (spec.mediaSeverity ?? "minor");
+  if (spec.mediaSeverity !== undefined && (spec.mediaSeverity !== "none") !== f.adverseMedia)
+    throw new RangeError(`case ${spec.id}: adverse media ${f.adverseMedia ? "is" : "is not"} found, so its severity cannot be ${spec.mediaSeverity}`);
+  if (f.entityType === "individual" && f.ownershipTransparency !== "direct")
+    throw new RangeError(`case ${spec.id}: an individual has no holding company or nominee above them`);
+  if (f.sanctionsHit && f.nameMatch !== "none")
+    throw new RangeError(`case ${spec.id}: a confirmed sanctions match supersedes a name match`);
   if (f.entityType === "individual" && f.uboOwnershipPct !== 100)
     throw new RangeError(`case ${spec.id}: an individual owns 100%, not ${f.uboOwnershipPct}%`);
   if (f.uboOwnershipPct <= 0 || f.uboOwnershipPct > 100) throw new RangeError(`case ${spec.id}: uboOwnershipPct must be in (0, 100]`);
@@ -274,42 +434,73 @@ function uniqueNames(rng: Rng): () => string {
   };
 }
 
-function companyName(rng: Rng, entityType: EntityType, nextName: () => string): string {
-  if (entityType === "individual") return nextName();
+function companyName(rng: Rng, entityType: EntityType, nextName: () => string, targetSector: CountryRisk | undefined): { name: string; word?: (typeof SECTORS)[number] } {
+  if (entityType === "individual") return { name: nextName() };
   const surname = pick(rng, LAST_NAMES);
-  return entityType === "company"
-    ? `${surname} ${pick(rng, SECTORS)} ${pick(rng, COMPANY_SUFFIXES)}`
-    : `${surname} ${pick(rng, TRUST_KINDS)}`;
+  if (entityType === "trust") return { name: `${surname} ${pick(rng, TRUST_KINDS)}` };
+  // The word and suffix are drawn either way so the random stream is the same whether or not a sector is targeted.
+  const word = pick(rng, SECTORS);
+  const suffix = pick(rng, COMPANY_SUFFIXES);
+  return { name: `${surname} ${targetSector === undefined ? word : "{sector}"} ${suffix}`, word };
 }
 
 type Owner = KycCase["owners"][number];
 
 /** Largest owner first (so `largestOwner` picks it); every other share is strictly smaller and the total stays ≤ 100. */
-function buildOwners(rng: Rng, f: KycFeatureTargets, customerName: string, nextName: () => string): [Owner, ...Owner[]] {
+function buildOwners(rng: Rng, f: Resolved, customerName: string, nextName: () => string): [Owner, ...Owner[]] {
   if (f.entityType === "individual")
-    return [{ name: customerName, role: "Account holder", sharePct: 100, idVerified: f.uboVerified, pep: f.pep }];
+    return [{ name: customerName, role: "Account holder", sharePct: 100, idVerified: f.uboVerified, pep: f.pep, kind: "person" }];
 
   const trust = f.entityType === "trust";
-  const owners: [Owner, ...Owner[]] = [
-    {
-      name: nextName(),
-      role: trust ? "Settlor & beneficiary" : f.uboOwnershipPct > 50 ? "Director & majority shareholder" : "Director & shareholder",
-      sharePct: f.uboOwnershipPct,
-      idVerified: f.uboVerified,
-      pep: false,
-    },
-  ];
+  const largestName = nextName();
+  const surname = largestName.split(" ").slice(1).join(" ") || largestName;
+  const structure = f.ownershipTransparency;
+  const largest: Owner =
+    structure === "nominee"
+      ? {
+          name: `${surname} Nominees Ltd`,
+          role: "Nominee shareholder",
+          sharePct: f.uboOwnershipPct,
+          idVerified: f.uboVerified,
+          pep: false,
+          kind: "nominee",
+          controller: "Not disclosed. Nominator declaration outstanding.",
+        }
+      : structure === "layered"
+        ? {
+            name: `${surname} Holdings Ltd`,
+            role: "Corporate shareholder",
+            sharePct: f.uboOwnershipPct,
+            idVerified: f.uboVerified,
+            pep: false,
+            kind: "holding_company",
+            controller: `Wholly held by ${nextName()} (identity ${f.uboVerified ? "verified" : "not verified"}).`,
+          }
+        : {
+            name: largestName,
+            role: trust ? "Settlor & beneficiary" : f.uboOwnershipPct > 50 ? "Director & majority shareholder" : "Director & shareholder",
+            sharePct: f.uboOwnershipPct,
+            idVerified: f.uboVerified,
+            pep: false,
+            kind: "person",
+          };
+  const owners: [Owner, ...Owner[]] = [largest];
   let remaining = 100 - f.uboOwnershipPct;
-  for (let k = intBetween(rng, 1, 3); k > 0; k--) {
+  // A holding company or nominee always sits beside at least one named person, who can carry a PEP flag.
+  for (let k = Math.max(intBetween(rng, 1, 3), structure === "direct" ? 0 : 1); k > 0; k--) {
     const cap = Math.min(Math.ceil(f.uboOwnershipPct) - 1, Math.floor(remaining));
     if (cap < 1) break;
     const sharePct = intBetween(rng, Math.max(1, Math.floor(cap / 3)), cap);
     remaining -= sharePct;
-    owners.push({ name: nextName(), role: trust ? "Beneficiary" : "Shareholder", sharePct, idVerified: chance(rng, 0.85), pep: false });
+    owners.push({ name: nextName(), role: trust ? "Beneficiary" : "Shareholder", sharePct, idVerified: chance(rng, 0.85), pep: false, kind: "person" });
   }
+  if (f.pep && !owners.some((o) => o.kind === "person"))
+    owners.push({ name: nextName(), role: "Controlling person", sharePct: 0, idVerified: true, pep: false, kind: "person" });
   if (f.pep) {
-    const politicallyExposed = owners[intBetween(rng, 0, owners.length - 1)];
-    if (politicallyExposed !== undefined) politicallyExposed.pep = true;
+    const people = owners.filter((o) => o.kind === "person");
+    const politicallyExposed = people[intBetween(rng, 0, people.length - 1)];
+    if (politicallyExposed === undefined) throw new RangeError("a PEP needs a named person among the owners");
+    politicallyExposed.pep = true;
   }
   return owners;
 }

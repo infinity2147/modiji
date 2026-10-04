@@ -25,6 +25,12 @@ export const SHARED = {
   adverseMedia: false,
   sourceOfFunds: "verified",
   expectedMonthlyVolume: 20_000,
+  // The judgment features of an ordinary case: nothing unusual about the business, structure, volume, media or names.
+  sectorRisk: "medium",
+  ownershipTransparency: "direct",
+  volumeConsistency: "consistent",
+  mediaSeverity: "none",
+  nameMatch: "none",
   riskRating: "unrated",
 } as const;
 

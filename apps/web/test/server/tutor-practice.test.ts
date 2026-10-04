@@ -154,7 +154,7 @@ describe("practice cases", () => {
     const rules = demoRules();
     const pinned = pinnedFeatures(rules);
     // Ownership share is coupled to entity type; customer status to relationship age.
-    expect([...pinned].sort()).toEqual(["accountAgeMonths", "customerStatus", "entityType", "jurisdictionRisk", "sanctionsHit", "uboOwnershipPct", "uboVerified"]);
+    expect([...pinned].sort()).toEqual(["accountAgeMonths", "customerStatus", "entityType", "jurisdictionRisk", "nameMatch", "ownershipTransparency", "sanctionsHit", "sectorRisk", "uboOwnershipPct", "uboVerified"]);
     const assignment = AssignmentSchema.parse({ ...caseFeatures(kycCases("heldout")[0]!), uboOwnershipPct: 25.1, uboVerified: false });
     const built = caseFromAssignment({ id: "NS-2026-1500", seed: 7, assignment, pinned });
     for (const f of pinned) expect(caseFeatures(built)[f]).toBe(assignment[f]);

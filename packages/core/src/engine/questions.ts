@@ -162,13 +162,20 @@ export function generateQuestions(params: {
 }): Question[] {
   const { model, set, ctx, recent, concepts = [], config } = params;
   const why = recent === undefined ? undefined : whyProbe({ model, set, ctx, recent, config });
+  const seen = new Set<string>();
   return [
     ...counterfactualQuestions({ model, set, ctx, ...(recent && { recent }), config }),
     ...(why === undefined ? [] : [why]),
     ...conceptProbes({ concepts, ctx, config }),
   ]
     .filter((q) => wordCount(q.text) <= MAX_QUESTION_WORDS && !screenAnswers(q, model.domain, ctx.context))
-    .sort((a, b) => b.value - a.value || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+    .sort((a, b) => b.value - a.value || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))
+    // Coupled features can produce the same repaired assignment from two different moves.
+    .filter((q) => {
+      if (seen.has(q.id)) return false;
+      seen.add(q.id);
+      return true;
+    });
 }
 
 /** The highest-value question at or above θ_ask (plan §7.2), if any. */

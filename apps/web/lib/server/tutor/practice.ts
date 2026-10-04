@@ -208,6 +208,7 @@ export async function generatePractice(deps: TutorDeps, loaded: LoadedSession): 
 /** A judge-entered case: every value checked against its domain feature, the domain constraints, then built. */
 export function addJudgeCase(deps: TutorDeps, loaded: LoadedSession, features: JudgeFeatures): KycCase {
   for (const [field, value] of Object.entries(features)) {
+    if (value === undefined) continue;
     const check = validateFeatureValue(KYC_DOMAIN, field, value);
     if (!check.ok) throw new ApiFailure(400, "invalid_value", `features.${field}: ${check.message}`);
   }
@@ -215,7 +216,8 @@ export function addJudgeCase(deps: TutorDeps, loaded: LoadedSession, features: J
   const id = nextId([...tutorRecord(deps.ledger, sessionId).generated.keys()], JUDGE_FIRST_ID);
   let kycCase: KycCase;
   try {
-    kycCase = KycCaseSchema.parse(generateKycCase(mulberry32(seedOf(sessionId, id)), { id, set: "practice", ...features }));
+    const targets = Object.fromEntries(Object.entries(features).filter(([, value]) => value !== undefined)) as Partial<KycFeatureTargets>;
+    kycCase = KycCaseSchema.parse(generateKycCase(mulberry32(seedOf(sessionId, id)), { id, set: "practice", ...targets }));
   } catch (error) {
     throw new ApiFailure(400, "invalid_case", error instanceof Error ? error.message : "the values do not form a valid case");
   }
