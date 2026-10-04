@@ -120,6 +120,10 @@ export type FakeServerBehaviour = {
   llmCalls?: "on" | "off" | null;
   /** Event-loop delay p99 `/api/health/deep` reports (default 4 ms); null omits `eventLoop`, as an older server would. */
   eventLoopP99Ms?: number | null;
+  /** GC pause stats `/api/health/deep` reports; omitted by default (an older server does not report them). */
+  gc?: { count: number; totalPauseMs: number; maxPauseMs: number; sinceMs: number };
+  /** CPU-throttle counters `/api/health/deep` reports; `null` means the cgroup exposes none; omitted by default. */
+  cpuThrottle?: { nrPeriods: number; nrThrottled: number; throttledMs: number } | null;
   sandboxHtml?: string;
   voiceTokenStatus?: number;
 };
@@ -150,7 +154,16 @@ export function fakeServer(behaviour: FakeServerBehaviour = {}, wallClock: () =>
         const llmCalls = behaviour.llmCalls === undefined ? "on" : behaviour.llmCalls;
         const p99Ms = behaviour.eventLoopP99Ms === undefined ? 4 : behaviour.eventLoopP99Ms;
         const eventLoop = p99Ms === null ? null : { p50Ms: 0.5, p99Ms, maxMs: p99Ms * 3, samples: 6000, sinceMs: 60_000 };
-        const body = { ok, db: part(d.db), dataDir: part(d.dataDir), z3: part(d.z3), ...(llmCalls !== null && { llmCalls }), ...(eventLoop !== null && { eventLoop }) };
+        const body = {
+          ok,
+          db: part(d.db),
+          dataDir: part(d.dataDir),
+          z3: part(d.z3),
+          ...(llmCalls !== null && { llmCalls }),
+          ...(eventLoop !== null && { eventLoop }),
+          ...(behaviour.gc !== undefined && { gc: behaviour.gc }),
+          ...("cpuThrottle" in behaviour && { cpuThrottle: behaviour.cpuThrottle }),
+        };
         return json(body, ok ? 200 : 503);
       }
       case "GET /sandbox":

@@ -26,7 +26,9 @@ import {
   createPerceptionQueue,
   percentile,
   prepareUpload,
+  type CaseIdTracker,
   type ChangeDetector,
+  type ClientCaseId,
   type PerceptionQueue,
   type RedactionResult,
   type Redactor,
@@ -36,7 +38,14 @@ import type { PostFrameResponse, VisionState } from "../../contracts/frames";
 import { ApiError, describeError, type FetchFn } from "../api";
 import { postFrame } from "./api";
 
-export const CAPTURE_INTERVAL_MS = 500;
+/**
+ * Grab-and-detect tick (team P2 decision: 500 → 250 ms). Grab + change detection is a few ms of CPU
+ * (one 64×36 thumbnail + a 64-bit dHash), far under the tick, so a faster tick only shortens the wait
+ * before a change is noticed; it does not add a backlog (ticks during redaction/upload are skipped and
+ * counted). The recorded fixture is paced at 500 ms, so the eval harness cannot show this gain; it is
+ * a live-latency improvement, measured in the Playwright capture spec.
+ */
+export const CAPTURE_INTERVAL_MS = 250;
 
 /** A running screen share. `grab` returns null until the first video frame is available. */
 export type FrameGrabber = {
@@ -96,6 +105,11 @@ export type CapturePipelineOptions = {
   /** Highest vision frameSeq the server already accepted for this session (from `GET …/frames`). */
   lastFrameSeq: number;
   redactor: Redactor;
+  /**
+   * Reads the case id from each frame's OCR words (the redactor's, not a second OCR pass) and carries
+   * it forward; its result is sent as trusted metadata (team P2 decision). Omitted: no client case id.
+   */
+  caseIdTracker?: CaseIdTracker;
   encode: PngEncoder;
   now?: () => number;
   intervalMs?: number;
@@ -126,6 +140,8 @@ type Payload = {
   source: { width: number; height: number };
   changeScore: number;
   redactedRegions: number;
+  /** The case id read on-device from this frame's OCR words; null when none was read (carried forward). */
+  caseId: ClientCaseId | null;
 };
 
 const MAX_SAMPLES = 512;
@@ -183,6 +199,7 @@ export function createCapturePipeline(options: CapturePipelineOptions): CaptureP
             source: frame.payload.source,
             bbox: frame.payload.bbox,
             crop: frame.payload.cropRect,
+            caseId: frame.payload.caseId,
           },
           frame: frame.payload.frame,
           crop: frame.payload.crop,
@@ -225,10 +242,14 @@ export function createCapturePipeline(options: CapturePipelineOptions): CaptureP
       lastError = `redaction failed, frame not uploaded: ${describeError(error)}`;
       detector.reset();
       options.redactor.reset();
+      options.caseIdTracker?.reset();
       return;
     }
     sample(now() - started);
     if (mine !== generation) return;
+    // The case id is read from the words the redactor already OCR'd (no extra OCR pass), and carried
+    // forward: a field edit does not change the header, so its changed region shows no id.
+    const caseId = options.caseIdTracker?.read(redacted.words, { width: image.width, height: image.height }, redacted.ocrRegion) ?? null;
     const upload = prepareUpload(redacted.image, change.bbox);
     const [frame, crop] = await Promise.all([options.encode(upload.frame), upload.crop === null ? null : options.encode(upload.crop.image)]);
     if (mine !== generation) return;
@@ -241,6 +262,7 @@ export function createCapturePipeline(options: CapturePipelineOptions): CaptureP
         source: { width: image.width, height: image.height },
         changeScore: change.score,
         redactedRegions: redacted.boxes.length,
+        caseId,
       },
       captureTime,
       epoch,
@@ -281,6 +303,7 @@ export function createCapturePipeline(options: CapturePipelineOptions): CaptureP
       if (grabber !== null) halt({ state: "idle" });
       detector.reset();
       options.redactor.reset();
+      options.caseIdTracker?.reset();
       grabber = next;
       lastError = null;
       status = { state: "capturing" };
@@ -303,6 +326,7 @@ export function createCapturePipeline(options: CapturePipelineOptions): CaptureP
         queue.cancelAll();
         detector.reset();
         options.redactor.reset();
+        options.caseIdTracker?.reset();
       }
       if (epoch > queue.epoch()) queue.setEpoch(epoch);
       if (!offRecord && status.state === "off_record") {

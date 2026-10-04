@@ -106,3 +106,16 @@ start from the test history.
 To go back to the previous ledger, run `railway variable set DATA_DIR=/data` (another redeploy). Note
 that `railway config apply` also sets `DATA_DIR=/data` (it is declared in `.railway/railway.ts`), so
 applying the IaC file switches back to the old ledger too. Both ledgers share the 500 MB volume.
+
+## Raising the memory limit (resource bump)
+
+Diagnosis (2026-10-04): the freeze is **memory**, not CPU. `railway metrics` showed CPU max **0.14 of 2.0 vCPU** (idle) while memory sat at **979 MB of a 1024 MB cap (96%)** even near-idle, so GC under load produced a one-off 13.8 s event-loop freeze. CPU headroom is ample; memory is the ceiling.
+
+The 1 GB figure is the service's per-service cap. Raise it (the IaC already declares `deploy.limitOverride.containers.memoryBytes = 2 GiB`, but the bundled CLI's IaC `config apply` is blocked by a version guard on this machine, so apply it in the dashboard):
+
+1. Railway dashboard → project **vashistha** → service **vashistha** → **Settings** → **Resources** (or **Limits**).
+2. Set **Memory limit** to **2048 MB** (2 GB). Save.
+3. If the slider is capped at 1 GB, the account is on a tier that caps per-service memory — upgrade to **Hobby** (raises the cap to 8 GB/service), then set 2 GB.
+4. Redeploy (or it takes effect on the next deploy).
+
+Defense-in-depth for the judged demo (already set in `.railway/railway.ts`): `VISION_EXTRACTION=off` keeps the heaviest per-frame work off the server (the tutor and Save interlock use the disclosed DOM channel, D3). Flip to `on` only to exercise live vision.

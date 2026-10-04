@@ -277,9 +277,30 @@ describe("authorization lifecycle", () => {
     expect(await readTurn(await h.llmTurn(s, granted.controlMessage))).toMatchObject({ kind: "skip" });
     const again = GateAuthorizeResponseSchema.parse((await h.authorize(s, gateRequest(top.id, contextVersion))).body);
     expect(await readTurn(await h.llmTurn(s, again.controlMessage))).toMatchObject({ kind: "speech", text: top.text });
+    // The agent's audio confirms this speak, so it is not re-queued again when the re-speak window closes.
+    expect((await h.agentSaid(s, { conversationId: "conv-1", text: top.text, questionId: top.id })).status).toBe(204);
     h.advance(10_000);
     expect((await queueOf(h, s)).asked.map((a) => a.questionId)).toEqual([top.id]);
     expect(h.ledger.list(s, { kinds: ["question.requeued"] })).toHaveLength(1);
+  });
+
+  it("re-queues a provisional speak whose audio never arrives, refunding its budget slot (live bug #2)", async () => {
+    const { h, s } = await expertAfterOneCase();
+    const { queue, contextVersion } = await queueOf(h, s);
+    const top = queue[0];
+    if (top === undefined) throw new Error("empty queue");
+    const granted = GateAuthorizeResponseSchema.parse((await h.authorize(s, gateRequest(top.id, contextVersion))).body);
+    // The control message is spoken, but the agent turn produces no audio: no agent.utterance arrives.
+    expect(await readTurn(await h.llmTurn(s, granted.controlMessage))).toMatchObject({ kind: "speech", text: top.text });
+    expect((await queueOf(h, s)).asked.map((a) => a.questionId)).toEqual([top.id]);
+    h.advance(10_000); // the re-speak window closes with the speak still unvoiced
+    const after = await queueOf(h, s);
+    expect(after.asked).toEqual([]); // the live-budget slot is refunded
+    expect(after.queue.some((q) => q.id === top.id)).toBe(true); // and the question is back in the queue
+    expect(parseLedgerPayload(only(h.ledger.list(s, { kinds: ["question.requeued"] })), "question.requeued")).toEqual({
+      questionId: top.id,
+      reason: "authorization_unspoken",
+    });
   });
 
   it("a control message merged into the expert's open turn (skipped) and then expired re-queues the question", async () => {

@@ -309,6 +309,29 @@ describe("server-deep and sandbox", () => {
     expect(missing.detail).toContain("does not report eventLoop");
   });
 
+  it("surfaces GC and CPU-throttle telemetry when reported, without ever failing on them", async () => {
+    const r = await checkServerDeep(
+      makeContext({
+        fetch: fakeServer({
+          gc: { count: 7, totalPauseMs: 40, maxPauseMs: 13856, sinceMs: 60_000 },
+          cpuThrottle: { nrPeriods: 1000, nrThrottled: 42, throttledMs: 13800 },
+        }).fetch,
+      }),
+    );
+    expect(r.status).toBe("pass"); // a high GC pause / throttle is reported, not a failure (it is a host signal)
+    expect(r.facts?.gc).toMatchObject({ maxPauseMs: 13856, count: 7 });
+    expect(r.facts?.cpuThrottle).toMatchObject({ nrThrottled: 42, throttledMs: 13800 });
+    expect(r.detail).toContain("GC max pause 13856 ms (7)");
+    expect(r.detail).toContain("CPU throttled 42×/13800 ms");
+  });
+
+  it("reports CPU throttle as n/a when the cgroup exposes none, and omits GC when not reported", async () => {
+    const r = await checkServerDeep(makeContext({ fetch: fakeServer({ cpuThrottle: null }).fetch }));
+    expect(r.status).toBe("pass");
+    expect(r.facts?.cpuThrottle).toBeNull();
+    expect(r.detail).toContain("CPU throttle n/a");
+  });
+
   it("fails a target that reports LLM_CALLS=off, or does not report it at all", async () => {
     const off = await checkServerDeep(makeContext({ fetch: fakeServer({ llmCalls: "off" }).fetch }));
     expect(off.status).toBe("fail");

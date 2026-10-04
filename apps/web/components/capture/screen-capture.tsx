@@ -11,7 +11,8 @@ import { Pill, type Tone } from "@/components/casedesk/pills";
 import { useScreenCapture } from "./use-screen-capture";
 
 /** The disclosure shown next to the control: the whole and only claim about frame privacy. */
-export const SCREEN_CAPTURE_DISCLOSURE = "Screen frames: change-detected, best-effort PII blur in your browser before upload";
+export const SCREEN_CAPTURE_DISCLOSURE =
+  "Screen frames: change-detected, best-effort PII blur, and the case id read on-device by OCR, in your browser before upload";
 
 function statusPill(status: CaptureStatus | null): { tone: Tone; text: string } {
   switch (status?.state) {

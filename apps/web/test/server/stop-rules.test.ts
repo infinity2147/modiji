@@ -161,8 +161,12 @@ describe("typed stop-rule (debrief confirm_stop_rule)", () => {
     expect(frames.length).toBeGreaterThan(0);
     for (const id of frames) expect(w.ledger.get(id)?.sequence).toBeLessThan(decision?.sequence ?? -1);
     expect(rule?.evidence).toContainEqual({ kind: "observed_decision", ledgerEntryId: first.entryId });
-    const verdict = checkAction({ rules: rule === undefined ? [] : [rule], features: unseenFeatures(), action: ActionIdSchema.parse("reject"), domain: KYC_DOMAIN });
-    expect(verdict.decision).toBe("needs_approval");
+    // The rule guards only `approve` (live bug #4): approving needs sign-off, but escalating or rejecting does not.
+    expect(rule?.effect).toMatchObject({ type: "require_approval", role: "compliance_officer", action: "approve" });
+    const rules = rule === undefined ? [] : [rule];
+    expect(checkAction({ rules, features: unseenFeatures(), action: ActionIdSchema.parse("approve"), domain: KYC_DOMAIN }).decision).toBe("needs_approval");
+    for (const other of ["escalateCompliance", "reject"])
+      expect(checkAction({ rules, features: unseenFeatures(), action: ActionIdSchema.parse(other), domain: KYC_DOMAIN }).decision, other).toBe("allow");
   });
 
   it("refuses an invalid predicate, a foreign action, an unknown moment and a duplicate — leaving no trace", async () => {

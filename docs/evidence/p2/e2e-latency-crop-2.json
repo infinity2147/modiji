@@ -1,0 +1,20 @@
+{
+  "setting": "large15",
+  "uploadAndEncodeMsAssumed": 150,
+  "server": {
+    "n": 198,
+    "p50": 1911,
+    "p95": 2928
+  },
+  "clientOcr": {
+    "n": 80,
+    "p50": 350,
+    "p95": 2728
+  },
+  "sumOfP95s": 5806,
+  "monteCarlo": {
+    "pairs": 15840,
+    "p50": 2762,
+    "p95": 5131
+  }
+}

@@ -217,7 +217,7 @@ function statedShape(
     case "require_approval":
       return r.approvalRole === null
         ? { reason: `require_approval needs an approval role (${APPROVAL_ROLES.join(", ")})` }
-        : { kind: "guardrail", effect: { type: "require_approval", role: r.approvalRole } };
+        : { kind: "guardrail", effect: { type: "require_approval", role: r.approvalRole, action } };
     case "recommend":
       return r.kind === "guardrail"
         ? { reason: "a recommendation is not a guardrail: a guardrail forbids an action or requires approval" }

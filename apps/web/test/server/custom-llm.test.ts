@@ -199,10 +199,12 @@ describe("skip_turn", () => {
     expect(turn).toMatchObject({ kind: "skip", reason });
   });
 
-  it("skips a replayed nonce (already_used)", async () => {
+  it("re-speaks the same text on a same-nonce retry within the window (live bug #2)", async () => {
     const body = controlTurn(issue().nonce);
-    expect((await readTurn(await h.call(body))).kind).toBe("speech");
-    expect(await readTurn(await h.call(body))).toMatchObject({ kind: "skip", reason: "already_used" });
+    expect(await readTurn(await h.call(body))).toMatchObject({ kind: "speech", text: QUESTION });
+    expect(await readTurn(await h.call(body))).toMatchObject({ kind: "speech", text: QUESTION });
+    h.advance(10_000); // past the re-speak window: the lost question is now re-queued, not spoken
+    expect(await readTurn(await h.call(body))).toMatchObject({ kind: "skip" });
   });
 
   it("burns a nonce presented in the wrong context, so it cannot speak later", async () => {
@@ -384,12 +386,12 @@ describe("retries (ElevenLabs retries the same custom LLM on errors, timeouts an
     return reader;
   }
 
-  it("a retry after a stream cancelled mid-speech speaks the authorised text exactly once", async () => {
+  it("a retry after a stream cancelled mid-speech speaks, and a further retry re-speaks within the window", async () => {
     const body = controlTurn(issue().nonce);
     const reader = await readFirstChunk(await h.call(body));
     await reader.cancel();
     expect(await readTurn(await h.call(body))).toMatchObject({ kind: "speech", text: QUESTION });
-    expect(await readTurn(await h.call(body))).toMatchObject({ kind: "skip", reason: "already_used" });
+    expect(await readTurn(await h.call(body))).toMatchObject({ kind: "speech", text: QUESTION });
   });
 
   it("a retry after the request was aborted (client disconnect) speaks", async () => {
@@ -400,27 +402,29 @@ describe("retries (ElevenLabs retries the same custom LLM on errors, timeouts an
     expect(await readTurn(await h.call(body))).toMatchObject({ kind: "speech", text: QUESTION });
   });
 
-  it("a retry after a completed stream skips", async () => {
+  it("a retry after a completed stream re-speaks the same text, then is refused once the window closes", async () => {
     const body = controlTurn(issue().nonce);
     expect((await readTurn(await h.call(body))).kind).toBe("speech");
-    expect(await readTurn(await h.call(body))).toMatchObject({ kind: "skip", reason: "already_used" });
+    expect(await readTurn(await h.call(body))).toMatchObject({ kind: "speech", text: QUESTION });
+    h.advance(10_000); // past the re-speak window
+    expect(await readTurn(await h.call(body))).toMatchObject({ kind: "skip" });
   });
 
-  it("a concurrent duplicate skips while the first stream is in flight", async () => {
+  it("a concurrent duplicate skips while the first stream is in flight; a later retry re-speaks", async () => {
     const body = controlTurn(issue().nonce);
     const [first, second] = await Promise.all([h.call(body), h.call(body)]);
     if (!first || !second) throw new Error("unreachable");
     expect(await readTurn(second)).toMatchObject({ kind: "skip", reason: "in_flight" });
     expect(await readTurn(first)).toMatchObject({ kind: "speech", text: QUESTION });
-    expect(await readTurn(await h.call(body))).toMatchObject({ kind: "skip", reason: "already_used" });
+    expect(await readTurn(await h.call(body))).toMatchObject({ kind: "speech", text: QUESTION });
   });
 
-  it("an abort after completion does not hand the nonce back", async () => {
+  it("an abort after completion does not hand the nonce back: a retry re-speaks the same text, never a different one", async () => {
     const body = controlTurn(issue().nonce);
     const controller = new AbortController();
     expect((await readTurn(await h.call(body, undefined, controller.signal))).kind).toBe("speech");
     controller.abort();
-    expect(await readTurn(await h.call(body))).toMatchObject({ kind: "skip", reason: "already_used" });
+    expect(await readTurn(await h.call(body))).toMatchObject({ kind: "speech", text: QUESTION });
   });
 
   it("an aborted retry window closes at expiry", async () => {
@@ -522,6 +526,62 @@ describe("ledger provenance", () => {
   });
 });
 
+describe("response path is thin (live response-path hardening, bug 3)", () => {
+  /** A ledger wrapper that counts and (optionally) slows its writes, to prove the handler does no fold. */
+  function counting(slowMs = 0): Pick<Ledger, "getSession" | "append"> & { appends: number; getSessions: number } {
+    const self = {
+      appends: 0,
+      getSessions: 0,
+      getSession: (id: string) => {
+        self.getSessions += 1;
+        return h.ledger.getSession(id);
+      },
+      append: (entry: Parameters<Ledger["append"]>[0]) => {
+        self.appends += 1;
+        if (slowMs > 0) {
+          const until = performance.now() + slowMs;
+          while (performance.now() < until) {
+            /* simulate a slow/blocked write (as a host freeze would): the handler must still do nothing else */
+          }
+        }
+        return h.ledger.append(entry);
+      },
+    };
+    return self;
+  }
+
+  it("a speak writes only the control message and the decision — no engine fold, no ledger scan", async () => {
+    const ledger = counting();
+    const response = await handleChatCompletion(chatRequest(controlTurn(issue().nonce), { authorization: `Bearer ${SECRET}` }), { ...h.deps, ledger }, performance.now());
+    expect(await readTurn(response)).toMatchObject({ kind: "speech", text: QUESTION });
+    expect(ledger.appends).toBe(2); // gate.control_message + llm.turn_decision; nothing that folds the engine
+    expect(ledger.getSessions).toBeLessThanOrEqual(2);
+  });
+
+  it("a skip writes only the one decision", async () => {
+    const ledger = counting();
+    await readTurn(
+      await handleChatCompletion(
+        chatRequest(chatBody({ messages: [{ role: "user", content: "hello" }], extraBody: { sessionId: "s1" } }), { authorization: `Bearer ${SECRET}` }),
+        { ...h.deps, ledger },
+        performance.now(),
+      ),
+    );
+    expect(ledger.appends).toBe(1);
+  });
+
+  it("returns quickly: handlerLatencyMs stays small even when the ledger write is slow", async () => {
+    const ledger = counting(50);
+    const received = performance.now();
+    const turn = await readTurn(await handleChatCompletion(chatRequest(controlTurn(issue().nonce), { authorization: `Bearer ${SECRET}` }), { ...h.deps, ledger }, received));
+    expect(turn.kind).toBe("speech");
+    // handlerLatencyMs is measured to the response body being ready, before the ledger append; the slow
+    // write happens after, so it does not delay the live speech path.
+    const { handlerLatencyMs } = JSON.parse(h.logs.at(-1) ?? "{}") as { handlerLatencyMs?: number };
+    expect(handlerLatencyMs).toBeLessThan(25);
+  });
+});
+
 describe("preflight authorization", () => {
   it("authorises only the fixed question, which speaks once and then skips", async () => {
     const pre = issuePreflightAuthorization({ ledger: h.ledger, authorizations: h.authorizations, now: h.now });
@@ -535,7 +595,8 @@ describe("preflight authorization", () => {
     const body = chatBody({ messages: [{ role: "user", content: pre.controlMessage }], extraBody: { sessionId: pre.sessionId } });
     h.advance(59_999);
     expect(await readTurn(await h.call(body))).toMatchObject({ kind: "speech", text: PREFLIGHT_QUESTION });
-    expect(await readTurn(await h.call(body))).toMatchObject({ kind: "skip", reason: "already_used" });
+    // A retry within the re-speak window speaks the same fixed question again (never a different one).
+    expect(await readTurn(await h.call(body))).toMatchObject({ kind: "speech", text: PREFLIGHT_QUESTION });
 
     const kinds = h.ledger.list(pre.sessionId).map((e) => `${e.source}:${e.kind}`);
     expect(kinds).toEqual([

@@ -7,4 +7,5 @@ export * from "./image";
 export * from "./change-detector";
 export * from "./queue";
 export * from "./privacy";
+export * from "./case-id";
 export * from "./evaluation";

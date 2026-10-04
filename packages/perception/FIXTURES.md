@@ -125,3 +125,34 @@ every read (frame, read mode, latency, tokens, the model's answer) to `reads` in
   pnpm --filter @vashistha/web exec playwright test --grep @record
   ```
 - This fixture spans 9 CaseDesk sessions under one privacy epoch, and case ids are reused across sessions.
+
+## Re-measure the frozen, human-paced fixture (REQUIRED once delivered)
+
+Every number in `docs/evidence/p2/eval-live-crop-*.{json,txt}` was measured on the CURRENT fixture
+(`casedesk-recorded`, 52 rating changes / 42 commits). It has 8 rating edits followed by another edit
+within 500 ms (the next read overwrites them) and cases that are left within ~1 s of a commit, which
+caps recall below what the pipeline can read. A teammate is re-recording it at realistic human pacing.
+When the frozen fixture is delivered, verify its frames and re-run the live eval; the P2 verdict
+must come from that run, not from the numbers recorded for the current fixture:
+
+```sh
+# 1. frames match the manifest
+cd packages/perception/test/fixtures/<new-fixture>/frames && sha256sum -c ../frames.sha256
+
+# 2. live eval (client case-id OCR on, one request in flight = the product's configuration), ~$0.4
+cd /home/24b4530/modiji && NODE_OPTIONS=--dns-result-order=ipv4first \
+  pnpm --filter @vashistha/web exec tsx ../../packages/perception/scripts/eval-fixture.ts \
+  ../../packages/perception/test/fixtures/<new-fixture> --out ../../docs/evidence/p2/eval-live-frozen.json \
+  | tee docs/evidence/p2/eval-live-frozen.txt
+
+# 3. end-to-end estimate (server replay + client OCR + upload)
+pnpm --filter @vashistha/web exec tsx ../../packages/perception/scripts/e2e-latency.ts \
+  ../../docs/evidence/p2/eval-live-frozen.json ../../docs/evidence/p2/ocr-latency.json --out ../../docs/evidence/p2/e2e-latency-frozen.json
+```
+
+Harness flags: `--no-client-caseid` (A/B baseline: the model reads the id), `--max-in-flight 2`
+(experiment only; the product keeps 1). The client case-id OCR in the harness is a Node Tesseract pass over
+the change region of every frame whose change touches the header band; the product reuses the
+redaction OCR, so its marginal cost there is ~0. The case-id header region
+(`CASEDESK_CASE_ID` in `apps/web/lib/client/capture/browser.ts`) was measured on a 1440×900 viewport; a
+re-recording at another size works (the region is fractional) but re-check the id accuracy.

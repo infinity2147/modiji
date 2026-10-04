@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { kycCases } from "@vashistha/core/domains/kyc";
-import { createRedactor, createRgba, type OcrFn, type OcrWord, type RgbaImage } from "@vashistha/perception";
+import { createCaseIdTracker, createRedactor, createRgba, type CaseIdTracker, type OcrFn, type OcrWord, type RgbaImage } from "@vashistha/perception";
 import { decodePng, encodePng } from "../../../../packages/perception/src/png";
 import { FrameMetadataSchema, type PostFrameResponse, type VisionState } from "../../lib/contracts/frames";
 import type { FetchFn } from "../../lib/client/api";
 import { personNames } from "../../lib/client/capture/browser";
-import { createCapturePipeline, type FrameGrabber } from "../../lib/client/capture/pipeline";
+import { CAPTURE_INTERVAL_MS, createCapturePipeline, type FrameGrabber } from "../../lib/client/capture/pipeline";
 
 const SESSION = "6f9c1d52-7d4e-4a54-9a3e-6a3b1c2d3e4f";
 const W = 320;
@@ -108,7 +108,7 @@ const flush = async (): Promise<void> => {
   for (let i = 0; i < 5; i += 1) await new Promise((resolve) => setTimeout(resolve, 0));
 };
 
-function setup(options: { epoch?: number; offRecord?: boolean; lastFrameSeq?: number; words?: (region: { x: number; y: number }) => OcrWord[] } = {}) {
+function setup(options: { epoch?: number; offRecord?: boolean; lastFrameSeq?: number; words?: (region: { x: number; y: number }) => OcrWord[]; caseIdTracker?: CaseIdTracker } = {}) {
   const server = uploadServer();
   const ocr = controlledOcr(options.words);
   const ticks: Array<() => void> = [];
@@ -120,6 +120,7 @@ function setup(options: { epoch?: number; offRecord?: boolean; lastFrameSeq?: nu
     privacy: { offRecord: options.offRecord ?? false, epoch: options.epoch ?? 0 },
     lastFrameSeq: options.lastFrameSeq ?? 0,
     redactor: createRedactor({ ocr: ocr.ocr, names: () => ["Mara Lindqvist"] }),
+    ...(options.caseIdTracker !== undefined && { caseIdTracker: options.caseIdTracker }),
     encode: async (image) => new Blob([new Uint8Array(encodePng(image))], { type: "image/png" }),
     now: () => clock.t,
     timers: {
@@ -193,6 +194,18 @@ describe("capture pipeline: grab → change → redact → upload", () => {
     expect(second?.metadata.bbox).not.toBeNull();
     expect(second?.metadata.crop).toEqual(second?.metadata.bbox);
     expect(second?.crop).not.toBeNull();
+  });
+
+  it("reads the case id from the OCR words and sends it as trusted metadata; the tick is 250 ms (team P2 decision)", async () => {
+    expect(CAPTURE_INTERVAL_MS).toBe(250);
+    const tracker = createCaseIdTracker({ pattern: /^NS-\d{4}-\d{4}$/, region: { x: 0, y: 0, width: 1, height: 1 } });
+    const s = setup({ caseIdTracker: tracker, words: () => [{ text: "NS-2026-0301", line: 0, bbox: { x: 40, y: 20, width: 90, height: 14 }, confidence: 0.9 }] });
+    s.pipeline.start(s.share.g);
+    s.tick();
+    s.ocr.release();
+    await flush();
+    // The id came from the redactor's words (carry-forward and region filtering are unit-tested in case-id.test.ts).
+    expect(s.server.uploads[0]?.metadata.caseId).toEqual({ value: "NS-2026-0301", confidence: 0.9 });
   });
 
   it("blurs names from the session's people before upload and reports how many regions it blurred", async () => {

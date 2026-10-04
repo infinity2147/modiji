@@ -28,6 +28,7 @@
  */
 import { z } from "zod";
 import { ProposedConceptSchema, type DomainConfig, type NewLedgerEntry, type ProposedConcept } from "@vashistha/core";
+import type { ClientCaseId } from "../../contracts/frames";
 import type { Ledger } from "@vashistha/core/server";
 import { createStateApplier, percentile, type StateApplier } from "@vashistha/perception";
 import {
@@ -58,6 +59,8 @@ export type VisionJob = {
   /** Server clock, when the frame was accepted. */
   receivedAt: number;
   epoch: number;
+  /** The case id the browser read on-device (trusted; team P2 decision); null when it had no confident read. */
+  clientCaseId: ClientCaseId | null;
   frame: VisionFrame;
   crop: VisionCrop | null;
 };
@@ -280,7 +283,7 @@ export function createPerceptionService(options: PerceptionServiceOptions): Perc
     w.pending = null;
     const slot = { job, abandoned: false };
     w.inFlight = slot;
-    const context = { domain, profile, previous: w.snapshot, frameSeq: job.frameSeq, captureTime: job.captureTime, sessionEpoch: job.epoch };
+    const context = { domain, profile, previous: w.snapshot, frameSeq: job.frameSeq, captureTime: job.captureTime, sessionEpoch: job.epoch, clientCaseId: job.clientCaseId };
     Promise.resolve()
       .then(async () => {
         // Decoded only for frames that reach the model (coalesced ones never are): code compares it with the last reading.

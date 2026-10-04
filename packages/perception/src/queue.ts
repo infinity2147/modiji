@@ -3,16 +3,19 @@
  * Isomorphic. Code, not the model, decides ordering and staleness:
  *
  * - every submitted frame gets the next monotonic `frameSeq`;
- * - at most ONE request is in flight; while it runs, only the newest pending frame is kept
- *   (older pending frames are coalesced away and counted);
+ * - at most `maxInFlight` requests are in flight (default 1; the team allows 2 only if crop reads
+ *   alone miss the latency target, P2 decision 4); while all slots are busy, only the newest pending
+ *   frame is kept (older pending frames are coalesced away and counted);
  * - a frame stamped with a privacy epoch other than the current one is refused at submit;
- * - `cancelAll()` drops the pending frame and aborts the in-flight request, whose result can then
+ * - `cancelAll()` drops the pending frame and aborts every in-flight request, whose results can then
  *   never be applied; `setEpoch()` does the same and moves to the new epoch;
  * - results reach the caller's `apply` only through the state applier, which refuses any result
- *   whose frameSeq is not newer than the last applied or whose epoch is not current.
+ *   whose frameSeq is not newer than the last applied or whose epoch is not current. With two in
+ *   flight, requests may settle out of order: the older frameSeq arriving after a newer one has been
+ *   applied is dropped as stale, never applied.
  *
- * The in-flight slot is released only when the request settles (abort makes that prompt for a
- * fetch-based `send`), so "one in flight" holds strictly even across cancellation.
+ * A slot is released only when its request settles (abort makes that prompt for a fetch-based
+ * `send`), so "at most `maxInFlight`" holds strictly even across cancellation.
  */
 
 export type PerceptionFrame<P> = { frameSeq: number; captureTime: number; epoch: number; payload: P };
@@ -49,7 +52,7 @@ export type QueueStats = {
   submitted: number;
   /** Requests started. */
   sent: number;
-  /** 0 or 1. */
+  /** Requests currently in flight (0 to `maxInFlight`). */
   inFlight: number;
   /** frameSeq of the frame waiting for the slot, if any. */
   pendingFrameSeq: number | null;
@@ -81,6 +84,8 @@ export type PerceptionQueueOptions<P, R> = {
   /** Last frameSeq used by this session before the queue was created (default 0). */
   lastFrameSeq?: number;
   maxSamples?: number;
+  /** Concurrent requests allowed (default 1). */
+  maxInFlight?: number;
 };
 
 export type PerceptionQueue<P> = {
@@ -103,7 +108,9 @@ export function createPerceptionQueue<P, R>(options: PerceptionQueueOptions<P, R
   let epoch = options.epoch;
   let nextSeq = (options.lastFrameSeq ?? 0) + 1;
   let pending: PerceptionFrame<P> | null = null;
-  let inFlight: { frame: PerceptionFrame<P>; controller: AbortController; cancelled: boolean } | null = null;
+  const maxInFlight = options.maxInFlight ?? 1;
+  if (!Number.isInteger(maxInFlight) || maxInFlight < 1) throw new RangeError(`maxInFlight must be a positive integer, got ${maxInFlight}`);
+  const inFlight = new Set<{ frame: PerceptionFrame<P>; controller: AbortController; cancelled: boolean }>();
   let idleWaiters: Array<() => void> = [];
   const counts = { submitted: 0, sent: 0, coalesced: 0, applied: 0, staleDropped: 0, cancelled: 0, epochRejected: 0, failed: 0 };
   const frameToApplyMs: number[] = [];
@@ -125,18 +132,18 @@ export function createPerceptionQueue<P, R>(options: PerceptionQueueOptions<P, R
   });
 
   const settleIdle = (): void => {
-    if (pending !== null || inFlight !== null) return;
+    if (pending !== null || inFlight.size > 0) return;
     const waiters = idleWaiters;
     idleWaiters = [];
     for (const resolve of waiters) resolve();
   };
 
   const pump = (): void => {
-    if (inFlight !== null || pending === null) return settleIdle();
+    if (inFlight.size >= maxInFlight || pending === null) return settleIdle();
     const frame = pending;
     pending = null;
     const slot = { frame, controller: new AbortController(), cancelled: false };
-    inFlight = slot;
+    inFlight.add(slot);
     counts.sent += 1;
     const started = options.now();
     // `send` may throw synchronously; Promise.resolve().then keeps both paths asynchronous and uniform.
@@ -163,7 +170,7 @@ export function createPerceptionQueue<P, R>(options: PerceptionQueueOptions<P, R
         },
       )
       .finally(() => {
-        inFlight = null;
+        inFlight.delete(slot);
         pump();
       });
   };
@@ -173,10 +180,11 @@ export function createPerceptionQueue<P, R>(options: PerceptionQueueOptions<P, R
       counts.cancelled += 1;
       pending = null;
     }
-    if (inFlight !== null && !inFlight.cancelled) {
-      inFlight.cancelled = true;
-      inFlight.controller.abort();
-    }
+    for (const slot of inFlight)
+      if (!slot.cancelled) {
+        slot.cancelled = true;
+        slot.controller.abort();
+      }
     settleIdle();
   };
 
@@ -203,12 +211,12 @@ export function createPerceptionQueue<P, R>(options: PerceptionQueueOptions<P, R
     epoch: () => epoch,
     stats: () => ({
       ...counts,
-      inFlight: inFlight === null ? 0 : 1,
+      inFlight: inFlight.size,
       pendingFrameSeq: pending?.frameSeq ?? null,
       frameToApplyMs: [...frameToApplyMs],
       requestMs: [...requestMs],
     }),
     idle: () =>
-      pending === null && inFlight === null ? Promise.resolve() : new Promise<void>((resolve) => idleWaiters.push(resolve)),
+      pending === null && inFlight.size === 0 ? Promise.resolve() : new Promise<void>((resolve) => idleWaiters.push(resolve)),
   };
 }

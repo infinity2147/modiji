@@ -1,0 +1,22 @@
+{
+  "host": "headless Chromium (Playwright), dev machine, OffscreenCanvas drawImage+getImageData (the grabber's path; no live video decode) then the change detector",
+  "tickMs": 250,
+  "frame": "1440x900",
+  "n": 360,
+  "grabMs": {
+    "p50": 3.3,
+    "p95": 4.6,
+    "max": 14.6
+  },
+  "detectMs": {
+    "p50": 7.3,
+    "p95": 7.5,
+    "max": 13.6
+  },
+  "grabPlusDetectMs": {
+    "p50": 10.7,
+    "p95": 12.3,
+    "max": 20.3
+  },
+  "shareOfTickP95": 0.049
+}

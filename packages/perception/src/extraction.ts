@@ -48,6 +48,7 @@ import {
   type Unknown,
 } from "@vashistha/core";
 import { CLAUDE_MODELS, type Claude, type ClaudeContentBlock, type StructuredRequest } from "@vashistha/core/server";
+import type { ClientCaseId } from "./case-id";
 import { compareThumbnails, DEFAULT_CHANGE_CONFIG, thumbnail, type Thumbnail } from "./change-detector";
 import { clampRect, contentRect, cropRgba, MAX_UPLOAD_LONG_EDGE, padRect, type Rect, type RgbaImage } from "./image";
 import { encodePng } from "./png";
@@ -129,20 +130,32 @@ export type ReadMode = "full" | "refresh" | "local";
 export type ReadPlan = { scope: "screen"; switchPossible: boolean } | { scope: "local"; rect: Rect };
 
 /**
- * Code decides how much the model must look at: the whole screen when there is no case to compare
- * with, nothing measurable changed (re-read rather than guess), the frame size changed, the change is
- * diffuse or large, or the last whole-screen read is older than `LOCAL_READ.maxAgeMs`; otherwise a
- * local read of the changed region plus margin.
+ * Code decides how much the model must look at.
+ *
+ * With a trusted client case id (team P2 decision), the whole frame is read ONLY when the case
+ * switches (a different client id, or no previous case): then the new case's fields and committed
+ * action must be read. Every change within the same case sends only the changed region as a crop —
+ * no full frame — because the id, the one value crops cannot re-read, is supplied by the client. A
+ * diffuse same-case change with no local bbox still needs the whole screen, but is not a switch.
+ *
+ * Without a client id (fallback), the earlier policy holds: the whole screen when there is no case to
+ * compare with, nothing measurable changed (re-read rather than guess), the frame size changed, the
+ * change is diffuse or large, or the last whole-screen read is older than `LOCAL_READ.maxAgeMs`;
+ * otherwise a local read of the changed region plus margin.
  */
-export function planRead(previous: CaseSnapshot | null, current: Thumbnail, captureTime: number): ReadPlan {
+export function planRead(previous: CaseSnapshot | null, current: Thumbnail, captureTime: number, clientCaseId: ClientCaseId | null = null): ReadPlan {
   if (previous === null || previous.caseId === null) return { scope: "screen", switchPossible: true };
   const diff = compareThumbnails(previous.thumbnail, current, { ...DEFAULT_CHANGE_CONFIG, cellThreshold: LOCAL_READ.cellThreshold, padding: 0 });
   if (diff.reason === "none") return { scope: "screen", switchPossible: false };
+  const cropRect = diff.reason === "cells" && diff.bbox !== null ? clampRect(padRect(diff.bbox, LOCAL_READ.margin), current.width, current.height) : null;
+  if (clientCaseId !== null) {
+    if (clientCaseId.value !== previous.caseId) return { scope: "screen", switchPossible: true }; // confirmed case switch: read the new screen
+    return cropRect === null ? { scope: "screen", switchPossible: false } : { scope: "local", rect: cropRect }; // same case: crop only
+  }
   if (diff.reason !== "cells" || diff.bbox === null) return { scope: "screen", switchPossible: true };
   if (diff.bbox.width * diff.bbox.height > LOCAL_READ.maxAreaShare * current.width * current.height) return { scope: "screen", switchPossible: true };
   if (captureTime - previous.fullReadAt > LOCAL_READ.maxAgeMs) return { scope: "screen", switchPossible: false };
-  const rect = clampRect(padRect(diff.bbox, LOCAL_READ.margin), current.width, current.height);
-  return rect === null ? { scope: "screen", switchPossible: false } : { scope: "local", rect };
+  return cropRect === null ? { scope: "screen", switchPossible: false } : { scope: "local", rect: cropRect };
 }
 
 /** Words that, appended to a catalogue feature's name, still name that feature. */
@@ -383,6 +396,12 @@ export type ExtractionContext = {
   frameSeq: number;
   captureTime: number;
   sessionEpoch: number;
+  /**
+   * The case id the client read on-device from the header region (trusted metadata, team P2
+   * decision). When set it is authoritative: the case is this id and the model's read is never used
+   * for identity. Null (no confident client read) falls back to the model's read, which votes.
+   */
+  clientCaseId?: ClientCaseId | null;
 };
 
 export type ExtractionInput = ExtractionContext & {
@@ -419,7 +438,7 @@ export function prepareRead(input: ExtractionInput): PreparedRead {
     throw new RangeError(`frame: long edge ${Math.max(frame.image.width, frame.image.height)} px exceeds ${MAX_UPLOAD_LONG_EDGE}; use prepareUpload()`);
   if (crop !== undefined) assertUploadSize(crop, "crop");
   const thumb = thumbnail(frame.image);
-  const plan = planRead(context.previous, thumb, context.captureTime);
+  const plan = planRead(context.previous, thumb, context.captureTime, context.clientCaseId ?? null);
   const previous = context.previous;
   const base = {
     model: CLAUDE_MODELS.frameEvents,
@@ -546,25 +565,48 @@ export function interpretReading(reading: FrameReading, context: ReadContext): E
   // An extractor bug, not a reading: refuse the whole frame (the caller counts it as failed).
   if (reading.mode !== context.mode) throw new Error(`extractor answered a ${reading.mode} read for a ${context.mode} request`);
 
-  // Which case is open. Code decides whether it can have changed: only on a large change (`switchPossible`)
-  // that shows another title. Otherwise a different (or missing) id is a misreading of the same case: it only
-  // votes, and the case keeps the id read most often during this visit. A local read never reads the id.
-  let read: string | null | undefined;
-  if (reading.mode !== "local") {
-    const raw = reading.output.caseId;
-    read = raw === null ? null : raw.trim() === "" ? null : raw.trim();
-    if (raw !== null && read === null) dropped.push({ where: "reading", key: "caseId", reason: "invalid_case" });
-  }
+  // Which case is open. A local read never reads the id.
   const titleRead = reading.mode === "local" ? null : (reading.output.caseTitle?.trim() || null);
-  const sameTitle = titleRead !== null && previous?.caseTitle != null && titleKey(titleRead) === titleKey(previous.caseTitle);
-  const sameVisit =
-    previous !== null && previous.caseId !== null && (read === undefined || read === previous.caseId || sameTitle || !context.switchPossible);
-  const caseVotes: Record<string, number> = sameVisit ? { ...previous.caseVotes } : {};
-  if (typeof read === "string") caseVotes[read] = (caseVotes[read] ?? 0) + 1;
-  let caseId: string | null = sameVisit ? previous.caseId : (read ?? null);
-  // Ties keep the id already in use.
-  for (const [id, votes] of Object.entries(caseVotes)) if (caseId !== null && votes > (caseVotes[caseId] ?? 0)) caseId = id;
-  const opened = !sameVisit && (previous === null || previous.caseId !== caseId);
+  const client = context.clientCaseId ?? null;
+  let caseId: string | null;
+  let opened: boolean;
+  let caseVotes: Record<string, number>;
+  let caseTitleOut: string | null;
+
+  if (client !== null) {
+    // Trusted client id (team P2 decision): it is the case. The model's caseId read is never used
+    // for identity, so its misreads ("NS-2626-…") can no longer attribute events to a wrong case.
+    caseId = client.value;
+    if (previous !== null && previous.caseId === client.value) {
+      opened = false;
+      caseVotes = { ...previous.caseVotes, [client.value]: (previous.caseVotes[client.value] ?? 0) + 1 };
+      caseTitleOut = previous.caseTitle ?? titleRead;
+    } else {
+      opened = true;
+      caseVotes = { [client.value]: 1 };
+      caseTitleOut = titleRead;
+    }
+  } else {
+    // Fallback (no confident client read): the case can change only on a large change (`switchPossible`)
+    // that shows another title. Otherwise a different (or missing) id is a misreading of the same case:
+    // it only votes, and the case keeps the id read most often during this visit.
+    let read: string | null | undefined;
+    if (reading.mode !== "local") {
+      const raw = reading.output.caseId;
+      read = raw === null ? null : raw.trim() === "" ? null : raw.trim();
+      if (raw !== null && read === null) dropped.push({ where: "reading", key: "caseId", reason: "invalid_case" });
+    }
+    const sameTitle = titleRead !== null && previous?.caseTitle != null && titleKey(titleRead) === titleKey(previous.caseTitle);
+    const sameVisit =
+      previous !== null && previous.caseId !== null && (read === undefined || read === previous.caseId || sameTitle || !context.switchPossible);
+    caseVotes = sameVisit ? { ...previous.caseVotes } : {};
+    if (typeof read === "string") caseVotes[read] = (caseVotes[read] ?? 0) + 1;
+    caseId = sameVisit ? previous.caseId : (read ?? null);
+    // Ties keep the id already in use.
+    for (const [id, votes] of Object.entries(caseVotes)) if (caseId !== null && votes > (caseVotes[caseId] ?? 0)) caseId = id;
+    opened = !sameVisit && (previous === null || previous.caseId !== caseId);
+    caseTitleOut = caseId === null ? null : sameVisit ? (previous.caseTitle ?? titleRead) : titleRead;
+  }
   if (opened) {
     if (caseId === null) emit({ kind: "navigate" });
     else emit({ kind: "open_case", caseId });
@@ -646,7 +688,7 @@ export function interpretReading(reading: FrameReading, context: ReadContext): E
       fullReadAt: reading.mode === "local" ? (previous?.fullReadAt ?? captureTime) : captureTime,
       conceptsRead: !opened && (reading.mode === "full" || (previous?.conceptsRead ?? false)),
       caseVotes,
-      caseTitle: caseId === null ? null : sameVisit ? (previous.caseTitle ?? titleRead) : titleRead,
+      caseTitle: caseTitleOut,
     },
     concepts,
     dropped,

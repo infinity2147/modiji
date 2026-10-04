@@ -56,7 +56,7 @@ export type InterviewDeps = {
   ledger: Ledger;
   casedesk: CaseDeskStore;
   store: InterviewStore;
-  authorizations: Pick<AuthorizationStore, "issue" | "getContextVersion" | "bumpContextVersion" | "pending" | "sweep">;
+  authorizations: Pick<AuthorizationStore, "issue" | "getContextVersion" | "bumpContextVersion" | "pending" | "sweep" | "confirmVoiced">;
   /** Null without ANTHROPIC_API_KEY: utterances are still recorded, answers stay unparsed. */
   claude: Claude | null;
   config: EngineConfig;
@@ -72,6 +72,20 @@ export type InterviewDeps = {
 
 function describeError(error: unknown): string {
   return error instanceof Error ? `${error.name}: ${error.message}` : String(error);
+}
+
+/**
+ * Yields to the event loop once (`setImmediate`) before running `fn`, so the handler's response is
+ * written to the client before this post-response work touches the engine (live response-path
+ * hardening: a host freeze or GC pause after the response still cannot delay the live speech path).
+ * Scheduled inside the session's serial queue, so `interviewIdle` still awaits it.
+ */
+function afterResponse<T>(fn: () => Promise<T>): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    setImmediate(() => {
+      fn().then(resolve, reject);
+    });
+  });
 }
 
 /** Runs `task` after every earlier task of the session has settled. */
@@ -115,9 +129,11 @@ function archived(deps: InterviewDeps, sessionId: string, skipped: string): bool
 export function interviewHooks(deps: InterviewDeps): InterviewHooks {
   return {
     decisionCommitted(decision, { info, session }) {
+      // The context bump is synchronous — an in-flight authorization must be stale at once — but the
+      // engine fold and queue regeneration run only after the commit response has been flushed.
       deps.authorizations.bumpContextVersion(session.id);
       if (info.mode !== "expert") return;
-      serially(deps, session.id, () => afterDecision(deps, session.id, decision)).catch((error: unknown) =>
+      serially(deps, session.id, () => afterResponse(() => afterDecision(deps, session.id, decision))).catch((error: unknown) =>
         deps.log.error(`[interview] engine step for decision ${decision.id} failed: ${describeError(error)}`),
       );
     },
@@ -266,6 +282,9 @@ export function recordUtterance(deps: InterviewDeps, sessionId: string, body: Po
     const record = body.questionId === undefined ? undefined : state.questions.get(body.questionId);
     if (body.questionId !== undefined && record?.asked === undefined)
       throw new ApiFailure(409, "question_not_asked", `question ${body.questionId} was not asked in this session`);
+    // Answering a question is itself proof the agent voiced it: confirm the authorization so its speak is
+    // no longer provisional (no re-speak on retry, no re-queue — live bug #2).
+    if (body.questionId !== undefined) deps.authorizations.confirmVoiced(sessionId, body.questionId);
     const ctx: EntryContext = { sessionId, occurredAt: deps.now(), traceId: randomUUID(), privacyEpoch: body.privacyEpoch };
     const language = utteranceLanguage(body.text, { client: body.language, expert: state.expert?.language });
     // The ledger re-checks epoch and off-record atomically (409 stale_epoch / off_record on a race).

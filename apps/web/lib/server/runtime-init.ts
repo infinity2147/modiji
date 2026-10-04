@@ -23,7 +23,7 @@ import { createAuthorizationStore } from "./authorizations";
 import { createCaseDeskStore } from "./casedesk/session";
 import { createDebriefStore } from "./debrief/deps";
 import { createDisagreementHolds, createExpertDirectory, createLedgerRulebook, teamRulebookView } from "./debrief/rulebook-store";
-import { createEventLoopMonitor } from "./event-loop";
+import { createEventLoopMonitor, createGcMonitor, readCpuThrottle } from "./event-loop";
 import { createInterviewStore } from "./interview/engine-state";
 import { createPerception } from "./perception/init";
 import { createRateLimiter } from "./rate-limit";
@@ -126,6 +126,7 @@ export function createRuntime(source: Readonly<Record<string, string | undefined
   const engine = createEngineWorker(console);
   const vision = createVisionWorker(console);
   const eventLoop = createEventLoopMonitor();
+  const gc = createGcMonitor();
   const runtime: Runtime = {
     env,
     ledger,
@@ -154,7 +155,7 @@ export function createRuntime(source: Readonly<Record<string, string | undefined
     },
     tutor: { practice: z3.practice },
     voiceTokenLimiter: createRateLimiter(VOICE_TOKEN_RATE_LIMIT),
-    checks: { db: () => probeDatabase(opened), dataDir: () => probeDataDir(env.DATA_DIR), z3: () => probeZ3(z3), eventLoop: eventLoop.snapshot },
+    checks: { db: () => probeDatabase(opened), dataDir: () => probeDataDir(env.DATA_DIR), z3: () => probeZ3(z3), eventLoop: eventLoop.snapshot, gc: gc.snapshot, cpuThrottle: readCpuThrottle },
   };
   registerRuntime(runtime);
 
@@ -168,6 +169,7 @@ export function createRuntime(source: Readonly<Record<string, string | undefined
     close: () => {
       registerRuntime(undefined);
       eventLoop.close();
+      gc.close();
       void z3.close();
       void engine.close();
       void vision.close();

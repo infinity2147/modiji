@@ -3,7 +3,8 @@
  *
  * - `training`: three hand-designed cases the expert works in the demo (plan §10), chosen so that a
  *   threshold (largest owner above 25 % and unverified), an exception (long-standing customer in a
- *   high-risk country) and an escalation (PEP) are all observable, and cases 1 and 2 provoke the
+ *   high-risk country) and an escalation (PEP) are all observable. Cases 1 and 2 are matched on every
+ *   feature except ownership share and jurisdiction risk, with different outcomes, so they provoke the
  *   "ownership share or jurisdiction?" question.
  * - `heldout`: hand-designed unseen cases for the tutor and agent demo; never shown in training.
  * - `practice`: varied generated cases (fixed seed).
@@ -18,7 +19,8 @@ const NO_ADVERSE_MEDIA = { status: "none", detail: "No relevant adverse media fo
 
 function trainingCases(): KycCase[] {
   return [
-    // 1. Threshold: company, medium-risk country, largest owner 35 % unverified, new, funds verified, low volume.
+    // 1. Threshold: company, medium-risk country, largest owner 35 % unverified. Matched with case 2 on everything
+    //    except ownership share and jurisdiction (existing 36 months, funds verified, owner unverified, same volume).
     {
       id: "NS-2026-0101",
       set: "training",
@@ -30,7 +32,7 @@ function trainingCases(): KycCase[] {
         country: "Estoria",
         address: "14 Quayside Row, Valmont, Estoria",
       },
-      relationship: { status: "new", accountAgeMonths: 0, relationshipManager: "Odile Brannock" },
+      relationship: { status: "existing", accountAgeMonths: 36, relationshipManager: "Odile Brannock" },
       owners: [
         { name: "Ingrid Halvorsen", role: "Director & shareholder", sharePct: 35, idVerified: false, pep: false },
         { name: "Tomasz Okonkwo-Hale", role: "Shareholder", sharePct: 30, idVerified: true, pep: false },
@@ -39,7 +41,7 @@ function trainingCases(): KycCase[] {
       screening: { sanctions: SYNTHETIC_SANCTIONS_CLEAR, adverseMedia: NO_ADVERSE_MEDIA },
       funds: {
         sourceOfFunds: "verified",
-        description: "Freight revenue; audited 2025 accounts and bank statements reviewed.",
+        description: "Freight revenue; audited 2025 accounts and three years of bank statements reviewed.",
         expectedMonthlyVolumeEur: 18_000,
       },
       documents: [
@@ -50,7 +52,8 @@ function trainingCases(): KycCase[] {
       ],
       review: { riskRating: "unrated" },
     },
-    // 2. Exception: company, high-risk country, existing 36 months, funds verified, largest owner 20 % verified.
+    // 2. Exception: the same profile as case 1 but in a high-risk country with the largest owner at 20 %: the
+    //    long-standing-customer exception applies, so no enhanced review (the outcome differs from case 1).
     {
       id: "NS-2026-0102",
       set: "training",
@@ -64,7 +67,7 @@ function trainingCases(): KycCase[] {
       },
       relationship: { status: "existing", accountAgeMonths: 36, relationshipManager: "Kwame Ashby-Rourke" },
       owners: [
-        { name: "Farid Quillfeather", role: "Director & shareholder", sharePct: 20, idVerified: true, pep: false },
+        { name: "Farid Quillfeather", role: "Director & shareholder", sharePct: 20, idVerified: false, pep: false },
         { name: "Mei Lindqvist-Obi", role: "Shareholder", sharePct: 18, idVerified: true, pep: false },
         { name: "Rosalind Achterberg", role: "Shareholder", sharePct: 15, idVerified: true, pep: false },
       ],
@@ -77,7 +80,7 @@ function trainingCases(): KycCase[] {
       documents: [
         { name: "Company registry extract", status: "received" },
         { name: "Register of beneficial owners", status: "received" },
-        { name: "Passport — Farid Quillfeather", status: "received" },
+        { name: "Passport — Farid Quillfeather", status: "missing" },
         { name: "Source-of-funds statement", status: "received" },
       ],
       review: { riskRating: "unrated" },

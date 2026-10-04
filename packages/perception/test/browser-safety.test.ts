@@ -27,6 +27,7 @@ describe("browser-safe entry (@vashistha/perception)", () => {
   it("never reaches node: modules, the server wrapper or an oracle", () => {
     const modules = graph(join(SRC, "index.ts"));
     expect([...modules.keys()].map((f) => f.slice(SRC.length + 1)).sort()).toEqual([
+      "case-id.ts",
       "change-detector.ts",
       "evaluation.ts",
       "image.ts",

@@ -165,6 +165,7 @@ export function handlePostFrame(request: Request, sessionId: string, deps: Perce
       captureTime: metadata.captureTime,
       receivedAt: deps.now(),
       epoch: metadata.privacyEpoch,
+      clientCaseId: metadata.caseId,
       frame: { base64Png: base64(frame.bytes), width: frame.width, height: frame.height, sourceWidth: metadata.source.width, sourceHeight: metadata.source.height },
       crop: crop === null || metadata.crop === null ? null : { base64Png: base64(crop.bytes), width: crop.width, height: crop.height, rect: metadata.crop },
     });

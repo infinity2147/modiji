@@ -167,6 +167,8 @@ export function handlePostAgentUtterance(request: Request, sessionId: string, de
     const asked = body.questionId === undefined ? undefined : engineState(deps, session.id).questions.get(body.questionId)?.asked;
     if (body.questionId !== undefined && asked === undefined)
       throw new ApiFailure(409, "question_not_asked", `question ${body.questionId} was not asked in this session`);
+    // The agent's audio confirms the authorization's speak was heard: no re-speak on retry, no re-queue (live bug #2).
+    if (body.questionId !== undefined) deps.authorizations.confirmVoiced(session.id, body.questionId);
     deps.ledger.append(
       entry(
         { sessionId: session.id, occurredAt: deps.now(), traceId: randomUUID(), privacyEpoch: session.privacyEpoch },

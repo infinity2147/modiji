@@ -41,7 +41,9 @@ export type HypothesisSet = z.infer<typeof HypothesisSetSchema>;
 
 export const RuleEffectSchema = z.discriminatedUnion("type", [
   z.strictObject({ type: z.literal("recommend"), action: ActionIdSchema }),
-  z.strictObject({ type: z.literal("require_approval"), role: z.string().min(1) }),
+  // `action` is the action whose approval is guarded (live bug #4): recorded, the rule gates only that
+  // action; absent (rules from before it was recorded), it gates every terminal action of its family.
+  z.strictObject({ type: z.literal("require_approval"), role: z.string().min(1), action: ActionIdSchema.optional() }),
   z.strictObject({ type: z.literal("forbid"), action: ActionIdSchema }),
   z.strictObject({ type: z.literal("route"), destination: z.string().min(1) }),
 ]);

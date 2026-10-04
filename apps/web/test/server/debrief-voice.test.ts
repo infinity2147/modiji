@@ -36,9 +36,9 @@ describe("debrief by voice", () => {
   it("an answered unresolved witness gains the rule for its cell, quoted from the utterance", async () => {
     const w = await setup();
     let s = await rebuild(w);
-    const target = s.witnesses.find((v) => v.witness.kind === "unresolved" && v.conditions.includes("largest owner identity verified: yes") && v.conditions.some((c) => c.includes("at most 25%")));
+    const target = s.witnesses.find((v) => v.witness.kind === "unresolved" && v.conditions.includes("largest owner identity verified: no") && v.conditions.some((c) => c.includes("at most 25%")));
     const questionId = target?.question?.id ?? "";
-    const utterance = askAndAnswer(w, questionId, "Small verified owner? Approve it.");
+    const utterance = askAndAnswer(w, questionId, "Small owner, long-standing customer? Approve it.");
     w.ledger.append({
       sessionId: w.sessionId,
       source: "engine",
@@ -57,7 +57,7 @@ describe("debrief by voice", () => {
     expect(s.witnesses.find((v) => v.witness.id === target?.witness.id)?.status).toBe("resolved");
     const confirmed = w.ledger.list(w.sessionId, { kinds: ["rule.confirmed"] }).at(-1);
     const rule = ConfirmedRuleSchema.parse((confirmed?.payload as { rule: unknown }).rule);
-    expect(rule.evidence[0]).toMatchObject({ utteranceId: utterance.id, provenance: "human_voice", exactQuote: "Small verified owner? Approve it.", t0Ms: 10_000, t1Ms: 12_500 });
+    expect(rule.evidence[0]).toMatchObject({ utteranceId: utterance.id, provenance: "human_voice", exactQuote: "Small owner, long-standing customer? Approve it.", t0Ms: 10_000, t1Ms: 12_500 });
     expect(rule.confirmedBy[0]).toMatchObject({ method: "debrief", ledgerEntryId: utterance.id });
     expect(s.decisions.find((d) => d.caseId === "NS-2026-0102")?.explained).toBe(true);
   }, 60_000);

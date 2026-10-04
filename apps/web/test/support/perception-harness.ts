@@ -32,6 +32,7 @@ export function metadata(over: Partial<FrameMetadata> = {}): FrameMetadata {
     source: { ...SOURCE },
     bbox: null,
     crop: null,
+    caseId: null,
     ...over,
   };
 }

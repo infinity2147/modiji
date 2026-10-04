@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { KycCase } from "@vashistha/core/domains/kyc";
 import { describeError, type FetchFn } from "@/lib/client/api";
 import { fetchVisionState } from "@/lib/client/capture/api";
-import { createBrowserRedactor, encodePng, personNames, startScreenShare } from "@/lib/client/capture/browser";
+import { createBrowserCaseIdTracker, createBrowserRedactor, encodePng, personNames, startScreenShare } from "@/lib/client/capture/browser";
 import { createCapturePipeline, type CapturePipeline, type CaptureStats, type CaptureStatus } from "@/lib/client/capture/pipeline";
 import { usePrivacyController } from "@/lib/client/voice/use-interview";
 
@@ -48,6 +48,7 @@ export function useScreenCapture(sessionId: string, cases: readonly KycCase[]): 
           privacy: privacyRef.current?.state() ?? { offRecord: vision.offRecord, epoch: vision.privacyEpoch },
           lastFrameSeq: vision.lastFrameSeq,
           redactor,
+          caseIdTracker: createBrowserCaseIdTracker(),
           encode: encodePng,
         });
         created.subscribe(() => setVersion((v) => v + 1));

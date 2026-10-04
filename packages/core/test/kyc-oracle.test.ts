@@ -104,7 +104,7 @@ describe("NSRP-1 outcomes on the demo cases", () => {
   it("training cases 1 and 2 differ in both ownership and jurisdiction (the capture-phase contradiction)", () => {
     const [one, two] = kycCases("training").map((c) => caseFeatures(c));
     expect(one).toMatchObject({ jurisdictionRisk: "medium", uboOwnershipPct: 35, uboVerified: false });
-    expect(two).toMatchObject({ jurisdictionRisk: "high", uboOwnershipPct: 20, uboVerified: true });
+    expect(two).toMatchObject({ jurisdictionRisk: "high", uboOwnershipPct: 20, uboVerified: false });
   });
 
   it("the overridden rule would otherwise fire: removing the exception's conditions sends case 2 to enhanced review", () => {

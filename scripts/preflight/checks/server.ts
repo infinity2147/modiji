@@ -23,6 +23,29 @@ function eventLoopOf(value: unknown): EventLoop | null {
     : null;
 }
 
+type Gc = { count: number; totalPauseMs: number; maxPauseMs: number; sinceMs: number };
+type CpuThrottle = { nrPeriods: number; nrThrottled: number; throttledMs: number };
+
+/** GC pause stats, if the server reports them (servers older than this preflight do not). */
+function gcOf(value: unknown): Gc | null {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) return null;
+  const v = value as Record<string, unknown>;
+  const { count, totalPauseMs, maxPauseMs, sinceMs } = v;
+  return typeof count === "number" && typeof totalPauseMs === "number" && typeof maxPauseMs === "number" && typeof sinceMs === "number"
+    ? { count, totalPauseMs, maxPauseMs, sinceMs }
+    : null;
+}
+
+/** CPU-throttle counters, when the container's cgroup exposes them (null on the server means "not detectable"). */
+function cpuThrottleOf(value: unknown): CpuThrottle | null {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) return null;
+  const v = value as Record<string, unknown>;
+  const { nrPeriods, nrThrottled, throttledMs } = v;
+  return typeof nrPeriods === "number" && typeof nrThrottled === "number" && typeof throttledMs === "number"
+    ? { nrPeriods, nrThrottled, throttledMs }
+    : null;
+}
+
 /**
  * `/api/health` is up, `/api/health/deep` refuses an anonymous caller, and with the bearer reports the database
  * writable, DATA_DIR writable and Z3 initialised (plan §12), and model calls on: a target running with the hermetic
@@ -72,6 +95,12 @@ export async function checkServerDeep(ctx: Ctx): Promise<CheckOutcome> {
       if (eventLoop.p99Ms > MAX_EVENT_LOOP_P99_MS)
         problems.push(`event-loop delay p99 ${eventLoop.p99Ms} ms > ${MAX_EVENT_LOOP_P99_MS} ms (max ${eventLoop.maxMs} ms, ${eventLoop.samples} samples since boot)`);
     }
+    // GC and CPU-throttle are surfaced for ops to tell a code stall from a host/GC freeze; never a reason to fail.
+    const gc = gcOf(body.gc);
+    if (gc !== null) facts.gc = gc;
+    const cpuThrottle = cpuThrottleOf(body.cpuThrottle);
+    if (cpuThrottle !== null) facts.cpuThrottle = cpuThrottle;
+    else if (body.cpuThrottle === null) facts.cpuThrottle = null;
   }
   facts.deepMs = deep.ms;
 
@@ -81,9 +110,13 @@ export async function checkServerDeep(ctx: Ctx): Promise<CheckOutcome> {
     const ms = f !== null && typeof f === "object" && !Array.isArray(f) ? f.ms : null;
     return `${p} ok${typeof ms === "number" ? ` ${ms} ms` : ""}`;
   });
+  const gc = gcOf(body?.gc);
+  const cpuThrottle = cpuThrottleOf(body?.cpuThrottle);
+  const gcPart = gc === null ? "" : `; GC max pause ${gc.maxPauseMs} ms (${gc.count})`;
+  const throttlePart = cpuThrottle === null ? (body?.cpuThrottle === null ? "; CPU throttle n/a" : "") : `; CPU throttled ${cpuThrottle.nrThrottled}×/${cpuThrottle.throttledMs} ms`;
   return {
     status: "pass",
-    detail: `health 200; deep 401 without bearer; ${parts.join(", ")}; model calls on; event-loop delay p99 ${eventLoop?.p99Ms ?? "?"} ms`,
+    detail: `health 200; deep 401 without bearer; ${parts.join(", ")}; model calls on; event-loop delay p99 ${eventLoop?.p99Ms ?? "?"} ms${gcPart}${throttlePart}`,
     facts,
   };
 }

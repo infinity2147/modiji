@@ -7,6 +7,7 @@
  * live product's frame→event latency is this replay's plus client OCR/redaction and the upload.
  */
 import type { DomainConfig } from "@vashistha/core";
+import type { ClientCaseId } from "./case-id";
 import { createChangeDetector, DEFAULT_CHANGE_CONFIG, type ChangeDetectorConfig } from "./change-detector";
 import {
   interpretReading,
@@ -85,7 +86,16 @@ export function createVirtualClock(start: number): VirtualClock {
 /** One model call per frame: answers the prepared read exactly as the model would. */
 export type FrameExtractor = (read: PreparedRead) => Promise<FrameReading>;
 
-export type ReplayFrame = { captureTime: number; load(): RgbaImage };
+export type ReplayFrame = {
+  captureTime: number;
+  load(): RgbaImage;
+  /**
+   * The case id the client read on-device for this frame (team P2 decision), carried forward across
+   * frames by the caller's tracker; null when the client had no confident read. Omitted (undefined)
+   * means the harness is not simulating client OCR, so the model's read decides identity.
+   */
+  clientCaseId?: ClientCaseId | null;
+};
 
 export type ReplayResult = {
   observations: VisionObservation[];
@@ -104,6 +114,8 @@ export async function replaySession(options: {
   extract: FrameExtractor;
   clock: Clock;
   detector?: ChangeDetectorConfig;
+  /** Concurrent extraction requests (default 1, the product's setting). */
+  maxInFlight?: number;
 }): Promise<ReplayResult> {
   const { domain, profile, sessionEpoch, clock } = options;
   const detector = createChangeDetector(options.detector ?? DEFAULT_CHANGE_CONFIG);
@@ -114,12 +126,16 @@ export async function replaySession(options: {
   let snapshot: CaseSnapshot | null = null;
   let changed = 0;
 
-  const queue = createPerceptionQueue<{ image: RgbaImage; bbox: Rect | null }, ExtractionResult>({
+  // Events are derived when a result is APPLIED, against the snapshot as it is then — with more than one
+  // request in flight a result's dispatch-time snapshot may be one frame stale; the state applier has
+  // already refused any result older than the last applied, so applying in frameSeq order is sound.
+  const queue = createPerceptionQueue<{ image: RgbaImage; bbox: Rect | null; clientCaseId: ClientCaseId | null }, { read: PreparedRead; reading: FrameReading }>({
     epoch: sessionEpoch,
+    maxInFlight: options.maxInFlight ?? 1,
     now: () => clock.now(),
     async send(frame) {
       // As on the server: the ≤1568 px upload (plus the client's crop of its change bbox) is what extraction sees.
-      const { image, bbox } = frame.payload;
+      const { image, bbox, clientCaseId } = frame.payload;
       const upload = prepareUpload(image, bbox);
       const crop = upload.crop;
       const read = prepareRead({
@@ -129,14 +145,16 @@ export async function replaySession(options: {
         frameSeq: frame.frameSeq,
         captureTime: frame.captureTime,
         sessionEpoch: frame.epoch,
+        clientCaseId,
         frame: { image: upload.frame, sourceWidth: image.width, sourceHeight: image.height },
         ...(crop !== null && {
           crop: { base64Png: encodePng(crop.image).toString("base64"), width: crop.image.width, height: crop.image.height, rect: crop.rect },
         }),
       });
-      return interpretReading(await options.extract(read), read.context);
+      return { read, reading: await options.extract(read) };
     },
-    apply(result) {
+    apply({ read, reading }) {
+      const result: ExtractionResult = interpretReading(reading, { ...read.context, previous: snapshot });
       snapshot = result.snapshot;
       const appliedAt = clock.now();
       observations.push(...result.events.map((event) => ({ event, appliedAt })));
@@ -154,7 +172,7 @@ export async function replaySession(options: {
     const change = detector.push(image);
     if (!change.changed) continue;
     changed += 1;
-    queue.submit({ image, bbox: change.bbox }, frame.captureTime, sessionEpoch);
+    queue.submit({ image, bbox: change.bbox, clientCaseId: frame.clientCaseId ?? null }, frame.captureTime, sessionEpoch);
   }
   await queue.idle();
   return { observations, concepts, dropped, queue: queue.stats(), frames: { total: options.frames.length, changed }, errors };

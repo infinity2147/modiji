@@ -1,10 +1,10 @@
 source http://127.0.0.1:4396/ · version 0.1.0 · commit unknown
-session dd24ac85-82c2-4179-afc3-666422bb124b · archived (read-only from now on)
-session 1fc3dae2-4af8-403b-827d-cf0616c738fb · archived (read-only from now on)
-session dd24ac85-82c2-4179-afc3-666422bb124b · expert · training · 90 entries · 3 frame(s)
-session 1fc3dae2-4af8-403b-827d-cf0616c738fb · novice · heldout · 13 entries · 0 frame(s)
+session 0a81a9f6-998b-42b5-b138-ae986f970cf0 · archived (read-only from now on)
+session f4334202-87d4-40bf-af72-c7a359debe3a · archived (read-only from now on)
+session 0a81a9f6-998b-42b5-b138-ae986f970cf0 · expert · training · 91 entries · 3 frame(s)
+session f4334202-87d4-40bf-af72-c7a359debe3a · novice · heldout · 13 entries · 0 frame(s)
 
-bundle 20261004-0307-695d1463d554 → /tmp/vashistha-e2e-R3ocoT/replay/replays/20261004-0307-695d1463d554
-  103 entries · chain head 695d1463d554a6d46b1cf4628aa99ed093d7219f2a3cbf17546c63778e7b7a8d · 9 files
-  manifest sha256 873f3d63ff7b97524f732e0e61596c83b7861d52e1141a6ad7e3f71ab3c55a2a
-  replay: /replay/20261004-0307-695d1463d554
+bundle 20261004-0605-e14c5d5ad3bc → /tmp/vashistha-e2e-dEu7Hh/replay/replays/20261004-0605-e14c5d5ad3bc
+  104 entries · chain head e14c5d5ad3bccd1477c91e45be74ebe1f6dc93bf632846224aedcfe417db7a20 · 9 files
+  manifest sha256 36c93dbb63cfb61df0371fa19afc29ee7efffecddccc88ce06787e7937b5c45a
+  replay: /replay/20261004-0605-e14c5d5ad3bc

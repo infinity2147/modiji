@@ -1,0 +1,32 @@
+changelog (crop run 1): + client case-id OCR as trusted metadata, crop-only same-case reads, 250 ms tick. FAILED as built: the harness OCR'd a tight header crop, which reads the small id 9% correct (diagnosed offline, 588 frames) and the wrong trusted ids exploded false critical to 0.848. Kept as evidence of why the OCR region matters; superseded by run 2.
+
+MODE: live — Claude Haiku 4.5 structured extraction, real-time replay.
+fixture: /home/24b4530/modiji/packages/perception/test/fixtures/casedesk-recorded — 617 frames, 145 DOM events
+
+metric                        value           threshold   result
+----------------------------  --------------  ----------  ------
+critical field-change recall  0.154 (8/52)    >= 0.95     FAIL
+critical action recall        0.190 (8/42)    >= 0.95     FAIL
+false critical rate           0.848 (89/105)  <= 0.05     FAIL
+p95 frame→event (ms)          2814            <= 3000     PASS
+non-critical precision        0.600 (9/15)    (reported)
+non-critical recall           0.176 (9/51)    (reported)
+non-critical F1               0.273           (reported)
+p50 frame→event (ms)          1764            (n=215)
+p50 change→event (ms)         2896            (reported)
+p95 change→event (ms)         3781            (reported)
+
+DOM events: 52 critical field changes, 42 critical actions, 51 non-critical
+Vision events: 71 critical field changes, 34 critical actions, 15 non-critical
+OVERALL: FAIL
+
+pipeline: 311/617 frames changed · queue sent 215, coalesced 96, applied 215, stale dropped 0, failed 0
+dropped by validation: {"field:invalid_value":1} · proposed concepts: 0 (0 distinct names)
+usage (full reads): 0 requests, 0 input tokens (0 cache reads), 0 output tokens; request p50 n/a ms, p95 n/a ms
+usage (refresh reads): 22 requests, 55633 input tokens (0 cache reads), 1042 output tokens; request p50 1710 ms, p95 2342 ms
+usage (local reads): 193 requests, 357310 input tokens (0 cache reads), 3986 output tokens; request p50 1200 ms, p95 1816 ms
+client case-id OCR (header band, team P2 decision): 127 header reads, 16 matched; ids ["NS-2026-6305","NS-2026-0101","NS-2026-0102"]; OCR p50 499.3750660000005 ms, p95 542.6650440000003 ms (dedicated Node OCR; shared with redaction in-product)
+
+JSON report: /home/24b4530/modiji/docs/evidence/p2/eval-live-crop-1.json
+
+

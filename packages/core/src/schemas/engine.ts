@@ -128,7 +128,9 @@ export type ApprovalRole = z.infer<typeof ApprovalRoleSchema>;
 export const StatedRuleEffectSchema = z.discriminatedUnion("type", [
   z.strictObject({ type: z.literal("recommend"), action: ActionIdSchema }),
   z.strictObject({ type: z.literal("forbid"), action: ActionIdSchema }),
-  z.strictObject({ type: z.literal("require_approval"), role: ApprovalRoleSchema }),
+  // `action` is the action whose sign-off is required (live bug #4); optional for backwards compatibility
+  // with rules stated before it was recorded, which gate the whole decision family.
+  z.strictObject({ type: z.literal("require_approval"), role: ApprovalRoleSchema, action: ActionIdSchema.optional() }),
 ]);
 export type StatedRuleEffect = z.infer<typeof StatedRuleEffectSchema>;
 
@@ -167,7 +169,9 @@ export const StatedRuleSchema = z
       ctx.addIssue({ code: "custom", path: ["effect"], message: "a stated guardrail must say what it enforces (forbid or require_approval)" });
       return z.NEVER;
     }
-    if (effect.type !== "require_approval" && effect.action !== rule.action)
+    // Every effect that names an action must name the rule's action (a `require_approval` without one
+    // gates the whole family and is exempt).
+    if (effect.action !== undefined && effect.action !== rule.action)
       ctx.addIssue({ code: "custom", path: ["effect", "action"], message: `effect action "${effect.action}" differs from the rule's action "${rule.action}"` });
     if (isStopEffect(effect) !== (rule.kind === "guardrail"))
       ctx.addIssue({ code: "custom", path: ["kind"], message: `a ${effect.type} rule must ${isStopEffect(effect) ? "" : "not "}be a guardrail` });

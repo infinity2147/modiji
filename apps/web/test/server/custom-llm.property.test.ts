@@ -1,11 +1,12 @@
 /**
  * The wrapper invariant as a property (plan §7.2): over arbitrary interleavings of issuing, context
  * changes, clock movement and requests with random histories, the handler emits content only when
- * the last message is a user turn carrying a currently valid nonce for that agent, session and
- * context version that has not spoken before — and then exactly the authorised text. A valid nonce
- * seen for the first time always speaks, and an identical replay of a spoken turn always skips.
- * Some requests drop their stream mid-speech, as a lost connection would: the nonce must then be
- * free for ElevenLabs' retry, and still speak at most once in total.
+ * the last message is a user turn carrying a nonce that is live for that agent, session and context
+ * version — within its TTL if never spoken, or within the re-speak window of its first speak (live
+ * bug #2) — and then exactly the authorised text, never a different one. A valid nonce seen for the
+ * first time always speaks. An identical retry re-speaks the SAME text while it is within that window;
+ * past it, or after a context change (which burns the nonce), the handler skips. Some requests drop
+ * their stream mid-speech, as a lost connection would: the nonce is then free for ElevenLabs' retry.
  *
  * The one unauthorised non-skip reply is the off-record tool call: it carries no content (readTurn
  * rejects any), and it is emitted exactly for a known agent's last user turn that is an off-record
@@ -15,6 +16,7 @@ import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import { formatControlMessage, isOffRecordPhrase, parseControlMessage } from "@vashistha/core";
 import type { AgentRole } from "@vashistha/core/server";
+import { RESPEAK_WINDOW_MS } from "../../lib/server/authorizations";
 import { chatBody, createHarness, readTurn } from "../support/llm-harness";
 
 const RUNS = { seed: 20261004, numRuns: 400 };
@@ -147,12 +149,15 @@ describe("custom-LLM wrapper invariant (property)", () => {
         try {
           for (const id of SESSIONS) h.ledger.createSession({ id });
           const issued: RefAuth[] = [];
-          const spoken = new Set<string>();
+          /** When a nonce first spoke, so a retry within RESPEAK_WINDOW_MS is still expected to speak. */
+          const firstSpokeAt = new Map<string, number>();
           const seen = new Set<string>();
           const versions = new Map<string, number>();
           /** Requests naming a session that exists in the ledger, so each must leave one decision entry. */
           let recordable = 0;
           let abortedSpeeches = 0;
+          /** Every `speak` decision the handler is expected to write (first speaks, re-speaks, aborted speeches). */
+          let speakDecisions = 0;
           /** Off-record replies to a known session: each leaves exactly one marker and no decision. */
           let offRecordMarkers = 0;
 
@@ -188,12 +193,16 @@ describe("custom-LLM wrapper invariant (property)", () => {
             const nonce = last.role === "user" ? parseControlMessage(last.text) : null;
             const auth = nonce === null ? undefined : issued.find((a) => a.nonce === nonce);
             const agent = MODELS[action.model] ?? null;
-            const valid =
+            const spokeAt = nonce === null ? undefined : firstSpokeAt.get(nonce);
+            // Live: context matches, and either it has never spoken and is within its TTL, or it is within
+            // the re-speak window of its first speak. (A nonce burned by a wrong-context presentation is
+            // always one the test has `seen`, so it never trips the liveness check below.)
+            const live =
               auth !== undefined &&
-              h.now() < auth.expiresAt &&
               agent === auth.agent &&
               action.session === auth.sessionId &&
-              (versions.get(auth.sessionId) ?? 0) === auth.contextVersion;
+              (versions.get(auth.sessionId) ?? 0) === auth.contextVersion &&
+              (spokeAt === undefined ? h.now() < auth.expiresAt : h.now() < spokeAt + RESPEAK_WINDOW_MS);
             const offRecordExpected = agent !== null && last.role === "user" && nonce === null && isOffRecordPhrase(last.text);
 
             const response = await h.call(body);
@@ -201,19 +210,25 @@ describe("custom-LLM wrapper invariant (property)", () => {
             if (known && offRecordExpected) offRecordMarkers += 1;
             else if (known) recordable += 1;
 
+            const noteSpoke = () => {
+              if (nonce !== null && !firstSpokeAt.has(nonce)) firstSpokeAt.set(nonce, h.now());
+            };
+
             if (action.abort) {
               const reader = response.body?.getReader();
               const first = new TextDecoder().decode((await reader?.read())?.value);
               await reader?.cancel();
               expect(first.includes('"name":"set_off_record"')).toBe(offRecordExpected);
               if (first.includes('"role":"assistant","content":""')) {
-                // Speech started: same safety as below; the nonce goes back for a retry, so it stays fresh.
-                expect(valid).toBe(true);
-                expect(spoken.has(nonce ?? "")).toBe(false);
+                // Speech started: a live authorization spoke its exact text; the stream is then dropped.
+                expect(live).toBe(true);
                 abortedSpeeches += 1;
+                speakDecisions += 1;
+                noteSpoke();
+                if (nonce !== null) seen.add(nonce);
                 continue;
               }
-              if (valid && nonce !== null && !seen.has(nonce)) throw new Error("valid first presentation skipped");
+              if (live && nonce !== null && !seen.has(nonce)) throw new Error("valid first presentation skipped");
               if (nonce !== null) seen.add(nonce);
               continue;
             }
@@ -222,17 +237,18 @@ describe("custom-LLM wrapper invariant (property)", () => {
             // Silencing: exactly for an off-record phrase from a known agent; readTurn already proved no content.
             expect(turn.kind === "off_record").toBe(offRecordExpected);
             if (turn.kind === "speech") {
-              // Safety: speech only for a valid authorization that has not spoken, with its exact text.
-              expect(valid).toBe(true);
-              expect(spoken.has(nonce ?? "")).toBe(false);
+              // Safety: speech only for a live authorization, and always its exact authorised text.
+              expect(live).toBe(true);
               expect(turn.text).toBe(auth?.text);
-              spoken.add(nonce ?? "");
-              // A second identical request skips.
-              expect(await readTurn(await h.call(body))).toMatchObject({ kind: "skip", reason: "already_used" });
+              speakDecisions += 1;
+              noteSpoke();
+              // An immediate retry re-speaks the SAME text within the window (live bug #2), never a different one.
+              const retry = await readTurn(await h.call(body));
+              expect(retry).toMatchObject({ kind: "speech", text: auth?.text });
+              speakDecisions += 1;
               if (known) recordable += 1;
-            } else if (turn.kind === "skip" && valid && nonce !== null && !seen.has(nonce)) {
-              // Liveness: a valid nonce presented for the first time (or retried after an aborted
-              // stream) is never silenced.
+            } else if (turn.kind === "skip" && live && nonce !== null && !seen.has(nonce)) {
+              // Liveness: a live nonce presented for the first time is never silenced.
               throw new Error(`valid first presentation skipped: ${turn.reason}`);
             }
             if (nonce !== null) seen.add(nonce);
@@ -241,7 +257,7 @@ describe("custom-LLM wrapper invariant (property)", () => {
           // Every request to a known session left exactly one decision; no control entry is evidence.
           const decisions = SESSIONS.flatMap((s) => h.ledger.list(s, { kinds: ["llm.turn_decision"] }));
           const speeches = decisions.filter((e) => (e.payload as { decision: string }).decision === "speak");
-          expect(speeches).toHaveLength(spoken.size + abortedSpeeches);
+          expect(speeches).toHaveLength(speakDecisions);
           const aborts = SESSIONS.flatMap((s) => h.ledger.list(s, { kinds: ["llm.stream_aborted"] }));
           expect(aborts).toHaveLength(abortedSpeeches);
           expect(decisions).toHaveLength(recordable);

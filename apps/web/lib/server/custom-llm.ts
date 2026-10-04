@@ -366,10 +366,10 @@ export async function handleChatCompletion(request: Request, deps: CustomLlmDeps
         handlerLatencyMs,
       }) ?? null;
   } catch (error) {
-    // Fail closed: an unrecorded question must not be spoken. The nonce is spent, not handed back:
-    // the gate authorises again once the ledger is healthy.
+    // Fail closed: an unrecorded question must not be spoken, nor re-spoken on a retry, nor re-queued.
+    // Burn the nonce; the gate authorises the question again once the ledger is healthy.
     deps.log.error(`[custom-llm] ledger write failed: ${describeError(error)}`);
-    if (turn.decision === "speak") turn.lease.complete();
+    if (turn.decision === "speak") turn.lease.burn();
     turn = { decision: "skip_turn", agent: turn.agent, reason: "ledger_write_failed", nonce: turn.nonce };
   }
 

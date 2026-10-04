@@ -39,6 +39,18 @@ export type PixelRect = z.infer<typeof PixelRectSchema>;
 
 const SizeSchema = z.strictObject({ width: z.int().positive().max(MAX_SOURCE_EDGE), height: z.int().positive().max(MAX_SOURCE_EDGE) });
 
+/**
+ * The case id the browser read on-device from the screen header by OCR (team P2 decision, disclosed
+ * in the capture UI). The server trusts it as the authoritative caseId for extraction and never
+ * overrides it with the model's read; it falls back to the model only when this is null (no confident
+ * client read). `value` is an id token; `confidence` is the OCR word confidence (0–1).
+ */
+export const ClientCaseIdSchema = z.strictObject({
+  value: z.string().min(1).max(64).regex(/^[A-Za-z0-9][A-Za-z0-9-]*$/, "an id token"),
+  confidence: z.number().min(0).max(1),
+});
+export type ClientCaseId = z.infer<typeof ClientCaseIdSchema>;
+
 const inside = (rect: PixelRect, size: { width: number; height: number }): boolean =>
   rect.x + rect.width <= size.width && rect.y + rect.height <= size.height;
 
@@ -60,6 +72,8 @@ export const FrameMetadataSchema = z
     bbox: PixelRectSchema.nullable(),
     /** Rect (source pixels) of the `crop` part; null when no crop is sent. */
     crop: PixelRectSchema.nullable(),
+    /** Case id read on-device from the header; null when the client had no confident read. */
+    caseId: ClientCaseIdSchema.nullable().default(null),
   })
   .superRefine((m, ctx) => {
     if (m.bbox !== null && !inside(m.bbox, m.source))

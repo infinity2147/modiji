@@ -74,7 +74,7 @@ export function checkAction({ rules, features, action, domain }: CheckActionInpu
     const group =
       rule.effect.type === "forbid" && rule.effect.action === action
         ? forbids
-        : rule.effect.type === "require_approval" && familiesOfAction.has(rule.decisionFamily)
+        : rule.effect.type === "require_approval" && guardsApproval(rule.effect, rule.decisionFamily, action, familiesOfAction)
           ? approvals
           : undefined;
     if (group === undefined) continue;
@@ -82,6 +82,21 @@ export function checkAction({ rules, features, action, domain }: CheckActionInpu
   }
 
   return decide(forbids, "forbid") ?? decide(approvals, "needs_approval") ?? { decision: "allow", matchedRules: [], missingFeatures: [], evidence: [] };
+}
+
+/**
+ * Whether a `require_approval` rule gates `action` (live bug #4). A rule that records the action it
+ * guards (`effect.action`, the action the expert's sign-off is for) fires only for that action — so
+ * escalating or rejecting a PEP is not held by "approving a PEP needs sign-off". A rule stated before
+ * the action was recorded gates every action of its decision family, as it always did (never weaker).
+ */
+function guardsApproval(
+  effect: Extract<ConfirmedRule["effect"], { type: "require_approval" }>,
+  decisionFamily: string,
+  action: ActionId,
+  familiesOfAction: ReadonlySet<string>,
+): boolean {
+  return effect.action === undefined ? familiesOfAction.has(decisionFamily) : effect.action === action;
 }
 
 /** `p ∧ ¬(o₁ ∨ … ∨ oₙ)`, or `p` itself when nothing overrides it. */

@@ -94,6 +94,18 @@ describe("deep health response", () => {
     dataDir: async () => ({ ok: true as const, ms: 1 }),
     z3: async () => (z3 ? { ok: true as const, ms: 1 } : { ok: false as const, error: "boom" }),
     eventLoop: () => ({ p50Ms: 0, p99Ms: 1, maxMs: 2, samples: 10, sinceMs: 100 }),
+    gc: () => ({ count: 3, totalPauseMs: 5, maxPauseMs: 2, sinceMs: 100 }),
+    cpuThrottle: () => null,
+  });
+
+  it("reports GC and CPU-throttle telemetry alongside the event loop, without letting them affect ok", async () => {
+    const env = loadServerEnv({ ...baseEnv(), LLM_CALLS: "on" });
+    expect(await deepHealth({ env, checks: checks(true) })).toMatchObject({
+      ok: true,
+      eventLoop: { p99Ms: 1 },
+      gc: { count: 3, totalPauseMs: 5, maxPauseMs: 2 },
+      cpuThrottle: null,
+    });
   });
 
   it("reports llmCalls from the environment, without letting it affect ok", async () => {

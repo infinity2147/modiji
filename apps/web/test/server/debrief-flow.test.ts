@@ -76,10 +76,10 @@ describe("debrief flow (P5 acceptance)", () => {
 
   it("closes gaps from the expert's typed answers: rules for decision cells, an acknowledged escalation", async () => {
     let s = await getState(w);
-    // The case the expert approved (0102: owner 20%, verified) is an unresolved cell: the expert confirms "approve".
-    const approveCell = s.witnesses.find((v) => v.current && v.witness.kind === "unresolved" && v.conditions.some((c) => c.includes("at most 25%")) && v.conditions.includes("largest owner identity verified: yes"));
-    expect(approveCell?.cellRule?.text).toBe("largest beneficial owner share at most 25% and largest owner identity verified is yes");
-    s = await act(w, { action: "add_rule_for_witness", witnessId: approveCell?.witness.id, decision: "approve", quote: "Small owner, verified — that's a straight approval." });
+    // The case the expert approved (0102: owner 20%, unverified) is an unresolved cell: the expert confirms "approve".
+    const approveCell = s.witnesses.find((v) => v.current && v.witness.kind === "unresolved" && v.conditions.some((c) => c.includes("at most 25%")) && v.conditions.includes("largest owner identity verified: no"));
+    expect(approveCell?.cellRule?.text).toBe("largest beneficial owner share at most 25% and largest owner identity verified is no");
+    s = await act(w, { action: "add_rule_for_witness", witnessId: approveCell?.witness.id, decision: "approve", quote: "Small owner, high-risk country but a long-standing customer — that's a straight approval." });
     expect(s.witnesses.find((v) => v.witness.id === approveCell?.witness.id)?.status).toBe("resolved");
     expect(s.decisions.find((d) => d.caseId === "NS-2026-0102")?.explained).toBe(true);
     expect(s.rulebookRevision).toBe(3);
@@ -89,7 +89,7 @@ describe("debrief flow (P5 acceptance)", () => {
     s = await act(w, { action: "add_rule_for_witness", witnessId: pepCell?.witness.id, decision: "enhancedReview", quote: "A big verified owner still gets enhanced review." });
     expect(s.decisions.every((d) => d.explained)).toBe(true);
 
-    // Small unverified owner: not the reviewer's call.
+    // Small verified owner: not the reviewer's call.
     const escalate = openGaps(s)[0];
     expect(escalate).toBeDefined();
     s = await act(w, { action: "acknowledge_witness", witnessId: escalate?.witness.id, resolution: "escalate_to_controller", quote: "That one isn't mine to decide — escalate to the controller." });

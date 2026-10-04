@@ -75,6 +75,8 @@ describe("plan §10 scenario at the server", () => {
     expect(granted.authorization.expiresAt - h.deps.now()).toBe(4000);
     const spoken = await readTurn(await h.llmTurn(s, granted.controlMessage));
     expect(spoken).toMatchObject({ kind: "speech", text: best.text });
+    // The agent voiced it (its utterance confirms the audio), so a stray replay of the same nonce is refused.
+    expect((await h.agentSaid(s, { conversationId: "conv-s10", text: best.text, questionId: best.id })).status).toBe(204);
     expect(await readTurn(await h.llmTurn(s, granted.controlMessage))).toMatchObject({ kind: "skip", reason: "already_used" });
     console.info(`[§10 server] spoken (EIG ${best.value.toFixed(3)} bits): "${spoken.kind === "speech" ? spoken.text : ""}"`);
 

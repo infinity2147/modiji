@@ -6,6 +6,7 @@ import {
   QUESTION_REASONS,
   QuestionSchema,
   buildHypothesisSet,
+  describeQuestion,
   engineConfig,
   evaluatePredicate,
   generateQuestions,
@@ -21,6 +22,9 @@ import {
   type ProposedConcept,
   type Question,
 } from "../src";
+import { KYC_HIDDEN_POLICY } from "../src/domains/kyc/domain.oracle.server";
+import { caseFeatures, kycCases } from "../src/domains/kyc";
+import { lookupFrom } from "./helpers";
 import { CASE_A, CASE_B, CONFIG, KYC, REVIEW, observation, questionContext } from "./engine.fixtures";
 
 const RUNS = { seed: 20261004, numRuns: 60 };
@@ -173,6 +177,25 @@ describe("why-probes, reasons and selection", () => {
     expect(queue.every((q, i) => i === 0 || (queue[i - 1]?.value ?? 0) >= q.value)).toBe(true);
     expect(selectQuestion(queue, { thetaAsk: (best?.value ?? 0) + 1e-9 })).toBeUndefined();
     expect(selectQuestion([], { thetaAsk: 0 })).toBeUndefined();
+  });
+
+  it("the HUD reason states the real trigger on the real training cases: contradiction only at or above the threshold", () => {
+    const [one, two] = kycCases("training").map((c) => {
+      const features = caseFeatures(c);
+      return observation(c.id, features, KYC_HIDDEN_POLICY.evaluate(lookupFrom(features)).decisions.reviewOutcome?.action ?? "approve");
+    });
+    if (one === undefined || two === undefined) throw new Error("missing training case");
+    const first = observeDecision({ model: REVIEW, set: buildHypothesisSet({ setId: "hs", model: REVIEW, knowledge: EMPTY_KNOWLEDGE, schemaVersion: 1, config: CONFIG }), knowledge: EMPTY_KNOWLEDGE, observation: one, config: CONFIG });
+    const second = observeDecision({ model: REVIEW, set: first.set, knowledge: first.knowledge, observation: two, config: CONFIG });
+    const bits = second.recent.surprise.bits;
+    const hudReasons = (contradictionBits: number) =>
+      generateQuestions({ model: REVIEW, set: second.set, ctx: questionContext(two), recent: second.recent, config: engineConfig({ contradictionBits }) })
+        .filter((q) => q.kind === "counterfactual")
+        .map((q) => describeQuestion(q).split(" · ")[0]);
+    // Default threshold (3 bits) is not reached by case 2, so the HUD must not claim a contradiction.
+    expect(bits).toBeLessThan(CONFIG.contradictionBits);
+    expect(new Set(hudReasons(CONFIG.contradictionBits))).toEqual(new Set([QUESTION_REASONS.competing]));
+    expect(new Set(hudReasons(bits))).toEqual(new Set([QUESTION_REASONS.contradiction]));
   });
 
   it("is deterministic", () => {

@@ -536,7 +536,8 @@ function statedStopRule(snap: Snapshot, req: Extract<ExpertActionRequest, { acti
   if (!converted.ok) throw new ApiFailure(400, "invalid_predicate", converted.reasons.join("; "));
   const issues = typecheckPredicate(converted.predicate, snap.domain.features);
   if (issues.length > 0) throw new ApiFailure(400, "invalid_predicate", issues.map((i) => `${i.path || "/"}: ${i.message}`).join("; "));
-  const effect = req.effect.type === "forbid" ? req.effect : { type: req.effect.type, role: req.effect.role };
+  // Keep the action the stop-rule guards for `require_approval` too, so it gates only that action (live bug #4).
+  const effect = req.effect.type === "forbid" ? req.effect : { type: req.effect.type, role: req.effect.role, action: req.effect.action };
   const stated = StatedRuleSchema.safeParse({ predicate: converted.predicate, action: req.effect.action, kind: "guardrail", effect, exactQuote: req.quote, t0Ms: 0, t1Ms: 0 });
   if (!stated.success) throw new ApiFailure(400, "invalid_stop_rule", stated.error.issues.map((i) => i.message).join("; "));
   return stated.data;

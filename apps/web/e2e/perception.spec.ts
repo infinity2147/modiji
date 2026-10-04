@@ -66,7 +66,7 @@ test("share screen → change-detected, redacted frames are uploaded, stored and
   const sessionId = new URL(page.url()).searchParams.get("session") ?? "";
 
   const card = page.getByRole("region", { name: "Screen capture" });
-  await expect(card).toContainText("Screen frames: change-detected, best-effort PII blur in your browser before upload");
+  await expect(card).toContainText("Screen frames: change-detected, best-effort PII blur, and the case id read on-device by OCR, in your browser before upload");
   const status = card.getByRole("status", { name: "Screen capture status" });
   await expect(status).toHaveText("Not sharing");
 

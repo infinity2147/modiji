@@ -73,23 +73,60 @@ describe("consume", () => {
       ok: true,
       authorization: auth,
       text: "Why that threshold?",
-      lease: { complete: expect.any(Function), release: expect.any(Function) },
+      respeak: false,
+      lease: { complete: expect.any(Function), release: expect.any(Function), burn: expect.any(Function) },
     });
   });
 
-  it("refuses a duplicate while in flight, and every presentation after completion", () => {
+  it("refuses a duplicate while in flight; after completion a retry re-speaks the same text within the window (live bug #2)", () => {
     const { issue, consume } = setup();
     const auth = issue();
     const first = consume(auth.nonce);
     expect(consume(auth.nonce)).toEqual({ ok: false, reason: "in_flight" });
     if (!first.ok) throw new Error("expected success");
     first.lease.complete();
-    expect(consume(auth.nonce)).toEqual({ ok: false, reason: "already_used" });
-    first.lease.release(); // settling twice changes nothing
-    expect(consume(auth.nonce)).toEqual({ ok: false, reason: "already_used" });
+    // The agent turn produced no audio and ElevenLabs retries: the SAME text is spoken again.
+    const retry = consume(auth.nonce);
+    expect(retry).toMatchObject({ ok: true, respeak: true, text: "Why that threshold?" });
+    if (!retry.ok) throw new Error("expected respeak");
+    retry.lease.complete();
+    first.lease.release(); // a stale lease from the first consume cannot undo the retry
+    expect(consume(auth.nonce)).toMatchObject({ ok: true, respeak: true });
   });
 
-  it("hands a released nonce back for exactly one more successful consume", () => {
+  it("refuses the retry once its audio is confirmed (voiced) or the window closes", () => {
+    const { store, issue, consume, setClock } = setup();
+    const confirmed = issue();
+    const taken = consume(confirmed.nonce);
+    if (!taken.ok) throw new Error("expected success");
+    taken.lease.complete();
+    store.confirmVoiced("s1", "q1");
+    expect(consume(confirmed.nonce)).toEqual({ ok: false, reason: "already_used" });
+
+    const lapsing = issue();
+    const spoke = consume(lapsing.nonce);
+    if (!spoke.ok) throw new Error("expected success");
+    spoke.lease.complete();
+    setClock(T0 + 9_999);
+    expect(consume(lapsing.nonce)).toMatchObject({ ok: true, respeak: true });
+    setClock(T0 + 10_000); // 10 s after the first speak: the re-speak window has closed
+    const closed = issue({ sessionId: "s2" }); // any op prunes; the spoken-unvoiced nonce now lapses
+    void closed;
+    expect(consume(lapsing.nonce)).toEqual({ ok: false, reason: "unknown_nonce" });
+  });
+
+  it("refuses a retry after the context changed: a different question needs a fresh authorization", () => {
+    const { store, issue, consume } = setup();
+    const a = issue();
+    const taken = consume(a.nonce);
+    if (!taken.ok) throw new Error("expected success");
+    taken.lease.complete();
+    store.bumpContextVersion("s1"); // the case moved on; a different question is due
+    expect(consume(a.nonce)).toEqual({ ok: false, reason: "context_changed" });
+    expect(consume(a.nonce)).toEqual({ ok: false, reason: "already_used" }); // burned, never re-spoken
+  });
+
+  it("hands a released nonce back for another successful consume", () => {
     const { issue, consume } = setup();
     const auth = issue();
     const first = consume(auth.nonce);
@@ -100,7 +137,7 @@ describe("consume", () => {
     if (!retry.ok) return;
     first.lease.release(); // a stale lease cannot undo the newer consume
     expect(consume(auth.nonce)).toEqual({ ok: false, reason: "in_flight" });
-    retry.lease.complete();
+    retry.lease.burn(); // spent for good (as on a ledger failure): no re-speak
     first.lease.release();
     expect(consume(auth.nonce)).toEqual({ ok: false, reason: "already_used" });
   });
@@ -170,21 +207,21 @@ describe("consume", () => {
 });
 
 describe("pruning", () => {
-  it("drops expired entries, whatever their state, on the next operation", () => {
+  it("drops an expired never-spoken entry at its TTL, but keeps a spoken one for the re-speak window", () => {
     const { issue, consume, setClock } = setup();
     const issued = issue({ ttlMs: 1_000 });
-    const inFlight = issue({ ttlMs: 1_000 });
     const spent = issue({ ttlMs: 1_000 });
-    expect(consume(inFlight.nonce).ok).toBe(true);
     const done = consume(spent.nonce);
     if (done.ok) done.lease.complete();
-    // Before pruning, a spent nonce is reported as used.
-    expect(consume(spent.nonce, { now: T0 + 999 })).toEqual({ ok: false, reason: "already_used" });
     setClock(T0 + 1_000);
-    issue(); // any operation prunes everything with expiresAt <= now
-    for (const auth of [issued, inFlight, spent]) {
-      expect(consume(auth.nonce)).toEqual({ ok: false, reason: "unknown_nonce" });
-    }
+    issue(); // any operation prunes everything past its deadline
+    // A never-spoken entry drops at its TTL; the spoken one survives (re-speakable on a retry).
+    expect(consume(issued.nonce)).toEqual({ ok: false, reason: "unknown_nonce" });
+    expect(consume(spent.nonce)).toMatchObject({ ok: true, respeak: true });
+    // Past the re-speak window (10 s from the first speak) the spoken entry drops too.
+    setClock(T0 + 10_000);
+    issue();
+    expect(consume(spent.nonce)).toEqual({ ok: false, reason: "unknown_nonce" });
   });
 
   it("keeps unexpired entries", () => {
@@ -235,6 +272,7 @@ describe("pending and sweep (one outstanding authorization per session; lapses r
     const taken = consume(spoken.nonce);
     if (!taken.ok) throw new Error("consume failed");
     taken.lease.complete();
+    store.confirmVoiced("s1", "q1"); // its audio arrived: it never lapses
     const lost = issue({ sessionId: "s2" });
     const burned = issue({ sessionId: "s3" });
     expect(consume(burned.nonce, { sessionId: "s3", agent: "tutor" })).toEqual({ ok: false, reason: "wrong_agent" });
@@ -249,13 +287,28 @@ describe("pending and sweep (one outstanding authorization per session; lapses r
     expect(store.sweep(T0 + 10_000)).toEqual([]);
   });
 
-  it("an aborted stream that is never retried still counts as spoken (the speak decision was made)", () => {
+  it("re-queues a provisional speak whose audio never arrives, once the re-speak window closes (live bug #2)", () => {
     const { store, issue, consume, setClock } = setup();
     const a = issue();
     const taken = consume(a.nonce);
     if (!taken.ok) throw new Error("consume failed");
-    taken.lease.release();
-    setClock(T0 + 5_000);
-    expect(store.sweep(T0 + 5_000)).toEqual([]);
+    taken.lease.complete(); // the stream completed, but the agent turn produced no audio — never voiced
+    setClock(T0 + 9_999);
+    expect(store.sweep(T0 + 9_999)).toEqual([]); // still re-speakable within the window
+    setClock(T0 + 10_000);
+    const lapsed = store.sweep(T0 + 10_000);
+    expect(lapsed.map((l) => [l.sessionId, l.questionId])).toEqual([["s1", "q1"]]);
+    expect(store.sweep(T0 + 20_000)).toEqual([]); // reported once
+  });
+
+  it("never re-queues a spoken question once its audio is confirmed", () => {
+    const { store, issue, consume, setClock } = setup();
+    const a = issue();
+    const taken = consume(a.nonce);
+    if (!taken.ok) throw new Error("consume failed");
+    taken.lease.complete();
+    store.confirmVoiced("s1", "q1");
+    setClock(T0 + 20_000);
+    expect(store.sweep(T0 + 20_000)).toEqual([]);
   });
 });

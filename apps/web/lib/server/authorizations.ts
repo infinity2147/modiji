@@ -3,15 +3,22 @@
  * precomputed question; the custom-LLM wrapper speaks only when it consumes a valid one.
  *
  * Lifecycle: issued → in_flight → used. ElevenLabs retries the same custom LLM on errors, timeouts
- * and empty responses (llm-cascading docs), so a nonce is spent only once its speech has been fully
- * streamed; a stream that aborts first hands the nonce back (in_flight → issued) for the retry.
- * A duplicate arriving while a stream is in flight is refused. Expired nonces never succeed.
+ * and empty responses (llm-cascading docs), so a nonce stays re-speakable for a short window after
+ * its speech: a stream that aborts hands the nonce back at once (in_flight → issued) for the retry,
+ * and a stream that completes but whose turn produced no audio (ElevenLabs then retries the SAME
+ * nonce) is re-spoken with the SAME precomputed text for `RESPEAK_WINDOW_MS` after the first speak
+ * (live bug #2). A duplicate arriving while a stream is in flight is refused. Expired nonces, nonces
+ * past the re-speak window, nonces whose audio has been confirmed, and nonces burned in the wrong
+ * context never succeed. The wrapper invariant holds: only the one authorised text for that nonce is
+ * ever spoken, however many times it is re-spoken.
  *
  * At most one authorization is pending per session (`pending`): the gate holds the floor while one is
  * outstanding, and the server refuses a second rather than let two control messages race (live bug
- * #2). An authorization that expires without its speech ever starting — no `speak` decision for its
- * nonce: the control message was lost, withheld, or merged into an open user turn (live bug #1) —
- * is reported once by `sweep`, so the caller can re-queue its question.
+ * #2). "Speak" is provisional until the agent's audio is confirmed (`confirmVoiced`, from the
+ * browser's `agent.utterance`). An authorization that expires or passes its re-speak window without
+ * a confirmed utterance — the control message was lost, withheld, or merged into an open user turn
+ * (live bug #1), or the agent turn came out empty (live bug #2) — is reported once by `sweep`, so the
+ * caller can re-queue its question and refund its live-budget slot.
  *
  * In memory on purpose: there is one persistent process (D5) and an authorization lives seconds.
  * Stateless at module level: the one store instance lives on the runtime (see runtime.ts), because
@@ -23,6 +30,13 @@ import { AGENT_ROLES, GateAuthorizationSchema, IdSchema, type AgentRole, type Ga
 
 /** Longest lifetime any caller may request (the preflight check uses all of it; the gate uses ~4 s). */
 export const MAX_AUTHORIZATION_TTL_MS = 60_000;
+/**
+ * How long after its first speak a nonce may be re-spoken on an ElevenLabs retry (live bug #2). It is
+ * longer than the gate's ~4 s TTL on purpose: a retry carrying the same nonce in the same session,
+ * agent and context arrives seconds after the control message, often after the TTL. Past this window
+ * (measured from the first speak) a spoken-but-unvoiced nonce lapses, so its question is re-queued.
+ */
+export const RESPEAK_WINDOW_MS = 10_000;
 /** A spoken question is ≤25 words (plan §7.2); this is a generous cap, not the phrasing limit. */
 const MAX_QUESTION_CHARS = 600;
 const NONCE_BYTES = 32;
@@ -53,13 +67,15 @@ export type ConsumeFailureReason =
 
 /**
  * The caller holds the nonce in flight and must settle it exactly once: `complete()` when the speech
- * has been fully streamed (in_flight → used), `release()` when the stream failed first
- * (in_flight → issued). Both are idempotent, and whichever runs first wins.
+ * has been fully streamed (in_flight → used, re-speakable on retry within the window), `release()`
+ * when the stream failed first (in_flight → issued, re-speakable at once), `burn()` to spend it for
+ * good without a confirmed utterance (in_flight → used, voiced — a decision that could not be
+ * recorded must never be re-spoken, nor re-queued). All are idempotent, and whichever runs first wins.
  */
-export type AuthorizationLease = { complete: () => void; release: () => void };
+export type AuthorizationLease = { complete: () => void; release: () => void; burn: () => void };
 
 export type ConsumeResult =
-  | { ok: true; authorization: GateAuthorization; text: string; lease: AuthorizationLease }
+  | { ok: true; authorization: GateAuthorization; text: string; lease: AuthorizationLease; respeak: boolean }
   | { ok: false; reason: ConsumeFailureReason };
 
 export type ConsumeContext = {
@@ -80,6 +96,12 @@ type Entry = {
   lease: number;
   /** A consume succeeded at least once: the custom LLM decided to speak it. */
   spoke: boolean;
+  /** When the first `speak` decision was made; the re-speak window is measured from here. */
+  firstSpokeAt?: number;
+  /** The agent's audio for this question was confirmed (`agent.utterance`): no re-speak, and no re-queue. */
+  voiced: boolean;
+  /** Spent for good (out-of-context presentation, or a ledger failure): never re-spoken; still re-queued unless voiced. */
+  burned: boolean;
   issuedAt: number;
 };
 
@@ -107,12 +129,22 @@ export function createAuthorizationStore(opts: { now?: () => number } = {}) {
   const lapsed: LapsedAuthorization[] = [];
   let leases = 0;
 
+  /**
+   * A spoken nonce stays alive for the re-speak window (so an ElevenLabs retry can speak it again);
+   * every other nonce only until its TTL. On removal, a nonce whose audio was never confirmed lapsed:
+   * it was authorised (its question counted as asked) but never voiced, so `sweep` reports it.
+   */
+  function deadlineOf(entry: Entry): number {
+    const { expiresAt } = entry.authorization;
+    return entry.firstSpokeAt === undefined ? expiresAt : Math.max(expiresAt, entry.firstSpokeAt + RESPEAK_WINDOW_MS);
+  }
+
   function prune(now: number): void {
     for (const [nonce, entry] of entries) {
-      if (entry.authorization.expiresAt > now) continue;
+      if (deadlineOf(entry) > now) continue;
       entries.delete(nonce);
       const { sessionId, questionId, expiresAt } = entry.authorization;
-      if (!entry.spoke) lapsed.push({ sessionId, questionId, agent: entry.agent, nonceDigest: nonceDigest(nonce), issuedAt: entry.issuedAt, expiresAt });
+      if (!entry.voiced) lapsed.push({ sessionId, questionId, agent: entry.agent, nonceDigest: nonceDigest(nonce), issuedAt: entry.issuedAt, expiresAt });
     }
   }
 
@@ -128,7 +160,7 @@ export function createAuthorizationStore(opts: { now?: () => number } = {}) {
         expiresAt: now + ttlMs,
         contextVersion,
       });
-      entries.set(authorization.nonce, { authorization, agent, text, state: "issued", lease: 0, spoke: false, issuedAt: now });
+      entries.set(authorization.nonce, { authorization, agent, text, state: "issued", lease: 0, spoke: false, voiced: false, burned: false, issuedAt: now });
       return authorization;
     },
 
@@ -144,26 +176,33 @@ export function createAuthorizationStore(opts: { now?: () => number } = {}) {
       return undefined;
     },
 
-    /** Collects the authorizations that expired unspoken since the last sweep (each is reported once). */
+    /** Collects the authorizations that lapsed unvoiced since the last sweep (each is reported once). */
     sweep(now: number): LapsedAuthorization[] {
       prune(now);
       return lapsed.splice(0, lapsed.length);
     },
 
     /**
-     * Takes `nonce` in flight. A presentation in the wrong context (session, agent or context version)
-     * burns it: a nonce seen out of context is treated as compromised, and the gate simply issues a
-     * new one. Expiry is exclusive: at `now === expiresAt` the nonce is expired. Synchronous, so two
-     * concurrent requests can never both take it.
+     * Takes `nonce` in flight. A duplicate while a stream is in flight is refused. A presentation in
+     * the wrong context (session, agent or context version) burns it: a nonce seen out of context is
+     * treated as compromised, and the gate simply issues a new one. A nonce whose speech has already
+     * completed is re-spoken with the same text while it is within the re-speak window and its audio
+     * is not yet confirmed (an ElevenLabs retry, live bug #2); afterwards it reads as `already_used`.
+     * A nonce never spoken is taken if unexpired (expiry is exclusive: at `now === expiresAt` it is
+     * expired). Synchronous, so two concurrent requests can never both take it.
      */
     consume(nonce: string, ctx: ConsumeContext): ConsumeResult {
       const entry = entries.get(nonce);
       prune(ctx.now);
       if (!entry) return { ok: false, reason: "unknown_nonce" };
-      if (entry.state === "used") return { ok: false, reason: "already_used" };
+      // A stream is in flight: refuse without disturbing its holder (a concurrent duplicate).
       if (entry.state === "in_flight") return { ok: false, reason: "in_flight" };
       const { authorization } = entry;
-      if (ctx.now >= authorization.expiresAt) return { ok: false, reason: "expired" };
+      // A spent nonce that can never be re-spoken — burned, audio confirmed, never truly spoken, or past
+      // its re-speak window — is terminal whatever the context. (A still-respeakable spoken nonce falls
+      // through to the context check below, so it is never re-spoken out of context.)
+      const respeakable = entry.spoke && !entry.voiced && !entry.burned && entry.firstSpokeAt !== undefined && ctx.now < entry.firstSpokeAt + RESPEAK_WINDOW_MS;
+      if (entry.state === "used" && !respeakable) return { ok: false, reason: "already_used" };
       const mismatch: ConsumeFailureReason | null =
         authorization.sessionId !== ctx.sessionId
           ? "wrong_session"
@@ -173,23 +212,51 @@ export function createAuthorizationStore(opts: { now?: () => number } = {}) {
               ? "context_changed"
               : null;
       if (mismatch) {
+        // A nonce seen out of context is compromised: burn it (never re-spoken). It was not voiced, so
+        // its question is still re-queued when it lapses, as before.
         entry.state = "used";
+        entry.burned = true;
         return { ok: false, reason: mismatch };
       }
+      if (entry.state === "issued" && ctx.now >= authorization.expiresAt) return { ok: false, reason: "expired" };
+      const respeak = entry.state === "used";
       leases += 1;
       const lease = leases;
       entry.state = "in_flight";
       entry.lease = lease;
       entry.spoke = true;
+      entry.firstSpokeAt ??= ctx.now;
+      const held = () => entry.state === "in_flight" && entry.lease === lease;
       const settle = (to: "used" | "issued") => {
-        if (entry.state === "in_flight" && entry.lease === lease) entry.state = to;
+        if (held()) entry.state = to;
       };
       return {
         ok: true,
         authorization,
         text: entry.text,
-        lease: { complete: () => settle("used"), release: () => settle("issued") },
+        respeak,
+        lease: {
+          complete: () => settle("used"),
+          release: () => settle("issued"),
+          burn: () => {
+            if (held()) {
+              entry.state = "used";
+              entry.voiced = true;
+            }
+          },
+        },
       };
+    },
+
+    /**
+     * Confirms the agent's audio for a question was heard (`agent.utterance`): its authorization's
+     * speak is no longer provisional, so it will not be re-spoken or re-queued. Marks every live
+     * authorization of this session and question that has spoken (an older re-queued one stays as it
+     * is). A no-op if none is live.
+     */
+    confirmVoiced(sessionId: string, questionId: string): void {
+      for (const entry of entries.values())
+        if (entry.authorization.sessionId === sessionId && entry.authorization.questionId === questionId && entry.spoke) entry.voiced = true;
     },
 
     /** Starts at 0 for a session never bumped. */

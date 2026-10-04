@@ -178,7 +178,7 @@ describe("checkAction participation", () => {
     expect(check([sanctionsForbid], "approve", { sanctionsHit: true }).decision).toBe("forbid");
   });
 
-  it("require_approval constrains exactly the actions of its decision family", () => {
+  it("a require_approval without a recorded action gates the whole decision family (legacy)", () => {
     const ratingApproval = rule({
       id: "r.rating",
       family: "riskRating",
@@ -188,6 +188,19 @@ describe("checkAction participation", () => {
     for (const a of ["rateLow", "rateMedium", "rateHigh"])
       expect(check([ratingApproval], a, { pep: true }).decision).toBe("needs_approval");
     for (const a of ["approve", "reject", "enhancedReview"]) expect(check([ratingApproval], a, { pep: true })).toEqual(ALLOW);
+  });
+
+  it("a require_approval that records its action gates only that action (live bug #4)", () => {
+    // "Never approve a PEP without compliance sign-off": the sign-off is for `approve` only.
+    const pepApprove = rule({
+      id: "r.pep.approve",
+      predicate: { "==": [{ var: "pep" }, true] },
+      effect: { type: "require_approval", role: "compliance_officer", action: "approve" },
+    });
+    expect(check([pepApprove], "approve", { pep: true }).decision).toBe("needs_approval");
+    // Escalating to compliance (or rejecting) a PEP is NOT held by the approve sign-off rule.
+    for (const a of ["escalateCompliance", "reject", "enhancedReview"])
+      expect(check([pepApprove], a, { pep: true }), a).toEqual(ALLOW);
   });
 
   it("recommend and route effects never block", () => {

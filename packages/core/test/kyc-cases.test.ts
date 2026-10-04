@@ -15,6 +15,7 @@ import {
   type KycCase,
   type KycFeatureTargets,
 } from "../src/domains/kyc";
+import { KYC_HIDDEN_POLICY } from "../src/domains/kyc/domain.oracle.server";
 import { lookupFrom } from "./helpers";
 
 const ALL: KycCase[] = CASE_SETS.flatMap((set) => kycCases(set));
@@ -62,7 +63,8 @@ describe("KYC case sets", () => {
       jurisdictionRisk: "medium",
       uboOwnershipPct: 35,
       uboVerified: false,
-      customerStatus: "new",
+      customerStatus: "existing",
+      accountAgeMonths: 36,
       sourceOfFunds: "verified",
     });
     expect(two).toMatchObject({
@@ -72,9 +74,18 @@ describe("KYC case sets", () => {
       accountAgeMonths: 36,
       sourceOfFunds: "verified",
       uboOwnershipPct: 20,
-      uboVerified: true,
+      uboVerified: false,
     });
     expect(three).toMatchObject({ entityType: "individual", pep: true, jurisdictionRisk: "low" });
+  });
+
+  it("training cases 1 and 2 differ only in ownership share and jurisdiction risk, with different outcomes", () => {
+    const [one, two] = kycCases("training").map((c) => caseFeatures(c));
+    if (one === undefined || two === undefined) throw new Error("missing training case");
+    const differing = Object.keys(one).filter((id) => one[id as keyof typeof one] !== two[id as keyof typeof two]);
+    expect(differing.sort()).toEqual(["jurisdictionRisk", "uboOwnershipPct"]);
+    const [oneOutcome, twoOutcome] = [one, two].map((f) => KYC_HIDDEN_POLICY.evaluate(lookupFrom(f)).decisions.reviewOutcome?.action);
+    expect(oneOutcome).not.toBe(twoOutcome);
   });
 
   it("held-out cases are unseen variants: a verified 30 % owner in a high-risk country, and a sanctions match", () => {

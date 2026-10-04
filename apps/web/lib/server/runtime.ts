@@ -13,7 +13,7 @@ import type { DebriefExports, DebriefModels, DebriefStore } from "./debrief/deps
 import type { ExpertRecord } from "./debrief/rulebook-store";
 import type { WitnessSolver } from "./debrief/solver";
 import type { DisagreementSolver } from "./disagreements/deps";
-import type { EventLoopDelay } from "./event-loop";
+import type { CpuThrottle, EventLoopDelay, GcStats } from "./event-loop";
 import type { InterviewStore } from "./interview/engine-state";
 import type { QuestionGenerator } from "./interview/questions";
 import type { PerceptionService } from "./perception/service";
@@ -71,7 +71,14 @@ export type Runtime = {
   tutor: { practice: PracticeSolver };
   voiceTokenLimiter: RateLimiter;
   /** Probes behind `GET /api/health/deep`. */
-  checks: { db: () => CheckResult; dataDir: () => Promise<CheckResult>; z3: () => Promise<CheckResult>; eventLoop: () => EventLoopDelay };
+  checks: {
+    db: () => CheckResult;
+    dataDir: () => Promise<CheckResult>;
+    z3: () => Promise<CheckResult>;
+    eventLoop: () => EventLoopDelay;
+    gc: () => GcStats;
+    cpuThrottle: () => CpuThrottle | null;
+  };
 };
 
 const RUNTIME_KEY: unique symbol = Symbol.for("vashistha.runtime");

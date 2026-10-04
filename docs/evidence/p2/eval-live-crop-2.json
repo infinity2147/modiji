@@ -1,0 +1,4002 @@
+{
+  "mode": "live",
+  "seed": null,
+  "fixture": "/home/24b4530/modiji/packages/perception/test/fixtures/casedesk-recorded",
+  "report": {
+    "counts": {
+      "dom": {
+        "critical_field": 52,
+        "critical_action": 42,
+        "non_critical": 51
+      },
+      "vision": {
+        "critical_field": 46,
+        "critical_action": 36,
+        "non_critical": 51
+      }
+    },
+    "criticalFieldChangeRecall": {
+      "numerator": 44,
+      "denominator": 52,
+      "value": 0.8461538461538461
+    },
+    "criticalActionRecall": {
+      "numerator": 36,
+      "denominator": 42,
+      "value": 0.8571428571428571
+    },
+    "falseCriticalRate": {
+      "numerator": 2,
+      "denominator": 82,
+      "value": 0.024390243902439025
+    },
+    "nonCritical": {
+      "precision": {
+        "numerator": 46,
+        "denominator": 51,
+        "value": 0.9019607843137255
+      },
+      "recall": {
+        "numerator": 46,
+        "denominator": 51,
+        "value": 0.9019607843137255
+      },
+      "f1": 0.9019607843137255
+    },
+    "latency": {
+      "frameToEventMs": {
+        "n": 198,
+        "p50": 1911.33154296875,
+        "p95": 2927.8505859375
+      },
+      "changeToEventMs": {
+        "n": 126,
+        "p50": 2393.089599609375,
+        "p95": 3454.84765625
+      }
+    },
+    "missedCritical": [
+      {
+        "id": "3baa9697-58ab-417c-bedc-c9592105e3db",
+        "frameSeq": 10,
+        "captureTime": 1791065969639,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0303",
+        "action": "reject",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "0fc4526c-4031-41df-97c4-afa7721bd7e6",
+        "frameSeq": 12,
+        "captureTime": 1791065972528,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0304",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "221c76c8-e7ce-43af-b75c-f7cd71f21231",
+        "frameSeq": 4,
+        "captureTime": 1791066001465,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0101",
+        "action": "requestDocuments",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "456de567-6a8f-49c2-b5b4-d2811681aed6",
+        "frameSeq": 8,
+        "captureTime": 1791066007322,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0102",
+        "action": "approve",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "4b45a58f-607a-4e47-b003-544124ab12eb",
+        "frameSeq": 3,
+        "captureTime": 1791066064592,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0101",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "48797a19-08a9-44d3-b5cc-bb78da7888dd",
+        "frameSeq": 6,
+        "captureTime": 1791066092392,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0302",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "dd6eb7dd-5eec-4899-ab23-7b1633adbb76",
+        "frameSeq": 19,
+        "captureTime": 1791066117124,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0306",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "3820457c-4e9f-4be6-92fa-8cbcc977ef3b",
+        "frameSeq": 3,
+        "captureTime": 1791066149237,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0301",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "748c727a-6527-4694-9aa6-5b51777e5c79",
+        "frameSeq": 8,
+        "captureTime": 1791066158620,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0302",
+        "action": "escalateCompliance",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "43ced156-747e-4034-b724-d53ace0f33d1",
+        "frameSeq": 16,
+        "captureTime": 1791066175639,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0305",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "8302ccf2-6b5d-45d7-9536-8b5e455c824c",
+        "frameSeq": 4,
+        "captureTime": 1791066196576,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0101",
+        "action": "approve",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "2d82abf5-1279-4764-8a2c-71b3257192f4",
+        "frameSeq": 9,
+        "captureTime": 1791066206903,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0103",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "c8688c0b-51af-4ed8-b01a-4aed1158ccdb",
+        "frameSeq": 12,
+        "captureTime": 1791066237486,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0304",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "6a536363-65e9-4fb4-9fff-604f6db591b9",
+        "frameSeq": 14,
+        "captureTime": 1791066240905,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0304",
+        "action": "approve",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      }
+    ],
+    "falseCritical": [
+      {
+        "id": "vision-0-203-0",
+        "frameSeq": 203,
+        "captureTime": 1791066142099,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0103",
+        "field": "riskRating",
+        "from": "medium",
+        "to": "low",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-204-0",
+        "frameSeq": 204,
+        "captureTime": 1791066142600,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0103",
+        "field": "riskRating",
+        "from": "low",
+        "to": "medium",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      }
+    ],
+    "checks": [
+      {
+        "metric": "critical field-change recall",
+        "value": 0.8461538461538461,
+        "comparator": ">=",
+        "threshold": 0.95,
+        "pass": false
+      },
+      {
+        "metric": "critical action recall",
+        "value": 0.8571428571428571,
+        "comparator": ">=",
+        "threshold": 0.95,
+        "pass": false
+      },
+      {
+        "metric": "false critical rate",
+        "value": 0.024390243902439025,
+        "comparator": "<=",
+        "threshold": 0.05,
+        "pass": true
+      },
+      {
+        "metric": "p95 frame→event (ms)",
+        "value": 2927.8505859375,
+        "comparator": "<=",
+        "threshold": 3000,
+        "pass": true
+      }
+    ],
+    "pass": false
+  },
+  "pipeline": {
+    "frames": {
+      "total": 617,
+      "changed": 311
+    },
+    "queue": {
+      "submitted": 311,
+      "sent": 198,
+      "coalesced": 113,
+      "applied": 198,
+      "staleDropped": 0,
+      "cancelled": 0,
+      "epochRejected": 0,
+      "failed": 0,
+      "inFlight": 0,
+      "pendingFrameSeq": null,
+      "frameToApplyMs": [
+        1889.87158203125,
+        1677.19189453125,
+        2442.361083984375,
+        3191.343994140625,
+        1888.954833984375,
+        1944.578369140625,
+        1682.42919921875,
+        1886.4306640625,
+        1310.8505859375,
+        1555.312744140625,
+        1921.52099609375,
+        2736.123291015625,
+        1793.599365234375,
+        1264.670166015625,
+        1911.33154296875,
+        2053.886962890625,
+        1554.379150390625,
+        2566.258056640625,
+        2054.206298828125,
+        1824.130615234375,
+        1928.636962890625,
+        1596.65478515625,
+        1636.48779296875,
+        2271.231201171875,
+        3108.296142578125,
+        2446.37353515625,
+        1962.750244140625,
+        1477.3603515625,
+        1288.788818359375,
+        1407.562255859375,
+        1666.2548828125,
+        2561.580322265625,
+        2586.89208984375,
+        2201.640869140625,
+        2091.839599609375,
+        1322.815673828125,
+        2365.749755859375,
+        2484.0908203125,
+        2182.873046875,
+        2110.987060546875,
+        3196.754150390625,
+        1985.06689453125,
+        2817.37890625,
+        2294.4375,
+        2612.14404296875,
+        1814.550537109375,
+        1912.55126953125,
+        2209.77392578125,
+        2780.907470703125,
+        1781.01708984375,
+        1485.817626953125,
+        2237.100830078125,
+        2151.32421875,
+        1223.342041015625,
+        2057.71728515625,
+        1640.0146484375,
+        1220.4013671875,
+        1756.570556640625,
+        1232.683349609375,
+        1859.7001953125,
+        2083.585693359375,
+        2543.115478515625,
+        1581.491455078125,
+        1802.119140625,
+        2055.705078125,
+        2773.44189453125,
+        1720.897216796875,
+        1570.068359375,
+        1603.257080078125,
+        1355.46826171875,
+        1486.836181640625,
+        2871.115966796875,
+        2044.128173828125,
+        1630.325927734375,
+        1647.96875,
+        1476.537109375,
+        2337.47265625,
+        2842.05517578125,
+        2205.45654296875,
+        2329.821533203125,
+        1276.784423828125,
+        1106.08740234375,
+        1344.078857421875,
+        2104.390869140625,
+        1540.1640625,
+        1368.910888671875,
+        1771.9765625,
+        1776.148193359375,
+        2807.468505859375,
+        1802.870361328125,
+        1610.743408203125,
+        2282.869384765625,
+        1890.290283203125,
+        1623.0732421875,
+        1405.247314453125,
+        2077.31787109375,
+        1066.0625,
+        1091.48681640625,
+        1998.994140625,
+        2692.88232421875,
+        1178.02685546875,
+        1181.2744140625,
+        1325.318603515625,
+        2106.32958984375,
+        2262.399658203125,
+        2327.882568359375,
+        2338.079833984375,
+        2632.42041015625,
+        1800.015869140625,
+        2312.983154296875,
+        1341.47265625,
+        2109.926513671875,
+        2753.055419921875,
+        1546.585693359375,
+        1801.19287109375,
+        2357.134033203125,
+        994.67919921875,
+        1040.82421875,
+        1323.038330078125,
+        2052.9091796875,
+        1062.245849609375,
+        970.8916015625,
+        2963.05712890625,
+        3341.91845703125,
+        2319.195068359375,
+        1552.229736328125,
+        2927.8505859375,
+        1775.606201171875,
+        2203.01953125,
+        3480.108154296875,
+        2045.60205078125,
+        1569.471435546875,
+        1397.739013671875,
+        2412.682861328125,
+        1402.87353515625,
+        1363.272216796875,
+        1570.187255859375,
+        2375.694091796875,
+        2207.19482421875,
+        1785.7041015625,
+        2041.49365234375,
+        2302.14013671875,
+        1749.2060546875,
+        1587.55517578125,
+        1943.280517578125,
+        2201.091796875,
+        1186.937744140625,
+        1156.822021484375,
+        1148.72705078125,
+        1637.12060546875,
+        1452.381591796875,
+        2344.390869140625,
+        1789.960205078125,
+        1726.07861328125,
+        2057.735107421875,
+        1945.63232421875,
+        2771.333740234375,
+        3986.67041015625,
+        1462.061767578125,
+        1756.34375,
+        1943.578369140625,
+        3491.331298828125,
+        1932.36865234375,
+        2068.238525390625,
+        2949.7490234375,
+        2473.7607421875,
+        1446.936767578125,
+        1043.1767578125,
+        1305.469482421875,
+        1536.928466796875,
+        1966.976806640625,
+        2227.43310546875,
+        2378.7607421875,
+        1981.995361328125,
+        2235.6259765625,
+        1902.309326171875,
+        1640.1171875,
+        2208.42529296875,
+        1695.06103515625,
+        2136.748291015625,
+        2323.001708984375,
+        2262.268798828125,
+        1915.03369140625,
+        2144.095947265625,
+        2886.458740234375,
+        1349.789794921875,
+        2380.635009765625,
+        2043.987060546875,
+        1673.75244140625,
+        1123.089111328125,
+        1043.322509765625,
+        986.979248046875,
+        1754.329833984375,
+        1894.224365234375,
+        1486.49755859375,
+        1040.37890625,
+        2168.357666015625,
+        1975.856689453125
+      ],
+      "requestMs": [
+        1848.4150390625,
+        1287.278564453125,
+        1266.148193359375,
+        2248.94580078125,
+        1196.5791015625,
+        1555.602294921875,
+        1238.83056640625,
+        1702.97705078125,
+        924.3505859375,
+        1516.180419921875,
+        1866.177734375,
+        2314.583740234375,
+        1057.4599609375,
+        971.06005859375,
+        1646.650634765625,
+        1642.54248046875,
+        1500.478515625,
+        1512.869873046875,
+        986.9384765625,
+        1770.911376953125,
+        1603.492431640625,
+        1168.000732421875,
+        1539.820556640625,
+        1634.732421875,
+        1837.052001953125,
+        2338.0634765625,
+        1016.3642578125,
+        1014.599853515625,
+        1239.548583984375,
+        1363.166259765625,
+        1258.67919921875,
+        2396.311767578125,
+        1524.299072265625,
+        1614.736083984375,
+        1891.18505859375,
+        1229.9638671875,
+        1543.92236328125,
+        1617.33056640625,
+        1698.769775390625,
+        1928.103759765625,
+        1585.75244140625,
+        1788.298095703125,
+        1332.29931640625,
+        1977.044189453125,
+        2317.693359375,
+        1202.39404296875,
+        1597.986328125,
+        1297.21142578125,
+        2071.122314453125,
+        1500.097900390625,
+        1204.7919921875,
+        1751.270751953125,
+        1914.211181640625,
+        1072.00634765625,
+        1834.364501953125,
+        1582.285400390625,
+        1080.375732421875,
+        1036.159423828125,
+        976.101318359375,
+        1627.004638671875,
+        1223.87353515625,
+        2459.517578125,
+        1539.36572265625,
+        1218.618408203125,
+        1754.576416015625,
+        1718.72216796875,
+        946.44384765625,
+        1531.302001953125,
+        1033.176513671875,
+        1252.19970703125,
+        1450.485595703125,
+        1884.267333984375,
+        1673.000732421875,
+        1586.185791015625,
+        1608.747314453125,
+        1329.556884765625,
+        1859.923828125,
+        1504.5732421875,
+        1863.39111328125,
+        1625.3525390625,
+        946.952392578125,
+        1065.64013671875,
+        1237.98095703125,
+        1260.300048828125,
+        1435.76123046875,
+        1329.73486328125,
+        1727.050048828125,
+        1504.16064453125,
+        1531.308349609375,
+        995.3916015625,
+        1307.859130859375,
+        1672.111572265625,
+        1107.408203125,
+        1581.342529296875,
+        1282.162353515625,
+        1672.0595703125,
+        988.733642578125,
+        1037.921142578125,
+        1907.496337890625,
+        2193.875244140625,
+        985.131103515625,
+        1003.237060546875,
+        1144.033203125,
+        1280.999755859375,
+        1656.058349609375,
+        1565.470458984375,
+        1511.186767578125,
+        1793.3310546875,
+        1668.584716796875,
+        1511.9560546875,
+        1027.478515625,
+        1769.4423828125,
+        1143.11962890625,
+        1293.51904296875,
+        1255.596435546875,
+        1554.928955078125,
+        958.394287109375,
+        1006.3798828125,
+        1281.20361328125,
+        1730.861572265625,
+        1009.328125,
+        932.945068359375,
+        2915.00927734375,
+        1878.847412109375,
+        978.2646484375,
+        1232.02197265625,
+        1876.608154296875,
+        1346.742919921875,
+        1928.40234375,
+        2276.073974609375,
+        1065.48291015625,
+        1024.8603515625,
+        1327.256103515625,
+        2367.965576171875,
+        991.17822265625,
+        959.387939453125,
+        1206.905517578125,
+        2305.491943359375,
+        1831.474365234375,
+        1578.498291015625,
+        1256.775146484375,
+        2260.633056640625,
+        946.05517578125,
+        1549.28125,
+        1854.713623046875,
+        1757.799560546875,
+        985.830078125,
+        969.870361328125,
+        1110.418701171875,
+        989.38427734375,
+        1315.244140625,
+        2302.910400390625,
+        945.55712890625,
+        1437.108154296875,
+        1831.646728515625,
+        1909.578369140625,
+        1825.689453125,
+        3215.320556640625,
+        975.376953125,
+        1294.27197265625,
+        1687.225341796875,
+        2047.741943359375,
+        941.026611328125,
+        1635.860107421875,
+        1882.497802734375,
+        1522.9990234375,
+        973.1640625,
+        1004.5849609375,
+        1261.2802734375,
+        1502.142578125,
+        1930.03662109375,
+        1760.4443359375,
+        1651.31640625,
+        1603.21630859375,
+        1253.612548828125,
+        1666.668212890625,
+        1581.57861328125,
+        1068.296630859375,
+        987.625732421875,
+        1940.67724609375,
+        1686.242431640625,
+        939.255859375,
+        1653.7529296875,
+        1228.05078125,
+        2242.350341796875,
+        963.319580078125,
+        1530.83544921875,
+        1664.344482421875,
+        1628.75390625,
+        949.327392578125,
+        1003.937255859375,
+        948.494140625,
+        1267.337646484375,
+        1639.879638671875,
+        1092.258056640625,
+        1001.55126953125,
+        1627.968505859375,
+        1807.48583984375
+      ]
+    },
+    "dropped": {},
+    "concepts": [],
+    "conceptNames": [],
+    "errors": []
+  },
+  "usage": {
+    "full": {
+      "requests": 0,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "cacheReadTokens": 0,
+      "latencyMs": []
+    },
+    "refresh": {
+      "requests": 64,
+      "inputTokens": 164266,
+      "outputTokens": 2855,
+      "cacheReadTokens": 0,
+      "latencyMs": [
+        1804,
+        1243,
+        1220,
+        2213,
+        1648,
+        2249,
+        1604,
+        1555,
+        2287,
+        1321,
+        1214,
+        2324,
+        1815,
+        1651,
+        1934,
+        2266,
+        2019,
+        1712,
+        1533,
+        2421,
+        1709,
+        1673,
+        1419,
+        1853,
+        1635,
+        1547,
+        1822,
+        1587,
+        1405,
+        1298,
+        1688,
+        1633,
+        1633,
+        2147,
+        1618,
+        1628,
+        1262,
+        1225,
+        1517,
+        1694,
+        1831,
+        1306,
+        1885,
+        2228,
+        2328,
+        2250,
+        2223,
+        1721,
+        2261,
+        1877,
+        1794,
+        3147,
+        1650,
+        1996,
+        1807,
+        1486,
+        1470,
+        1897,
+        1722,
+        1627,
+        1640,
+        2205,
+        1591,
+        1598
+      ]
+    },
+    "local": {
+      "requests": 134,
+      "inputTokens": 222167,
+      "outputTokens": 2780,
+      "cacheReadTokens": 0,
+      "latencyMs": [
+        1171,
+        1541,
+        1206,
+        911,
+        1498,
+        1820,
+        1034,
+        954,
+        1630,
+        1485,
+        1497,
+        968,
+        1728,
+        1127,
+        1513,
+        1615,
+        1793,
+        996,
+        993,
+        1196,
+        1503,
+        1586,
+        1209,
+        1525,
+        1597,
+        1893,
+        1567,
+        1753,
+        1287,
+        1170,
+        1581,
+        1248,
+        1483,
+        1160,
+        1896,
+        1044,
+        1777,
+        1063,
+        1010,
+        951,
+        1608,
+        1190,
+        1523,
+        1201,
+        924,
+        1514,
+        1007,
+        1220,
+        1595,
+        1287,
+        1492,
+        1832,
+        933,
+        1049,
+        1212,
+        1224,
+        1488,
+        1510,
+        982,
+        1274,
+        1092,
+        1565,
+        1249,
+        965,
+        1022,
+        1861,
+        970,
+        987,
+        1126,
+        1247,
+        1552,
+        1496,
+        1761,
+        1498,
+        1001,
+        1736,
+        1115,
+        944,
+        992,
+        1250,
+        992,
+        917,
+        2879,
+        961,
+        1196,
+        1829,
+        1047,
+        1011,
+        1293,
+        966,
+        934,
+        1180,
+        1792,
+        1562,
+        1210,
+        931,
+        1531,
+        1804,
+        970,
+        953,
+        1094,
+        976,
+        1280,
+        922,
+        1410,
+        1799,
+        961,
+        1261,
+        927,
+        1619,
+        956,
+        989,
+        1221,
+        1637,
+        1588,
+        1219,
+        1563,
+        1051,
+        972,
+        1896,
+        927,
+        1638,
+        1194,
+        947,
+        1516,
+        1650,
+        937,
+        988,
+        930,
+        1234,
+        1077,
+        987,
+        1612,
+        1764
+      ]
+    }
+  },
+  "clientCaseId": {
+    "headerReads": 127,
+    "matched": 95,
+    "distinctIds": [
+      "NS-2026-0301",
+      "NS-2026-0302",
+      "NS-2026-0303",
+      "NS-2026-0304",
+      "NS-2026-0305",
+      "NS-2026-0306",
+      "NS-2026-0101",
+      "NS-2026-0102",
+      "NS-2026-0103"
+    ],
+    "ocrMs": {
+      "n": 127,
+      "p50": 1985.9080449999892,
+      "p95": 2450.2636300000013,
+      "samples": [
+        790,
+        1188,
+        1428,
+        2137,
+        457,
+        2085,
+        2296,
+        1312,
+        2118,
+        1221,
+        2144,
+        2093,
+        2151,
+        2161,
+        2148,
+        2153,
+        2161,
+        2166,
+        1079,
+        1191,
+        2659,
+        2503,
+        2168,
+        1728,
+        1889,
+        1242,
+        950,
+        1053,
+        1379,
+        2097,
+        455,
+        2099,
+        2220,
+        1288,
+        2110,
+        1216,
+        2160,
+        2094,
+        2168,
+        2183,
+        11,
+        2116,
+        1964,
+        1220,
+        2303,
+        2054,
+        1064,
+        1202,
+        1998,
+        1724,
+        1080,
+        2026,
+        1735,
+        10,
+        1904,
+        1141,
+        1049,
+        1078,
+        1396,
+        2120,
+        2073,
+        2087,
+        2450,
+        3065,
+        2197,
+        2231,
+        2028,
+        2217,
+        2169,
+        2211,
+        2201,
+        1352,
+        1047,
+        1176,
+        1954,
+        1730,
+        1160,
+        2099,
+        1375,
+        1143,
+        1990,
+        1500,
+        1374,
+        1415,
+        935,
+        1541,
+        2805,
+        2452,
+        2835,
+        2215,
+        2213,
+        1955,
+        1169,
+        2207,
+        1988,
+        2170,
+        1986,
+        2344,
+        2259,
+        1052,
+        1191,
+        1952,
+        1710,
+        1148,
+        1855,
+        1145,
+        1193,
+        1977,
+        1163,
+        1081,
+        1406,
+        2113,
+        85,
+        2070,
+        2166,
+        1947,
+        1266,
+        2251,
+        2130,
+        2242,
+        2216,
+        10,
+        2216,
+        2027,
+        2350,
+        2065,
+        1399
+      ]
+    }
+  },
+  "reads": [
+    {
+      "frameSeq": 1,
+      "atMs": 0,
+      "mode": "refresh",
+      "latencyMs": 1804,
+      "inputTokens": 1285,
+      "outputTokens": 33,
+      "output": {
+        "caseId": null,
+        "caseTitle": null,
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 3,
+      "atMs": 1500,
+      "mode": "refresh",
+      "latencyMs": 1243,
+      "inputTokens": 2582,
+      "outputTokens": 31,
+      "output": {
+        "caseId": null,
+        "caseTitle": null,
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 4,
+      "atMs": 2001,
+      "mode": "refresh",
+      "latencyMs": 1220,
+      "inputTokens": 2582,
+      "outputTokens": 33,
+      "output": {
+        "caseId": null,
+        "caseTitle": null,
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 5,
+      "atMs": 3501,
+      "mode": "refresh",
+      "latencyMs": 2213,
+      "inputTokens": 2582,
+      "outputTokens": 55,
+      "output": {
+        "caseId": "NS-2026-0301",
+        "caseTitle": "Zofia Rasmussen-Adeyemi",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 6,
+      "atMs": 6000,
+      "mode": "local",
+      "latencyMs": 1171,
+      "inputTokens": 1947,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 7,
+      "atMs": 7500,
+      "mode": "local",
+      "latencyMs": 1541,
+      "inputTokens": 1223,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 9,
+      "atMs": 9001,
+      "mode": "local",
+      "latencyMs": 1206,
+      "inputTokens": 2575,
+      "outputTokens": 26,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": "enhancedReview"
+      }
+    },
+    {
+      "frameSeq": 11,
+      "atMs": 10500,
+      "mode": "refresh",
+      "latencyMs": 1648,
+      "inputTokens": 2589,
+      "outputTokens": 50,
+      "output": {
+        "caseId": "NS-2026-0302",
+        "caseTitle": "Thomcastle Software Studio Holdings Ltd",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 12,
+      "atMs": 12000,
+      "mode": "local",
+      "latencyMs": 911,
+      "inputTokens": 1161,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 13,
+      "atMs": 13500,
+      "mode": "local",
+      "latencyMs": 1498,
+      "inputTokens": 1314,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 16,
+      "atMs": 15000,
+      "mode": "local",
+      "latencyMs": 1820,
+      "inputTokens": 2575,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": "approve"
+      }
+    },
+    {
+      "frameSeq": 18,
+      "atMs": 16500,
+      "mode": "refresh",
+      "latencyMs": 2249,
+      "inputTokens": 2589,
+      "outputTokens": 51,
+      "output": {
+        "caseId": "NS-2026-0303",
+        "caseTitle": "Drummore Freight Partners Holdings Ltd",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 20,
+      "atMs": 18500,
+      "mode": "local",
+      "latencyMs": 1034,
+      "inputTokens": 1249,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 21,
+      "atMs": 20000,
+      "mode": "local",
+      "latencyMs": 954,
+      "inputTokens": 1314,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 22,
+      "atMs": 21000,
+      "mode": "local",
+      "latencyMs": 1630,
+      "inputTokens": 1353,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 24,
+      "atMs": 22500,
+      "mode": "refresh",
+      "latencyMs": 1604,
+      "inputTokens": 2589,
+      "outputTokens": 43,
+      "output": {
+        "caseId": "NS-2026-0304",
+        "caseTitle": "Bellwether Heritage Trust",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 27,
+      "atMs": 24500,
+      "mode": "local",
+      "latencyMs": 1485,
+      "inputTokens": 1161,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 28,
+      "atMs": 25001,
+      "mode": "local",
+      "latencyMs": 1497,
+      "inputTokens": 1189,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 29,
+      "atMs": 26500,
+      "mode": "local",
+      "latencyMs": 968,
+      "inputTokens": 1275,
+      "outputTokens": 20,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 31,
+      "atMs": 28501,
+      "mode": "local",
+      "latencyMs": 1728,
+      "inputTokens": 2575,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": "requestDocuments"
+      }
+    },
+    {
+      "frameSeq": 32,
+      "atMs": 30000,
+      "mode": "refresh",
+      "latencyMs": 1555,
+      "inputTokens": 2589,
+      "outputTokens": 46,
+      "output": {
+        "caseId": "NS-2626-0305",
+        "caseTitle": "Eskildsen Aviation Services & Co.",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 34,
+      "atMs": 31500,
+      "mode": "local",
+      "latencyMs": 1127,
+      "inputTokens": 2315,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 36,
+      "atMs": 33000,
+      "mode": "local",
+      "latencyMs": 1513,
+      "inputTokens": 1314,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 38,
+      "atMs": 34000,
+      "mode": "local",
+      "latencyMs": 1615,
+      "inputTokens": 1353,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 39,
+      "atMs": 35000,
+      "mode": "local",
+      "latencyMs": 1793,
+      "inputTokens": 2575,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": "requestDocuments"
+      }
+    },
+    {
+      "frameSeq": 42,
+      "atMs": 38000,
+      "mode": "refresh",
+      "latencyMs": 2287,
+      "inputTokens": 2589,
+      "outputTokens": 52,
+      "output": {
+        "caseId": "NS-2026-0306",
+        "caseTitle": "Elif Mbatha-Sorensen",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 44,
+      "atMs": 39500,
+      "mode": "local",
+      "latencyMs": 996,
+      "inputTokens": 1353,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 45,
+      "atMs": 41000,
+      "mode": "local",
+      "latencyMs": 993,
+      "inputTokens": 1353,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 46,
+      "atMs": 42500,
+      "mode": "local",
+      "latencyMs": 1196,
+      "inputTokens": 2575,
+      "outputTokens": 25,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": "escalateCompliance"
+      }
+    },
+    {
+      "frameSeq": 47,
+      "atMs": 46000,
+      "mode": "refresh",
+      "latencyMs": 1321,
+      "inputTokens": 2589,
+      "outputTokens": 33,
+      "output": {
+        "caseId": null,
+        "caseTitle": null,
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 48,
+      "atMs": 47000,
+      "mode": "refresh",
+      "latencyMs": 1214,
+      "inputTokens": 2582,
+      "outputTokens": 33,
+      "output": {
+        "caseId": null,
+        "caseTitle": null,
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 50,
+      "atMs": 48501,
+      "mode": "refresh",
+      "latencyMs": 2324,
+      "inputTokens": 2582,
+      "outputTokens": 51,
+      "output": {
+        "caseId": "NS-2026-0101",
+        "caseTitle": "Halvorsen Marine Logistics Ltd",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 51,
+      "atMs": 50000,
+      "mode": "local",
+      "latencyMs": 1503,
+      "inputTokens": 1249,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 53,
+      "atMs": 52000,
+      "mode": "local",
+      "latencyMs": 1586,
+      "inputTokens": 1249,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 56,
+      "atMs": 54001,
+      "mode": "refresh",
+      "latencyMs": 1815,
+      "inputTokens": 2589,
+      "outputTokens": 53,
+      "output": {
+        "caseId": "NS-2026-0102",
+        "caseTitle": "Quillfeather Agritrade Holdings",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 59,
+      "atMs": 56000,
+      "mode": "local",
+      "latencyMs": 1209,
+      "inputTokens": 1379,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 60,
+      "atMs": 56501,
+      "mode": "local",
+      "latencyMs": 1525,
+      "inputTokens": 1249,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 61,
+      "atMs": 58000,
+      "mode": "local",
+      "latencyMs": 1597,
+      "inputTokens": 1314,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 63,
+      "atMs": 60000,
+      "mode": "refresh",
+      "latencyMs": 1651,
+      "inputTokens": 2589,
+      "outputTokens": 50,
+      "output": {
+        "caseId": "NS-2026-0103",
+        "caseTitle": "Valentin Ashgrove",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 65,
+      "atMs": 62000,
+      "mode": "local",
+      "latencyMs": 1893,
+      "inputTokens": 2107,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 66,
+      "atMs": 62500,
+      "mode": "local",
+      "latencyMs": 1567,
+      "inputTokens": 1249,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 68,
+      "atMs": 65500,
+      "mode": "local",
+      "latencyMs": 1753,
+      "inputTokens": 2211,
+      "outputTokens": 23,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": "enhancedReview"
+      }
+    },
+    {
+      "frameSeq": 69,
+      "atMs": 66000,
+      "mode": "local",
+      "latencyMs": 1287,
+      "inputTokens": 2039,
+      "outputTokens": 23,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": "enhancedReview"
+      }
+    },
+    {
+      "frameSeq": 70,
+      "atMs": 68500,
+      "mode": "refresh",
+      "latencyMs": 1934,
+      "inputTokens": 2589,
+      "outputTokens": 32,
+      "output": {
+        "caseId": null,
+        "caseTitle": null,
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 74,
+      "atMs": 70500,
+      "mode": "refresh",
+      "latencyMs": 2266,
+      "inputTokens": 2582,
+      "outputTokens": 55,
+      "output": {
+        "caseId": "NS-2026-0301",
+        "caseTitle": "Zofia Rasmussen-Adeyemi",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 75,
+      "atMs": 72500,
+      "mode": "local",
+      "latencyMs": 1170,
+      "inputTokens": 1947,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 76,
+      "atMs": 74000,
+      "mode": "local",
+      "latencyMs": 1581,
+      "inputTokens": 1223,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 78,
+      "atMs": 75000,
+      "mode": "local",
+      "latencyMs": 1248,
+      "inputTokens": 2575,
+      "outputTokens": 26,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": "enhancedReview"
+      }
+    },
+    {
+      "frameSeq": 80,
+      "atMs": 76500,
+      "mode": "refresh",
+      "latencyMs": 2019,
+      "inputTokens": 2589,
+      "outputTokens": 50,
+      "output": {
+        "caseId": "NS-2026-0302",
+        "caseTitle": "Thomcastle Software Studio Holdings Ltd",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 82,
+      "atMs": 79000,
+      "mode": "local",
+      "latencyMs": 1483,
+      "inputTokens": 1353,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 84,
+      "atMs": 80500,
+      "mode": "local",
+      "latencyMs": 1160,
+      "inputTokens": 2575,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": "approve"
+      }
+    },
+    {
+      "frameSeq": 85,
+      "atMs": 81500,
+      "mode": "refresh",
+      "latencyMs": 1712,
+      "inputTokens": 2589,
+      "outputTokens": 45,
+      "output": {
+        "caseId": "NS-2026-0303",
+        "caseTitle": "Drummore Freight Partners Holdings Ltd",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 87,
+      "atMs": 83500,
+      "mode": "local",
+      "latencyMs": 1896,
+      "inputTokens": 1161,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 90,
+      "atMs": 85500,
+      "mode": "local",
+      "latencyMs": 1044,
+      "inputTokens": 1379,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 92,
+      "atMs": 86500,
+      "mode": "local",
+      "latencyMs": 1777,
+      "inputTokens": 2575,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": "reject"
+      }
+    },
+    {
+      "frameSeq": 94,
+      "atMs": 88500,
+      "mode": "refresh",
+      "latencyMs": 1533,
+      "inputTokens": 2589,
+      "outputTokens": 43,
+      "output": {
+        "caseId": "NS-2026-0304",
+        "caseTitle": "Bellwether Heritage Trust",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 95,
+      "atMs": 90000,
+      "mode": "local",
+      "latencyMs": 1063,
+      "inputTokens": 1379,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 96,
+      "atMs": 90500,
+      "mode": "local",
+      "latencyMs": 1010,
+      "inputTokens": 1366,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 97,
+      "atMs": 92000,
+      "mode": "local",
+      "latencyMs": 951,
+      "inputTokens": 1314,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 98,
+      "atMs": 93000,
+      "mode": "local",
+      "latencyMs": 1608,
+      "inputTokens": 1353,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 100,
+      "atMs": 94000,
+      "mode": "local",
+      "latencyMs": 1190,
+      "inputTokens": 2575,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": "reject"
+      }
+    },
+    {
+      "frameSeq": 102,
+      "atMs": 96000,
+      "mode": "refresh",
+      "latencyMs": 2421,
+      "inputTokens": 2589,
+      "outputTokens": 52,
+      "output": {
+        "caseId": "NS-2626-0305",
+        "caseTitle": "Eskildsen Aviation Services & Co.",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 105,
+      "atMs": 98501,
+      "mode": "local",
+      "latencyMs": 1523,
+      "inputTokens": 1353,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 106,
+      "atMs": 99499,
+      "mode": "local",
+      "latencyMs": 1201,
+      "inputTokens": 1353,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 108,
+      "atMs": 101000,
+      "mode": "refresh",
+      "latencyMs": 1709,
+      "inputTokens": 2589,
+      "outputTokens": 54,
+      "output": {
+        "caseId": "NS-2026-0305",
+        "caseTitle": "Eskildsen Aviation Services & Co.",
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": "escalateCompliance"
+      }
+    },
+    {
+      "frameSeq": 110,
+      "atMs": 102001,
+      "mode": "refresh",
+      "latencyMs": 1673,
+      "inputTokens": 2589,
+      "outputTokens": 52,
+      "output": {
+        "caseId": "NS-2026-0306",
+        "caseTitle": "Elif Mbatha-Sorensen",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 112,
+      "atMs": 104000,
+      "mode": "local",
+      "latencyMs": 924,
+      "inputTokens": 1249,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 113,
+      "atMs": 106000,
+      "mode": "local",
+      "latencyMs": 1514,
+      "inputTokens": 1314,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 114,
+      "atMs": 107000,
+      "mode": "local",
+      "latencyMs": 1007,
+      "inputTokens": 1353,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 115,
+      "atMs": 108500,
+      "mode": "local",
+      "latencyMs": 1220,
+      "inputTokens": 2575,
+      "outputTokens": 26,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": "enhancedReview"
+      }
+    },
+    {
+      "frameSeq": 116,
+      "atMs": 111500,
+      "mode": "refresh",
+      "latencyMs": 1419,
+      "inputTokens": 2589,
+      "outputTokens": 33,
+      "output": {
+        "caseId": null,
+        "caseTitle": null,
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 117,
+      "atMs": 112000,
+      "mode": "refresh",
+      "latencyMs": 1853,
+      "inputTokens": 2582,
+      "outputTokens": 33,
+      "output": {
+        "caseId": null,
+        "caseTitle": null,
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 119,
+      "atMs": 114500,
+      "mode": "refresh",
+      "latencyMs": 1635,
+      "inputTokens": 2582,
+      "outputTokens": 51,
+      "output": {
+        "caseId": "NS-2026-0101",
+        "caseTitle": "Halvorsen Marine Logistics Ltd",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 121,
+      "atMs": 116500,
+      "mode": "refresh",
+      "latencyMs": 1547,
+      "inputTokens": 2589,
+      "outputTokens": 50,
+      "output": {
+        "caseId": "NS-2026-0101",
+        "caseTitle": "Halvorsen Marine Logistics Ltd",
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 122,
+      "atMs": 118500,
+      "mode": "local",
+      "latencyMs": 1595,
+      "inputTokens": 1210,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 124,
+      "atMs": 120001,
+      "mode": "local",
+      "latencyMs": 1287,
+      "inputTokens": 2575,
+      "outputTokens": 26,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": "escalateCompliance"
+      }
+    },
+    {
+      "frameSeq": 126,
+      "atMs": 121000,
+      "mode": "refresh",
+      "latencyMs": 1822,
+      "inputTokens": 2589,
+      "outputTokens": 53,
+      "output": {
+        "caseId": "NS-2626-0102",
+        "caseTitle": "Quillfeather Agritrade Holdings",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 128,
+      "atMs": 122000,
+      "mode": "local",
+      "latencyMs": 1492,
+      "inputTokens": 1161,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 130,
+      "atMs": 124500,
+      "mode": "local",
+      "latencyMs": 1832,
+      "inputTokens": 2419,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": "requestDocuments"
+      }
+    },
+    {
+      "frameSeq": 133,
+      "atMs": 126001,
+      "mode": "refresh",
+      "latencyMs": 1587,
+      "inputTokens": 2589,
+      "outputTokens": 50,
+      "output": {
+        "caseId": "NS-2626-0103",
+        "caseTitle": "Valentin Ashgrove",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 135,
+      "atMs": 128001,
+      "mode": "local",
+      "latencyMs": 933,
+      "inputTokens": 1249,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 136,
+      "atMs": 130000,
+      "mode": "local",
+      "latencyMs": 1049,
+      "inputTokens": 1314,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 137,
+      "atMs": 131000,
+      "mode": "local",
+      "latencyMs": 1212,
+      "inputTokens": 2211,
+      "outputTokens": 25,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": "escalateCompliance"
+      }
+    },
+    {
+      "frameSeq": 138,
+      "atMs": 131500,
+      "mode": "local",
+      "latencyMs": 1224,
+      "inputTokens": 2059,
+      "outputTokens": 25,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": "escalateCompliance"
+      }
+    },
+    {
+      "frameSeq": 139,
+      "atMs": 133500,
+      "mode": "refresh",
+      "latencyMs": 1405,
+      "inputTokens": 2589,
+      "outputTokens": 33,
+      "output": {
+        "caseId": null,
+        "caseTitle": null,
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 141,
+      "atMs": 135001,
+      "mode": "refresh",
+      "latencyMs": 1298,
+      "inputTokens": 2582,
+      "outputTokens": 33,
+      "output": {
+        "caseId": null,
+        "caseTitle": null,
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 142,
+      "atMs": 136500,
+      "mode": "refresh",
+      "latencyMs": 1688,
+      "inputTokens": 2582,
+      "outputTokens": 55,
+      "output": {
+        "caseId": "NS-2026-0301",
+        "caseTitle": "Zofia Rasmussen-Adeyemi",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 143,
+      "atMs": 138000,
+      "mode": "local",
+      "latencyMs": 1488,
+      "inputTokens": 1249,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 144,
+      "atMs": 138500,
+      "mode": "local",
+      "latencyMs": 1510,
+      "inputTokens": 1249,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 145,
+      "atMs": 140500,
+      "mode": "local",
+      "latencyMs": 982,
+      "inputTokens": 1210,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 147,
+      "atMs": 142000,
+      "mode": "local",
+      "latencyMs": 1274,
+      "inputTokens": 2575,
+      "outputTokens": 24,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": "requestDocuments"
+      }
+    },
+    {
+      "frameSeq": 149,
+      "atMs": 143000,
+      "mode": "refresh",
+      "latencyMs": 1633,
+      "inputTokens": 2589,
+      "outputTokens": 44,
+      "output": {
+        "caseId": "NS-2026-0302",
+        "caseTitle": "Thomcastle Software Studio Holdings Ltd",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 151,
+      "atMs": 144500,
+      "mode": "local",
+      "latencyMs": 1092,
+      "inputTokens": 1161,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 152,
+      "atMs": 146500,
+      "mode": "local",
+      "latencyMs": 1565,
+      "inputTokens": 1275,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 154,
+      "atMs": 148000,
+      "mode": "local",
+      "latencyMs": 1249,
+      "inputTokens": 2575,
+      "outputTokens": 24,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": "requestDocuments"
+      }
+    },
+    {
+      "frameSeq": 155,
+      "atMs": 149000,
+      "mode": "refresh",
+      "latencyMs": 1633,
+      "inputTokens": 2589,
+      "outputTokens": 45,
+      "output": {
+        "caseId": "NS-2026-0303",
+        "caseTitle": "Drummore Freight Partners Holdings Ltd",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 157,
+      "atMs": 151000,
+      "mode": "local",
+      "latencyMs": 965,
+      "inputTokens": 1249,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 158,
+      "atMs": 152500,
+      "mode": "local",
+      "latencyMs": 1022,
+      "inputTokens": 1301,
+      "outputTokens": 20,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 159,
+      "atMs": 153500,
+      "mode": "local",
+      "latencyMs": 1861,
+      "inputTokens": 2575,
+      "outputTokens": 24,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": "requestDocuments"
+      }
+    },
+    {
+      "frameSeq": 160,
+      "atMs": 155000,
+      "mode": "refresh",
+      "latencyMs": 2147,
+      "inputTokens": 2589,
+      "outputTokens": 49,
+      "output": {
+        "caseId": "NS-2026-0304",
+        "caseTitle": "Bellwether Heritage Trust",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 162,
+      "atMs": 157500,
+      "mode": "local",
+      "latencyMs": 970,
+      "inputTokens": 1249,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 163,
+      "atMs": 158500,
+      "mode": "local",
+      "latencyMs": 987,
+      "inputTokens": 1288,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 165,
+      "atMs": 159500,
+      "mode": "local",
+      "latencyMs": 1126,
+      "inputTokens": 1353,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 166,
+      "atMs": 160000,
+      "mode": "local",
+      "latencyMs": 1247,
+      "inputTokens": 2575,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": "escalateCompliance"
+      }
+    },
+    {
+      "frameSeq": 167,
+      "atMs": 161500,
+      "mode": "refresh",
+      "latencyMs": 1618,
+      "inputTokens": 2589,
+      "outputTokens": 46,
+      "output": {
+        "caseId": "NS-2026-0305",
+        "caseTitle": "Eskildsen Aviation Services & Co.",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 169,
+      "atMs": 163000,
+      "mode": "local",
+      "latencyMs": 1552,
+      "inputTokens": 1161,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 170,
+      "atMs": 164501,
+      "mode": "local",
+      "latencyMs": 1496,
+      "inputTokens": 1275,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 172,
+      "atMs": 166000,
+      "mode": "local",
+      "latencyMs": 1761,
+      "inputTokens": 2575,
+      "outputTokens": 24,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": "requestDocuments"
+      }
+    },
+    {
+      "frameSeq": 175,
+      "atMs": 168501,
+      "mode": "refresh",
+      "latencyMs": 1628,
+      "inputTokens": 2589,
+      "outputTokens": 46,
+      "output": {
+        "caseId": "NS-2026-0306",
+        "caseTitle": "Elif Mbatha-Sorensen",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 177,
+      "atMs": 169500,
+      "mode": "local",
+      "latencyMs": 1498,
+      "inputTokens": 1249,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 179,
+      "atMs": 171499,
+      "mode": "local",
+      "latencyMs": 1001,
+      "inputTokens": 1353,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 181,
+      "atMs": 172500,
+      "mode": "local",
+      "latencyMs": 1736,
+      "inputTokens": 2575,
+      "outputTokens": 23,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": "reject"
+      }
+    },
+    {
+      "frameSeq": 182,
+      "atMs": 173000,
+      "mode": "local",
+      "latencyMs": 1115,
+      "inputTokens": 2294,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": "reject"
+      }
+    },
+    {
+      "frameSeq": 184,
+      "atMs": 175500,
+      "mode": "refresh",
+      "latencyMs": 1262,
+      "inputTokens": 2589,
+      "outputTokens": 33,
+      "output": {
+        "caseId": null,
+        "caseTitle": null,
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 186,
+      "atMs": 176501,
+      "mode": "refresh",
+      "latencyMs": 1225,
+      "inputTokens": 2582,
+      "outputTokens": 33,
+      "output": {
+        "caseId": null,
+        "caseTitle": null,
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 187,
+      "atMs": 177500,
+      "mode": "refresh",
+      "latencyMs": 1517,
+      "inputTokens": 2582,
+      "outputTokens": 45,
+      "output": {
+        "caseId": "NS-2026-0101",
+        "caseTitle": "Halvorsen Marine Logistics Ltd",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 188,
+      "atMs": 180000,
+      "mode": "local",
+      "latencyMs": 944,
+      "inputTokens": 1249,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 189,
+      "atMs": 181000,
+      "mode": "local",
+      "latencyMs": 992,
+      "inputTokens": 1262,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 190,
+      "atMs": 181999,
+      "mode": "local",
+      "latencyMs": 1250,
+      "inputTokens": 2575,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": "escalateCompliance"
+      }
+    },
+    {
+      "frameSeq": 192,
+      "atMs": 183000,
+      "mode": "refresh",
+      "latencyMs": 1694,
+      "inputTokens": 2589,
+      "outputTokens": 53,
+      "output": {
+        "caseId": "NS-2626-0102",
+        "caseTitle": "Quillfeather Agritrade Holdings",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 195,
+      "atMs": 185000,
+      "mode": "local",
+      "latencyMs": 992,
+      "inputTokens": 1319,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 196,
+      "atMs": 186499,
+      "mode": "local",
+      "latencyMs": 917,
+      "inputTokens": 1262,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 197,
+      "atMs": 188000,
+      "mode": "local",
+      "latencyMs": 2879,
+      "inputTokens": 2211,
+      "outputTokens": 25,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": "escalateCompliance"
+      }
+    },
+    {
+      "frameSeq": 199,
+      "atMs": 189500,
+      "mode": "refresh",
+      "latencyMs": 1831,
+      "inputTokens": 2589,
+      "outputTokens": 44,
+      "output": {
+        "caseId": "NS-2626-0103",
+        "caseTitle": "Valentin Ashgrove",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 201,
+      "atMs": 191501,
+      "mode": "local",
+      "latencyMs": 961,
+      "inputTokens": 1249,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 203,
+      "atMs": 193500,
+      "mode": "local",
+      "latencyMs": 1196,
+      "inputTokens": 2211,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 204,
+      "atMs": 194001,
+      "mode": "local",
+      "latencyMs": 1829,
+      "inputTokens": 2059,
+      "outputTokens": 23,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": "enhancedReview"
+      }
+    },
+    {
+      "frameSeq": 205,
+      "atMs": 196500,
+      "mode": "refresh",
+      "latencyMs": 1306,
+      "inputTokens": 2589,
+      "outputTokens": 33,
+      "output": {
+        "caseId": null,
+        "caseTitle": null,
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 208,
+      "atMs": 198001,
+      "mode": "refresh",
+      "latencyMs": 1885,
+      "inputTokens": 2582,
+      "outputTokens": 33,
+      "output": {
+        "caseId": null,
+        "caseTitle": null,
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 209,
+      "atMs": 199000,
+      "mode": "refresh",
+      "latencyMs": 2228,
+      "inputTokens": 2582,
+      "outputTokens": 55,
+      "output": {
+        "caseId": "NS-2026-0301",
+        "caseTitle": "Zofia Rasmussen-Adeyemi",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 212,
+      "atMs": 201500,
+      "mode": "local",
+      "latencyMs": 1047,
+      "inputTokens": 1262,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 213,
+      "atMs": 203001,
+      "mode": "local",
+      "latencyMs": 1011,
+      "inputTokens": 1223,
+      "outputTokens": 20,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 214,
+      "atMs": 204500,
+      "mode": "local",
+      "latencyMs": 1293,
+      "inputTokens": 2575,
+      "outputTokens": 24,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": "requestDocuments"
+      }
+    },
+    {
+      "frameSeq": 215,
+      "atMs": 206000,
+      "mode": "refresh",
+      "latencyMs": 2328,
+      "inputTokens": 2589,
+      "outputTokens": 44,
+      "output": {
+        "caseId": "NS-2026-0302",
+        "caseTitle": "Thomcastle Software Studio Holdings Ltd",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 217,
+      "atMs": 208001,
+      "mode": "local",
+      "latencyMs": 966,
+      "inputTokens": 1249,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 218,
+      "atMs": 209000,
+      "mode": "local",
+      "latencyMs": 934,
+      "inputTokens": 1301,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 219,
+      "atMs": 210000,
+      "mode": "local",
+      "latencyMs": 1180,
+      "inputTokens": 1353,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 221,
+      "atMs": 211500,
+      "mode": "refresh",
+      "latencyMs": 2250,
+      "inputTokens": 2589,
+      "outputTokens": 45,
+      "output": {
+        "caseId": "NS-2026-0303",
+        "caseTitle": "Drummore Freight Partners Holdings Ltd",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 223,
+      "atMs": 213500,
+      "mode": "local",
+      "latencyMs": 1792,
+      "inputTokens": 1947,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 225,
+      "atMs": 215500,
+      "mode": "local",
+      "latencyMs": 1562,
+      "inputTokens": 1314,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 227,
+      "atMs": 216501,
+      "mode": "local",
+      "latencyMs": 1210,
+      "inputTokens": 2575,
+      "outputTokens": 24,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": "requestDocuments"
+      }
+    },
+    {
+      "frameSeq": 229,
+      "atMs": 218501,
+      "mode": "refresh",
+      "latencyMs": 2223,
+      "inputTokens": 2589,
+      "outputTokens": 43,
+      "output": {
+        "caseId": "NS-2626-0304",
+        "caseTitle": "Bellwether Heritage Trust",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 231,
+      "atMs": 220000,
+      "mode": "local",
+      "latencyMs": 931,
+      "inputTokens": 1249,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 232,
+      "atMs": 222001,
+      "mode": "local",
+      "latencyMs": 1531,
+      "inputTokens": 1314,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 234,
+      "atMs": 223500,
+      "mode": "local",
+      "latencyMs": 1804,
+      "inputTokens": 2575,
+      "outputTokens": 25,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": "escalateCompliance"
+      }
+    },
+    {
+      "frameSeq": 235,
+      "atMs": 225000,
+      "mode": "refresh",
+      "latencyMs": 1721,
+      "inputTokens": 2589,
+      "outputTokens": 51,
+      "output": {
+        "caseId": "NS-2626-0305",
+        "caseTitle": "Eskildsen Aviation Services & Co.",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 237,
+      "atMs": 227000,
+      "mode": "local",
+      "latencyMs": 970,
+      "inputTokens": 1366,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 239,
+      "atMs": 228000,
+      "mode": "local",
+      "latencyMs": 953,
+      "inputTokens": 1249,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 240,
+      "atMs": 229499,
+      "mode": "local",
+      "latencyMs": 1094,
+      "inputTokens": 1301,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 241,
+      "atMs": 230000,
+      "mode": "local",
+      "latencyMs": 976,
+      "inputTokens": 1210,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 243,
+      "atMs": 231500,
+      "mode": "local",
+      "latencyMs": 1280,
+      "inputTokens": 2575,
+      "outputTokens": 25,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": "escalateCompliance"
+      }
+    },
+    {
+      "frameSeq": 244,
+      "atMs": 232999,
+      "mode": "refresh",
+      "latencyMs": 2261,
+      "inputTokens": 2589,
+      "outputTokens": 52,
+      "output": {
+        "caseId": "NS-2026-0306",
+        "caseTitle": "Elif Mbatha-Sorensen",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 246,
+      "atMs": 234499,
+      "mode": "local",
+      "latencyMs": 922,
+      "inputTokens": 1249,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 247,
+      "atMs": 236000,
+      "mode": "local",
+      "latencyMs": 1410,
+      "inputTokens": 1314,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 249,
+      "atMs": 237500,
+      "mode": "local",
+      "latencyMs": 1799,
+      "inputTokens": 2575,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": "approve"
+      }
+    },
+    {
+      "frameSeq": 250,
+      "atMs": 240500,
+      "mode": "refresh",
+      "latencyMs": 1877,
+      "inputTokens": 2589,
+      "outputTokens": 33,
+      "output": {
+        "caseId": null,
+        "caseTitle": null,
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 251,
+      "atMs": 241500,
+      "mode": "refresh",
+      "latencyMs": 1794,
+      "inputTokens": 2582,
+      "outputTokens": 33,
+      "output": {
+        "caseId": null,
+        "caseTitle": null,
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 252,
+      "atMs": 243500,
+      "mode": "refresh",
+      "latencyMs": 3147,
+      "inputTokens": 2582,
+      "outputTokens": 45,
+      "output": {
+        "caseId": "NS-2026-0101",
+        "caseTitle": "Halvorsen Marine Logistics Ltd",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 254,
+      "atMs": 247000,
+      "mode": "local",
+      "latencyMs": 961,
+      "inputTokens": 1249,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 255,
+      "atMs": 248000,
+      "mode": "local",
+      "latencyMs": 1261,
+      "inputTokens": 2575,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 257,
+      "atMs": 249500,
+      "mode": "refresh",
+      "latencyMs": 1650,
+      "inputTokens": 2589,
+      "outputTokens": 53,
+      "output": {
+        "caseId": "NS-2626-0102",
+        "caseTitle": "Quillfeather Agritrade Holdings",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 258,
+      "atMs": 250000,
+      "mode": "refresh",
+      "latencyMs": 1996,
+      "inputTokens": 2589,
+      "outputTokens": 53,
+      "output": {
+        "caseId": "NS-2026-0102",
+        "caseTitle": "Quillfeather Agritrade Holdings",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 260,
+      "atMs": 252500,
+      "mode": "local",
+      "latencyMs": 927,
+      "inputTokens": 1249,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 261,
+      "atMs": 254000,
+      "mode": "local",
+      "latencyMs": 1619,
+      "inputTokens": 1314,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 262,
+      "atMs": 255001,
+      "mode": "refresh",
+      "latencyMs": 1807,
+      "inputTokens": 2589,
+      "outputTokens": 49,
+      "output": {
+        "caseId": "NS-2026-0102",
+        "caseTitle": "Quillfeather Agritrade Holdings",
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": "escalateCompliance"
+      }
+    },
+    {
+      "frameSeq": 263,
+      "atMs": 257000,
+      "mode": "refresh",
+      "latencyMs": 1486,
+      "inputTokens": 2589,
+      "outputTokens": 50,
+      "output": {
+        "caseId": "NS-2626-0103",
+        "caseTitle": "Valentin Ashgrove",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 265,
+      "atMs": 259000,
+      "mode": "local",
+      "latencyMs": 956,
+      "inputTokens": 1249,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 266,
+      "atMs": 261000,
+      "mode": "local",
+      "latencyMs": 989,
+      "inputTokens": 1314,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 267,
+      "atMs": 261999,
+      "mode": "local",
+      "latencyMs": 1221,
+      "inputTokens": 2159,
+      "outputTokens": 25,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": "escalateCompliance"
+      }
+    },
+    {
+      "frameSeq": 268,
+      "atMs": 265000,
+      "mode": "refresh",
+      "latencyMs": 1470,
+      "inputTokens": 2589,
+      "outputTokens": 33,
+      "output": {
+        "caseId": null,
+        "caseTitle": null,
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 270,
+      "atMs": 266500,
+      "mode": "refresh",
+      "latencyMs": 1897,
+      "inputTokens": 2582,
+      "outputTokens": 33,
+      "output": {
+        "caseId": null,
+        "caseTitle": null,
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 272,
+      "atMs": 268000,
+      "mode": "refresh",
+      "latencyMs": 1722,
+      "inputTokens": 2582,
+      "outputTokens": 55,
+      "output": {
+        "caseId": "NS-2026-0301",
+        "caseTitle": "Zofia Rasmussen-Adeyemi",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 274,
+      "atMs": 269500,
+      "mode": "local",
+      "latencyMs": 1637,
+      "inputTokens": 1262,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 275,
+      "atMs": 271500,
+      "mode": "local",
+      "latencyMs": 1588,
+      "inputTokens": 1236,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 276,
+      "atMs": 272500,
+      "mode": "local",
+      "latencyMs": 1219,
+      "inputTokens": 2575,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": "approve"
+      }
+    },
+    {
+      "frameSeq": 277,
+      "atMs": 274500,
+      "mode": "refresh",
+      "latencyMs": 1627,
+      "inputTokens": 2589,
+      "outputTokens": 50,
+      "output": {
+        "caseId": "NS-2026-0302",
+        "caseTitle": "Thomcastle Software Studio Holdings Ltd",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 278,
+      "atMs": 276500,
+      "mode": "local",
+      "latencyMs": 1563,
+      "inputTokens": 1379,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 279,
+      "atMs": 277000,
+      "mode": "local",
+      "latencyMs": 1051,
+      "inputTokens": 1353,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 280,
+      "atMs": 278501,
+      "mode": "local",
+      "latencyMs": 972,
+      "inputTokens": 1314,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 282,
+      "atMs": 280000,
+      "mode": "local",
+      "latencyMs": 1896,
+      "inputTokens": 2575,
+      "outputTokens": 26,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": "enhancedReview"
+      }
+    },
+    {
+      "frameSeq": 284,
+      "atMs": 281500,
+      "mode": "refresh",
+      "latencyMs": 1640,
+      "inputTokens": 2589,
+      "outputTokens": 45,
+      "output": {
+        "caseId": "NS-2026-0303",
+        "caseTitle": "Drummore Freight Partners Holdings Ltd",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 285,
+      "atMs": 282500,
+      "mode": "local",
+      "latencyMs": 927,
+      "inputTokens": 1161,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 286,
+      "atMs": 284501,
+      "mode": "local",
+      "latencyMs": 1638,
+      "inputTokens": 1314,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 288,
+      "atMs": 285500,
+      "mode": "local",
+      "latencyMs": 1194,
+      "inputTokens": 2575,
+      "outputTokens": 23,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": "approve"
+      }
+    },
+    {
+      "frameSeq": 289,
+      "atMs": 287000,
+      "mode": "refresh",
+      "latencyMs": 2205,
+      "inputTokens": 2589,
+      "outputTokens": 49,
+      "output": {
+        "caseId": "NS-2026-0304",
+        "caseTitle": "Bellwether Heritage Trust",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 291,
+      "atMs": 289500,
+      "mode": "local",
+      "latencyMs": 947,
+      "inputTokens": 1379,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 292,
+      "atMs": 290000,
+      "mode": "local",
+      "latencyMs": 1516,
+      "inputTokens": 1327,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 294,
+      "atMs": 292001,
+      "mode": "local",
+      "latencyMs": 1650,
+      "inputTokens": 1314,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 297,
+      "atMs": 294000,
+      "mode": "refresh",
+      "latencyMs": 1591,
+      "inputTokens": 2589,
+      "outputTokens": 46,
+      "output": {
+        "caseId": "NS-2626-0305",
+        "caseTitle": "Eskildsen Aviation Services & Co.",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 299,
+      "atMs": 295500,
+      "mode": "local",
+      "latencyMs": 937,
+      "inputTokens": 1161,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 300,
+      "atMs": 297000,
+      "mode": "local",
+      "latencyMs": 988,
+      "inputTokens": 1301,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 301,
+      "atMs": 298500,
+      "mode": "local",
+      "latencyMs": 930,
+      "inputTokens": 1353,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 302,
+      "atMs": 299000,
+      "mode": "local",
+      "latencyMs": 1234,
+      "inputTokens": 2575,
+      "outputTokens": 26,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": "enhancedReview"
+      }
+    },
+    {
+      "frameSeq": 304,
+      "atMs": 300500,
+      "mode": "refresh",
+      "latencyMs": 1598,
+      "inputTokens": 2589,
+      "outputTokens": 46,
+      "output": {
+        "caseId": "NS-2026-0306",
+        "caseTitle": "Elif Mbatha-Sorensen",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 306,
+      "atMs": 302000,
+      "mode": "local",
+      "latencyMs": 1077,
+      "inputTokens": 1249,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 307,
+      "atMs": 303500,
+      "mode": "local",
+      "latencyMs": 987,
+      "inputTokens": 1288,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 308,
+      "atMs": 304000,
+      "mode": "local",
+      "latencyMs": 1612,
+      "inputTokens": 1288,
+      "outputTokens": 20,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 311,
+      "atMs": 306000,
+      "mode": "local",
+      "latencyMs": 1764,
+      "inputTokens": 2575,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": "reject"
+      }
+    }
+  ]
+}

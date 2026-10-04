@@ -4,7 +4,7 @@ import { createPerceptionQueue, createStateApplier, type PerceptionFrame } from 
 /** A request the test resolves or rejects by hand. */
 type Pending = { frame: PerceptionFrame<string>; signal: AbortSignal; resolve: (r: string) => void; reject: (e: unknown) => void };
 
-function harness(options: { epoch?: number; lastFrameSeq?: number } = {}) {
+function harness(options: { epoch?: number; lastFrameSeq?: number; maxInFlight?: number } = {}) {
   let time = 1000;
   const requests: Pending[] = [];
   const applied: Array<{ result: string; frameSeq: number }> = [];
@@ -13,6 +13,7 @@ function harness(options: { epoch?: number; lastFrameSeq?: number } = {}) {
   let concurrent = 0;
   const queue = createPerceptionQueue<string, string>({
     epoch: options.epoch ?? 0,
+    ...(options.maxInFlight !== undefined && { maxInFlight: options.maxInFlight }),
     ...(options.lastFrameSeq !== undefined && { lastFrameSeq: options.lastFrameSeq }),
     now: () => time,
     send: (frame, signal) => {
@@ -191,5 +192,55 @@ describe("perception queue", () => {
     h.requests[0]?.resolve("r");
     await h.flush();
     expect(idle).toBe(true);
+  });
+});
+
+describe("perception queue with two requests in flight (team P2 decision 4; off by default)", () => {
+  it("runs at most two at once, coalesces the rest to the newest, and refuses a non-positive limit", async () => {
+    const h = harness({ maxInFlight: 2 });
+    for (const f of ["a", "b", "c", "d", "e"]) h.queue.submit(f, 1, 0);
+    await h.flush();
+    expect(h.requests.map((r) => r.frame.payload)).toEqual(["a", "b"]);
+    expect(h.queue.stats()).toMatchObject({ inFlight: 2, pendingFrameSeq: 5, coalesced: 2 });
+    h.requests[0]?.resolve("A");
+    await h.flush();
+    expect(h.requests.map((r) => r.frame.payload)).toEqual(["a", "b", "e"]);
+    expect(h.maxConcurrent()).toBe(2);
+    expect(() => createPerceptionQueue({ epoch: 0, maxInFlight: 0, now: () => 0, send: () => Promise.resolve(""), apply: () => undefined })).toThrow(RangeError);
+  });
+
+  it("never applies an older frameSeq that settles after a newer one was applied", async () => {
+    const h = harness({ maxInFlight: 2 });
+    h.queue.submit("old", 1, 0);
+    h.queue.submit("new", 2, 0);
+    await h.flush();
+    h.requests[1]?.resolve("NEW"); // the newer frame answers first
+    await h.flush();
+    h.requests[0]?.resolve("OLD"); // the older answer arrives late: stale, even though two were in flight
+    await h.flush();
+    expect(h.applied).toEqual([{ result: "NEW", frameSeq: 2 }]);
+    expect(h.queue.stats()).toMatchObject({ applied: 1, staleDropped: 1, inFlight: 0 });
+  });
+
+  it("applies both in order when they settle in order, and an epoch change aborts both", async () => {
+    const h = harness({ maxInFlight: 2 });
+    h.queue.submit("one", 1, 0);
+    h.queue.submit("two", 2, 0);
+    await h.flush();
+    h.requests[0]?.resolve("ONE");
+    await h.flush();
+    h.requests[1]?.resolve("TWO");
+    await h.flush();
+    expect(h.applied.map((a) => a.frameSeq)).toEqual([1, 2]);
+
+    h.queue.submit("three", 3, 0);
+    h.queue.submit("four", 4, 0);
+    await h.flush();
+    h.queue.setEpoch(1);
+    expect(h.requests.slice(2).map((r) => r.signal.aborted)).toEqual([true, true]);
+    h.requests[2]?.resolve("THREE");
+    h.requests[3]?.resolve("FOUR");
+    await h.flush();
+    expect(h.applied.map((a) => a.frameSeq)).toEqual([1, 2]); // nothing from the old epoch is applied
   });
 });

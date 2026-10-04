@@ -29,7 +29,7 @@ import {
 } from "./image";
 
 /** A word read by OCR, in full-frame pixel coordinates. Words with the same `line` share a text line. */
-export type OcrWord = { text: string; bbox: Rect; line: number };
+export type OcrWord = { text: string; bbox: Rect; line: number; /** OCR confidence, 0–1, when the engine reports it. */ confidence?: number };
 
 /** Reads the words inside `region` of `image`; returned boxes are in `image` coordinates. */
 export type OcrFn = (image: RgbaImage, region: Rect) => Promise<OcrWord[]>;
@@ -173,6 +173,8 @@ export type RedactionResult = {
   boxes: PiiBox[];
   /** Region OCR read this time. */
   ocrRegion: Rect;
+  /** Every word OCR read this time (for the case-id reader; not every word is PII). */
+  words: OcrWord[];
 };
 
 export type Redactor = {
@@ -214,7 +216,7 @@ export function createRedactor(options: {
         const found = findPiiBoxes(words, options.names()).map((b) => ({ kind: b.kind, box: padRect(b.box, padding) }));
         carried = [...kept, ...found];
         size = { width: image.width, height: image.height };
-        return { image: pixelateBoxes(image, carried.map((b) => b.box)), boxes: carried, ocrRegion: region };
+        return { image: pixelateBoxes(image, carried.map((b) => b.box)), boxes: carried, ocrRegion: region, words };
       } finally {
         busy = false;
       }
@@ -292,6 +294,7 @@ export function createTesseractOcr(options: { basePath: string; lang?: string } 
               words.push({
                 text: w.text,
                 line,
+                ...(typeof w.confidence === "number" && { confidence: w.confidence / 100 }),
                 bbox: {
                   x: origin.x + w.bbox.x0 / scale,
                   y: origin.y + w.bbox.y0 / scale,

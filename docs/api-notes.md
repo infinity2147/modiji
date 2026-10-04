@@ -508,3 +508,34 @@ Sources: installed `@elevenlabs/elevenlabs-js` 2.70 serialization types (`Langua
 - An answer in progress needs 4 s of silence.
 - The floor is held from the authorize request until the agent has spoken, or until the TTL + 1.5 s has passed.
 - A refused, withdrawn or lapsed authorization gives its budget slot back, and the server re-queues a lapsed question.
+
+## 19. P2 client case-id OCR (team decision, 2026-10-04) — implementation note
+
+The P2 vision thresholds are unchanged; this records how the team's decision is wired.
+
+- **Client reads the case id on-device.** Tesseract already runs in the browser for the PII pass
+  (`packages/perception/src/privacy.ts`). The redactor now also returns the OCR `words`, and
+  `createBrowserCaseIdTracker()` (`apps/web/lib/client/capture/browser.ts`) harvests the
+  `NS-####-####` token from the detail-panel header band — fractional region `{x:0.1, y:0,
+  width:0.68, height:0.2}`, measured on the recorded fixture (header id at x≈305, y≈67; the queue
+  column at x≈17 and the review column at x≈1150 are outside it). No second OCR pass: the id comes
+  from words redaction already read. The last confident read is carried forward (a field edit does
+  not change the header), and the tracker resets on off-record, resume and redaction failure.
+- **Trusted metadata.** `FrameMetadataSchema.caseId` (`apps/web/lib/contracts/frames.ts`) carries
+  `{ value, confidence } | null`. The server passes it through to extraction
+  (`VisionJob.clientCaseId` → `ExtractionContext.clientCaseId`). In
+  `packages/perception/src/extraction.ts`, when it is set it is the authoritative caseId for
+  `planRead`/`interpretReading`: the model's own `caseId` read is never consulted for identity, so
+  its misreads ("NS-2626-…" for "NS-2026-…") can no longer attribute events to a wrong case. It
+  falls back to the model's read (which votes, with the title heuristic) only when the client sends
+  null (no confident read, e.g. a list/navigate screen).
+- **Crop-only reads.** With a trusted id, `planRead` sends only the change-bbox crop for any change
+  within the same case (the id is the one value a crop cannot re-read, and the client supplies it);
+  the whole frame is sent only when the client id differs from the open case — a confirmed switch —
+  to read the new case's fields and committed action. A diffuse same-case change with no local bbox
+  still reads the whole screen but is not treated as a switch.
+- **Disclosure.** The capture card (`SCREEN_CAPTURE_DISCLOSURE`) and the top bar
+  (`components/casedesk/top-bar.tsx`) state that the screen-frame case id is read on-device by OCR.
+- **Trust boundary.** The id is read from a synthetic CaseDesk header; it is client-supplied, so the
+  server validates its shape (`ClientCaseIdSchema`) but, as with every client channel, treats it as
+  data. It never carries hidden policy and is independent of the DOM channel.

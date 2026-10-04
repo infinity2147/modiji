@@ -1,0 +1,208 @@
+$ pnpm --filter @vashistha/web vendor:tesseract && pnpm --filter @vashistha/web build && pnpm --filter @vashistha/web exec playwright test
+$ tsx ../../packages/perception/scripts/vendor-tesseract.ts public/tesseract
+worker.min.js                                 109 KiB
+tesseract-core-lstm.wasm.js                  3805 KiB
+tesseract-core-simd-lstm.wasm.js             3808 KiB
+tesseract-core-relaxedsimd-lstm.wasm.js      3814 KiB
+eng.traineddata.gz                           1916 KiB
+vendored into /home/24b4530/modiji/apps/web/public/tesseract
+$ next build
+▲ Next.js 16.3.8 (Turbopack)
+✓ Running next.config.ts took 628ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 3.2s
+  Running TypeScript ...
+  Finished TypeScript in 11.0s ...
+  Collecting page data using 52 workers ...
+  Generating static pages using 52 workers (0/6) ...
+  Generating static pages using 52 workers (1/6) 
+  Generating static pages using 52 workers (2/6) 
+  Generating static pages using 52 workers (4/6) 
+✓ Generating static pages using 52 workers (6/6) in 1029ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /api/cases
+├ ƒ /api/disagreements
+├ ƒ /api/disagreements/answer
+├ ƒ /api/health
+├ ƒ /api/health/deep
+├ ƒ /api/interlock/check
+├ ƒ /api/llm/chat/completions
+├ ƒ /api/media/[sessionId]/frames/[file]
+├ ƒ /api/preflight/authorize
+├ ƒ /api/replays
+├ ƒ /api/replays/[bundleId]
+├ ƒ /api/replays/[bundleId]/audio/[file]
+├ ƒ /api/replays/[bundleId]/import
+├ ƒ /api/replays/[bundleId]/import/[...path]
+├ ƒ /api/replays/[bundleId]/media/[...path]
+├ ƒ /api/replays/[bundleId]/views
+├ ƒ /api/rulebook
+├ ƒ /api/sessions
+├ ƒ /api/sessions/[sessionId]/agent-utterances
+├ ƒ /api/sessions/[sessionId]/archive
+├ ƒ /api/sessions/[sessionId]/concepts
+├ ƒ /api/sessions/[sessionId]/debrief
+├ ƒ /api/sessions/[sessionId]/decisions
+├ ƒ /api/sessions/[sessionId]/engine
+├ ƒ /api/sessions/[sessionId]/events
+├ ƒ /api/sessions/[sessionId]/frames
+├ ƒ /api/sessions/[sessionId]/gate/authorize
+├ ƒ /api/sessions/[sessionId]/ledger
+├ ƒ /api/sessions/[sessionId]/lineage
+├ ƒ /api/sessions/[sessionId]/off-record
+├ ƒ /api/sessions/[sessionId]/questions
+├ ƒ /api/sessions/[sessionId]/teachback
+├ ƒ /api/sessions/[sessionId]/tutor
+├ ƒ /api/sessions/[sessionId]/tutor/cases
+├ ƒ /api/sessions/[sessionId]/tutor/intent
+├ ƒ /api/sessions/[sessionId]/tutor/practice
+├ ƒ /api/sessions/[sessionId]/tutor/prediction
+├ ƒ /api/sessions/[sessionId]/utterances
+├ ƒ /api/sessions/[sessionId]/witnesses
+├ ƒ /api/sessions/[sessionId]/workmap
+├ ƒ /api/sessions/[sessionId]/workmap/export
+├ ƒ /api/voice/token
+├ ƒ /debrief/[sessionId]
+├ ƒ /experts
+├ ○ /replay
+├ ƒ /replay/[bundleId]
+├ ○ /sandbox
+└ ƒ /workmap/[sessionId]
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+[casedesk] > LLM_CALLS=off: model calls disabled (no Anthropic client)
+[casedesk] ✓ Running next.config.ts took 57ms
+[casedesk] > production server ready on http://0.0.0.0:4391
+[casedesk] > Z3 ready (598 ms)
+[concepts] > LLM_CALLS=off: model calls disabled (no Anthropic client)
+[concepts] ✓ Running next.config.ts took 82ms
+[concepts] > production server ready on http://0.0.0.0:4392
+[concepts] > Z3 ready (612 ms)
+[debrief] > LLM_CALLS=off: model calls disabled (no Anthropic client)
+[debrief] ✓ Running next.config.ts took 161ms
+[debrief] > production server ready on http://0.0.0.0:4393
+[debrief] > Z3 ready (631 ms)
+[judge-view] > LLM_CALLS=off: model calls disabled (no Anthropic client)
+[judge-view] ✓ Running next.config.ts took 67ms
+[judge-view] > production server ready on http://0.0.0.0:4394
+[judge-view] > Z3 ready (626 ms)
+[perception] > LLM_CALLS=off: model calls disabled (no Anthropic client)
+[perception] ✓ Running next.config.ts took 63ms
+[perception] > production server ready on http://0.0.0.0:4395
+[perception] > Z3 ready (612 ms)
+[replay] > LLM_CALLS=off: model calls disabled (no Anthropic client)
+[replay] ✓ Running next.config.ts took 66ms
+[replay] > production server ready on http://0.0.0.0:4396
+[replay] > Z3 ready (611 ms)
+[tutor] > LLM_CALLS=off: model calls disabled (no Anthropic client)
+[tutor] ✓ Running next.config.ts took 88ms
+[tutor] > production server ready on http://0.0.0.0:4397
+[tutor] > Z3 ready (653 ms)
+[two-experts] > LLM_CALLS=off: model calls disabled (no Anthropic client)
+[two-experts] ✓ Running next.config.ts took 69ms
+[two-experts] > production server ready on http://0.0.0.0:4398
+[two-experts] > Z3 ready (605 ms)
+
+Running 17 tests using 1 worker
+
+  ✓   1 [casedesk] › e2e/casedesk.spec.ts:92:1 › P1 acceptance: an expert processes the three training cases by hand (8.2s)
+  ✓   2 [casedesk] › e2e/casedesk.spec.ts:168:1 › a forbid from the interlock blocks the commit and shows the expert's quote (2.3s)
+  ✓   3 [casedesk] › e2e/casedesk.spec.ts:203:1 › needs_approval requires a note; acknowledging commits through the real server (2.4s)
+  ✓   4 [casedesk] › e2e/casedesk.spec.ts:238:1 › insufficient_information lists the missing features by their domain labels and can be escalated (3.2s)
+  ✓   5 [casedesk] › e2e/casedesk.spec.ts:261:1 › reloading the session URL resumes it with decided cases still marked (3.2s)
+  ✓   6 [concepts] › e2e/concepts.spec.ts:67:1 › concepts: undefined concept → expert confirms → Model updated banner → backfill shown → coverage under v2 (1.8s)
+  ✘   7 [debrief] › e2e/debrief.spec.ts:70:1 › debrief: witnesses → typed answers → teach-back correction → coverage closed; Work Map with lineage (2.9s)
+  ✓   8 [debrief] › e2e/debrief.spec.ts:168:1 › debrief: a session whose screen was never shared cannot confirm a rule (409 no_screen_frame) (156ms)
+  ✓   9 [judge-view] › e2e/judge-view.spec.ts:42:1 › judge view: gate HUD reacts to typing, ticker follows the ledger, strip stays honestly pending, voice not configured (10.8s)
+  ✓  10 [judge-view] › e2e/judge-view.spec.ts:122:1 › tutor voice on a server without voice credentials: a clear not-configured state, CaseDesk keeps working (2.2s)
+  ✓  11 [judge-view] › e2e/judge-view.spec.ts:135:1 › off the record: red banner, capture paused, nothing recorded, resume with a new epoch (2.4s)
+  ✓  12 [judge-view] › e2e/judge-view.spec.ts:195:1 › a session reloaded while off the record stays off the record (1.7s)
+  ✘  13 [perception] › e2e/perception.spec.ts:55:1 › share screen → change-detected, redacted frames are uploaded, stored and ledgered; off the record stops them (6.0s)
+[replay] [debrief] teach-back uses the template: LLM unavailable
+[replay] [casedesk] session 0a81a9f6-998b-42b5-b138-ae986f970cf0 archived by replay_export
+[replay] [casedesk] session f4334202-87d4-40bf-af72-c7a359debe3a archived by replay_export
+  ✓  14 [replay] › e2e/replay.spec.ts:119:1 › verified replay: genuine run → export → verified replay through the same UI; seek/play in step; one byte tampered → refused (15.6s)
+  ✓  15 [tutor] › e2e/tutor.spec.ts:98:1 › tutor: predict → reveal in the expert's words → commit → mastery → unseen practice case decided (6.7s)
+  ✓  16 [tutor] › e2e/tutor.spec.ts:198:1 › tutor: a real stop-rule from the debrief → intervention on selection, before Save → Save blocked (3.8s)
+  ✓  17 [two-experts] › e2e/two-experts.spec.ts:72:1 › two experts: Z3 disagreement case → both answer → revision with both quotes → team rulebook (2.7s)
+
+
+  1) [debrief] › e2e/debrief.spec.ts:70:1 › debrief: witnesses → typed answers → teach-back correction → coverage closed; Work Map with lineage 
+
+    Error: no proposal "largest owner identity verified is no" → requestDocuments: [["country risk is not high","requestDocuments"],["country risk is medium","requestDocuments"],["politically exposed person is yes","enhancedReview"],["country risk is not high","enhancedReview"],["customer status is new","enhancedReview"]]
+
+      48 |   const pick = (text: string, action: string): Proposal => {
+      49 |     const p = state.proposals.find((x) => x.text === text && x.action === action);
+    > 50 |     if (p === undefined) throw new Error(`no proposal "${text}" → ${action}: ${JSON.stringify(state.proposals.map((x) => [x.text, x.action]))}`);
+         |                                ^
+      51 |     return p;
+      52 |   };
+      53 |   const confirm = async (p: Proposal, quote: string): Promise<void> => {
+        at pick (/home/24b4530/modiji/apps/web/e2e/debrief.spec.ts:50:32)
+        at confirmProposals (/home/24b4530/modiji/apps/web/e2e/debrief.spec.ts:57:17)
+        at /home/24b4530/modiji/apps/web/e2e/debrief.spec.ts:73:3
+
+    Error Context: test-results/debrief-debrief-witnesses--19861-losed-Work-Map-with-lineage-debrief/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/debrief-debrief-witnesses--19861-losed-Work-Map-with-lineage-debrief/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/debrief-debrief-witnesses--19861-losed-Work-Map-with-lineage-debrief/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [perception] › e2e/perception.spec.ts:55:1 › share screen → change-detected, redacted frames are uploaded, stored and ledgered; off the record stops them 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('region', { name: 'Screen capture' })
+    Expected substring: "Screen frames: change-detected, best-effort PII blur in your browser before upload"
+    Received string:    "Screen captureNot sharingScreen frames: change-detected, best-effort PII blur, and the case id read on-device by OCR, in your browser before upload.Share screenVision: no frame uploaded yetPerception statsFrames captured / changed0 / 0Uploaded / coalesced0 / 0Stale-dropped / cancelled0 / 0Skipped (busy) / redaction failed0 / 0PII regions blurred0OCR + blur p50 / p95—Upload p50 / p95—"
+    Timeout: 5000ms
+
+    Call log:
+      - Expect "toContainText" getByRole('region', { name: 'Screen capture' }) with timeout 5000ms
+      - waiting for getByRole('region', { name: 'Screen capture' })
+        - locator resolved to <div role="region" data-slot="card" data-size="default" data-gate-ignore="" aria-labelledby="capture-title" class="group/card flex flex-col overflow-hidden rounded-xl bg-card text-sm text-card-foreground ring-1 ring-foreground/10 [--card-spacing:--spacing(4)] has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:[--card-spacing:--spacing(3)] data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl gap-0 py-0 shadow-xs">…</div>
+        - unexpected value "Screen captureLoading…Screen frames: change-detected, best-effort PII blur, and the case id read on-device by OCR, in your browser before upload.Share screen"
+        13 × locator resolved to <div role="region" data-slot="card" data-size="default" data-gate-ignore="" aria-labelledby="capture-title" class="group/card flex flex-col overflow-hidden rounded-xl bg-card text-sm text-card-foreground ring-1 ring-foreground/10 [--card-spacing:--spacing(4)] has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:[--card-spacing:--spacing(3)] data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl gap-0 py-0 shadow-xs">…</div>
+           - unexpected value "Screen captureNot sharingScreen frames: change-detected, best-effort PII blur, and the case id read on-device by OCR, in your browser before upload.Share screenVision: no frame uploaded yetPerception statsFrames captured / changed0 / 0Uploaded / coalesced0 / 0Stale-dropped / cancelled0 / 0Skipped (busy) / redaction failed0 / 0PII regions blurred0OCR + blur p50 / p95—Upload p50 / p95—"
+
+
+      67 |
+      68 |   const card = page.getByRole("region", { name: "Screen capture" });
+    > 69 |   await expect(card).toContainText("Screen frames: change-detected, best-effort PII blur in your browser before upload");
+         |                      ^
+      70 |   const status = card.getByRole("status", { name: "Screen capture status" });
+      71 |   await expect(status).toHaveText("Not sharing");
+      72 |
+        at /home/24b4530/modiji/apps/web/e2e/perception.spec.ts:69:22
+
+    Error Context: test-results/perception-share-screen-→--78776-d-off-the-record-stops-them-perception/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/perception-share-screen-→--78776-d-off-the-record-stops-them-perception/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/perception-share-screen-→--78776-d-off-the-record-stops-them-perception/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    [debrief] › e2e/debrief.spec.ts:70:1 › debrief: witnesses → typed answers → teach-back correction → coverage closed; Work Map with lineage 
+    [perception] › e2e/perception.spec.ts:55:1 › share screen → change-detected, redacted frames are uploaded, stored and ledgered; off the record stops them 
+  15 passed (1.8m)
+Error: ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL
+
+  × "pnpm recursive exec" failed in /home/24b4530/modiji/apps/web
+
+[ELIFECYCLE] Command failed with exit code 1.

@@ -76,6 +76,26 @@ describe("vision extraction → ledger", () => {
     expect(s.latencyMs.captureToEvents).toEqual({ n: 2, p50: 900, p95: 1200 });
   });
 
+  it("uses the client's trusted case id and ignores the model's misread (team P2 decision)", async () => {
+    const { h, sessionId, extractor, post, vision } = await setup();
+    const real = trainingCaseId();
+    const misread = real.replace("2026", "2626");
+    await post(1, { caseId: { value: real, confidence: 0.9 } });
+    // The model misreads the small grey header id; the client read it correctly on-device.
+    extractor.calls[0]?.resolve(caseReading(misread, "low"));
+    await h.perceptionDeps.perception.idle(sessionId);
+    const [opened] = vision();
+    expect(ScreenEventSchema.parse(opened?.payload)).toMatchObject({ kind: "open_case", caseId: real });
+
+    // A same-case edit is attributed to the trusted id too, even when the model misreads it again.
+    const second = await post(2, { caseId: { value: real, confidence: 0.9 } }, 200);
+    extractor.calls[1]?.resolve(caseReading(misread, "high"));
+    await h.perceptionDeps.perception.idle(sessionId);
+    const changed = vision().at(-1);
+    expect(second.frameSeq).toBe(2);
+    expect(ScreenEventSchema.parse(changed?.payload)).toMatchObject({ kind: "field_change", caseId: real, to: "high", critical: true });
+  });
+
   it("never overwrites DOM events: both channels are ledgered side by side with their source", async () => {
     const { h, sessionId, extractor, post, vision } = await setup();
     const caseId = trainingCaseId();
@@ -166,6 +186,7 @@ describe("ordering, coalescing and staleness (code decides, never the model)", (
         captureTime: T0 + frameSeq,
         receivedAt: T0 + frameSeq,
         epoch: 0,
+        clientCaseId: null,
         frame: { base64Png: png().toString("base64"), width: 160, height: 100, sourceWidth: 160, sourceHeight: 100 },
         crop: null,
       };

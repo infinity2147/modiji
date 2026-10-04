@@ -1,0 +1,6209 @@
+{
+  "mode": "live",
+  "seed": null,
+  "fixture": "/home/24b4530/modiji/packages/perception/test/fixtures/casedesk-recorded",
+  "report": {
+    "counts": {
+      "dom": {
+        "critical_field": 52,
+        "critical_action": 42,
+        "non_critical": 51
+      },
+      "vision": {
+        "critical_field": 71,
+        "critical_action": 34,
+        "non_critical": 15
+      }
+    },
+    "criticalFieldChangeRecall": {
+      "numerator": 8,
+      "denominator": 52,
+      "value": 0.15384615384615385
+    },
+    "criticalActionRecall": {
+      "numerator": 8,
+      "denominator": 42,
+      "value": 0.19047619047619047
+    },
+    "falseCriticalRate": {
+      "numerator": 89,
+      "denominator": 105,
+      "value": 0.8476190476190476
+    },
+    "nonCritical": {
+      "precision": {
+        "numerator": 9,
+        "denominator": 15,
+        "value": 0.6
+      },
+      "recall": {
+        "numerator": 9,
+        "denominator": 51,
+        "value": 0.17647058823529413
+      },
+      "f1": 0.2727272727272727
+    },
+    "latency": {
+      "frameToEventMs": {
+        "n": 215,
+        "p50": 1764.10009765625,
+        "p95": 2814.47998046875
+      },
+      "changeToEventMs": {
+        "n": 25,
+        "p50": 2895.52490234375,
+        "p95": 3780.810546875
+      }
+    },
+    "missedCritical": [
+      {
+        "id": "0fc4526c-4031-41df-97c4-afa7721bd7e6",
+        "frameSeq": 12,
+        "captureTime": 1791065972528,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0304",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "a4f6f971-1037-41fe-9974-4b152a3f52d2",
+        "frameSeq": 16,
+        "captureTime": 1791065980030,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0305",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "135f6b76-d712-4e36-82a0-96538bdb061c",
+        "frameSeq": 17,
+        "captureTime": 1791065983255,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0305",
+        "action": "requestDocuments",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "ffbb729d-afba-419c-a33d-24fd3cf7c2fa",
+        "frameSeq": 19,
+        "captureTime": 1791065986629,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0306",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "167c00f7-2821-4221-8436-45096d7cba76",
+        "frameSeq": 20,
+        "captureTime": 1791065990685,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0306",
+        "action": "escalateCompliance",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "89e092b3-1669-4bd9-ab58-2262238478ea",
+        "frameSeq": 3,
+        "captureTime": 1791065998377,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0101",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "221c76c8-e7ce-43af-b75c-f7cd71f21231",
+        "frameSeq": 4,
+        "captureTime": 1791066001465,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0101",
+        "action": "requestDocuments",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "b69d6fd1-0fd5-4fe3-aed9-4c83df95d25d",
+        "frameSeq": 6,
+        "captureTime": 1791066004210,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "823f536a-84e3-434a-abf7-63aa6c7e1bc3",
+        "frameSeq": 10,
+        "captureTime": 1791066010694,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0103",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "high",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "5225d2be-7190-4541-a6fc-f2b876c0bf23",
+        "frameSeq": 11,
+        "captureTime": 1791066013946,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0103",
+        "action": "enhancedReview",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "9633f175-9e24-49d4-b3ca-6daa00a757af",
+        "frameSeq": 3,
+        "captureTime": 1791066020758,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0301",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "d062a5b8-1a67-4cd8-960b-0420478b2f8e",
+        "frameSeq": 4,
+        "captureTime": 1791066023151,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0301",
+        "action": "enhancedReview",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "9b53b2f2-a2a9-4fd7-aeb1-14dc81f16335",
+        "frameSeq": 6,
+        "captureTime": 1791066025775,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0302",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "b6ff1682-d99c-4d76-a536-16109e671db4",
+        "frameSeq": 7,
+        "captureTime": 1791066028489,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0302",
+        "action": "approve",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "a195d873-5ffe-4c6b-b85d-63f18698dd20",
+        "frameSeq": 9,
+        "captureTime": 1791066031926,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0303",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "07050559-ce1a-45e9-9938-dc9edc430128",
+        "frameSeq": 10,
+        "captureTime": 1791066032409,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0303",
+        "field": "riskRating",
+        "from": "low",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "ae6033ba-57cf-4f98-8665-8baeac8d551e",
+        "frameSeq": 11,
+        "captureTime": 1791066034771,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0303",
+        "action": "reject",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "d89021a4-37f2-4cbb-aada-f37b856b7599",
+        "frameSeq": 13,
+        "captureTime": 1791066038560,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0304",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "99537770-27d8-41a8-8b28-1de0a249566c",
+        "frameSeq": 14,
+        "captureTime": 1791066041934,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0304",
+        "action": "reject",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "d438406e-0d13-494b-9ab1-c47e460f71dc",
+        "frameSeq": 16,
+        "captureTime": 1791066045559,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0305",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "62374561-a41e-4653-8f6d-2bd53da05b48",
+        "frameSeq": 17,
+        "captureTime": 1791066049016,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0305",
+        "action": "escalateCompliance",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "08caa986-79a7-44c6-aa3b-0003fc51748d",
+        "frameSeq": 19,
+        "captureTime": 1791066052243,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0306",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "25db514a-8d7c-49ee-a0c7-7df81f2006ed",
+        "frameSeq": 20,
+        "captureTime": 1791066056752,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0306",
+        "action": "enhancedReview",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "4b45a58f-607a-4e47-b003-544124ab12eb",
+        "frameSeq": 3,
+        "captureTime": 1791066064592,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0101",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "7cd61e02-34b5-4d9c-b5b4-f2fcbd3bed20",
+        "frameSeq": 4,
+        "captureTime": 1791066065041,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0101",
+        "field": "riskRating",
+        "from": "medium",
+        "to": "low",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "2cf18770-5a89-4b12-a1af-1e636e2bf261",
+        "frameSeq": 5,
+        "captureTime": 1791066067865,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0101",
+        "action": "escalateCompliance",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "a01cb084-1a79-42c3-a80b-6aaf0bd1c885",
+        "frameSeq": 10,
+        "captureTime": 1791066076207,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0103",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "2d8a3609-bcf0-46ba-88cb-156d88bf614f",
+        "frameSeq": 11,
+        "captureTime": 1791066079576,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0103",
+        "action": "escalateCompliance",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "0edb6b61-ceb8-4a43-a6cb-21b5ef718eb5",
+        "frameSeq": 3,
+        "captureTime": 1791066086806,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0301",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "1b5f40e2-dd79-4a7f-bb1f-60362dfdcf03",
+        "frameSeq": 4,
+        "captureTime": 1791066089914,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0301",
+        "action": "requestDocuments",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "48797a19-08a9-44d3-b5cc-bb78da7888dd",
+        "frameSeq": 6,
+        "captureTime": 1791066092392,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0302",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "a95101c1-2f61-4e3f-a940-248a81a22ff3",
+        "frameSeq": 7,
+        "captureTime": 1791066092775,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0302",
+        "field": "riskRating",
+        "from": "medium",
+        "to": "low",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "33e659bc-18e6-4870-9337-875164b1f823",
+        "frameSeq": 8,
+        "captureTime": 1791066096135,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0302",
+        "action": "requestDocuments",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "549ad539-880f-4c47-8a8d-546e6c8e02f2",
+        "frameSeq": 10,
+        "captureTime": 1791066099239,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0303",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "high",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "d5a97086-e6ba-4a63-b5ee-f1fcc87b910d",
+        "frameSeq": 11,
+        "captureTime": 1791066101760,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0303",
+        "action": "requestDocuments",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "18cc5d41-44de-4bb9-b444-fe98df2ec9b4",
+        "frameSeq": 13,
+        "captureTime": 1791066105424,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0304",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "high",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "96b4c69d-ef86-423d-a82b-395cb986652e",
+        "frameSeq": 14,
+        "captureTime": 1791066108192,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0304",
+        "action": "escalateCompliance",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "b1354f80-3742-48b0-b8e2-8f9c778f5955",
+        "frameSeq": 16,
+        "captureTime": 1791066111273,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0305",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "d29e11d3-ff79-4193-8f0b-34f636459955",
+        "frameSeq": 17,
+        "captureTime": 1791066114123,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0305",
+        "action": "requestDocuments",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "dd6eb7dd-5eec-4899-ab23-7b1633adbb76",
+        "frameSeq": 19,
+        "captureTime": 1791066117124,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0306",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "3558c447-a4f1-4105-80e4-577ea8efd9fc",
+        "frameSeq": 20,
+        "captureTime": 1791066117514,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0306",
+        "field": "riskRating",
+        "from": "medium",
+        "to": "low",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "e1e17a44-aaeb-4c40-a83d-63aad06f2ec5",
+        "frameSeq": 21,
+        "captureTime": 1791066121010,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0306",
+        "action": "reject",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "d1ca30b2-3691-4916-9519-fc40d78600a5",
+        "frameSeq": 3,
+        "captureTime": 1791066127923,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0101",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "292df167-fa8b-4ffb-bb51-5ce65fdd0046",
+        "frameSeq": 4,
+        "captureTime": 1791066130372,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0101",
+        "action": "escalateCompliance",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "ef4a156c-5235-4add-bb1f-2d900fc9f432",
+        "frameSeq": 9,
+        "captureTime": 1791066139406,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0103",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "e0a6fa9d-b6ff-4f90-bc6c-79604835a7eb",
+        "frameSeq": 10,
+        "captureTime": 1791066142073,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0103",
+        "action": "enhancedReview",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "3820457c-4e9f-4be6-92fa-8cbcc977ef3b",
+        "frameSeq": 3,
+        "captureTime": 1791066149237,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0301",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "07afe517-578b-4cc6-9d20-0bdbc4885806",
+        "frameSeq": 4,
+        "captureTime": 1791066149720,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0301",
+        "field": "riskRating",
+        "from": "low",
+        "to": "high",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "8c1b9bf5-94b1-472d-a1f0-18f82224ec18",
+        "frameSeq": 5,
+        "captureTime": 1791066152785,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0301",
+        "action": "requestDocuments",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "40db7782-bd1d-48c3-9d0e-e20ff4ca39bc",
+        "frameSeq": 7,
+        "captureTime": 1791066155938,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0302",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "high",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "748c727a-6527-4694-9aa6-5b51777e5c79",
+        "frameSeq": 8,
+        "captureTime": 1791066158620,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0302",
+        "action": "escalateCompliance",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "0d79f27f-cdfc-4bec-8178-2cbfa6c1db08",
+        "frameSeq": 10,
+        "captureTime": 1791066161986,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0303",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "high",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "55842af0-3b8a-4bb3-8a8b-1ecde1c755ec",
+        "frameSeq": 11,
+        "captureTime": 1791066164579,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0303",
+        "action": "requestDocuments",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "30b02239-1994-4f4e-8a76-546bf3449df9",
+        "frameSeq": 13,
+        "captureTime": 1791066167941,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0304",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "587e1c6c-5e85-42dd-8012-2997669f6e80",
+        "frameSeq": 14,
+        "captureTime": 1791066171727,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0304",
+        "action": "escalateCompliance",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "43ced156-747e-4034-b724-d53ace0f33d1",
+        "frameSeq": 16,
+        "captureTime": 1791066175639,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0305",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "02025683-16db-425f-9959-131ff2d48d71",
+        "frameSeq": 17,
+        "captureTime": 1791066176087,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0305",
+        "field": "riskRating",
+        "from": "low",
+        "to": "high",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "4efd9a4b-edcc-4a0a-be08-5de133e41dbd",
+        "frameSeq": 18,
+        "captureTime": 1791066179686,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0305",
+        "action": "escalateCompliance",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "e7f2647d-0eed-4ad4-9329-d2983317639a",
+        "frameSeq": 20,
+        "captureTime": 1791066182769,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0306",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "3aab0ee9-1dd1-4630-9027-3158055773c6",
+        "frameSeq": 21,
+        "captureTime": 1791066185615,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0306",
+        "action": "approve",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "05cb425c-46e7-4e4b-83d6-effecbbb9bd8",
+        "frameSeq": 3,
+        "captureTime": 1791066193988,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0101",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "8302ccf2-6b5d-45d7-9536-8b5e455c824c",
+        "frameSeq": 4,
+        "captureTime": 1791066196576,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0101",
+        "action": "approve",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "2d82abf5-1279-4764-8a2c-71b3257192f4",
+        "frameSeq": 9,
+        "captureTime": 1791066206903,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0103",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "f5ba3951-39a1-4e2f-928c-f10a4f649072",
+        "frameSeq": 10,
+        "captureTime": 1791066207236,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0103",
+        "field": "riskRating",
+        "from": "low",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "2397a58f-c429-4a38-b7e1-0845a578c3e4",
+        "frameSeq": 11,
+        "captureTime": 1791066210288,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0103",
+        "action": "escalateCompliance",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "d29ff43d-497b-4b95-98ae-a09e5fc57d8e",
+        "frameSeq": 3,
+        "captureTime": 1791066217704,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0301",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "high",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "5622db7d-f734-4e59-ad54-3df500a7ce0d",
+        "frameSeq": 4,
+        "captureTime": 1791066220753,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0301",
+        "action": "approve",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "1ce8957d-6928-4000-ab0c-f799e861c253",
+        "frameSeq": 6,
+        "captureTime": 1791066224921,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0302",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "1b9fa485-d1d8-4dd2-9abf-3217ee0365c7",
+        "frameSeq": 7,
+        "captureTime": 1791066227909,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0302",
+        "action": "enhancedReview",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "64786f52-ca6d-407f-b897-806be46119cc",
+        "frameSeq": 9,
+        "captureTime": 1791066230821,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0303",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "c4e3d05c-0b4d-4234-9323-abfdec849eb6",
+        "frameSeq": 10,
+        "captureTime": 1791066233689,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0303",
+        "action": "approve",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "c8688c0b-51af-4ed8-b01a-4aed1158ccdb",
+        "frameSeq": 12,
+        "captureTime": 1791066237486,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0304",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "6e439c0b-5fc5-4902-a400-5de157c9be84",
+        "frameSeq": 13,
+        "captureTime": 1791066237919,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0304",
+        "field": "riskRating",
+        "from": "low",
+        "to": "high",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "6a536363-65e9-4fb4-9fff-604f6db591b9",
+        "frameSeq": 14,
+        "captureTime": 1791066240905,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0304",
+        "action": "approve",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "c6ecc658-920d-4220-a37f-8330f18cf444",
+        "frameSeq": 16,
+        "captureTime": 1791066243452,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0305",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "f8c054c1-36f9-45b1-9f71-c19314ac941e",
+        "frameSeq": 17,
+        "captureTime": 1791066247394,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0305",
+        "action": "enhancedReview",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      },
+      {
+        "id": "643d7a35-0b1c-41d3-a835-9538c123f4e0",
+        "frameSeq": 19,
+        "captureTime": 1791066250214,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0306",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "high",
+        "confidence": 1,
+        "source": "dom",
+        "critical": true
+      },
+      {
+        "id": "f1a1be2e-e087-4e42-8f15-0b8c6b282940",
+        "frameSeq": 20,
+        "captureTime": 1791066254073,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0306",
+        "action": "reject",
+        "confidence": 1,
+        "source": "dom",
+        "critical": false
+      }
+    ],
+    "falseCritical": [
+      {
+        "id": "vision-0-39-0",
+        "frameSeq": 39,
+        "captureTime": 1791065983599,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-6305",
+        "action": "requestDocuments",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": false
+      },
+      {
+        "id": "vision-0-44-0",
+        "frameSeq": 44,
+        "captureTime": 1791065988099,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-6305",
+        "field": "riskRating",
+        "from": "medium",
+        "to": "low",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-46-0",
+        "frameSeq": 46,
+        "captureTime": 1791065991099,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-6305",
+        "action": "escalateCompliance",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": false
+      },
+      {
+        "id": "vision-0-50-0",
+        "frameSeq": 50,
+        "captureTime": 1791065997100,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-6305",
+        "field": "riskRating",
+        "from": "low",
+        "to": "unrated",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-51-0",
+        "frameSeq": 51,
+        "captureTime": 1791065998599,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-6305",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-64-0",
+        "frameSeq": 64,
+        "captureTime": 1791066009099,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "high",
+        "to": "unrated",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-66-0",
+        "frameSeq": 66,
+        "captureTime": 1791066011099,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "high",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-68-0",
+        "frameSeq": 68,
+        "captureTime": 1791066014099,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0102",
+        "action": "enhancedReview",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": false
+      },
+      {
+        "id": "vision-0-74-0",
+        "frameSeq": 74,
+        "captureTime": 1791066019099,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "high",
+        "to": "unrated",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-75-0",
+        "frameSeq": 75,
+        "captureTime": 1791066021099,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-80-0",
+        "frameSeq": 80,
+        "captureTime": 1791066025099,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "low",
+        "to": "unrated",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-81-0",
+        "frameSeq": 81,
+        "captureTime": 1791066026100,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-84-0",
+        "frameSeq": 84,
+        "captureTime": 1791066029099,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0102",
+        "action": "approve",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": false
+      },
+      {
+        "id": "vision-0-85-0",
+        "frameSeq": 85,
+        "captureTime": 1791066030099,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "medium",
+        "to": "unrated",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-89-0",
+        "frameSeq": 89,
+        "captureTime": 1791066033099,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-92-0",
+        "frameSeq": 92,
+        "captureTime": 1791066035099,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0102",
+        "action": "reject",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": false
+      },
+      {
+        "id": "vision-0-93-0",
+        "frameSeq": 93,
+        "captureTime": 1791066036599,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "medium",
+        "to": "unrated",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-96-0",
+        "frameSeq": 96,
+        "captureTime": 1791066039099,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-104-0",
+        "frameSeq": 104,
+        "captureTime": 1791066046099,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-6305",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-108-0",
+        "frameSeq": 108,
+        "captureTime": 1791066049599,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-6305",
+        "action": "escalateCompliance",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": false
+      },
+      {
+        "id": "vision-0-110-0",
+        "frameSeq": 110,
+        "captureTime": 1791066050600,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-6305",
+        "field": "riskRating",
+        "from": "low",
+        "to": "unrated",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-112-0",
+        "frameSeq": 112,
+        "captureTime": 1791066052599,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-6305",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-115-0",
+        "frameSeq": 115,
+        "captureTime": 1791066057099,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-6305",
+        "action": "enhancedReview",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": false
+      },
+      {
+        "id": "vision-0-119-0",
+        "frameSeq": 119,
+        "captureTime": 1791066063099,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-6305",
+        "field": "riskRating",
+        "from": "medium",
+        "to": "unrated",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-121-0",
+        "frameSeq": 121,
+        "captureTime": 1791066065099,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-6305",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-124-0",
+        "frameSeq": 124,
+        "captureTime": 1791066068600,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-6305",
+        "action": "escalateCompliance",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": false
+      },
+      {
+        "id": "vision-0-133-0",
+        "frameSeq": 133,
+        "captureTime": 1791066074600,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "low",
+        "to": "unrated",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-135-0",
+        "frameSeq": 135,
+        "captureTime": 1791066076600,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-138-0",
+        "frameSeq": 138,
+        "captureTime": 1791066080099,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0102",
+        "action": "escalateCompliance",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": false
+      },
+      {
+        "id": "vision-0-142-0",
+        "frameSeq": 142,
+        "captureTime": 1791066085099,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "medium",
+        "to": "unrated",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-144-0",
+        "frameSeq": 144,
+        "captureTime": 1791066087099,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-147-0",
+        "frameSeq": 147,
+        "captureTime": 1791066090599,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0102",
+        "action": "requestDocuments",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": false
+      },
+      {
+        "id": "vision-0-150-0",
+        "frameSeq": 150,
+        "captureTime": 1791066092600,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "low",
+        "to": "medium",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-151-0",
+        "frameSeq": 151,
+        "captureTime": 1791066093099,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "medium",
+        "to": "low",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-155-0",
+        "frameSeq": 155,
+        "captureTime": 1791066097599,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "low",
+        "to": "unrated",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-157-0",
+        "frameSeq": 157,
+        "captureTime": 1791066099599,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "high",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-160-0",
+        "frameSeq": 160,
+        "captureTime": 1791066103599,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "high",
+        "to": "unrated",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-162-0",
+        "frameSeq": 162,
+        "captureTime": 1791066106099,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "high",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-166-0",
+        "frameSeq": 166,
+        "captureTime": 1791066108599,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0102",
+        "action": "escalateCompliance",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": false
+      },
+      {
+        "id": "vision-0-169-0",
+        "frameSeq": 169,
+        "captureTime": 1791066111599,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-6305",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-172-0",
+        "frameSeq": 172,
+        "captureTime": 1791066114599,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-6305",
+        "action": "requestDocuments",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": false
+      },
+      {
+        "id": "vision-0-174-0",
+        "frameSeq": 174,
+        "captureTime": 1791066116100,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-6305",
+        "field": "riskRating",
+        "from": "low",
+        "to": "unrated",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-176-0",
+        "frameSeq": 176,
+        "captureTime": 1791066117599,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-6305",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-182-0",
+        "frameSeq": 182,
+        "captureTime": 1791066121599,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-6305",
+        "action": "reject",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": false
+      },
+      {
+        "id": "vision-0-187-0",
+        "frameSeq": 187,
+        "captureTime": 1791066126099,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-6305",
+        "field": "riskRating",
+        "from": "low",
+        "to": "unrated",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-188-0",
+        "frameSeq": 188,
+        "captureTime": 1791066128599,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-6305",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-190-0",
+        "frameSeq": 190,
+        "captureTime": 1791066130598,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-6305",
+        "action": "escalateCompliance",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": false
+      },
+      {
+        "id": "vision-0-199-0",
+        "frameSeq": 199,
+        "captureTime": 1791066138099,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "low",
+        "to": "unrated",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-201-0",
+        "frameSeq": 201,
+        "captureTime": 1791066140100,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-204-0",
+        "frameSeq": 204,
+        "captureTime": 1791066142600,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0102",
+        "action": "enhancedReview",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": false
+      },
+      {
+        "id": "vision-0-209-0",
+        "frameSeq": 209,
+        "captureTime": 1791066147599,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "medium",
+        "to": "unrated",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-211-0",
+        "frameSeq": 211,
+        "captureTime": 1791066149599,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-212-0",
+        "frameSeq": 212,
+        "captureTime": 1791066150099,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "low",
+        "to": "high",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-214-0",
+        "frameSeq": 214,
+        "captureTime": 1791066153099,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0102",
+        "action": "requestDocuments",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": false
+      },
+      {
+        "id": "vision-0-215-0",
+        "frameSeq": 215,
+        "captureTime": 1791066154599,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "high",
+        "to": "unrated",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-217-0",
+        "frameSeq": 217,
+        "captureTime": 1791066156600,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "high",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-220-0",
+        "frameSeq": 220,
+        "captureTime": 1791066159099,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0102",
+        "action": "escalateCompliance",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": false
+      },
+      {
+        "id": "vision-0-222-0",
+        "frameSeq": 222,
+        "captureTime": 1791066160599,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "high",
+        "to": "unrated",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-224-0",
+        "frameSeq": 224,
+        "captureTime": 1791066162599,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "high",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-227-0",
+        "frameSeq": 227,
+        "captureTime": 1791066165100,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0102",
+        "action": "requestDocuments",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": false
+      },
+      {
+        "id": "vision-0-228-0",
+        "frameSeq": 228,
+        "captureTime": 1791066166599,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "high",
+        "to": "unrated",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-231-0",
+        "frameSeq": 231,
+        "captureTime": 1791066168599,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-234-0",
+        "frameSeq": 234,
+        "captureTime": 1791066172099,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0102",
+        "action": "escalateCompliance",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": false
+      },
+      {
+        "id": "vision-0-239-0",
+        "frameSeq": 239,
+        "captureTime": 1791066176599,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-6305",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "high",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-243-0",
+        "frameSeq": 243,
+        "captureTime": 1791066180099,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-6305",
+        "action": "escalateCompliance",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": false
+      },
+      {
+        "id": "vision-0-244-0",
+        "frameSeq": 244,
+        "captureTime": 1791066181598,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-6305",
+        "field": "riskRating",
+        "from": "high",
+        "to": "unrated",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-246-0",
+        "frameSeq": 246,
+        "captureTime": 1791066183098,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-6305",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-249-0",
+        "frameSeq": 249,
+        "captureTime": 1791066186099,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-6305",
+        "action": "approve",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": false
+      },
+      {
+        "id": "vision-0-252-0",
+        "frameSeq": 252,
+        "captureTime": 1791066192099,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-6305",
+        "field": "riskRating",
+        "from": "medium",
+        "to": "unrated",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-253-0",
+        "frameSeq": 253,
+        "captureTime": 1791066194599,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-6305",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-257-0",
+        "frameSeq": 257,
+        "captureTime": 1791066198099,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-6305",
+        "field": "riskRating",
+        "from": "medium",
+        "to": "unrated",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-263-0",
+        "frameSeq": 263,
+        "captureTime": 1791066205599,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "medium",
+        "to": "unrated",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-264-0",
+        "frameSeq": 264,
+        "captureTime": 1791066207100,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-265-0",
+        "frameSeq": 265,
+        "captureTime": 1791066207599,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "low",
+        "to": "medium",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-273-0",
+        "frameSeq": 273,
+        "captureTime": 1791066217599,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "medium",
+        "to": "unrated",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-274-0",
+        "frameSeq": 274,
+        "captureTime": 1791066218099,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "high",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-276-0",
+        "frameSeq": 276,
+        "captureTime": 1791066221099,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0102",
+        "action": "approve",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": false
+      },
+      {
+        "id": "vision-0-277-0",
+        "frameSeq": 277,
+        "captureTime": 1791066223099,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "high",
+        "to": "unrated",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-278-0",
+        "frameSeq": 278,
+        "captureTime": 1791066225099,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "medium",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-281-0",
+        "frameSeq": 281,
+        "captureTime": 1791066228099,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0102",
+        "action": "enhancedReview",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": false
+      },
+      {
+        "id": "vision-0-285-0",
+        "frameSeq": 285,
+        "captureTime": 1791066231099,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "medium",
+        "to": "low",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-288-0",
+        "frameSeq": 288,
+        "captureTime": 1791066234099,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-0102",
+        "action": "approve",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": false
+      },
+      {
+        "id": "vision-0-289-0",
+        "frameSeq": 289,
+        "captureTime": 1791066235599,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "low",
+        "to": "unrated",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-290-0",
+        "frameSeq": 290,
+        "captureTime": 1791066237599,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "low",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-292-0",
+        "frameSeq": 292,
+        "captureTime": 1791066238599,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-0102",
+        "field": "riskRating",
+        "from": "low",
+        "to": "high",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-303-0",
+        "frameSeq": 303,
+        "captureTime": 1791066248100,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-6305",
+        "action": "enhancedReview",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": false
+      },
+      {
+        "id": "vision-0-304-0",
+        "frameSeq": 304,
+        "captureTime": 1791066249099,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-6305",
+        "field": "riskRating",
+        "from": "low",
+        "to": "unrated",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-306-0",
+        "frameSeq": 306,
+        "captureTime": 1791066250599,
+        "sessionEpoch": 0,
+        "kind": "field_change",
+        "caseId": "NS-2026-6305",
+        "field": "riskRating",
+        "from": "unrated",
+        "to": "high",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": true
+      },
+      {
+        "id": "vision-0-311-0",
+        "frameSeq": 311,
+        "captureTime": 1791066254599,
+        "sessionEpoch": 0,
+        "kind": "action",
+        "caseId": "NS-2026-6305",
+        "action": "reject",
+        "confidence": 0.9,
+        "source": "vision",
+        "critical": false
+      }
+    ],
+    "checks": [
+      {
+        "metric": "critical field-change recall",
+        "value": 0.15384615384615385,
+        "comparator": ">=",
+        "threshold": 0.95,
+        "pass": false
+      },
+      {
+        "metric": "critical action recall",
+        "value": 0.19047619047619047,
+        "comparator": ">=",
+        "threshold": 0.95,
+        "pass": false
+      },
+      {
+        "metric": "false critical rate",
+        "value": 0.8476190476190476,
+        "comparator": "<=",
+        "threshold": 0.05,
+        "pass": false
+      },
+      {
+        "metric": "p95 frame→event (ms)",
+        "value": 2814.47998046875,
+        "comparator": "<=",
+        "threshold": 3000,
+        "pass": true
+      }
+    ],
+    "pass": false
+  },
+  "pipeline": {
+    "frames": {
+      "total": 617,
+      "changed": 311
+    },
+    "queue": {
+      "submitted": 311,
+      "sent": 215,
+      "coalesced": 96,
+      "applied": 215,
+      "staleDropped": 0,
+      "cancelled": 0,
+      "epochRejected": 0,
+      "failed": 0,
+      "inFlight": 0,
+      "pendingFrameSeq": null,
+      "frameToApplyMs": [
+        1120.2412109375,
+        1893.926513671875,
+        1660.12255859375,
+        2660.7353515625,
+        1862.462890625,
+        1905.948974609375,
+        2559.556640625,
+        2794.632568359375,
+        2322.853271484375,
+        1933.51513671875,
+        2600.30419921875,
+        3265.188232421875,
+        2215.235595703125,
+        1700.756591796875,
+        2435.52978515625,
+        2807.73046875,
+        2313.24560546875,
+        1781.6923828125,
+        1874.224365234375,
+        3075.894287109375,
+        1718.123291015625,
+        1792.126708984375,
+        2436.678955078125,
+        3318.543701171875,
+        1551.8798828125,
+        1073.78125,
+        1235.40966796875,
+        1435.9794921875,
+        1177.06591796875,
+        1311.022216796875,
+        1734.746337890625,
+        1942.04931640625,
+        1973.016357421875,
+        1550.61279296875,
+        2250.544921875,
+        3140.8134765625,
+        2698.439697265625,
+        1885.987060546875,
+        1623.72021484375,
+        1147.474609375,
+        2213.50732421875,
+        1204.213623046875,
+        2061.165283203125,
+        2852.203857421875,
+        1662.87744140625,
+        1440.255859375,
+        2917.223388671875,
+        1964.656982421875,
+        1928.70068359375,
+        2378.00732421875,
+        2335.653564453125,
+        2296.806640625,
+        1783.720947265625,
+        1445.332275390625,
+        1610.975341796875,
+        2633.687744140625,
+        1116.013916015625,
+        1058.603759765625,
+        1387.791259765625,
+        1846.572509765625,
+        2828.1025390625,
+        1769.28271484375,
+        1249.986328125,
+        1829.81005859375,
+        2072.747802734375,
+        1795.12548828125,
+        1718.196533203125,
+        1719.652099609375,
+        1987.90771484375,
+        2052.59912109375,
+        2361.1513671875,
+        1481.026611328125,
+        1642.7392578125,
+        1640.659912109375,
+        1349.50146484375,
+        1203.950439453125,
+        1747.8037109375,
+        1844.739501953125,
+        2069.987060546875,
+        1553.0390625,
+        1667.85205078125,
+        1552.58349609375,
+        1813.728515625,
+        3056.321533203125,
+        1355.42578125,
+        1578.33837890625,
+        1493.977783203125,
+        2591.239990234375,
+        1557.485595703125,
+        1996.828125,
+        1287.978759765625,
+        1795.957275390625,
+        1983.0283203125,
+        1720.308837890625,
+        1735.333740234375,
+        2814.47998046875,
+        1822.679931640625,
+        2064.36767578125,
+        1298.86865234375,
+        1744.275634765625,
+        1660.6669921875,
+        1443.755859375,
+        1687.598388671875,
+        1683.899169921875,
+        2244.2021484375,
+        1775.998779296875,
+        2684.279296875,
+        3147.86474609375,
+        1700.693603515625,
+        1165.957763671875,
+        1427.619140625,
+        1894.001708984375,
+        1948.1005859375,
+        2176.8623046875,
+        1981.285888671875,
+        1764.10009765625,
+        1250.279052734375,
+        1786.017822265625,
+        1319.809326171875,
+        1892.211181640625,
+        2096.010498046875,
+        1293.400146484375,
+        1973.810791015625,
+        2233.820556640625,
+        1120.73046875,
+        1102.288330078125,
+        1361.89111328125,
+        2061.459228515625,
+        1055.13525390625,
+        1187.719970703125,
+        1325.095947265625,
+        2287.358642578125,
+        2466.54443359375,
+        1553.6376953125,
+        1618.6572265625,
+        1867.138427734375,
+        1201.9287109375,
+        1339.800048828125,
+        2082.228271484375,
+        2312.243408203125,
+        1316.273681640625,
+        2446.38623046875,
+        1849.357666015625,
+        1636.83935546875,
+        2076.7373046875,
+        1057.169677734375,
+        1055.77880859375,
+        1095.661376953125,
+        2555.511962890625,
+        2236.802978515625,
+        1230.822509765625,
+        1061.65185546875,
+        1390.03955078125,
+        1380.840087890625,
+        2389.4345703125,
+        1874.59619140625,
+        1552.445068359375,
+        1941.705078125,
+        2397.588134765625,
+        1386.099365234375,
+        1300.43505859375,
+        1308.966796875,
+        1807.8662109375,
+        1541.24462890625,
+        1320.833984375,
+        1321.027099609375,
+        2472.675537109375,
+        1592.92919921875,
+        1839.369873046875,
+        1780.11474609375,
+        2559.381591796875,
+        1791.08203125,
+        976.089599609375,
+        1569.025390625,
+        1323.78466796875,
+        1540.441650390625,
+        2860.35302734375,
+        1317.264892578125,
+        1621.481689453125,
+        1850.022216796875,
+        1861.96923828125,
+        1399.082275390625,
+        1897.40185546875,
+        1158.695556640625,
+        1490.54638671875,
+        1183.597412109375,
+        1750.3876953125,
+        2541.814208984375,
+        1247.461669921875,
+        2264.4697265625,
+        1777.29052734375,
+        2040.72314453125,
+        1221.4306640625,
+        1615.845703125,
+        2620.797607421875,
+        1350.61865234375,
+        2622.12646484375,
+        1364.001220703125,
+        1540.60791015625,
+        1769.5869140625,
+        1433.243408203125,
+        1047.82080078125,
+        1669.09228515625,
+        1176.136962890625,
+        1417.979248046875,
+        2398.02490234375,
+        2701.651123046875,
+        1699.9365234375,
+        1296.087890625,
+        1627.650390625,
+        1828.516845703125,
+        1992.544677734375,
+        1551.857421875,
+        1056.164306640625,
+        1915.041748046875
+      ],
+      "requestMs": [
+        1087.82861328125,
+        1274.657958984375,
+        1266.17578125,
+        2500.566162109375,
+        1700.703125,
+        1543.46630859375,
+        2154.58740234375,
+        1734.048095703125,
+        1028.197998046875,
+        1610.592529296875,
+        1666.771484375,
+        2164.873291015625,
+        950.034912109375,
+        985.509765625,
+        2234.759765625,
+        1872.187255859375,
+        1506.50244140625,
+        967.435302734375,
+        1593.521484375,
+        1701.657470703125,
+        1641.217529296875,
+        1573.993408203125,
+        1644.540283203125,
+        1881.8525390625,
+        1233.32666015625,
+        1021.8876953125,
+        1185.47607421875,
+        1387.06689453125,
+        1134.373291015625,
+        1133.9453125,
+        924.712890625,
+        1207.291015625,
+        1529.955078125,
+        1076.587646484375,
+        2200.920166015625,
+        2390.25634765625,
+        1558.6123046875,
+        1686.535400390625,
+        1237.72021484375,
+        1023.7392578125,
+        1566.0185546875,
+        990.695556640625,
+        1856.939453125,
+        1291.02685546875,
+        1310.661865234375,
+        1278.367431640625,
+        1975.957763671875,
+        1047.42236328125,
+        1464.03271484375,
+        1449.29638671875,
+        1457.636474609375,
+        962.143310546875,
+        985.907470703125,
+        1161.598876953125,
+        1165.63232421875,
+        1522.70263671875,
+        982.315673828125,
+        942.581298828125,
+        1329.177001953125,
+        1796.8916015625,
+        1481.518310546875,
+        941.169189453125,
+        980.69287109375,
+        1579.81201171875,
+        1242.925048828125,
+        1722.363525390625,
+        1423.056640625,
+        1002.4443359375,
+        1266.24560546875,
+        1565.678466796875,
+        1309.5390625,
+        1118.863525390625,
+        1588.26025390625,
+        997.9111328125,
+        1208.825927734375,
+        1158.50244140625,
+        1043.843017578125,
+        1096.921630859375,
+        1725.235107421875,
+        1483.041748046875,
+        1619.885498046875,
+        1385.72021484375,
+        1760.12939453125,
+        1742.58056640625,
+        1301.093017578125,
+        1221.89990234375,
+        1414.6279296875,
+        1598.2509765625,
+        965.236083984375,
+        1939.33251953125,
+        1246.850830078125,
+        1007.968994140625,
+        1188.060546875,
+        1236.26953125,
+        1515.015625,
+        1579.13623046875,
+        1008.190673828125,
+        1741.678955078125,
+        1235.490966796875,
+        944.39599609375,
+        1611.306884765625,
+        1283.079833984375,
+        1243.83203125,
+        1496.291259765625,
+        1060.291015625,
+        1031.7861328125,
+        1908.27099609375,
+        1963.57568359375,
+        1052.819580078125,
+        966.251220703125,
+        1260.648681640625,
+        1843.281982421875,
+        1554.086181640625,
+        1729.750732421875,
+        1303.41162109375,
+        1283.801513671875,
+        985.1650390625,
+        1035.727783203125,
+        1033.78173828125,
+        1572.390869140625,
+        1203.787353515625,
+        1197.378662109375,
+        1680.401611328125,
+        1759.99609375,
+        1071.82421875,
+        981.546875,
+        1258.591796875,
+        1700.5556640625,
+        993.66552734375,
+        1139.10400390625,
+        1275.391845703125,
+        1463.250732421875,
+        1178.17333984375,
+        1088.08203125,
+        1565.0087890625,
+        1248.470458984375,
+        1156.438232421875,
+        1137.858154296875,
+        1243.417724609375,
+        1229.00244140625,
+        1004.017333984375,
+        1630.095703125,
+        903.951904296875,
+        1286.466064453125,
+        1939.886962890625,
+        981.42236328125,
+        997.598876953125,
+        1039.86767578125,
+        1959.837158203125,
+        1181.28076171875,
+        994.008056640625,
+        1010.881591796875,
+        1329.375732421875,
+        1316.408203125,
+        1509.58447265625,
+        984.1494140625,
+        1502.994873046875,
+        1888.248779296875,
+        1955.87060546875,
+        988.499267578125,
+        914.324951171875,
+        1259.072265625,
+        999.888916015625,
+        1233.366455078125,
+        1278.5771484375,
+        1001.181884765625,
+        1650.632080078125,
+        1120.243896484375,
+        1247.43115234375,
+        1736.197509765625,
+        1779.25390625,
+        1231.681396484375,
+        920.996337890625,
+        1508.373046875,
+        1254.74951171875,
+        1216.6455078125,
+        1819.897705078125,
+        956.896728515625,
+        1571.817138671875,
+        1229.5263671875,
+        1813.363037109375,
+        1038.10205078125,
+        997.3076171875,
+        1090.0458984375,
+        1330.83740234375,
+        1138.574462890625,
+        1066.781982421875,
+        1791.418212890625,
+        1205.637451171875,
+        1516.996826171875,
+        1512.8046875,
+        1263.42138671875,
+        1180.69677734375,
+        1575.901123046875,
+        1504.9423828125,
+        1229.810791015625,
+        1771.499267578125,
+        1241.86083984375,
+        1495.33349609375,
+        1227.96875,
+        1163.646728515625,
+        1003.77978515625,
+        1621.261474609375,
+        1007.033203125,
+        1242.828857421875,
+        1480.033203125,
+        2302.613525390625,
+        998.27294921875,
+        1096.140380859375,
+        1332.548583984375,
+        1199.85302734375,
+        1664.015869140625,
+        1059.30126953125,
+        1004.29736328125,
+        1858.86572265625
+      ]
+    },
+    "dropped": {
+      "field:invalid_value": 1
+    },
+    "concepts": [],
+    "conceptNames": [],
+    "errors": []
+  },
+  "usage": {
+    "full": {
+      "requests": 0,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "cacheReadTokens": 0,
+      "latencyMs": []
+    },
+    "refresh": {
+      "requests": 22,
+      "inputTokens": 55633,
+      "outputTokens": 1042,
+      "cacheReadTokens": 0,
+      "latencyMs": [
+        1055,
+        1243,
+        1213,
+        2462,
+        1663,
+        2115,
+        1681,
+        1612,
+        2119,
+        2195,
+        1833,
+        1663,
+        1603,
+        2151,
+        2342,
+        1674,
+        1710,
+        1790,
+        1651,
+        1908,
+        1764,
+        2259
+      ]
+    },
+    "local": {
+      "requests": 193,
+      "inputTokens": 357310,
+      "outputTokens": 3986,
+      "cacheReadTokens": 0,
+      "latencyMs": [
+        1529,
+        1014,
+        1594,
+        934,
+        969,
+        1494,
+        951,
+        1576,
+        1557,
+        1620,
+        1827,
+        1190,
+        1002,
+        1163,
+        1344,
+        1100,
+        1099,
+        910,
+        1166,
+        1513,
+        1060,
+        1539,
+        1646,
+        1154,
+        997,
+        1539,
+        969,
+        1821,
+        1246,
+        1271,
+        1236,
+        1934,
+        1023,
+        1450,
+        1415,
+        1413,
+        948,
+        970,
+        1117,
+        1133,
+        1508,
+        968,
+        927,
+        1298,
+        1750,
+        1465,
+        922,
+        961,
+        1558,
+        1195,
+        1406,
+        984,
+        1245,
+        1521,
+        1252,
+        1100,
+        1568,
+        974,
+        1167,
+        1125,
+        1026,
+        1057,
+        1685,
+        1451,
+        1603,
+        1328,
+        1724,
+        1260,
+        1181,
+        1392,
+        1575,
+        944,
+        1891,
+        1210,
+        987,
+        1151,
+        1193,
+        1497,
+        1561,
+        991,
+        1699,
+        1189,
+        921,
+        1592,
+        1240,
+        1200,
+        1478,
+        1041,
+        1011,
+        1866,
+        1920,
+        1036,
+        948,
+        1216,
+        1536,
+        1708,
+        1260,
+        1231,
+        962,
+        1019,
+        1016,
+        1551,
+        1158,
+        1163,
+        1644,
+        1718,
+        1054,
+        961,
+        1218,
+        972,
+        1118,
+        1240,
+        1405,
+        1133,
+        1071,
+        1545,
+        1195,
+        1122,
+        1106,
+        1205,
+        1180,
+        983,
+        1609,
+        885,
+        1243,
+        1897,
+        962,
+        978,
+        1018,
+        1915,
+        1138,
+        974,
+        984,
+        1272,
+        1265,
+        1493,
+        964,
+        1482,
+        1845,
+        969,
+        894,
+        1239,
+        980,
+        1190,
+        1245,
+        986,
+        1636,
+        1102,
+        1215,
+        1697,
+        1742,
+        1190,
+        904,
+        1495,
+        1210,
+        1185,
+        935,
+        1551,
+        1171,
+        1773,
+        1015,
+        968,
+        1063,
+        1261,
+        1105,
+        1050,
+        1763,
+        1172,
+        1503,
+        1499,
+        1230,
+        1148,
+        1560,
+        1489,
+        1197,
+        1733,
+        1208,
+        1479,
+        1192,
+        1131,
+        987,
+        1606,
+        989,
+        1209,
+        1452,
+        979,
+        1078,
+        1299,
+        1157,
+        1645,
+        1040,
+        983,
+        1816
+      ]
+    }
+  },
+  "clientCaseId": {
+    "headerReads": 127,
+    "matched": 16,
+    "distinctIds": [
+      "NS-2026-6305",
+      "NS-2026-0101",
+      "NS-2026-0102"
+    ],
+    "ocrMs": {
+      "n": 127,
+      "p50": 499.3750660000005,
+      "p95": 542.6650440000003,
+      "samples": [
+        117,
+        239,
+        325,
+        487,
+        496,
+        515,
+        526,
+        543,
+        511,
+        501,
+        504,
+        536,
+        476,
+        493,
+        517,
+        504,
+        536,
+        573,
+        195,
+        311,
+        521,
+        569,
+        553,
+        528,
+        485,
+        502,
+        509,
+        192,
+        308,
+        484,
+        481,
+        507,
+        533,
+        536,
+        495,
+        500,
+        527,
+        500,
+        490,
+        510,
+        479,
+        498,
+        523,
+        530,
+        519,
+        535,
+        195,
+        308,
+        497,
+        534,
+        538,
+        516,
+        522,
+        507,
+        485,
+        478,
+        522,
+        196,
+        311,
+        491,
+        506,
+        538,
+        501,
+        492,
+        537,
+        483,
+        511,
+        510,
+        499,
+        524,
+        558,
+        533,
+        196,
+        312,
+        508,
+        577,
+        536,
+        516,
+        495,
+        499,
+        473,
+        476,
+        496,
+        191,
+        274,
+        306,
+        484,
+        508,
+        540,
+        491,
+        481,
+        490,
+        482,
+        472,
+        475,
+        495,
+        482,
+        518,
+        523,
+        188,
+        308,
+        481,
+        512,
+        512,
+        523,
+        509,
+        495,
+        474,
+        496,
+        190,
+        309,
+        486,
+        482,
+        494,
+        530,
+        528,
+        500,
+        502,
+        574,
+        465,
+        486,
+        491,
+        495,
+        483,
+        531,
+        518,
+        528
+      ]
+    }
+  },
+  "reads": [
+    {
+      "frameSeq": 1,
+      "atMs": 0,
+      "mode": "refresh",
+      "latencyMs": 1055,
+      "inputTokens": 1285,
+      "outputTokens": 31,
+      "output": {
+        "caseId": null,
+        "caseTitle": null,
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 2,
+      "atMs": 501,
+      "mode": "refresh",
+      "latencyMs": 1243,
+      "inputTokens": 2582,
+      "outputTokens": 31,
+      "output": {
+        "caseId": null,
+        "caseTitle": null,
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 4,
+      "atMs": 2001,
+      "mode": "refresh",
+      "latencyMs": 1213,
+      "inputTokens": 2582,
+      "outputTokens": 33,
+      "output": {
+        "caseId": null,
+        "caseTitle": null,
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 5,
+      "atMs": 3501,
+      "mode": "refresh",
+      "latencyMs": 2462,
+      "inputTokens": 2582,
+      "outputTokens": 49,
+      "output": {
+        "caseId": "NS-2026-0301",
+        "caseTitle": "Zofia Rasmussen-Adeyemi",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 6,
+      "atMs": 6000,
+      "mode": "refresh",
+      "latencyMs": 1663,
+      "inputTokens": 2589,
+      "outputTokens": 54,
+      "output": {
+        "caseId": "NS-2026-0301",
+        "caseTitle": "Zofia Rasmussen-Adeyemi",
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 7,
+      "atMs": 7500,
+      "mode": "local",
+      "latencyMs": 1529,
+      "inputTokens": 1223,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 9,
+      "atMs": 9001,
+      "mode": "refresh",
+      "latencyMs": 2115,
+      "inputTokens": 2589,
+      "outputTokens": 59,
+      "output": {
+        "caseId": "NS-2026-0301",
+        "caseTitle": "Zofia Rasmussen-Adeyemi",
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": "enhancedReview"
+      }
+    },
+    {
+      "frameSeq": 11,
+      "atMs": 10500,
+      "mode": "refresh",
+      "latencyMs": 1681,
+      "inputTokens": 2589,
+      "outputTokens": 50,
+      "output": {
+        "caseId": "NS-2026-0302",
+        "caseTitle": "Thomcastle Software Studio Holdings Ltd",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 12,
+      "atMs": 12000,
+      "mode": "local",
+      "latencyMs": 1014,
+      "inputTokens": 1161,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 14,
+      "atMs": 14000,
+      "mode": "local",
+      "latencyMs": 1594,
+      "inputTokens": 1314,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 16,
+      "atMs": 15000,
+      "mode": "refresh",
+      "latencyMs": 1612,
+      "inputTokens": 2589,
+      "outputTokens": 50,
+      "output": {
+        "caseId": "NS-2026-0302",
+        "caseTitle": "Thomcastle Software Studio Holdings Ltd",
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": "approve"
+      }
+    },
+    {
+      "frameSeq": 18,
+      "atMs": 16500,
+      "mode": "refresh",
+      "latencyMs": 2119,
+      "inputTokens": 2589,
+      "outputTokens": 51,
+      "output": {
+        "caseId": "NS-2026-0303",
+        "caseTitle": "Drummore Freight Partners Holdings Ltd",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 20,
+      "atMs": 18500,
+      "mode": "local",
+      "latencyMs": 934,
+      "inputTokens": 1249,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 21,
+      "atMs": 20000,
+      "mode": "local",
+      "latencyMs": 969,
+      "inputTokens": 1314,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 23,
+      "atMs": 21500,
+      "mode": "refresh",
+      "latencyMs": 2195,
+      "inputTokens": 2589,
+      "outputTokens": 44,
+      "output": {
+        "caseId": "NS-2026-0303",
+        "caseTitle": "Drummore Freight Partners Holdings Ltd",
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": "reject"
+      }
+    },
+    {
+      "frameSeq": 25,
+      "atMs": 23000,
+      "mode": "refresh",
+      "latencyMs": 1833,
+      "inputTokens": 2589,
+      "outputTokens": 43,
+      "output": {
+        "caseId": "NS-2026-0304",
+        "caseTitle": "Bellwether Heritage Trust",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 28,
+      "atMs": 25001,
+      "mode": "local",
+      "latencyMs": 1494,
+      "inputTokens": 1161,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 29,
+      "atMs": 26500,
+      "mode": "local",
+      "latencyMs": 951,
+      "inputTokens": 1275,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 30,
+      "atMs": 28001,
+      "mode": "local",
+      "latencyMs": 1576,
+      "inputTokens": 1353,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 31,
+      "atMs": 28501,
+      "mode": "refresh",
+      "latencyMs": 1663,
+      "inputTokens": 2589,
+      "outputTokens": 51,
+      "output": {
+        "caseId": "NS-2026-0304",
+        "caseTitle": "Bellwether Heritage Trust",
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": "requestDocuments"
+      }
+    },
+    {
+      "frameSeq": 34,
+      "atMs": 31500,
+      "mode": "refresh",
+      "latencyMs": 1603,
+      "inputTokens": 2589,
+      "outputTokens": 45,
+      "output": {
+        "caseId": "NS-2626-0305",
+        "caseTitle": "Eskildsen Aviation Services & Co.",
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 36,
+      "atMs": 33000,
+      "mode": "local",
+      "latencyMs": 1557,
+      "inputTokens": 1314,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 38,
+      "atMs": 34000,
+      "mode": "local",
+      "latencyMs": 1620,
+      "inputTokens": 1353,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 39,
+      "atMs": 35000,
+      "mode": "local",
+      "latencyMs": 1827,
+      "inputTokens": 2575,
+      "outputTokens": 24,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": "requestDocuments"
+      }
+    },
+    {
+      "frameSeq": 42,
+      "atMs": 38000,
+      "mode": "local",
+      "latencyMs": 1190,
+      "inputTokens": 2575,
+      "outputTokens": 23,
+      "output": {
+        "fields": {
+          "riskRating": "Unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 44,
+      "atMs": 39500,
+      "mode": "local",
+      "latencyMs": 1002,
+      "inputTokens": 1353,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 45,
+      "atMs": 41000,
+      "mode": "local",
+      "latencyMs": 1163,
+      "inputTokens": 1353,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 46,
+      "atMs": 42500,
+      "mode": "local",
+      "latencyMs": 1344,
+      "inputTokens": 2575,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": "escalateCompliance"
+      }
+    },
+    {
+      "frameSeq": 47,
+      "atMs": 46000,
+      "mode": "local",
+      "latencyMs": 1100,
+      "inputTokens": 2575,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 48,
+      "atMs": 47000,
+      "mode": "local",
+      "latencyMs": 1099,
+      "inputTokens": 2575,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 49,
+      "atMs": 47501,
+      "mode": "local",
+      "latencyMs": 910,
+      "inputTokens": 1173,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 50,
+      "atMs": 48501,
+      "mode": "local",
+      "latencyMs": 1166,
+      "inputTokens": 2575,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 51,
+      "atMs": 50000,
+      "mode": "local",
+      "latencyMs": 1513,
+      "inputTokens": 1249,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 52,
+      "atMs": 51499,
+      "mode": "local",
+      "latencyMs": 1060,
+      "inputTokens": 1203,
+      "outputTokens": 20,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 54,
+      "atMs": 53000,
+      "mode": "refresh",
+      "latencyMs": 2151,
+      "inputTokens": 2589,
+      "outputTokens": 53,
+      "output": {
+        "caseId": "NS-2026-0101",
+        "caseTitle": "Halvorsen Marine Logistics Ltd",
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": "requestDocuments"
+      }
+    },
+    {
+      "frameSeq": 57,
+      "atMs": 54500,
+      "mode": "refresh",
+      "latencyMs": 2342,
+      "inputTokens": 2589,
+      "outputTokens": 53,
+      "output": {
+        "caseId": "NS-2626-0102",
+        "caseTitle": "Quillfeather Agritrade Holdings",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 60,
+      "atMs": 56501,
+      "mode": "local",
+      "latencyMs": 1539,
+      "inputTokens": 1249,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 62,
+      "atMs": 59000,
+      "mode": "local",
+      "latencyMs": 1646,
+      "inputTokens": 2419,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": "approve"
+      }
+    },
+    {
+      "frameSeq": 64,
+      "atMs": 60500,
+      "mode": "local",
+      "latencyMs": 1154,
+      "inputTokens": 2575,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 65,
+      "atMs": 62000,
+      "mode": "local",
+      "latencyMs": 997,
+      "inputTokens": 1249,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 66,
+      "atMs": 62500,
+      "mode": "local",
+      "latencyMs": 1539,
+      "inputTokens": 1249,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 67,
+      "atMs": 64500,
+      "mode": "local",
+      "latencyMs": 969,
+      "inputTokens": 1301,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 68,
+      "atMs": 65500,
+      "mode": "local",
+      "latencyMs": 1821,
+      "inputTokens": 2211,
+      "outputTokens": 23,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": "enhancedReview"
+      }
+    },
+    {
+      "frameSeq": 69,
+      "atMs": 66000,
+      "mode": "local",
+      "latencyMs": 1246,
+      "inputTokens": 2039,
+      "outputTokens": 26,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": "enhancedReview"
+      }
+    },
+    {
+      "frameSeq": 70,
+      "atMs": 68500,
+      "mode": "local",
+      "latencyMs": 1271,
+      "inputTokens": 2575,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 73,
+      "atMs": 70001,
+      "mode": "local",
+      "latencyMs": 1236,
+      "inputTokens": 2575,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 74,
+      "atMs": 70500,
+      "mode": "local",
+      "latencyMs": 1934,
+      "inputTokens": 2575,
+      "outputTokens": 20,
+      "output": {
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 75,
+      "atMs": 72500,
+      "mode": "local",
+      "latencyMs": 1023,
+      "inputTokens": 1947,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 76,
+      "atMs": 74000,
+      "mode": "local",
+      "latencyMs": 1450,
+      "inputTokens": 1223,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 78,
+      "atMs": 75000,
+      "mode": "local",
+      "latencyMs": 1415,
+      "inputTokens": 2575,
+      "outputTokens": 26,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": "enhancedReview"
+      }
+    },
+    {
+      "frameSeq": 80,
+      "atMs": 76500,
+      "mode": "local",
+      "latencyMs": 1413,
+      "inputTokens": 2575,
+      "outputTokens": 20,
+      "output": {
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 81,
+      "atMs": 77501,
+      "mode": "local",
+      "latencyMs": 948,
+      "inputTokens": 1249,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 82,
+      "atMs": 79000,
+      "mode": "local",
+      "latencyMs": 970,
+      "inputTokens": 1314,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 84,
+      "atMs": 80500,
+      "mode": "local",
+      "latencyMs": 1117,
+      "inputTokens": 2575,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": "approve"
+      }
+    },
+    {
+      "frameSeq": 85,
+      "atMs": 81500,
+      "mode": "local",
+      "latencyMs": 1133,
+      "inputTokens": 2575,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 86,
+      "atMs": 82000,
+      "mode": "local",
+      "latencyMs": 1508,
+      "inputTokens": 1189,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 89,
+      "atMs": 84500,
+      "mode": "local",
+      "latencyMs": 968,
+      "inputTokens": 1249,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 90,
+      "atMs": 85500,
+      "mode": "local",
+      "latencyMs": 927,
+      "inputTokens": 1314,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 92,
+      "atMs": 86500,
+      "mode": "local",
+      "latencyMs": 1298,
+      "inputTokens": 2575,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": "reject"
+      }
+    },
+    {
+      "frameSeq": 93,
+      "atMs": 88000,
+      "mode": "local",
+      "latencyMs": 1750,
+      "inputTokens": 2575,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 94,
+      "atMs": 88500,
+      "mode": "local",
+      "latencyMs": 1465,
+      "inputTokens": 1189,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 96,
+      "atMs": 90500,
+      "mode": "local",
+      "latencyMs": 922,
+      "inputTokens": 1249,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 97,
+      "atMs": 92000,
+      "mode": "local",
+      "latencyMs": 961,
+      "inputTokens": 1314,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 98,
+      "atMs": 93000,
+      "mode": "local",
+      "latencyMs": 1558,
+      "inputTokens": 1353,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 100,
+      "atMs": 94000,
+      "mode": "local",
+      "latencyMs": 1195,
+      "inputTokens": 2575,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": "reject"
+      }
+    },
+    {
+      "frameSeq": 102,
+      "atMs": 96000,
+      "mode": "refresh",
+      "latencyMs": 1674,
+      "inputTokens": 2589,
+      "outputTokens": 46,
+      "output": {
+        "caseId": "NS-2626-0305",
+        "caseTitle": "Eskildsen Aviation Services & Co.",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 104,
+      "atMs": 97500,
+      "mode": "local",
+      "latencyMs": 1406,
+      "inputTokens": 1161,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 105,
+      "atMs": 98501,
+      "mode": "local",
+      "latencyMs": 984,
+      "inputTokens": 1262,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 106,
+      "atMs": 99499,
+      "mode": "local",
+      "latencyMs": 1245,
+      "inputTokens": 1353,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 108,
+      "atMs": 101000,
+      "mode": "local",
+      "latencyMs": 1521,
+      "inputTokens": 2575,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": "escalateCompliance"
+      }
+    },
+    {
+      "frameSeq": 110,
+      "atMs": 102001,
+      "mode": "local",
+      "latencyMs": 1252,
+      "inputTokens": 2575,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 112,
+      "atMs": 104000,
+      "mode": "local",
+      "latencyMs": 1100,
+      "inputTokens": 1249,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 113,
+      "atMs": 106000,
+      "mode": "local",
+      "latencyMs": 1568,
+      "inputTokens": 1314,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 114,
+      "atMs": 107000,
+      "mode": "local",
+      "latencyMs": 974,
+      "inputTokens": 1353,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 115,
+      "atMs": 108500,
+      "mode": "local",
+      "latencyMs": 1167,
+      "inputTokens": 2575,
+      "outputTokens": 26,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": "enhancedReview"
+      }
+    },
+    {
+      "frameSeq": 116,
+      "atMs": 111500,
+      "mode": "local",
+      "latencyMs": 1125,
+      "inputTokens": 2575,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 117,
+      "atMs": 112000,
+      "mode": "local",
+      "latencyMs": 1026,
+      "inputTokens": 1246,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 118,
+      "atMs": 113000,
+      "mode": "local",
+      "latencyMs": 1057,
+      "inputTokens": 2575,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 119,
+      "atMs": 114500,
+      "mode": "local",
+      "latencyMs": 1685,
+      "inputTokens": 2575,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 121,
+      "atMs": 116500,
+      "mode": "local",
+      "latencyMs": 1451,
+      "inputTokens": 1947,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 122,
+      "atMs": 118500,
+      "mode": "local",
+      "latencyMs": 1603,
+      "inputTokens": 1210,
+      "outputTokens": 20,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 124,
+      "atMs": 120001,
+      "mode": "local",
+      "latencyMs": 1328,
+      "inputTokens": 2575,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": "escalateCompliance"
+      }
+    },
+    {
+      "frameSeq": 127,
+      "atMs": 121500,
+      "mode": "refresh",
+      "latencyMs": 1710,
+      "inputTokens": 2589,
+      "outputTokens": 47,
+      "output": {
+        "caseId": "NS-2026-0102",
+        "caseTitle": "Quillfeather Agritrade Holdings",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 128,
+      "atMs": 122000,
+      "mode": "local",
+      "latencyMs": 1724,
+      "inputTokens": 1249,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 131,
+      "atMs": 125002,
+      "mode": "local",
+      "latencyMs": 1260,
+      "inputTokens": 2419,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": "requestDocuments"
+      }
+    },
+    {
+      "frameSeq": 133,
+      "atMs": 126001,
+      "mode": "local",
+      "latencyMs": 1181,
+      "inputTokens": 2575,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 134,
+      "atMs": 127500,
+      "mode": "local",
+      "latencyMs": 1392,
+      "inputTokens": 1249,
+      "outputTokens": 20,
+      "output": {
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 135,
+      "atMs": 128001,
+      "mode": "local",
+      "latencyMs": 1575,
+      "inputTokens": 1249,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 136,
+      "atMs": 130000,
+      "mode": "local",
+      "latencyMs": 944,
+      "inputTokens": 1314,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 138,
+      "atMs": 131500,
+      "mode": "local",
+      "latencyMs": 1891,
+      "inputTokens": 2159,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": "escalateCompliance"
+      }
+    },
+    {
+      "frameSeq": 139,
+      "atMs": 133500,
+      "mode": "local",
+      "latencyMs": 1210,
+      "inputTokens": 2575,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 140,
+      "atMs": 134000,
+      "mode": "local",
+      "latencyMs": 987,
+      "inputTokens": 1356,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 141,
+      "atMs": 135001,
+      "mode": "local",
+      "latencyMs": 1151,
+      "inputTokens": 2575,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 142,
+      "atMs": 136500,
+      "mode": "local",
+      "latencyMs": 1193,
+      "inputTokens": 2575,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 143,
+      "atMs": 138000,
+      "mode": "local",
+      "latencyMs": 1497,
+      "inputTokens": 1249,
+      "outputTokens": 20,
+      "output": {
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 144,
+      "atMs": 138500,
+      "mode": "local",
+      "latencyMs": 1561,
+      "inputTokens": 1249,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 145,
+      "atMs": 140500,
+      "mode": "local",
+      "latencyMs": 991,
+      "inputTokens": 1210,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 147,
+      "atMs": 142000,
+      "mode": "local",
+      "latencyMs": 1699,
+      "inputTokens": 2575,
+      "outputTokens": 24,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": "requestDocuments"
+      }
+    },
+    {
+      "frameSeq": 150,
+      "atMs": 144001,
+      "mode": "local",
+      "latencyMs": 1189,
+      "inputTokens": 2575,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 151,
+      "atMs": 144500,
+      "mode": "local",
+      "latencyMs": 921,
+      "inputTokens": 1379,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 152,
+      "atMs": 146500,
+      "mode": "local",
+      "latencyMs": 1592,
+      "inputTokens": 1275,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 154,
+      "atMs": 148000,
+      "mode": "local",
+      "latencyMs": 1240,
+      "inputTokens": 2575,
+      "outputTokens": 24,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": "requestDocuments"
+      }
+    },
+    {
+      "frameSeq": 155,
+      "atMs": 149000,
+      "mode": "local",
+      "latencyMs": 1200,
+      "inputTokens": 2575,
+      "outputTokens": 20,
+      "output": {
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 156,
+      "atMs": 150500,
+      "mode": "local",
+      "latencyMs": 1478,
+      "inputTokens": 1249,
+      "outputTokens": 20,
+      "output": {
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 157,
+      "atMs": 151000,
+      "mode": "local",
+      "latencyMs": 1041,
+      "inputTokens": 1249,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 158,
+      "atMs": 152500,
+      "mode": "local",
+      "latencyMs": 1011,
+      "inputTokens": 1301,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 159,
+      "atMs": 153500,
+      "mode": "local",
+      "latencyMs": 1866,
+      "inputTokens": 2575,
+      "outputTokens": 24,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": "requestDocuments"
+      }
+    },
+    {
+      "frameSeq": 160,
+      "atMs": 155000,
+      "mode": "local",
+      "latencyMs": 1920,
+      "inputTokens": 2575,
+      "outputTokens": 20,
+      "output": {
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 162,
+      "atMs": 157500,
+      "mode": "local",
+      "latencyMs": 1036,
+      "inputTokens": 1249,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 164,
+      "atMs": 159001,
+      "mode": "local",
+      "latencyMs": 948,
+      "inputTokens": 1301,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 166,
+      "atMs": 160000,
+      "mode": "local",
+      "latencyMs": 1216,
+      "inputTokens": 2575,
+      "outputTokens": 25,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": "escalateCompliance"
+      }
+    },
+    {
+      "frameSeq": 167,
+      "atMs": 161500,
+      "mode": "refresh",
+      "latencyMs": 1790,
+      "inputTokens": 2589,
+      "outputTokens": 51,
+      "output": {
+        "caseId": "NS-2026-0305",
+        "caseTitle": "Eskildsen Aviation Services & Co.",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 169,
+      "atMs": 163000,
+      "mode": "local",
+      "latencyMs": 1536,
+      "inputTokens": 1161,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 170,
+      "atMs": 164501,
+      "mode": "local",
+      "latencyMs": 1708,
+      "inputTokens": 1275,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 172,
+      "atMs": 166000,
+      "mode": "local",
+      "latencyMs": 1260,
+      "inputTokens": 2575,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": "requestDocuments"
+      }
+    },
+    {
+      "frameSeq": 174,
+      "atMs": 167501,
+      "mode": "local",
+      "latencyMs": 1231,
+      "inputTokens": 2575,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 176,
+      "atMs": 169000,
+      "mode": "local",
+      "latencyMs": 962,
+      "inputTokens": 1319,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 177,
+      "atMs": 169500,
+      "mode": "local",
+      "latencyMs": 1019,
+      "inputTokens": 1189,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 178,
+      "atMs": 171000,
+      "mode": "local",
+      "latencyMs": 1016,
+      "inputTokens": 1249,
+      "outputTokens": 20,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 180,
+      "atMs": 172000,
+      "mode": "local",
+      "latencyMs": 1551,
+      "inputTokens": 1353,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 182,
+      "atMs": 173000,
+      "mode": "local",
+      "latencyMs": 1158,
+      "inputTokens": 2575,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": "reject"
+      }
+    },
+    {
+      "frameSeq": 183,
+      "atMs": 175000,
+      "mode": "local",
+      "latencyMs": 1163,
+      "inputTokens": 2575,
+      "outputTokens": 20,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 185,
+      "atMs": 176000,
+      "mode": "local",
+      "latencyMs": 1644,
+      "inputTokens": 2575,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 187,
+      "atMs": 177500,
+      "mode": "local",
+      "latencyMs": 1718,
+      "inputTokens": 2575,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 188,
+      "atMs": 180000,
+      "mode": "local",
+      "latencyMs": 1054,
+      "inputTokens": 1249,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 189,
+      "atMs": 181000,
+      "mode": "local",
+      "latencyMs": 961,
+      "inputTokens": 1262,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 190,
+      "atMs": 181999,
+      "mode": "local",
+      "latencyMs": 1218,
+      "inputTokens": 2575,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": "escalateCompliance"
+      }
+    },
+    {
+      "frameSeq": 192,
+      "atMs": 183000,
+      "mode": "refresh",
+      "latencyMs": 1651,
+      "inputTokens": 2589,
+      "outputTokens": 47,
+      "output": {
+        "caseId": "NS-2626-0102",
+        "caseTitle": "Quillfeather Agritrade Holdings",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 195,
+      "atMs": 185000,
+      "mode": "local",
+      "latencyMs": 972,
+      "inputTokens": 1319,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 196,
+      "atMs": 186499,
+      "mode": "local",
+      "latencyMs": 1118,
+      "inputTokens": 1262,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 197,
+      "atMs": 188000,
+      "mode": "local",
+      "latencyMs": 1240,
+      "inputTokens": 2211,
+      "outputTokens": 25,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": "escalateCompliance"
+      }
+    },
+    {
+      "frameSeq": 198,
+      "atMs": 188501,
+      "mode": "local",
+      "latencyMs": 1405,
+      "inputTokens": 2079,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": "escalateCompliance"
+      }
+    },
+    {
+      "frameSeq": 199,
+      "atMs": 189500,
+      "mode": "local",
+      "latencyMs": 1133,
+      "inputTokens": 2575,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 201,
+      "atMs": 191501,
+      "mode": "local",
+      "latencyMs": 1071,
+      "inputTokens": 1249,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 202,
+      "atMs": 193001,
+      "mode": "local",
+      "latencyMs": 1545,
+      "inputTokens": 1314,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 204,
+      "atMs": 194001,
+      "mode": "local",
+      "latencyMs": 1195,
+      "inputTokens": 2159,
+      "outputTokens": 26,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": "enhancedReview"
+      }
+    },
+    {
+      "frameSeq": 205,
+      "atMs": 196500,
+      "mode": "local",
+      "latencyMs": 1122,
+      "inputTokens": 2575,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 207,
+      "atMs": 197500,
+      "mode": "local",
+      "latencyMs": 1106,
+      "inputTokens": 2575,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 208,
+      "atMs": 198001,
+      "mode": "local",
+      "latencyMs": 1205,
+      "inputTokens": 2471,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 209,
+      "atMs": 199000,
+      "mode": "local",
+      "latencyMs": 1180,
+      "inputTokens": 2575,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 211,
+      "atMs": 201000,
+      "mode": "local",
+      "latencyMs": 983,
+      "inputTokens": 1262,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 212,
+      "atMs": 201500,
+      "mode": "local",
+      "latencyMs": 1609,
+      "inputTokens": 1249,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 213,
+      "atMs": 203001,
+      "mode": "local",
+      "latencyMs": 885,
+      "inputTokens": 1223,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 214,
+      "atMs": 204500,
+      "mode": "local",
+      "latencyMs": 1243,
+      "inputTokens": 2575,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": "requestDocuments"
+      }
+    },
+    {
+      "frameSeq": 215,
+      "atMs": 206000,
+      "mode": "local",
+      "latencyMs": 1897,
+      "inputTokens": 2575,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 217,
+      "atMs": 208001,
+      "mode": "local",
+      "latencyMs": 962,
+      "inputTokens": 1249,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 218,
+      "atMs": 209000,
+      "mode": "local",
+      "latencyMs": 978,
+      "inputTokens": 1301,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 219,
+      "atMs": 210000,
+      "mode": "local",
+      "latencyMs": 1018,
+      "inputTokens": 1353,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 220,
+      "atMs": 210500,
+      "mode": "local",
+      "latencyMs": 1915,
+      "inputTokens": 2575,
+      "outputTokens": 25,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": "escalateCompliance"
+      }
+    },
+    {
+      "frameSeq": 222,
+      "atMs": 212000,
+      "mode": "local",
+      "latencyMs": 1138,
+      "inputTokens": 2575,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 224,
+      "atMs": 214000,
+      "mode": "local",
+      "latencyMs": 974,
+      "inputTokens": 1249,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 225,
+      "atMs": 215500,
+      "mode": "local",
+      "latencyMs": 984,
+      "inputTokens": 1301,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 227,
+      "atMs": 216501,
+      "mode": "local",
+      "latencyMs": 1272,
+      "inputTokens": 2575,
+      "outputTokens": 24,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": "requestDocuments"
+      }
+    },
+    {
+      "frameSeq": 228,
+      "atMs": 218000,
+      "mode": "local",
+      "latencyMs": 1265,
+      "inputTokens": 2575,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 229,
+      "atMs": 218501,
+      "mode": "local",
+      "latencyMs": 1493,
+      "inputTokens": 1189,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 231,
+      "atMs": 220000,
+      "mode": "local",
+      "latencyMs": 964,
+      "inputTokens": 1249,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 232,
+      "atMs": 222001,
+      "mode": "local",
+      "latencyMs": 1482,
+      "inputTokens": 1314,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 234,
+      "atMs": 223500,
+      "mode": "local",
+      "latencyMs": 1845,
+      "inputTokens": 2575,
+      "outputTokens": 25,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": "escalateCompliance"
+      }
+    },
+    {
+      "frameSeq": 235,
+      "atMs": 225000,
+      "mode": "refresh",
+      "latencyMs": 1908,
+      "inputTokens": 2589,
+      "outputTokens": 51,
+      "output": {
+        "caseId": "NS-2626-0305",
+        "caseTitle": "Eskildsen Aviation Services & Co.",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 237,
+      "atMs": 227000,
+      "mode": "local",
+      "latencyMs": 969,
+      "inputTokens": 1366,
+      "outputTokens": 20,
+      "output": {
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 239,
+      "atMs": 228000,
+      "mode": "local",
+      "latencyMs": 894,
+      "inputTokens": 1249,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 240,
+      "atMs": 229499,
+      "mode": "local",
+      "latencyMs": 1239,
+      "inputTokens": 1301,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 241,
+      "atMs": 230000,
+      "mode": "local",
+      "latencyMs": 980,
+      "inputTokens": 1210,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 243,
+      "atMs": 231500,
+      "mode": "local",
+      "latencyMs": 1190,
+      "inputTokens": 2575,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": "escalateCompliance"
+      }
+    },
+    {
+      "frameSeq": 244,
+      "atMs": 232999,
+      "mode": "local",
+      "latencyMs": 1245,
+      "inputTokens": 2575,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 245,
+      "atMs": 234000,
+      "mode": "local",
+      "latencyMs": 986,
+      "inputTokens": 1249,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 246,
+      "atMs": 234499,
+      "mode": "local",
+      "latencyMs": 1636,
+      "inputTokens": 1249,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 248,
+      "atMs": 236499,
+      "mode": "local",
+      "latencyMs": 1102,
+      "inputTokens": 1340,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 249,
+      "atMs": 237500,
+      "mode": "local",
+      "latencyMs": 1215,
+      "inputTokens": 2575,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": "approve"
+      }
+    },
+    {
+      "frameSeq": 250,
+      "atMs": 240500,
+      "mode": "local",
+      "latencyMs": 1697,
+      "inputTokens": 2575,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 251,
+      "atMs": 241500,
+      "mode": "local",
+      "latencyMs": 1742,
+      "inputTokens": 2575,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 252,
+      "atMs": 243500,
+      "mode": "local",
+      "latencyMs": 1190,
+      "inputTokens": 2575,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 253,
+      "atMs": 246000,
+      "mode": "local",
+      "latencyMs": 904,
+      "inputTokens": 1249,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 254,
+      "atMs": 247000,
+      "mode": "local",
+      "latencyMs": 1495,
+      "inputTokens": 1210,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 256,
+      "atMs": 248500,
+      "mode": "local",
+      "latencyMs": 1210,
+      "inputTokens": 2575,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": "approve"
+      }
+    },
+    {
+      "frameSeq": 257,
+      "atMs": 249500,
+      "mode": "local",
+      "latencyMs": 1185,
+      "inputTokens": 2575,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 258,
+      "atMs": 250000,
+      "mode": "refresh",
+      "latencyMs": 1764,
+      "inputTokens": 2589,
+      "outputTokens": 53,
+      "output": {
+        "caseId": "NS-2026-0102",
+        "caseTitle": "Quillfeather Agritrade Holdings",
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 260,
+      "atMs": 252500,
+      "mode": "local",
+      "latencyMs": 935,
+      "inputTokens": 1249,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 261,
+      "atMs": 254000,
+      "mode": "local",
+      "latencyMs": 1551,
+      "inputTokens": 1314,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 262,
+      "atMs": 255001,
+      "mode": "local",
+      "latencyMs": 1171,
+      "inputTokens": 2159,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": "escalateCompliance"
+      }
+    },
+    {
+      "frameSeq": 263,
+      "atMs": 257000,
+      "mode": "local",
+      "latencyMs": 1773,
+      "inputTokens": 2575,
+      "outputTokens": 23,
+      "output": {
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 264,
+      "atMs": 258501,
+      "mode": "local",
+      "latencyMs": 1015,
+      "inputTokens": 1379,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 265,
+      "atMs": 259000,
+      "mode": "local",
+      "latencyMs": 968,
+      "inputTokens": 1379,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 266,
+      "atMs": 261000,
+      "mode": "local",
+      "latencyMs": 1063,
+      "inputTokens": 1314,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 267,
+      "atMs": 261999,
+      "mode": "local",
+      "latencyMs": 1261,
+      "inputTokens": 2159,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": "escalateCompliance"
+      }
+    },
+    {
+      "frameSeq": 268,
+      "atMs": 265000,
+      "mode": "local",
+      "latencyMs": 1105,
+      "inputTokens": 2575,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 269,
+      "atMs": 265500,
+      "mode": "local",
+      "latencyMs": 1050,
+      "inputTokens": 1356,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 270,
+      "atMs": 266500,
+      "mode": "local",
+      "latencyMs": 1763,
+      "inputTokens": 2575,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 273,
+      "atMs": 269000,
+      "mode": "local",
+      "latencyMs": 1172,
+      "inputTokens": 2575,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 274,
+      "atMs": 269500,
+      "mode": "local",
+      "latencyMs": 1503,
+      "inputTokens": 1262,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 275,
+      "atMs": 271500,
+      "mode": "local",
+      "latencyMs": 1499,
+      "inputTokens": 1236,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 276,
+      "atMs": 272500,
+      "mode": "local",
+      "latencyMs": 1230,
+      "inputTokens": 2575,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": "approve"
+      }
+    },
+    {
+      "frameSeq": 277,
+      "atMs": 274500,
+      "mode": "local",
+      "latencyMs": 1148,
+      "inputTokens": 2575,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 278,
+      "atMs": 276500,
+      "mode": "local",
+      "latencyMs": 1560,
+      "inputTokens": 1379,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 279,
+      "atMs": 277000,
+      "mode": "local",
+      "latencyMs": 1489,
+      "inputTokens": 1353,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 281,
+      "atMs": 279500,
+      "mode": "local",
+      "latencyMs": 1197,
+      "inputTokens": 2575,
+      "outputTokens": 26,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": "enhancedReview"
+      }
+    },
+    {
+      "frameSeq": 282,
+      "atMs": 280000,
+      "mode": "local",
+      "latencyMs": 1733,
+      "inputTokens": 2079,
+      "outputTokens": 26,
+      "output": {
+        "fields": {
+          "riskRating": "medium"
+        },
+        "committed": "enhancedReview"
+      }
+    },
+    {
+      "frameSeq": 285,
+      "atMs": 282500,
+      "mode": "local",
+      "latencyMs": 1208,
+      "inputTokens": 2575,
+      "outputTokens": 21,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 286,
+      "atMs": 284501,
+      "mode": "local",
+      "latencyMs": 1479,
+      "inputTokens": 1314,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 288,
+      "atMs": 285500,
+      "mode": "local",
+      "latencyMs": 1192,
+      "inputTokens": 2575,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": "approve"
+      }
+    },
+    {
+      "frameSeq": 289,
+      "atMs": 287000,
+      "mode": "local",
+      "latencyMs": 1131,
+      "inputTokens": 2575,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 290,
+      "atMs": 289000,
+      "mode": "local",
+      "latencyMs": 987,
+      "inputTokens": 1319,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 292,
+      "atMs": 290000,
+      "mode": "local",
+      "latencyMs": 1606,
+      "inputTokens": 1379,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 293,
+      "atMs": 291500,
+      "mode": "local",
+      "latencyMs": 989,
+      "inputTokens": 1314,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 295,
+      "atMs": 292501,
+      "mode": "local",
+      "latencyMs": 1209,
+      "inputTokens": 2575,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": "approve"
+      }
+    },
+    {
+      "frameSeq": 296,
+      "atMs": 293001,
+      "mode": "local",
+      "latencyMs": 1452,
+      "inputTokens": 2019,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": "approve"
+      }
+    },
+    {
+      "frameSeq": 298,
+      "atMs": 295000,
+      "mode": "refresh",
+      "latencyMs": 2259,
+      "inputTokens": 2589,
+      "outputTokens": 50,
+      "output": {
+        "caseId": "NS-2626-0305",
+        "caseTitle": "Eskildsen Aviation Services & Co.",
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 300,
+      "atMs": 297000,
+      "mode": "local",
+      "latencyMs": 979,
+      "inputTokens": 1340,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 301,
+      "atMs": 298500,
+      "mode": "local",
+      "latencyMs": 1078,
+      "inputTokens": 1353,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 303,
+      "atMs": 299501,
+      "mode": "local",
+      "latencyMs": 1299,
+      "inputTokens": 2575,
+      "outputTokens": 26,
+      "output": {
+        "fields": {
+          "riskRating": "low"
+        },
+        "committed": "enhancedReview"
+      }
+    },
+    {
+      "frameSeq": 304,
+      "atMs": 300500,
+      "mode": "local",
+      "latencyMs": 1157,
+      "inputTokens": 2575,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "unrated"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 306,
+      "atMs": 302000,
+      "mode": "local",
+      "latencyMs": 1645,
+      "inputTokens": 1249,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 307,
+      "atMs": 303500,
+      "mode": "local",
+      "latencyMs": 1040,
+      "inputTokens": 1288,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": null
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 309,
+      "atMs": 305000,
+      "mode": "local",
+      "latencyMs": 983,
+      "inputTokens": 1353,
+      "outputTokens": 19,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": null
+      }
+    },
+    {
+      "frameSeq": 311,
+      "atMs": 306000,
+      "mode": "local",
+      "latencyMs": 1816,
+      "inputTokens": 2575,
+      "outputTokens": 22,
+      "output": {
+        "fields": {
+          "riskRating": "high"
+        },
+        "committed": "reject"
+      }
+    }
+  ]
+}

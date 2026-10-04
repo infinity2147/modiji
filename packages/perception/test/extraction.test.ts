@@ -467,3 +467,49 @@ describe("interpretReading (code derives events from two readings)", () => {
     expect(() => interpretReading(local("low"), context({ previous: snapshot() }))).toThrow(/local read for a full request/);
   });
 });
+
+describe("trusted client case id (team P2 decision)", () => {
+  const same = { value: CASE, confidence: 0.9 };
+  const other = { value: "NS-2026-0102", confidence: 0.9 };
+  const changed = (x: number, y: number, w: number, h: number) => thumbnail(paint(screen(), x, y, w, h, 40));
+
+  it("planRead: crop-only for same-case changes (even large ones), whole screen only on a confirmed switch", () => {
+    const prev = snapshot();
+    const small = changed(1150, 450, 200, 40);
+    const big = changed(300, 60, 820, 600); // > 25% of the frame
+    expect(planRead(prev, small, T, same).scope).toBe("local");
+    expect(planRead(prev, big, T, same).scope).toBe("local"); // same case: never widened to a full frame
+    expect(planRead(prev, small, T, other)).toEqual({ scope: "screen", switchPossible: true }); // a switch is read in full
+    // Without a client id the earlier policy holds (a large change may be a switch).
+    expect(planRead(prev, big, T)).toEqual({ scope: "screen", switchPossible: true });
+  });
+
+  it("prepareRead: a same-case change sends only a crop; a switch sends the whole screen", () => {
+    const image = paint(screen(), 1150, 450, 200, 40, 40);
+    const base = { ...context(), previous: snapshot(), frame: { image, sourceWidth: W, sourceHeight: H } };
+    expect(prepareRead({ ...base, clientCaseId: same }).mode).toBe("local");
+    expect(prepareRead({ ...base, clientCaseId: other }).mode).toBe("refresh");
+  });
+
+  it("interpretReading: the model's misread id is ignored; identity is the client's id", () => {
+    const misread = "NS-2626-0102";
+    const opened = interpretReading(
+      full({ caseId: misread, caseTitle: "Quillfeather Agritrade Holdings", fields: { riskRating: "high" }, committed: "approve" }),
+      context({ previous: snapshot(), clientCaseId: other, switchPossible: true }),
+    );
+    expect(opened.events.map((e) => [e.kind, e.caseId])).toEqual([["open_case", other.value]]);
+    expect(opened.snapshot).toMatchObject({ caseId: other.value });
+  });
+
+  it("interpretReading: same-case edits are attributed to the trusted id, model misread or not", () => {
+    const local1 = interpretReading(local("medium"), context({ ...local_(), previous: snapshot(), clientCaseId: same }));
+    expect(local1.events.map((e) => [e.kind, e.caseId, e.to])).toEqual([["field_change", CASE, "medium"]]);
+
+    const misread = "NS-2626-0101";
+    const refresh: FrameReading = { mode: "refresh", output: { caseId: misread, caseTitle: TITLE, fields: { riskRating: "high" }, committed: null } };
+    const r = interpretReading(refresh, context({ mode: "refresh", switchPossible: false, previous: snapshot(), clientCaseId: same }));
+    expect(r.events.map((e) => [e.kind, e.caseId, e.to])).toEqual([["field_change", CASE, "high"]]);
+    expect(r.dropped).toEqual([]); // the model's id is never consulted, so it is never flagged invalid
+    expect(r.snapshot.caseId).toBe(CASE);
+  });
+});
