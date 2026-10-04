@@ -21,6 +21,29 @@ export function joinUrl(baseUrl: string, path: string): string {
   return `${baseUrl}${path}`;
 }
 
+/** undici raises this when the TCP/TLS connection could not be established, so no request was sent. */
+function isConnectTimeout(error: unknown): boolean {
+  const cause = error instanceof Error ? error.cause : undefined;
+  return cause instanceof Error && (cause as { code?: string }).code === "UND_ERR_CONNECT_TIMEOUT";
+}
+
+/**
+ * Wraps `fetch` so a connection that never established is attempted once more. Nothing else is
+ * retried: a connect timeout means the request was never sent, so repeating it cannot duplicate a
+ * side effect (including single-use nonces), and a real outage still fails on the second attempt.
+ * Some networks stall roughly one new connection in six for the full connect timeout.
+ */
+export function withConnectRetry(base: typeof fetch): typeof fetch {
+  return async (input, init) => {
+    try {
+      return await base(input, init);
+    } catch (error) {
+      if (!isConnectTimeout(error) || init?.signal?.aborted === true) throw error;
+      return base(input, init);
+    }
+  };
+}
+
 /** One request with a whole-response timeout (headers and body). Network errors become `CheckFailure`. */
 export async function httpRequest(
   ctx: Pick<PreflightContext, "fetch" | "now" | "options">,

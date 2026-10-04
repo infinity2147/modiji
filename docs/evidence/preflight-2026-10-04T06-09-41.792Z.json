@@ -1,0 +1,192 @@
+{
+  "tool": "vashistha-preflight",
+  "startedAt": "2026-10-04T06:09:41.792Z",
+  "finishedAt": "2026-10-04T06:10:14.114Z",
+  "target": "https://vashistha-production.up.railway.app",
+  "options": {
+    "only": [
+      "env",
+      "anthropic",
+      "agents",
+      "token",
+      "public-llm",
+      "voice-skip-turn",
+      "voice-off-record",
+      "server-deep",
+      "sandbox",
+      "permissions"
+    ],
+    "quietWindowMs": 8000,
+    "speechTimeoutMs": 20000
+  },
+  "exitCode": 1,
+  "summary": {
+    "pass": 4,
+    "fail": 3,
+    "skip": 2,
+    "info": 1
+  },
+  "results": [
+    {
+      "id": "env",
+      "title": "Environment variables",
+      "status": "pass",
+      "ms": 52,
+      "detail": "6 required variables set, PUBLIC_BASE_URL is https (.env + process env)",
+      "facts": {
+        "source": ".env + process env",
+        "required": [
+          "ANTHROPIC_API_KEY",
+          "ELEVENLABS_API_KEY",
+          "ELEVENLABS_INTERVIEWER_AGENT_ID",
+          "ELEVENLABS_TUTOR_AGENT_ID",
+          "CUSTOM_LLM_SECRET",
+          "PUBLIC_BASE_URL"
+        ],
+        "missing": []
+      }
+    },
+    {
+      "id": "anthropic",
+      "title": "Anthropic structured output + routed models",
+      "status": "fail",
+      "ms": 32315,
+      "detail": "structured output on claude-haiku-4-5-20251001: Request timed out.; claude-sonnet-5-5: Request timed out.; claude-opus-5-5: Request timed out.",
+      "facts": {}
+    },
+    {
+      "id": "agents",
+      "title": "ElevenLabs agents match spec and invariants",
+      "status": "pass",
+      "ms": 1139,
+      "detail": "interviewer (vashistha-interviewer-v3), tutor (vashistha-tutor-v2): invariants hold, spec matches, client tools match, secret reference current",
+      "facts": {
+        "interviewer": {
+          "agentId": "agent_2601m41v7r80eh79v5f00x874765",
+          "specVersion": 3,
+          "modelId": "vashistha-interviewer-v3",
+          "secretReferenced": true,
+          "clientTools": [
+            "set_off_record=tool_0601m41xkp4se5kta44gyzp4f9s2"
+          ]
+        },
+        "tutor": {
+          "agentId": "agent_2401m41v7v1jfr295ekx74gh81hp",
+          "specVersion": 2,
+          "modelId": "vashistha-tutor-v2",
+          "secretReferenced": true,
+          "clientTools": [
+            "set_off_record=tool_0601m41xkp4se5kta44gyzp4f9s2"
+          ]
+        }
+      }
+    },
+    {
+      "id": "token",
+      "title": "Conversation tokens (API + public endpoint)",
+      "status": "fail",
+      "ms": 10493,
+      "detail": "public endpoint: GET /api/voice/token: fetch failed (Connect Timeout Error (attempted address: vashistha-production.up.railway.app:443, timeout: 10000ms)); interviewer token 453 ms; tutor token 488 ms",
+      "facts": {
+        "interviewer": {
+          "conversationId": "conv_1901m42rgm62fkq9dfxvv9ssak0e",
+          "ms": 453
+        },
+        "tutor": {
+          "conversationId": "conv_6101m42rgm5ve8rah98thqbmmnxa",
+          "ms": 488
+        }
+      }
+    },
+    {
+      "id": "public-llm",
+      "title": "Custom-LLM endpoint over the public internet",
+      "status": "fail",
+      "ms": 10491,
+      "detail": "POST /api/llm/chat/completions: fetch failed (Connect Timeout Error (attempted address: vashistha-production.up.railway.app:443, timeout: 10000ms))"
+    },
+    {
+      "id": "voice-skip-turn",
+      "title": "skip_turn honoured end to end through ElevenLabs + TTS",
+      "status": "skip",
+      "ms": 0,
+      "detail": "depends on public-llm (fail)"
+    },
+    {
+      "id": "voice-off-record",
+      "title": "Off-record phrase → set_off_record client tool, no speech",
+      "status": "skip",
+      "ms": 0,
+      "detail": "depends on public-llm (fail)"
+    },
+    {
+      "id": "server-deep",
+      "title": "DB, DATA_DIR writable and Z3 initialised",
+      "status": "pass",
+      "ms": 11158,
+      "detail": "health 200; deep 401 without bearer; db ok 0.6 ms, dataDir ok 0.8 ms, z3 ok 18 ms; model calls on; event-loop delay p99 1.8 ms",
+      "facts": {
+        "version": "0.1.0",
+        "uptimeS": 10594,
+        "db": {
+          "ok": true,
+          "ms": 0.6
+        },
+        "dataDir": {
+          "ok": true,
+          "ms": 0.8
+        },
+        "z3": {
+          "ok": true,
+          "ms": 18
+        },
+        "llmCalls": "on",
+        "eventLoop": {
+          "p50Ms": 0.1,
+          "p99Ms": 1.8,
+          "maxMs": 28276.4,
+          "samples": 991317,
+          "sinceMs": 10591847
+        },
+        "deepMs": 294
+      }
+    },
+    {
+      "id": "sandbox",
+      "title": "CaseDesk sandbox route",
+      "status": "pass",
+      "ms": 10585,
+      "detail": "/sandbox 200 text/html with \"CaseDesk\" (10585 ms)",
+      "facts": {
+        "status": 200,
+        "bytes": 7831,
+        "ms": 10585
+      }
+    },
+    {
+      "id": "permissions",
+      "title": "Demo machine mic/screen checklist",
+      "status": "info",
+      "ms": 1,
+      "detail": "6-item mic/screen checklist for the demo machine (printed below)",
+      "facts": {
+        "checklist": [
+          "Use Chrome (latest stable) on the demo machine; open the app on its HTTPS origin (PUBLIC_BASE_URL), never http or a LAN IP.",
+          "Site settings for that origin: Microphone = Allow; pick the demo headset as the input device.",
+          "Screen share via getDisplayMedia: choose \"Entire screen\" or the CaseDesk \"Window\"; leave \"Also share tab audio\" OFF.",
+          "macOS: System Settings → Privacy & Security → Screen Recording and Microphone both enabled for Chrome (restart Chrome after granting).",
+          "Close notification sources (Do Not Disturb on, Slack/Mail quit) and every other tab or window with personal data or PII.",
+          "Test the headset: confirm the input level moves when you speak (OS sound settings) and that agent speech plays in the headset only, not the room."
+        ]
+      }
+    }
+  ],
+  "checklist": [
+    "Use Chrome (latest stable) on the demo machine; open the app on its HTTPS origin (PUBLIC_BASE_URL), never http or a LAN IP.",
+    "Site settings for that origin: Microphone = Allow; pick the demo headset as the input device.",
+    "Screen share via getDisplayMedia: choose \"Entire screen\" or the CaseDesk \"Window\"; leave \"Also share tab audio\" OFF.",
+    "macOS: System Settings → Privacy & Security → Screen Recording and Microphone both enabled for Chrome (restart Chrome after granting).",
+    "Close notification sources (Do Not Disturb on, Slack/Mail quit) and every other tab or window with personal data or PII.",
+    "Test the headset: confirm the input level moves when you speak (OS sound settings) and that agent speech plays in the headset only, not the room."
+  ]
+}

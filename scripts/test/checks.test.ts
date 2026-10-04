@@ -10,6 +10,7 @@ import { checkPermissions } from "../preflight/checks/permissions";
 import { checkPublicLlm } from "../preflight/checks/public-llm";
 import { MAX_EVENT_LOOP_P99_MS, checkSandbox, checkServerDeep } from "../preflight/checks/server";
 import { checkToken } from "../preflight/checks/token";
+import { withConnectRetry } from "../preflight/http";
 import type { PreflightElevenLabs } from "../preflight/types";
 import {
   ANTHROPIC_KEY,
@@ -365,5 +366,29 @@ describe("permissions", () => {
     expect(r.status).toBe("info");
     expect(JSON.stringify(r.facts)).toMatch(/Also share tab audio/);
     expect(JSON.stringify(r.facts)).toMatch(/Screen Recording/);
+  });
+});
+
+describe("withConnectRetry", () => {
+  const connectTimeout = () => Object.assign(new TypeError("fetch failed"), { cause: Object.assign(new Error("Connect Timeout Error"), { code: "UND_ERR_CONNECT_TIMEOUT" }) });
+
+  it("retries a connection that never established, exactly once", async () => {
+    let calls = 0;
+    const flaky = (async () => {
+      calls += 1;
+      if (calls === 1) throw connectTimeout();
+      return new Response("ok");
+    }) as typeof fetch;
+    expect(await (await withConnectRetry(flaky)("https://example.test/")).text()).toBe("ok");
+    expect(calls).toBe(2);
+  });
+
+  it("gives up after the second attempt and does not retry other errors", async () => {
+    let timeouts = 0;
+    await expect(withConnectRetry((async () => { timeouts += 1; throw connectTimeout(); }) as typeof fetch)("https://example.test/")).rejects.toThrow();
+    expect(timeouts).toBe(2);
+    let resets = 0;
+    await expect(withConnectRetry((async () => { resets += 1; throw new TypeError("fetch failed"); }) as typeof fetch)("https://example.test/")).rejects.toThrow();
+    expect(resets).toBe(1);
   });
 });

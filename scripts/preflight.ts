@@ -17,6 +17,7 @@ import { parseArgs } from "node:util";
 import { createClaude } from "../packages/core/src/server/claude";
 import { createElevenLabsClient } from "../packages/core/src/server/elevenlabs";
 import { loadAgentSpec } from "../packages/core/src/server/elevenlabs-agents";
+import { withConnectRetry } from "./preflight/http";
 import { createSecretRegistry } from "./preflight/redact";
 import { buildReport, formatHuman, writeReport } from "./preflight/report";
 import { exitCodeFor, runChecks, selectChecks, UsageError } from "./preflight/runner";
@@ -63,10 +64,10 @@ async function main(): Promise<number> {
     envFileLoaded,
     target,
     options,
-    fetch: globalThis.fetch,
+    fetch: withConnectRetry(globalThis.fetch),
     WebSocket: nodeWebSocketFactory,
     createClaude: (apiKey) => createClaude({ apiKey, forbiddenMarkers: [] }),
-    createElevenLabs: (apiKey) => createElevenLabsClient({ apiKey }),
+    createElevenLabs: (apiKey) => createElevenLabsClient({ apiKey, fetch: withConnectRetry(globalThis.fetch) }),
     loadAgentSpec: (role) => loadAgentSpec(new URL(`../agents/${role}.json`, import.meta.url)),
     secrets,
     now: () => performance.now(),
