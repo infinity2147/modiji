@@ -64,6 +64,11 @@ export const QuestionKindSchema = z.enum([
   "debrief_turn",
   "prediction",
   "intervention",
+  /**
+   * A turn of the trainee's voice coach: a reply to what the trainee just said, or a nudge the tutor raised
+   * itself (a case opened, a selection off the expert's rules, a decision saved). Spoken by the tutor only.
+   */
+  "coach_turn",
 ]);
 export type QuestionKind = z.infer<typeof QuestionKindSchema>;
 

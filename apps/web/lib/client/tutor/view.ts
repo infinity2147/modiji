@@ -1,10 +1,10 @@
 /**
  * Display models for the tutor's cards, kept pure so the wording the novice sees is tested: the
  * intervention card (the warning, the expert's words, whether the tutor has spoken), the reveal
- * card, and the mastery ladder.
+ * card, the mastery ladder and the coach conversation (captions and the coach's state).
  */
 import { MASTERY_LEVELS, type MasteryLevel } from "@vashistha/core";
-import type { CaseTutorView, InterventionView, PredictionView, TutorRule, TutorState } from "../../contracts/tutor";
+import type { CaseTutorView, CoachTurnView, InterventionView, PredictionView, TutorRule, TutorState } from "../../contracts/tutor";
 import { actionLabel } from "../domain";
 
 export type InterventionCardModel = {
@@ -69,3 +69,60 @@ export function ladder(level: MasteryLevel): { level: MasteryLevel; label: strin
   const at = MASTERY_LEVELS.indexOf(level);
   return MASTERY_LEVELS.map((l, i) => ({ level: l, label: LEVEL_LABELS[l], reached: at > 0 && i <= at }));
 }
+
+/** One caption line of the coach conversation. */
+export type ConversationLine = { key: string; role: "coach" | "trainee"; text: string };
+
+/** At most this many recent lines are shown: a caption strip, not a chat log. */
+export const CONVERSATION_LINES = 4;
+
+const sameText = (a: string, b: string): boolean => a.trim().toLowerCase() === b.trim().toLowerCase();
+
+/**
+ * The recent conversation, oldest first: the server's turns (`TutorState.coach`), then what this page knows
+ * before the server has recorded it — the trainee's spoken words (final transcripts), a typed question in flight,
+ * and the reply the chat call returned. A local line disappears once the server has the same words.
+ */
+export function conversationLines(input: {
+  server: readonly Pick<CoachTurnView, "id" | "role" | "text">[];
+  /** Final transcripts of the trainee's speech on this page (newest last). */
+  spoken?: readonly { id: number; text: string }[];
+  /** A typed question, sent and not answered yet (or just answered). */
+  asked?: { text: string } | null;
+  /** The coach's reply to that question, as the chat call returned it. */
+  reply?: { text: string } | null;
+  max?: number;
+}): ConversationLine[] {
+  const server = input.server.filter((t) => t.text.trim() !== "");
+  const known = (role: ConversationLine["role"], text: string) => server.some((t) => t.role === role && sameText(t.text, text));
+  const local: ConversationLine[] = [
+    ...(input.spoken ?? []).filter((t) => !known("trainee", t.text)).map((t) => ({ key: `said:${t.id}`, role: "trainee" as const, text: t.text })),
+    ...(input.asked && !known("trainee", input.asked.text) ? [{ key: "asked", role: "trainee" as const, text: input.asked.text }] : []),
+    ...(input.reply && !known("coach", input.reply.text) ? [{ key: "reply", role: "coach" as const, text: input.reply.text }] : []),
+  ];
+  return [...server.map((t) => ({ key: t.id, role: t.role, text: t.text })), ...local].slice(-(input.max ?? CONVERSATION_LINES));
+}
+
+/** What the coach is doing, in one calm word for the trainee; null when there is nothing to say (no voice, idle). */
+export type CoachActivity = "listening" | "thinking" | "speaking" | null;
+
+export function coachActivity(input: {
+  /** The tutor voice agent is connected. */
+  voiceLive: boolean;
+  /** The agent's audio is playing. */
+  agentSpeaking: boolean;
+  /** The browser voice is reading a coach line (text-only coaching). */
+  browserSpeaking: boolean;
+  /** A reply is on its way: a typed question in flight, or the trainee just finished speaking. */
+  awaitingReply: boolean;
+}): CoachActivity {
+  if (input.agentSpeaking || input.browserSpeaking) return "speaking";
+  if (input.awaitingReply) return "thinking";
+  return input.voiceLive ? "listening" : null;
+}
+
+export const COACH_ACTIVITY_TEXT: Record<Exclude<CoachActivity, null>, string> = {
+  listening: "Coach is listening…",
+  thinking: "Coach is thinking…",
+  speaking: "Coach is speaking…",
+};

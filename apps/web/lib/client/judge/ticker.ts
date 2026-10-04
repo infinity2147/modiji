@@ -243,6 +243,12 @@ function describe(entry: LedgerEntry, ctx: TickerContext): { text: string; tone:
       const p = parseLedgerPayload(entry, "tutor.prediction");
       return evidence(`Prediction ${p.correct ? "correct" : "wrong"}: ${actionLabel(p.predicted)} (expected ${actionLabel(p.expected)}) · ${p.caseId}`);
     }
+    case "tutor.chat":
+      return system(`Trainee typed to the coach: ${quote(parseLedgerPayload(entry, "tutor.chat").text)}`);
+    case "tutor.coached": {
+      const p = parseLedgerPayload(entry, "tutor.coached");
+      return system(`Coach ${p.trigger === "reply" ? "replied" : sentence(p.trigger.replace("_", " "))}${p.caseId === null ? "" : ` · ${p.caseId}`}`);
+    }
     case "tutor.intervention": {
       const p = parseLedgerPayload(entry, "tutor.intervention");
       return {

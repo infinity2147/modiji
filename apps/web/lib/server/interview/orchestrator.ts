@@ -36,7 +36,7 @@ import type { z } from "zod";
 import type { PostUtteranceRequestSchema, PostUtteranceResponseSchema } from "../../contracts/interview";
 import type { AuthorizationStore } from "../authorizations";
 import { ApiFailure } from "../casedesk/http";
-import type { CaseDeskStore, InterviewHooks } from "../casedesk/session";
+import { sessionInfo, type CaseDeskStore, type InterviewHooks } from "../casedesk/session";
 import {
   engineState,
   queuedQuestions,
@@ -73,6 +73,12 @@ export type InterviewDeps = {
    * answer goes here, never to the answer parser. Unset: the reply is recorded and nothing reads it.
    */
   debriefAnswer?: (input: { sessionId: string; questionId: string; segments: AnsweredUtterance[] }) => Promise<void>;
+  /**
+   * The trainee's voice coach (tutor/conversation.ts): in a novice session every final transcript is the trainee
+   * talking to the coach, collected over `COACH_REPLY_WINDOW_MS` and answered by it; never the answer parser's.
+   * Unset: the trainee's words are recorded and nothing answers them.
+   */
+  coachReply?: (input: { sessionId: string; segments: AnsweredUtterance[] }) => Promise<void>;
   log: Pick<Console, "info" | "warn" | "error">;
 };
 
@@ -283,6 +289,8 @@ function utteranceFrames(ledger: Pick<Ledger, "list">, sessionId: string, privac
  * Without a parser the utterance is recorded and the answer stays unparsed (`unparsedAnswers`), never guessed.
  * A reply to a debrief conversation turn (`debrief_turn`) is collected the same way, over a short window
  * (`DEBRIEF_ANSWER_WINDOW_MS`), and handed to the conversation, which needs no model for a plain yes / no / skip.
+ * In a novice session every utterance is the trainee talking to the voice coach, whatever question it follows:
+ * collected over `COACH_REPLY_WINDOW_MS` and handed to the coach (`coachReply`), never to the answer parser.
  */
 export function recordUtterance(deps: InterviewDeps, sessionId: string, body: PostUtteranceRequest): Promise<PostUtteranceResponse> {
   return serially(deps, sessionId, async () => {
@@ -314,6 +322,12 @@ export function recordUtterance(deps: InterviewDeps, sessionId: string, body: Po
         translation: translation === undefined ? { status: "pending" as const } : { status: "translated" as const, text: translation },
       }),
     };
+    if (sessionInfo(deps.ledger, deps.casedesk, sessionId)?.mode === "novice") {
+      if (deps.coachReply === undefined) deps.log.info(`[interview] no voice coach configured; trainee utterance ${utterance.id} recorded only`);
+      else if (!archived(deps, sessionId, `answering trainee utterance ${utterance.id}`))
+        collectCoachWords(deps, sessionId, { id: utterance.id, text: body.text, t0Ms: body.t0Ms, t1Ms: body.t1Ms, language, ...(translation !== undefined && { translation }) });
+      return recorded;
+    }
     if (record === undefined) return recorded;
     const debrief = record.question.kind === "debrief_turn";
     if (debrief && deps.debriefAnswer === undefined) {
@@ -349,6 +363,55 @@ export const ANSWER_WINDOW_IDLE_MS = 12_000;
  * a late segment opens a new reply, which the conversation ignores as stale once the next turn is asked.
  */
 export const DEBRIEF_ANSWER_WINDOW_MS = 1_500;
+
+/**
+ * The idle window for what a trainee says to the voice coach (novice sessions): segments arriving within it are one
+ * turn. Short, because the reply's latency is what the trainee feels; the provider's own end-of-turn detection has
+ * already waited for a pause, so one turn is normally one final transcript.
+ */
+export const COACH_REPLY_WINDOW_MS = 1_000;
+
+type CoachWords = { segments: AnsweredUtterance[]; cancel: () => void };
+/** Open trainee turns per interview store (one process: one store), by session. */
+const coachWindows = new WeakMap<InterviewStore, Map<string, CoachWords>>();
+
+function coachWindowsOf(store: InterviewStore): Map<string, CoachWords> {
+  let windows = coachWindows.get(store);
+  if (windows === undefined) coachWindows.set(store, (windows = new Map()));
+  return windows;
+}
+
+/** Adds a trainee segment to the session's open coach turn and re-arms its idle timer. */
+function collectCoachWords(deps: InterviewDeps, sessionId: string, segment: AnsweredUtterance): void {
+  const windows = coachWindowsOf(deps.store);
+  const open = windows.get(sessionId);
+  open?.cancel();
+  windows.set(sessionId, {
+    segments: [...(open?.segments ?? []), segment],
+    cancel: deps.schedule(() => void closeCoachWords(deps, sessionId), COACH_REPLY_WINDOW_MS),
+  });
+}
+
+/**
+ * Closes the session's open trainee turn and hands it to the coach (`coachReply`). Like a debrief reply it runs
+ * after the interview's serial queue, not in it: the model's latency never holds up the next utterance, and a newer
+ * utterance supersedes a reply still being drafted (the coach checks the ledger before it queues). Failures are
+ * logged, never thrown into the utterance route. Resolves once the coach has answered.
+ */
+export async function closeCoachWords(deps: InterviewDeps, sessionId: string): Promise<void> {
+  const windows = coachWindowsOf(deps.store);
+  const open = windows.get(sessionId);
+  if (open === undefined) return;
+  open.cancel();
+  windows.delete(sessionId);
+  const ids = open.segments.map((s) => s.id).join(", ");
+  if (deps.coachReply === undefined) return;
+  try {
+    await deps.coachReply({ sessionId, segments: open.segments });
+  } catch (error) {
+    deps.log.error(`[interview] the coach's reply to ${ids} failed: ${describeError(error)}`);
+  }
+}
 
 /** Adds a segment to the session's open answer (closing another question's open answer first) and re-arms its idle timer. */
 function collectSegment(deps: InterviewDeps, sessionId: string, questionId: string, traceId: string, segment: AnsweredUtterance, idleMs: number): void {
@@ -432,7 +495,11 @@ export function requeueLapsed(deps: InterviewDeps): void {
       deps.log.info(`[interview] authorization ${lapsed.nonceDigest} for ${lapsed.questionId} expired unspoken; question re-queued`);
       const latest = questionFamily(state, record.question)?.decisions.at(-1)?.caseId;
       const { caseId } = record.question.target;
-      if (isLiveQuestionKind(record.question.kind) && caseId !== undefined && caseId !== latest)
+      // A coach turn cut off by the trainee is stale once a newer coach turn exists: the coach never goes back to it.
+      const newerCoachTurn =
+        record.question.kind === "coach_turn" &&
+        [...state.questions.values()].some((r) => r.question.kind === "coach_turn" && r.question.createdAt > record.question.createdAt);
+      if (newerCoachTurn || (isLiveQuestionKind(record.question.kind) && caseId !== undefined && caseId !== latest))
         deps.ledger.append(entry(ctx, "question.dropped", "engine", [record.queuedEntryId, requeued.id], { questionId: lapsed.questionId, reason: "superseded" }));
     } catch (error) {
       deps.log.warn(`[interview] re-queueing ${lapsed.questionId} after its authorization lapsed failed: ${describeError(error)}`);

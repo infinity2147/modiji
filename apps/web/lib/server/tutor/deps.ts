@@ -5,7 +5,7 @@
  */
 import "server-only";
 import type { ConfirmedRule, DomainConfig, Rulebook, Witness } from "@vashistha/core";
-import type { Ledger } from "@vashistha/core/server";
+import type { Claude, Ledger } from "@vashistha/core/server";
 import type { ContrastWitness, PracticeWitness } from "@vashistha/solver";
 import type { AuthorizationStore } from "../authorizations";
 import type { CaseDeskStore } from "../casedesk/session";
@@ -35,6 +35,11 @@ export type TutorDeps = {
   /** The display name of an account (for the coach's spoken welcome); absent in tests that do not need it. */
   displayName?: (userId: string) => string | undefined;
   practice: PracticeSolver;
+  /**
+   * The voice coach's model (conversation.ts), null without ANTHROPIC_API_KEY; absent in tests that do not need
+   * it. Without one the coach still answers every trainee turn, from templates built from the rulebook.
+   */
+  claude?: Claude | null;
   now: () => number;
   log: Pick<Console, "info" | "warn" | "error">;
 };
@@ -49,6 +54,7 @@ export function tutorDeps(): TutorDeps {
     authorizations: runtime.authorizations,
     displayName: (userId) => runtime.accounts.byId(userId)?.displayName,
     practice: runtime.tutor.practice,
+    claude: runtime.claude,
     now: Date.now,
     log: console,
   };

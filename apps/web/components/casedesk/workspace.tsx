@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import type { UserRole } from "@vashistha/core";
+import { systemClock, type UserRole } from "@vashistha/core";
 import type { KycCase } from "@vashistha/core/domains/kyc";
 import Link from "next/link";
 import { ConversationProvider } from "@elevenlabs/react";
@@ -11,6 +11,7 @@ import { PrivacyContext, useInterviewLoop, type GateSensors } from "@/lib/client
 import type { DomChannelStatus } from "@/lib/client/dom-events";
 import { describeError } from "@/lib/client/api";
 import type { SessionRef } from "@/lib/client/session-url";
+import { createIdleNudger } from "@/lib/client/tutor/idle-nudge";
 import { useTutor, type Tutor } from "@/lib/client/tutor/use-tutor";
 import { Alert, AlertAction, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ import { JudgeView } from "@/components/judge/judge-view";
 import { OffRecordBanner } from "@/components/voice/off-record";
 import { VoicePanel } from "@/components/voice/voice-panel";
 import { NoviceReview } from "@/components/tutor/novice-review";
+import { CoachConversation } from "@/components/tutor/coach-conversation";
 import { CoachSession } from "@/components/tutor/coach-session";
 import { TraineeGuide, guideStage } from "@/components/tutor/trainee-guide";
 import { TutorPanels } from "@/components/tutor/tutor-panels";
@@ -170,6 +172,25 @@ function WorkspaceBody({ session, role, diagnostics }: { session: SessionRef; ro
   useEffect(() => {
     if (ledgerSize > 0) refreshTutor();
   }, [ledgerSize, refreshTutor]);
+  // A coach turn was queued (the gate reads the queue every quarter second while a reply is due): show its words
+  // now, as the coach starts to say them, rather than on the next ledger read.
+  const queuedCoachTurns = (loop.gate?.queue ?? []).flatMap((q) => (q.kind === "coach_turn" ? [q.id] : [])).join(",");
+  useEffect(() => {
+    if (novice && queuedCoachTurns !== "") refreshTutor();
+  }, [novice, queuedCoachTurns, refreshTutor]);
+
+  // The coach's idle nudge: a connected coach offers a hint after a quiet spell on an open, undecided case (once per case).
+  const tutorNudge = tutor.nudge;
+  const expectCoachReply = loop.expectCoachReply;
+  const nudgeRef = useRef<(caseId: string) => void>(() => undefined);
+  const [nudger] = useState(() => createIdleNudger({ setTimer: systemClock.setTimer, nudge: (caseId) => nudgeRef.current(caseId) }));
+  useEffect(() => {
+    nudgeRef.current = (caseId) => {
+      expectCoachReply();
+      tutorNudge(caseId).catch(() => undefined);
+    };
+  });
+  useEffect(() => () => nudger.dispose(), [nudger]);
 
   // Open the first available case so reviewers begin with the task in front of them.
   const loadedCases = ws.load.status === "ready" ? ws.load.cases : undefined;
@@ -181,6 +202,30 @@ function WorkspaceBody({ session, role, diagnostics }: { session: SessionRef; ro
     const first = loadedCases.find((c) => !decidedIds.has(c.id)) ?? loadedCases[0];
     if (first) openCase(first.id);
   }, [novice, loadedCases, nothingSelected, decidedIds, openCase]);
+
+  const idleCaseId = ws.selectedCase?.id;
+  const idleEligible =
+    novice &&
+    loop.voice.state === "connected" &&
+    !offRecord &&
+    idleCaseId !== undefined &&
+    !ws.decisions.has(idleCaseId) &&
+    (tutor.state?.rules.length ?? 0) > 0;
+  useEffect(() => nudger.update(idleCaseId, idleEligible), [nudger, idleCaseId, idleEligible]);
+  // Activity restarts the idle clock: the trainee spoke, the coach spoke or answered, a key, click or scroll anywhere.
+  const heard = loop.transcript.at(-1)?.id ?? 0;
+  const lastCoachTurn = tutor.state?.coach.at(-1)?.id ?? "";
+  const agentTalking = loop.agentSpeaking;
+  useEffect(() => nudger.activity(), [nudger, heard, lastCoachTurn, agentTalking]);
+  useEffect(() => {
+    if (!novice) return;
+    const poke = (): void => nudger.activity();
+    const events = ["keydown", "pointerdown", "wheel"] as const;
+    for (const name of events) document.addEventListener(name, poke, { capture: true, passive: true });
+    return () => {
+      for (const name of events) document.removeEventListener(name, poke, { capture: true });
+    };
+  }, [novice, nudger]);
 
   if (ws.load.status === "error") {
     return (
@@ -263,6 +308,9 @@ function WorkspaceBody({ session, role, diagnostics }: { session: SessionRef; ro
               ready={(tutor.state?.rules.length ?? 0) > 0 && selected !== undefined}
               onSharingChange={setScreenShared}
             />
+          )}
+          {novice && ws.load.status === "ready" && (tutor.state?.rules.length ?? 0) > 0 && selected !== undefined && (
+            <CoachConversation tutor={tutor} loop={loop} offRecord={offRecord} />
           )}
           {selected && (
             <NoviceReviewSlot novice={novice} tutor={tutor} kycCase={selected} draft={ws.draftFor(selected)} locked={stopped || offRecord} agentConnected={loop.voice.state === "connected"}>

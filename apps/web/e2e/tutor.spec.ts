@@ -314,6 +314,14 @@ test("coach pop-up: taking a case asks for microphone and screen once; yes start
   await expect(bar).toContainText("Coaching in text");
   await expect(bar.getByRole("button", { name: "Turn on voice coach" })).toBeVisible();
   await expect(page.getByTestId("trainee-guide")).toHaveAttribute("data-stage", "working");
+
+  // Without voice the trainee can still talk with the coach: a typed question gets an answer on screen at once.
+  const talk = page.getByTestId("coach-conversation");
+  await talk.getByTestId("coach-ask").fill("What should I check first on this case?");
+  await talk.getByTestId("coach-send").click();
+  await expect(talk.locator('li[data-role="trainee"]').last()).toContainText("What should I check first on this case?");
+  await expect(talk.locator('li[data-role="coach"]').last()).not.toBeEmpty();
+  await expect(talk.getByTestId("coach-ask")).toHaveValue("");
   await shot(page, "coach-text-only.png");
 });
 

@@ -66,6 +66,11 @@ export type InterviewLoop = {
   ledger: LedgerTailState;
   /** The UI cue for the last question spoken (field highlighted, gap shown), if it had one. */
   cue: CueResult | null;
+  /**
+   * A coach turn is about to be queued (the trainee typed to the coach, or a nudge was asked for): the gate reads
+   * the queue at once and then quickly until it arrives. The gate does this itself after each spoken turn.
+   */
+  expectCoachReply: () => void;
 };
 
 /**
@@ -357,6 +362,8 @@ export function useInterviewLoop(options: {
     },
   };
 
+  const expectCoachReply = useCallback(() => loopRef.current?.gate.expectReply(), []);
+
   return {
     agent,
     voice,
@@ -373,6 +380,7 @@ export function useInterviewLoop(options: {
     privacyState,
     ledger,
     cue,
+    expectCoachReply,
   };
 }
 

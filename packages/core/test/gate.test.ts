@@ -8,6 +8,7 @@ import {
   hudModel,
   type GateDecision,
   type GateEvent,
+  type GateInput,
   type GateMode,
   type LatencySample,
 } from "../src/gate/index";
@@ -365,6 +366,99 @@ describe("evaluateGate: tutor mode", () => {
 
   it("interventions follow the normal rules in interviewer mode", () => {
     expect(evalAt([...rude, queue(9995, q("stop", { kind: "intervention" }))]).decision).toBe("wait");
+  });
+});
+
+describe("evaluateGate: the tutor's coach turns", () => {
+  const coach = (t: number, id = "c1") => queue(t, q(id, { kind: "coach_turn", ephemeral: true, value: 90, reason: "coach reply" }));
+  /** The trainee spoke 8000–9500 (provider transcript at 9600) while working: typing and the screen moving. */
+  const talked: GateEvent[] = [
+    { kind: "vad", t: 8000, value: 0.9 },
+    { kind: "vad", t: 9500, value: 0.1 },
+    { kind: "user_transcript", t: 9600 },
+    { kind: "typing", t: 9900 },
+    { kind: "screen_motion", t: 9950 },
+  ];
+
+  it("answers once the trainee pauses: coachSilenceMs after their speech, whatever the screen and keyboard do", () => {
+    const events = [...talked, coach(9700)];
+    expect(evalAt(events, 9600 + cfg.coachSilenceMs - 1, "tutor").decision).toBe("wait");
+    const e = evalAt(events, 9600 + cfg.coachSilenceMs, "tutor");
+    expect(e.decision).toBe("authorize");
+    expect(e.becameValidAt).toBe(9600 + cfg.coachSilenceMs);
+    expect(e.conditions.screenIdle.ok).toBe(false);
+    expect(e.conditions.typingIdle.ok).toBe(false);
+    expect(e.reason).toBe("coach reply · coach turn: answers once the trainee pauses");
+  });
+
+  it("never speaks while the trainee is still talking, before their turn is transcribed, over the agent or off the record", () => {
+    expect(evalAt([{ kind: "vad", t: 5000, value: 0.9 }, coach(5000)], NOW, "tutor").decision).toBe("wait");
+    // Speech ended at 9500 with no final transcript: the provider's turn is open until transcriptWaitMs.
+    const open: GateEvent[] = [{ kind: "vad", t: 8000, value: 0.9 }, { kind: "vad", t: 9500, value: 0.1 }, coach(9500)];
+    expect(evalAt(open, 9500 + cfg.coachSilenceMs, "tutor").decision).toBe("wait");
+    expect(evalAt(open, 9500 + cfg.transcriptWaitMs, "tutor").decision).toBe("authorize");
+    expect(evalAt([coach(0), { kind: "agent_speaking", t: 9000, value: 1 }], NOW, "tutor").decision).toBe("wait");
+    expect(evalAt([coach(0), { kind: "off_record", t: 9000, on: true }], NOW, "tutor").decision).toBe("wait");
+  });
+
+  it("ignores the interview's longer answer silence, the live budget, breakpoints and θ_ask", () => {
+    const spent = [1, 2, 3, 4, 5].flatMap((i) => askedAndSpoken(i * 100, q(`old${i}`)));
+    // The trainee answered the coach's last turn (answering: the interview would wait answerSilenceMs).
+    const answered: GateEvent[] = [
+      ...askedAndSpoken(6000, q("prev", { kind: "coach_turn", ephemeral: true })),
+      { kind: "vad", t: 9000, value: 0.9 },
+      { kind: "vad", t: 9200, value: 0.1 },
+      { kind: "user_transcript", t: 9250 },
+    ];
+    const low = queue(9300, q("c2", { kind: "coach_turn", ephemeral: false, value: 0 }));
+    expect(evalAt([...spent, ...answered, low], 9250 + cfg.coachSilenceMs, "tutor").decision).toBe("authorize");
+    expect(evalAt([...spent, ...answered, low], 9250 + cfg.coachSilenceMs).decision).toBe("wait");
+  });
+
+  it("after its own turn, waits coachAnswerWindowMs for the trainee before speaking again", () => {
+    const events = [...askedAndSpoken(1000, q("prev", { kind: "coach_turn", ephemeral: true })), coach(4000, "c2")];
+    expect(evalAt(events, 4000 + cfg.coachAnswerWindowMs - 1, "tutor").decision).toBe("wait");
+    expect(evalAt(events, 4000 + cfg.coachAnswerWindowMs, "tutor").decision).toBe("authorize");
+  });
+
+  it("a controller in tutor mode sends a coach turn while the screen moves, and withdraws it only if the trainee resumes speaking", async () => {
+    const run = (extra: GateInput[]) => {
+      const clock = fakeClock();
+      const sent: string[] = [];
+      const withdrawn: string[] = [];
+      let resolve: (a: GateAuthorization) => void = () => {};
+      const gate = createGateController({
+        mode: "tutor",
+        clock,
+        issue: (question) =>
+          new Promise<GateAuthorization>((r) => {
+            resolve = r;
+            void question;
+          }),
+        onAuthorize: (_a, question) => {
+          sent.push(question.id);
+          return true;
+        },
+        onWithdraw: (_a, question) => withdrawn.push(question.id),
+        onHudUpdate: () => {},
+      });
+      gate.feed({ kind: "vad", t: 0, value: 0.9 });
+      gate.feed({ kind: "vad", t: 1000, value: 0.1 });
+      gate.feed({ kind: "user_transcript", t: 1100 });
+      const question = q("c1", { kind: "coach_turn", ephemeral: true, value: 90 });
+      gate.feed(queue(1200, question));
+      clock.advanceTo(1100 + cfg.coachSilenceMs);
+      for (const e of extra) gate.feed(e);
+      resolve({ sessionId: "s1", questionId: "c1", nonce: "n".repeat(22), expiresAt: 0, contextVersion: 0 });
+      return { sent, withdrawn, gate };
+    };
+    const moving = run([{ kind: "screen_motion", t: 1800 }, { kind: "typing", t: 1800 }]);
+    await Promise.resolve();
+    expect(moving.sent).toEqual(["c1"]);
+    const resumed = run([{ kind: "vad", t: 1800, value: 0.9 }]);
+    await Promise.resolve();
+    expect(resumed.sent).toEqual([]);
+    expect(resumed.withdrawn).toEqual(["c1"]);
   });
 });
 

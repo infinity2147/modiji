@@ -43,7 +43,7 @@ function view(over: Partial<CaseTutorView> = {}): CaseTutorView {
   return { caseId: "NS-2026-0201", origin: "case_set", prompt: { ask: true }, prediction: null, interventions: [], ...over };
 }
 
-const state: TutorState = { sessionId: "s-1", rulebookRevision: 2, masteryLabel: "heuristic estimate", rules: [decisionRule, rule], cases: [view()] };
+const state: TutorState = { sessionId: "s-1", rulebookRevision: 2, masteryLabel: "heuristic estimate", rules: [decisionRule, rule], cases: [view()], coach: [] };
 
 function run(events: readonly PredictEvent[], from: PredictState = INITIAL_PREDICT_STATE): PredictState {
   return events.reduce(predictReducer, from);

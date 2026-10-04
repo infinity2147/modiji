@@ -41,7 +41,7 @@ const AGENT_FOR_MODE: Record<SessionMode, AgentRole> = { expert: "interviewer", 
 /** The question kinds each agent may ask. */
 const AGENT_QUESTION_KINDS: Record<AgentRole, ReadonlySet<QuestionKind>> = {
   interviewer: new Set(["why_probe", "counterfactual", "concept_definition", "witness", "teach_back", "debrief_turn"]),
-  tutor: new Set(["prediction", "intervention"]),
+  tutor: new Set(["prediction", "intervention", "coach_turn"]),
 };
 
 function refuse(reason: z.infer<typeof GateRefusalSchema>, detail: string): ApiFailure {

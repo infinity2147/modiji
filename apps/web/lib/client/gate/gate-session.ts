@@ -5,7 +5,7 @@
  * - inputs: provider VAD, the local microphone detector, transcript arrivals and agent mode (voice),
  *   typing and screen motion (activity sensors), breakpoints (case opened / decision saved),
  *   off-record state, and the top of the server's question queue (polled every second, one request at
- *   a time, abortable);
+ *   a time, abortable; every `REPLY_POLL_MS` while a coach reply is expected, see `expectReply`);
  * - `issue` = POST gate/authorize (bounded by `AUTHORIZE_TIMEOUT_MS`); on success the control message
  *   is sent with `sendUserMessage` exactly once — unless the expert resumed while the request was in
  *   flight (withdrawn); a refusal (409) or a withdrawal is recorded, gives the live-budget slot back,
@@ -34,6 +34,14 @@ import { ApiError, describeError, type FetchFn } from "../api";
 import { authorizeQuestion, fetchQuestionQueue } from "./api";
 
 export const QUEUE_POLL_MS = 1000;
+/**
+ * While the tutor's coach is expected to answer (the trainee just finished a spoken turn, typed to the coach, or a
+ * nudge was asked for), the queue is read this often, so the reply is offered to the gate within a quarter second
+ * of being queued rather than a second.
+ */
+export const REPLY_POLL_MS = 250;
+/** How long a reply is expected after the trainee's turn: the server's grounded reply takes a few seconds at most. */
+export const REPLY_WAIT_MS = 10_000;
 /** A freshly opened case becomes a breakpoint once the reviewer has had a moment to take it in. */
 export const CASE_SETTLE_MS = 1000;
 /** Poll interval after the queue route failed (e.g. not deployed yet). */
@@ -73,6 +81,8 @@ export type GateSnapshot = {
   refusals: readonly GateRefusal[];
   voiceLive: boolean;
   offRecord: boolean;
+  /** A coach reply is expected and not yet queued (the coach is "thinking"; see `expectReply`). */
+  awaitingReply: boolean;
 };
 
 export type GateSessionOptions = {
@@ -114,6 +124,11 @@ export type GateSession = {
   setVoiceLive: (live: boolean) => void;
   /** Re-reads the queue now (after an authorization, a refusal or a decision). */
   refreshQueue: () => void;
+  /**
+   * A coach turn is about to be queued (typed chat, a nudge): read the queue now and every `REPLY_POLL_MS` until
+   * one arrives or `REPLY_WAIT_MS` passes. A tutor session does this by itself after each final transcript.
+   */
+  expectReply: () => void;
   dispose: () => void;
 };
 
@@ -137,6 +152,8 @@ export function createGateSession(options: GateSessionOptions): GateSession {
   let pollAbort: AbortController | null = null;
   let cancelPoll: (() => void) | null = null;
   let cancelSettle: (() => void) | null = null;
+  /** Until when a coach reply is expected (fast polling). */
+  let replyDueUntil = Number.NEGATIVE_INFINITY;
   let current: { hud: HudModel; evaluation: GateEvaluation } | undefined;
   let snap: GateSnapshot | undefined;
 
@@ -208,6 +225,8 @@ export function createGateSession(options: GateSessionOptions): GateSession {
     controller.feed({ kind: "queue", t: clock.now(), top: voiceLive ? (queue[0] ?? null) : null });
   };
 
+  const nextPollMs = (): number => (clock.now() < replyDueUntil ? Math.min(pollMs, REPLY_POLL_MS) : pollMs);
+
   function schedulePoll(delayMs: number): void {
     cancelPoll?.();
     cancelPoll = disposed ? null : clock.setTimer(poll, delayMs);
@@ -224,12 +243,14 @@ export function createGateSession(options: GateSessionOptions): GateSession {
         pollAbort = null;
         // The server orders the queue; the top this page may speak is the first question of a kind it speaks.
         queue = response.queue.filter((q) => questionKinds.has(q.kind));
+        // The expected reply has arrived: back to the normal pace.
+        if (queue.some((q) => q.kind === "coach_turn")) replyDueUntil = Number.NEGATIVE_INFINITY;
         contextVersion = response.contextVersion;
         serverAsked = response.asked.length;
         queueStatus = { state: "ok", at: clock.now() };
         offerTop();
         notify();
-        schedulePoll(pollMs);
+        schedulePoll(nextPollMs());
       },
       (error: unknown) => {
         if (abort.signal.aborted) return;
@@ -252,6 +273,13 @@ export function createGateSession(options: GateSessionOptions): GateSession {
     schedulePoll(0);
   }
 
+  function expectReply(): void {
+    if (disposed) return;
+    replyDueUntil = clock.now() + REPLY_WAIT_MS;
+    notify();
+    refreshQueue();
+  }
+
   poll();
 
   return {
@@ -269,6 +297,7 @@ export function createGateSession(options: GateSessionOptions): GateSession {
         refusals,
         voiceLive,
         offRecord,
+        awaitingReply: clock.now() < replyDueUntil,
       };
       return snap;
     },
@@ -292,7 +321,11 @@ export function createGateSession(options: GateSessionOptions): GateSession {
     },
     vad: (score) => controller.feed({ kind: "vad", t: clock.now(), value: Math.min(1, Math.max(0, score)) }),
     localSpeech: (speaking) => controller.feed({ kind: "local_speech", t: clock.now(), value: speaking ? 1 : 0 }),
-    transcript: (final) => controller.feed({ kind: final ? "user_transcript" : "tentative_transcript", t: clock.now() }),
+    transcript(final) {
+      controller.feed({ kind: final ? "user_transcript" : "tentative_transcript", t: clock.now() });
+      // The trainee finished a spoken turn: their coach's reply is about to be queued (tutor sessions only).
+      if (final && options.mode === "tutor" && voiceLive && questionKinds.has("coach_turn")) expectReply();
+    },
     agentSpeaking: (speaking) => controller.feed({ kind: "agent_speaking", t: clock.now(), value: speaking ? 1 : 0 }),
     setOffRecord(on) {
       if (on === offRecord) return;
@@ -308,6 +341,7 @@ export function createGateSession(options: GateSessionOptions): GateSession {
       notify();
     },
     refreshQueue,
+    expectReply,
     dispose() {
       disposed = true;
       cancelPoll?.();

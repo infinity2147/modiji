@@ -9,6 +9,8 @@ import { ReviewEditsSchema as ReviewEditsContract } from "../../contracts/casede
 import {
   BriefingRequestSchema,
   type BriefingResponseSchema,
+  CoachChatRequestSchema,
+  type CoachChatResponseSchema,
   JudgeCaseRequestSchema,
   MASTERY_LABEL,
   PredictionRequestSchema,
@@ -30,7 +32,9 @@ import { entry } from "../interview/ledger";
 import type { TutorDeps } from "./deps";
 import { commitOutcomes, predictionOutcomes, recordOutcomes } from "./mastery";
 import { queueBriefing, spokenName } from "./briefing";
+import { chatWithCoach, coachTurnViews } from "./conversation";
 import { dropStaleInterventions, interventionView, monitorSelection } from "./monitor";
+import { coachCaseOpened, coachCommitted, coachPrediction, coachSafely, coachSelection, withdrawStaleNudges } from "./nudges";
 import { addJudgeCase, generatePractice } from "./practice";
 import { casePrompt, expectedOutcome } from "./predict";
 import { isStopRule, quoteView, taughtRules, thenText, whenText } from "./rules";
@@ -72,6 +76,7 @@ export function tutorState(deps: TutorDeps, loaded: LoadedSession): TutorState {
       level: record.mastery.get(rule.id) ?? "untested",
     })),
     cases,
+    coach: coachTurnViews(deps.ledger, session.id),
   };
 }
 
@@ -99,7 +104,12 @@ export function handleIntent(request: Request, sessionId: string, deps: TutorDep
         edits: editsRecord(body.edits),
       }),
     );
+    coachSafely(deps, `intent ${intent.id}`, () => withdrawStaleNudges(deps, loaded, { caseId: kycCase.id, action: body.proposedAction, intent }));
     const outcome = monitorSelection(deps, loaded, { kycCase, action: body.proposedAction, edits: body.edits, trigger: intent });
+    // The coach's nudge never repeats a stop-rule warning: a selection with an intervention gets none.
+    coachSafely(deps, `intent ${intent.id}`, () =>
+      coachSelection(deps, loaded, { kycCase, action: body.proposedAction, edits: body.edits, intent, intervened: outcome.intervention !== null }),
+    );
     const response: z.infer<typeof TutorIntentResponseSchema> = outcome;
     return json(response);
   });
@@ -139,6 +149,7 @@ export function handlePrediction(request: Request, sessionId: string, deps: Tuto
       trigger: written.id,
       ruleEntries,
     });
+    coachSafely(deps, `prediction ${written.id}`, () => coachPrediction(deps, loaded, written));
     const prediction = tutorRecord(deps.ledger, loaded.session.id).predictions.get(kycCase.id);
     if (prediction === undefined) throw new Error(`prediction ${written.id} did not fold`);
     const response: z.infer<typeof PredictionResponseSchema> = { prediction: predictionView(prediction), state: tutorState(deps, loaded) };
@@ -179,11 +190,12 @@ function afterCommit(deps: TutorDeps, loaded: LoadedSession, record: TutorRecord
   dropStaleInterventions(deps, ctx, { record, caseId: kycCase.id, keepAction: undefined, trigger: decision.entry.id });
   const prediction = record.predictions.get(kycCase.id)?.payload;
   const intervened = new Set(record.interventions.filter((i) => i.payload.caseId === kycCase.id).flatMap((i) => i.payload.ruleIds));
-  recordOutcomes(deps, ctx, {
+  const expected = expectedOutcome(book.rules, kycCase, edits);
+  const moved = recordOutcomes(deps, ctx, {
     levels: new Map(record.mastery),
     outcomes: commitOutcomes({
       action: decision.payload.action,
-      expected: expectedOutcome(book.rules, kycCase, edits),
+      expected,
       prediction,
       intervened,
       rules: book.rules,
@@ -194,6 +206,9 @@ function afterCommit(deps: TutorDeps, loaded: LoadedSession, record: TutorRecord
     trigger: decision.entry.id,
     ruleEntries: ruleEntryIds(book),
   });
+  coachSafely(deps, `decision ${decision.entry.id}`, () =>
+    coachCommitted(deps, loaded, { decision: decision.entry, kycCase, action: decision.payload.action, expected, moved }),
+  );
 }
 
 function describeError(error: unknown): string {
@@ -222,6 +237,7 @@ export function tutorHooks(deps: TutorDeps): TutorHooks {
       for (const event of events) {
         try {
           monitorFieldChange(deps, loaded, event);
+          coachSafely(deps, `screen event ${event.id}`, () => coachCaseOpened(deps, loaded, event));
         } catch (error) {
           deps.log.error(`[tutor] monitor after screen event ${event.id} failed: ${describeError(error)}`);
         }
@@ -258,6 +274,20 @@ export function handleBriefing(request: Request, sessionId: string, deps: TutorD
       caseId,
     });
     const body: z.infer<typeof BriefingResponseSchema> = result;
+    return json(body);
+  });
+}
+
+/**
+ * POST /api/sessions/:sessionId/tutor/chat — the trainee types to the coach. The reply (grounded in the confirmed
+ * rulebook and the current case, queued for speech) is returned as text, so it shows without a voice session.
+ */
+export function handleCoachChat(request: Request, sessionId: string, deps: TutorDeps): Promise<Response> {
+  return respond(deps.log, async () => {
+    const { text } = await readJson(request, CoachChatRequestSchema);
+    const loaded = loadNoviceSession(deps, sessionId);
+    requireOnRecord(loaded.session);
+    const body: z.infer<typeof CoachChatResponseSchema> = await chatWithCoach(deps, loaded, text);
     return json(body);
   });
 }

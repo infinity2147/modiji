@@ -2,13 +2,14 @@
 
 /**
  * Spoken coaching for the trainee with no setup: the browser's own voice (Web Speech API) reads the
- * predict-then-reveal result and the tutor's stop-rule warnings aloud. The ElevenLabs tutor agent stays
- * optional: while it is connected it speaks interventions itself, so the browser voice leaves those to
- * it (the caller decides; see `NoviceReview`). Text builders are pure; the speaker is framework-free
+ * predict-then-reveal result, the tutor's stop-rule warnings and the coach's turns (replies to typed
+ * questions, nudges) aloud. The ElevenLabs tutor agent stays optional: while it is connected it speaks all
+ * of these itself (the reveal as a `coach_turn` with trigger "prediction"), so the browser voice is held
+ * and leaves them to it (see `NoviceReview`, `useCoachTurnVoice`). Text builders are pure; the speaker is framework-free
  * and tested against a fake `speechSynthesis`; `useTutorVoice` binds one shared speaker to React.
  */
-import { useEffect, useSyncExternalStore } from "react";
-import type { ExpertQuoteView, InterventionView } from "../../contracts/tutor";
+import { useEffect, useState, useSyncExternalStore } from "react";
+import type { CoachTurnView, ExpertQuoteView, InterventionView } from "../../contracts/tutor";
 import type { RevealModel } from "./view";
 
 /** At most this many expert quotes are read after the verdict: the rest stay on screen. */
@@ -34,6 +35,7 @@ export function interventionSpeech(intervention: InterventionView): string {
 
 export const revealKey = (entryId: string) => `reveal:${entryId}`;
 export const interventionKey = (questionId: string) => `intervention:${questionId}`;
+export const coachKey = (turnId: string) => `coach:${turnId}`;
 
 /** Where a keyed message stands with the browser voice: being said now, said, or neither. */
 export type SpeechStatus = "speaking" | "spoken" | undefined;
@@ -230,6 +232,40 @@ export function createTutorSpeaker(deps: {
   };
 }
 
+/** Coach-turn triggers the browser voice reads from their own cards (`NoviceReview`), never twice. */
+const READ_ELSEWHERE: ReadonlySet<string> = new Set(["prediction", "intervention"]);
+
+/** The fields of a coach turn the browser voice reads. */
+export type SpeakableCoachTurn = Pick<CoachTurnView, "id" | "role" | "text" | "trigger" | "spoken">;
+
+export type CoachTurnVoice = {
+  /**
+   * The coach's turns as they stand now (oldest first). The first call is the baseline: turns already there
+   * (the session's history) are never read aloud. After that, the newest new coach turn is said once (keyed by
+   * its id) — unless the tutor agent is connected (it speaks coach turns itself), the agent already spoke it, or
+   * the browser voice reads it elsewhere (a prediction reveal: the reveal card; a stop-rule warning: the
+   * intervention card). Returns the id of the turn it started saying.
+   */
+  observe: (turns: readonly SpeakableCoachTurn[], agentConnected: boolean) => string | null;
+};
+
+/** The browser voice for the coach's turns when no tutor agent is connected (typed chat, nudges). Framework-free. */
+export function createCoachTurnVoice(speaker: Pick<TutorSpeaker, "speakOnce">): CoachTurnVoice {
+  let seen: Set<string> | null = null;
+  return {
+    observe(turns, agentConnected) {
+      const known = seen;
+      seen = new Set([...(known ?? []), ...turns.map((t) => t.id)]);
+      if (known === null || agentConnected) return null;
+      const next = turns.findLast(
+        (t) => !known.has(t.id) && t.role === "coach" && !t.spoken && !READ_ELSEWHERE.has(t.trigger ?? "") && t.text.trim() !== "",
+      );
+      if (next === undefined) return null;
+      return speaker.speakOnce(coachKey(next.id), next.text) ? next.id : null;
+    },
+  };
+}
+
 function browserSpeaker(): TutorSpeaker {
   const win =
     typeof window !== "undefined" && "speechSynthesis" in window && typeof window.SpeechSynthesisUtterance === "function"
@@ -270,6 +306,17 @@ export function useTutorVoice(): TutorVoice {
     ...ACTIONS,
     status: (key) => (snap.speaking === key ? "speaking" : snap.spoken.has(key) ? "spoken" : undefined),
   };
+}
+
+/**
+ * Reads new coach turns aloud with the browser voice while no tutor agent is connected (see `createCoachTurnVoice`).
+ * `turns` is undefined while the tutor view loads (no baseline is taken until it has loaded).
+ */
+export function useCoachTurnVoice(turns: readonly SpeakableCoachTurn[] | undefined, agentConnected: boolean): void {
+  const [voice] = useState(() => createCoachTurnVoice({ speakOnce: (key, text) => sharedSpeaker().speakOnce(key, text) }));
+  useEffect(() => {
+    if (turns !== undefined) voice.observe(turns, agentConnected);
+  }, [voice, turns, agentConnected]);
 }
 
 /**
