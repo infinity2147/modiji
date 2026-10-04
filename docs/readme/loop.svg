@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="400" viewBox="0 0 1200 400" font-family="-apple-system, 'Segoe UI', Inter, Helvetica, Arial, sans-serif" role="img" aria-labelledby="t d">
+  <title id="t">The Sage loop</title>
+  <desc id="d">Three stages: Capture asks why at the right moment, Map runs the debrief and builds the Work Map, Teach tutors the next hire. New cases feed new questions back into Capture.</desc>
+  <defs>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="6"/>
+      <feOffset dy="4" result="b"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.12"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <marker id="head" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#55724F"/>
+    </marker>
+    <marker id="headMuted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#8BA888"/>
+    </marker>
+  </defs>
+
+  <rect width="1200" height="400" fill="#F3F5EF"/>
+
+  <!-- header -->
+  <text x="40" y="40" font-size="22" font-weight="700" fill="#22301F">The Sage loop</text>
+  <text x="1160" y="40" font-size="17" font-style="italic" fill="#5B6853" text-anchor="end">LLMs infer. Experts confirm. Code enforces.</text>
+
+  <!-- forward arrows -->
+  <line x1="378" y1="187" x2="427" y2="187" stroke="#55724F" stroke-width="3" stroke-linecap="round" marker-end="url(#head)"/>
+  <line x1="773" y1="187" x2="822" y2="187" stroke="#55724F" stroke-width="3" stroke-linecap="round" marker-end="url(#head)"/>
+
+  <!-- return arrow -->
+  <path d="M995 314 C995 384, 205 384, 205 316" fill="none" stroke="#8BA888" stroke-width="2.5" stroke-dasharray="7 6" stroke-linecap="round" marker-end="url(#headMuted)"/>
+  <rect x="468" y="349" width="264" height="34" rx="17" fill="#FFFFFF" stroke="#D8E0CF"/>
+  <text x="600" y="371" font-size="16" font-style="italic" fill="#5B6853" text-anchor="middle">new cases → new questions</text>
+
+  <!-- CAPTURE -->
+  <g transform="translate(40,64)">
+    <rect width="330" height="246" rx="14" fill="#FFFFFF" stroke="#D8E0CF" filter="url(#shadow)"/>
+    <circle cx="52" cy="52" r="31" fill="#E3EBDC"/>
+    <g transform="translate(52,50)" fill="none" stroke="#55724F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="-18" y="-15" width="36" height="25" rx="3" fill="#FFFFFF"/>
+      <line x1="0" y1="10" x2="0" y2="16"/>
+      <line x1="-8" y1="16" x2="8" y2="16"/>
+      <path d="M-11,-2.5 Q0,-11 11,-2.5 Q0,6 -11,-2.5 Z" stroke-width="1.8"/>
+      <circle cx="0" cy="-2.5" r="2.8" fill="#55724F" stroke="none"/>
+    </g>
+    <text x="98" y="42" font-size="15" font-weight="700" letter-spacing="1.5" fill="#5B6853">STEP 1</text>
+    <text x="98" y="70" font-size="26" font-weight="800" letter-spacing="0.5" fill="#22301F">CAPTURE</text>
+    <text x="24" y="122" font-size="18" fill="#22301F">asks why at the right moment</text>
+    <rect x="20" y="140" width="290" height="86" rx="10" fill="#EEF3E9"/>
+    <path d="M38,163 l4,4 l8,-9" fill="none" stroke="#55724F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="58" y="168" font-size="15" font-weight="700" letter-spacing="1.2" fill="#55724F">GUARANTEE</text>
+    <text x="38" y="194" font-size="16" fill="#22301F">speaks only at a natural pause</text>
+    <text x="38" y="215" font-size="16" fill="#5B6853">(code-enforced gate)</text>
+  </g>
+
+  <!-- MAP -->
+  <g transform="translate(435,64)">
+    <rect width="330" height="246" rx="14" fill="#FFFFFF" stroke="#D8E0CF" filter="url(#shadow)"/>
+    <circle cx="52" cy="52" r="31" fill="#E3EBDC"/>
+    <g transform="translate(52,52)" stroke="#55724F" stroke-width="2" stroke-linecap="round">
+      <line x1="-12" y1="9" x2="0" y2="-10"/>
+      <line x1="0" y1="-10" x2="13" y2="6"/>
+      <line x1="-12" y1="9" x2="13" y2="6"/>
+      <circle cx="-12" cy="9" r="5.5" fill="#FFFFFF"/>
+      <circle cx="0" cy="-10" r="5.5" fill="#55724F"/>
+      <circle cx="13" cy="6" r="5.5" fill="#FFFFFF"/>
+    </g>
+    <text x="98" y="42" font-size="15" font-weight="700" letter-spacing="1.5" fill="#5B6853">STEP 2</text>
+    <text x="98" y="70" font-size="26" font-weight="800" letter-spacing="0.5" fill="#22301F">MAP</text>
+    <text x="24" y="122" font-size="18" fill="#22301F">debrief, Work Map, teach-back</text>
+    <rect x="20" y="140" width="290" height="86" rx="10" fill="#EEF3E9"/>
+    <path d="M38,163 l4,4 l8,-9" fill="none" stroke="#55724F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="58" y="168" font-size="15" font-weight="700" letter-spacing="1.2" fill="#55724F">GUARANTEE</text>
+    <text x="38" y="194" font-size="16" fill="#22301F">nothing saved until</text>
+    <text x="38" y="215" font-size="16" fill="#22301F">the expert says yes</text>
+  </g>
+
+  <!-- TEACH -->
+  <g transform="translate(830,64)">
+    <rect width="330" height="246" rx="14" fill="#FFFFFF" stroke="#D8E0CF" filter="url(#shadow)"/>
+    <circle cx="52" cy="52" r="31" fill="#E3EBDC"/>
+    <g transform="translate(52,50)">
+      <path d="M-11,1 v8 q11,7 22,0 v-8" fill="#8BA888"/>
+      <polygon points="-21,-4 0,-13 21,-4 0,5" fill="#55724F"/>
+      <path d="M16,-2 v12" stroke="#55724F" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="16" cy="12" r="2.6" fill="#55724F"/>
+    </g>
+    <text x="98" y="42" font-size="15" font-weight="700" letter-spacing="1.5" fill="#5B6853">STEP 3</text>
+    <text x="98" y="70" font-size="26" font-weight="800" letter-spacing="0.5" fill="#22301F">TEACH</text>
+    <text x="24" y="122" font-size="18" fill="#22301F">voice tutor for the next hire</text>
+    <rect x="20" y="140" width="290" height="86" rx="10" fill="#EEF3E9"/>
+    <path d="M38,163 l4,4 l8,-9" fill="none" stroke="#55724F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="58" y="168" font-size="15" font-weight="700" letter-spacing="1.2" fill="#55724F">GUARANTEE</text>
+    <text x="38" y="194" font-size="16" fill="#22301F">stops a wrong decision</text>
+    <text x="38" y="215" font-size="16" fill="#22301F">before Save</text>
+  </g>
+</svg>

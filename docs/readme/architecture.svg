@@ -1,0 +1,154 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="910" viewBox="0 0 1440 910" font-family="-apple-system, 'Segoe UI', Inter, Helvetica, Arial, sans-serif" role="img" aria-labelledby="t d">
+  <title id="t">Sage architecture</title>
+  <desc id="d">Browser (CaseDesk, redacted screen share, DOM events, voice panel, speaking gate), the Sage server (perception, ledger, hypothesis engine, Z3, debrief, rulebook, Work Map, tutor, custom LLM endpoint) and external services (ElevenLabs Agents, Claude, Cloudflare R2, AI agents via MCP). Code-enforced parts are sage; model-proposed parts are ochre.</desc>
+  <defs>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="6"/>
+      <feOffset dy="4" result="b"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.10"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <marker id="h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#6E7C66"/></marker>
+    <marker id="hr" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M10,0 L0,5 L10,10 Z" fill="#6E7C66"/></marker>
+    <marker id="hs" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#55724F"/></marker>
+  </defs>
+  <rect width="1440" height="910" fill="#F3F5EF"/>
+  <text x="30" y="42" font-size="24" font-weight="700" fill="#22301F">Sage architecture</text>
+  <text x="1410" y="42" font-size="15" text-anchor="end" fill="#5B6853">Arrows show data flow · labels name what crosses the boundary</text>
+  <rect x="30" y="66" width="310" height="734" rx="14" fill="#FFFFFF" stroke="#D8E0CF" filter="url(#shadow)"/>
+  <text x="48" y="98" font-size="17" font-weight="700" letter-spacing="1.6" fill="#55724F">BROWSER</text>
+  <text x="48" y="120" font-size="15" fill="#5B6853">expert or new hire, in CaseDesk</text>
+  <rect x="440" y="66" width="460" height="734" rx="14" fill="#FFFFFF" stroke="#D8E0CF" filter="url(#shadow)"/>
+  <text x="458" y="98" font-size="17" font-weight="700" letter-spacing="1.6" fill="#55724F">SAGE SERVER</text>
+  <text x="458" y="120" font-size="15" fill="#5B6853">one Node service on Railway</text>
+  <rect x="1070" y="66" width="340" height="734" rx="14" fill="#FFFFFF" stroke="#D8E0CF" filter="url(#shadow)"/>
+  <text x="1088" y="98" font-size="17" font-weight="700" letter-spacing="1.6" fill="#55724F">EXTERNAL</text>
+  <text x="1088" y="120" font-size="15" fill="#5B6853">hosted services and agents</text>
+  <rect x="46" y="134" width="278" height="64" rx="10" fill="#FFFFFF" stroke="#C3CEB7" stroke-width="1.5"/>
+  <text x="62" y="161" font-size="17" font-weight="700" fill="#22301F">CaseDesk app</text>
+  <text x="62" y="184" font-size="15" fill="#5B6853">KYC case review the expert uses</text>
+  <rect x="46" y="212" width="278" height="200" rx="10" fill="#EEF3E9" stroke="#55724F" stroke-width="1.5"/>
+  <text x="62" y="239" font-size="17" font-weight="700" fill="#22301F">Screen share</text>
+  <rect x="62" y="256" width="246" height="34" rx="8" fill="#FFFFFF" stroke="#8BA888"/>
+  <text x="185" y="278" font-size="15" text-anchor="middle" fill="#22301F">change detector</text>
+  <path d="M185,291 v15" stroke="#55724F" stroke-width="2" marker-end="url(#hs)"/>
+  <rect x="62" y="308" width="246" height="34" rx="8" fill="#FFFFFF" stroke="#8BA888"/>
+  <text x="185" y="330" font-size="15" text-anchor="middle" fill="#22301F">on-device OCR PII blur</text>
+  <path d="M185,343 v15" stroke="#55724F" stroke-width="2" marker-end="url(#hs)"/>
+  <rect x="62" y="360" width="246" height="34" rx="8" fill="#FFFFFF" stroke="#8BA888"/>
+  <text x="185" y="382" font-size="15" text-anchor="middle" fill="#22301F">redacted frames</text>
+  <rect x="46" y="426" width="278" height="64" rx="10" fill="#EEF3E9" stroke="#55724F" stroke-width="1.5"/>
+  <text x="62" y="453" font-size="17" font-weight="700" fill="#22301F">DOM events</text>
+  <text x="62" y="476" font-size="15" fill="#5B6853">disclosed to the person on screen</text>
+  <rect x="46" y="504" width="278" height="64" rx="10" fill="#FFFFFF" stroke="#C3CEB7" stroke-width="1.5"/>
+  <text x="62" y="531" font-size="17" font-weight="700" fill="#22301F">Voice panel</text>
+  <text x="62" y="554" font-size="15" fill="#5B6853">ElevenLabs SDK, WebRTC</text>
+  <rect x="46" y="582" width="278" height="202" rx="10" fill="#EEF3E9" stroke="#55724F" stroke-width="2.5"/>
+  <text x="62" y="609" font-size="17" font-weight="700" fill="#22301F">Speaking gate</text>
+  <text x="62" y="632" font-size="15" fill="#5B6853">speaks only when all pass:</text>
+  <rect x="62" y="644" width="119" height="28" rx="14" fill="#FFFFFF" stroke="#8BA888"/>
+  <path d="M74,658 l3.5,3.5 l6.5,-7" fill="none" stroke="#55724F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="92" y="663" font-size="15" fill="#22301F">silence</text>
+  <rect x="189" y="644" width="119" height="28" rx="14" fill="#FFFFFF" stroke="#8BA888"/>
+  <path d="M201,658 l3.5,3.5 l6.5,-7" fill="none" stroke="#55724F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="219" y="663" font-size="15" fill="#22301F">screen idle</text>
+  <rect x="62" y="678" width="119" height="28" rx="14" fill="#FFFFFF" stroke="#8BA888"/>
+  <path d="M74,692 l3.5,3.5 l6.5,-7" fill="none" stroke="#55724F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="92" y="697" font-size="15" fill="#22301F">typing idle</text>
+  <rect x="189" y="678" width="119" height="28" rx="14" fill="#FFFFFF" stroke="#8BA888"/>
+  <path d="M201,692 l3.5,3.5 l6.5,-7" fill="none" stroke="#55724F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="219" y="697" font-size="15" fill="#22301F">breakpoint</text>
+  <rect x="62" y="712" width="119" height="28" rx="14" fill="#FFFFFF" stroke="#8BA888"/>
+  <path d="M74,726 l3.5,3.5 l6.5,-7" fill="none" stroke="#55724F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="92" y="731" font-size="15" fill="#22301F">value</text>
+  <rect x="189" y="712" width="119" height="28" rx="14" fill="#FFFFFF" stroke="#8BA888"/>
+  <path d="M201,726 l3.5,3.5 l6.5,-7" fill="none" stroke="#55724F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="219" y="731" font-size="15" fill="#22301F">budget</text>
+  <rect x="62" y="746" width="119" height="28" rx="14" fill="#FFFFFF" stroke="#8BA888"/>
+  <path d="M74,760 l3.5,3.5 l6.5,-7" fill="none" stroke="#55724F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="92" y="765" font-size="15" fill="#22301F">off-record</text>
+  <rect x="456" y="134" width="428" height="64" rx="10" fill="#F8EDD3" stroke="#D9A441" stroke-width="1.5"/>
+  <text x="472" y="161" font-size="17" font-weight="700" fill="#4A3A10">Perception</text>
+  <text x="472" y="184" font-size="15" fill="#7A5A12">Claude Haiku → screen events</text>
+  <rect x="456" y="207" width="428" height="64" rx="10" fill="#EEF3E9" stroke="#55724F" stroke-width="1.5"/>
+  <text x="472" y="234" font-size="17" font-weight="700" fill="#22301F">Append-only ledger</text>
+  <text x="472" y="257" font-size="15" fill="#5B6853">SQLite · provenance · lineage</text>
+  <rect x="456" y="280" width="428" height="64" rx="10" fill="#EEF3E9" stroke="#55724F" stroke-width="1.5"/>
+  <text x="472" y="307" font-size="17" font-weight="700" fill="#22301F">Hypothesis engine</text>
+  <text x="472" y="330" font-size="15" fill="#5B6853">surprise + information gain</text>
+  <rect x="456" y="353" width="428" height="64" rx="10" fill="#EEF3E9" stroke="#55724F" stroke-width="1.5"/>
+  <text x="472" y="380" font-size="17" font-weight="700" fill="#22301F">Z3 solver</text>
+  <text x="472" y="403" font-size="15" fill="#5B6853">counterexamples: unresolved · conflict · boundary</text>
+  <rect x="456" y="426" width="428" height="64" rx="10" fill="#EEF3E9" stroke="#55724F" stroke-width="1.5"/>
+  <text x="472" y="453" font-size="17" font-weight="700" fill="#22301F">Debrief conversation</text>
+  <text x="472" y="476" font-size="15" fill="#5B6853">read-back before saving</text>
+  <rect x="687" y="435" width="185" height="26" rx="13" fill="#F8EDD3" stroke="#D9A441"/>
+  <text x="779.5" y="453" font-size="15" text-anchor="middle" fill="#7A5A12">replies read by Sonnet</text>
+  <rect x="456" y="499" width="428" height="64" rx="10" fill="#EEF3E9" stroke="#55724F" stroke-width="1.5"/>
+  <text x="472" y="526" font-size="17" font-weight="700" fill="#22301F">Confirmed rulebook</text>
+  <text x="472" y="549" font-size="15" fill="#5B6853">expert's exact words + screen frame</text>
+  <rect x="456" y="572" width="428" height="64" rx="10" fill="#EEF3E9" stroke="#55724F" stroke-width="1.5"/>
+  <text x="472" y="599" font-size="17" font-weight="700" fill="#22301F">Work Map</text>
+  <text x="472" y="622" font-size="15" fill="#5B6853">MCP check_action · ElevenLabs Procedure export</text>
+  <rect x="754" y="581" width="118" height="26" rx="13" fill="#F8EDD3" stroke="#D9A441"/>
+  <text x="813" y="599" font-size="15" text-anchor="middle" fill="#7A5A12">prose by Opus</text>
+  <rect x="456" y="645" width="428" height="64" rx="10" fill="#EEF3E9" stroke="#55724F" stroke-width="1.5"/>
+  <text x="472" y="672" font-size="17" font-weight="700" fill="#22301F">Tutor</text>
+  <text x="472" y="695" font-size="15" fill="#5B6853">predict · intervene before Save · mastery</text>
+  <rect x="456" y="718" width="428" height="64" rx="10" fill="#EEF3E9" stroke="#55724F" stroke-width="2.5"/>
+  <text x="472" y="745" font-size="17" font-weight="700" fill="#22301F">Custom LLM endpoint</text>
+  <text x="472" y="768" font-size="15" fill="#5B6853">speaks only gate-authorised text (single-use nonce)</text>
+  <rect x="1086" y="134" width="308" height="118" rx="10" fill="#F8EDD3" stroke="#D9A441" stroke-width="1.5"/>
+  <text x="1102" y="161" font-size="17" font-weight="700" fill="#4A3A10">Claude</text>
+  <text x="1102" y="184" font-size="15" fill="#7A5A12">Haiku · vision</text>
+  <text x="1102" y="207" font-size="15" fill="#7A5A12">Sonnet · parsing, reading replies</text>
+  <text x="1102" y="230" font-size="15" fill="#7A5A12">Opus · prose</text>
+  <rect x="1086" y="300" width="308" height="64" rx="10" fill="#FFFFFF" stroke="#C3CEB7" stroke-width="1.5"/>
+  <text x="1102" y="327" font-size="17" font-weight="700" fill="#22301F">Cloudflare R2</text>
+  <text x="1102" y="350" font-size="15" fill="#5B6853">redacted frames, 2 GB cap</text>
+  <rect x="1086" y="562" width="308" height="64" rx="10" fill="#FFFFFF" stroke="#C3CEB7" stroke-width="1.5"/>
+  <text x="1102" y="589" font-size="17" font-weight="700" fill="#22301F">AI agents via MCP</text>
+  <text x="1102" y="612" font-size="15" fill="#5B6853">same guardrails as humans</text>
+  <rect x="1086" y="666" width="308" height="116" rx="10" fill="#FFFFFF" stroke="#C3CEB7" stroke-width="1.5"/>
+  <text x="1102" y="693" font-size="17" font-weight="700" fill="#22301F">ElevenLabs Agents</text>
+  <text x="1102" y="716" font-size="15" fill="#5B6853">interviewer + tutor</text>
+  <text x="1102" y="739" font-size="15" fill="#5B6853">Scribe realtime</text>
+  <text x="1102" y="762" font-size="15" fill="#5B6853">Expressive TTS</text>
+  <rect x="1086" y="404" width="308" height="122" rx="10" fill="#F3F5EF" stroke="#A3B18A" stroke-dasharray="5 5"/>
+  <text x="1102" y="434" font-size="16" font-weight="700" fill="#55724F">Why two colours?</text>
+  <text x="1102" y="460" font-size="15" fill="#5B6853">Model outputs are proposals.</text>
+  <text x="1102" y="483" font-size="15" fill="#5B6853">Code checks them before anything</text>
+  <text x="1102" y="506" font-size="15" fill="#5B6853">is spoken, saved or enforced.</text>
+  <path d="M324,377 H370 V166 H454" fill="none" stroke="#6E7C66" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#h)"/>
+  <rect x="336" y="277" width="68" height="26" rx="13" fill="#FFFFFF" stroke="#D8E0CF"/>
+  <text x="370" y="295" font-size="15" text-anchor="middle" fill="#5B6853">frames</text>
+  <path d="M324,458 H410 V239 H454" fill="none" stroke="#6E7C66" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#h)"/>
+  <rect x="336" y="445" width="64" height="26" rx="13" fill="#FFFFFF" stroke="#D8E0CF"/>
+  <text x="368" y="463" font-size="15" text-anchor="middle" fill="#5B6853">events</text>
+  <path d="M324,742 H454" fill="none" stroke="#55724F" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#hs)"/>
+  <text x="390" y="734" font-size="15" font-weight="600" text-anchor="middle" fill="#55724F">authorize</text>
+  <path d="M456,772 H326" fill="none" stroke="#55724F" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#hs)"/>
+  <text x="390" y="764" font-size="15" font-weight="600" text-anchor="middle" fill="#55724F">nonce</text>
+  <path d="M900,166 H1084" fill="none" stroke="#6E7C66" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#h)" marker-start="url(#hr)"/>
+  <rect x="932" y="153" width="106" height="26" rx="13" fill="#FFFFFF" stroke="#D8E0CF"/>
+  <text x="985" y="171" font-size="15" text-anchor="middle" fill="#5B6853">model calls</text>
+  <path d="M884,239 H960 V332 H1084" fill="none" stroke="#6E7C66" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#h)"/>
+  <text x="1023" y="324" font-size="15" text-anchor="middle" fill="#5B6853">frames</text>
+  <path d="M884,604 H1084" fill="none" stroke="#6E7C66" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#h)" marker-start="url(#hr)"/>
+  <rect x="928.5" y="591" width="113" height="26" rx="13" fill="#FFFFFF" stroke="#D8E0CF"/>
+  <text x="985" y="609" font-size="15" text-anchor="middle" fill="#5B6853">check_action</text>
+  <path d="M1086,738 H886" fill="none" stroke="#6E7C66" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#h)"/>
+  <text x="985" y="729" font-size="15" text-anchor="middle" fill="#5B6853">chat/completions</text>
+  <path d="M884,772 H1084" fill="none" stroke="#55724F" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#hs)"/>
+  <text x="985" y="763" font-size="15" font-weight="600" text-anchor="middle" fill="#55724F">exact text or skip_turn</text>
+  <path d="M185,784 V826 H1240 V784" fill="none" stroke="#55724F" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#hs)"/>
+  <rect x="527" y="813" width="326" height="26" rx="13" fill="#FFFFFF" stroke="#8BA888"/>
+  <text x="690" y="831" font-size="15" text-anchor="middle" fill="#55724F">control message: speak now / stay silent</text>
+  <rect x="30" y="857" width="26" height="20" rx="5" fill="#EEF3E9" stroke="#55724F" stroke-width="1.5"/>
+  <text x="66" y="872" font-size="15" fill="#22301F">code-enforced</text>
+  <rect x="200" y="857" width="26" height="20" rx="5" fill="#F8EDD3" stroke="#D9A441" stroke-width="1.5"/>
+  <text x="236" y="872" font-size="15" fill="#22301F">model-proposed (checked by code)</text>
+  <rect x="492" y="857" width="26" height="20" rx="5" fill="#FFFFFF" stroke="#C3CEB7" stroke-width="1.5"/>
+  <text x="528" y="872" font-size="15" fill="#22301F">app / hosted service</text>
+  <text x="1410" y="872" font-size="19" font-weight="700" text-anchor="end" font-style="italic" fill="#55724F">LLMs infer. Experts confirm. Code enforces.</text>
+</svg>
