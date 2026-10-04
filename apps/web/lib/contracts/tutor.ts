@@ -83,7 +83,8 @@ export const PromptSchema = z.discriminatedUnion("ask", [
 ]);
 export type Prompt = z.infer<typeof PromptSchema>;
 
-export const CaseOriginSchema = z.enum(["case_set", "boundary_practice", "judge"]);
+/** Where a case of the session came from: the case set, a solver practice case (boundary or contrast), or a judge. */
+export const CaseOriginSchema = z.enum(["case_set", "boundary_practice", "contrast_practice", "judge"]);
 
 export const CaseTutorViewSchema = z.strictObject({
   caseId: z.string(),
@@ -130,7 +131,7 @@ export const PredictionRequestSchema = z.strictObject({
 });
 export const PredictionResponseSchema = z.strictObject({ prediction: PredictionViewSchema, state: TutorStateSchema });
 
-/** POST /api/sessions/:sessionId/tutor/practice — unseen boundary cases for the weakest rules. */
+/** POST /api/sessions/:sessionId/tutor/practice — unseen boundary and contrast cases for the weakest rules. */
 export const PracticeResponseSchema = z.strictObject({
   cases: z.array(KycCaseSchema),
   /** Why fewer cases than asked for were made, if so. */

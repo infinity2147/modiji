@@ -7,6 +7,7 @@
 import "server-only";
 import {
   RuleConfirmedPayloadSchema,
+  RuleRetiredPayloadSchema,
   RuleRevisedPayloadSchema,
   isLedgerKind,
   lineage,
@@ -94,6 +95,10 @@ export function entrySummary(e: LedgerEntry): string {
     }
     case "debrief.understood":
       return `Debrief reply read as ${parseLedgerPayload(e, "debrief.understood").intent}`;
+    case "rule.retired": {
+      const { ruleId, reason } = RuleRetiredPayloadSchema.parse(parseLedgerPayload(e, "rule.retired"));
+      return `Deleted rule ${ruleId} (${reason})`;
+    }
     case "teachback.generated":
       return `Teach-back (${parseLedgerPayload(e, "teachback.generated").origin === "llm" ? "Opus prose" : "template"})`;
     case "teachback.confirmed":

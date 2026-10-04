@@ -260,7 +260,8 @@ function describe(entry: LedgerEntry, ctx: TickerContext): { text: string; tone:
     }
     case "case.generated": {
       const p = parseLedgerPayload(entry, "case.generated");
-      return system(`${p.origin.kind === "judge" ? "Judge-entered case" : "Practice case at a rule boundary"} · ${p.case.id}`);
+      const label = { judge: "Judge-entered case", boundary_practice: "Practice case at a rule boundary", contrast_practice: "Practice case where one condition decides a rule" }[p.origin.kind];
+      return system(`${label} · ${p.case.id}`);
     }
   }
 }

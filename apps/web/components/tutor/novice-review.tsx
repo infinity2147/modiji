@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useReducer, type ReactNode } from "react";
-import { AlertCircle, CheckCircle2, GraduationCap, Loader2, ShieldAlert, Volume2, XCircle } from "lucide-react";
+import { AlertCircle, CheckCircle2, GraduationCap, Loader2, RotateCcw, ShieldAlert, Volume2, VolumeX, XCircle } from "lucide-react";
 import type { ActionId } from "@vashistha/core";
 import type { KycCase } from "@vashistha/core/domains/kyc";
 import { describeError } from "@/lib/client/api";
@@ -9,17 +9,27 @@ import { REVIEW_OUTCOMES } from "@/lib/client/domain";
 import type { RiskRating } from "@/lib/client/session-state";
 import { INITIAL_PREDICT_STATE, decisionUnlocked, predictReducer } from "@/lib/client/tutor/predict-machine";
 import type { Tutor } from "@/lib/client/tutor/use-tutor";
+import {
+  interventionKey,
+  interventionSpeech,
+  interventionSpeechLine,
+  revealKey,
+  revealSpeech,
+  useHoldTutorVoice,
+  useTutorVoice,
+  type TutorVoice,
+} from "@/lib/client/tutor/speech";
 import { activeIntervention, interventionCard, revealCard } from "@/lib/client/tutor/view";
 import type { InterventionView, PredictionView, TutorState } from "@/lib/contracts/tutor";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader } from "@/components/ui/card";
+import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { RuleQuote } from "./rule-quote";
 
 function PredictionPrompt({
-  kycCase,
+  kycCase: _kycCase,
   choice,
   submitting,
   error,
@@ -43,8 +53,7 @@ function PredictionPrompt({
           What would the expert decide?
         </h2>
         <CardDescription className="text-xs">
-          Predict first: {kycCase.id} is decided by rules you have not mastered yet. Your answer is scored against the
-          expert&rsquo;s confirmed rules, then revealed.
+          Choose an outcome before viewing the expert&rsquo;s reasoning.
         </CardDescription>
       </CardHeader>
       <form
@@ -99,8 +108,30 @@ function PredictionPrompt({
   );
 }
 
-function RevealCard({ state, prediction }: { state: TutorState; prediction: PredictionView }) {
+/** Turns the browser's spoken coaching on or off (remembered on this device). Hidden where the browser cannot speak. */
+function VoiceToggle({ voice, className = "" }: { voice: TutorVoice; className?: string }) {
+  if (!voice.supported) return null;
+  const label = voice.enabled ? "Turn spoken coaching off" : "Turn spoken coaching on";
+  return (
+    <Button
+      type="button"
+      size="icon-xs"
+      variant="ghost"
+      aria-pressed={voice.enabled}
+      aria-label={label}
+      title={label}
+      onClick={voice.toggle}
+      className={className}
+      data-testid="voice-toggle"
+    >
+      {voice.enabled ? <Volume2 aria-hidden /> : <VolumeX aria-hidden />}
+    </Button>
+  );
+}
+
+function RevealCard({ state, prediction, voice }: { state: TutorState; prediction: PredictionView; voice: TutorVoice }) {
   const model = revealCard(state, prediction);
+  const key = revealKey(prediction.entryId);
   return (
     <Card
       className={`gap-0 py-0 shadow-xs ring-1 ${model.correct ? "ring-emerald-200" : "ring-amber-200"}`}
@@ -118,6 +149,22 @@ function RevealCard({ state, prediction }: { state: TutorState; prediction: Pred
           {model.verdict}
         </h2>
         <CardDescription className="text-xs">In the expert&rsquo;s words:</CardDescription>
+        {voice.supported && (
+          <CardAction className="flex items-center gap-0.5">
+            <Button
+              type="button"
+              size="icon-xs"
+              variant="ghost"
+              aria-label="Say it again"
+              title={voice.held ? "Your voice coach is connected: it does the talking" : "Say it again"}
+              disabled={voice.held || voice.speaking === key}
+              onClick={() => voice.say(key, revealSpeech(model))}
+            >
+              <RotateCcw aria-hidden />
+            </Button>
+            <VoiceToggle voice={voice} />
+          </CardAction>
+        )}
       </CardHeader>
       <CardContent className="grid gap-4 py-3">
         {model.rules.map((rule) => (
@@ -128,8 +175,24 @@ function RevealCard({ state, prediction }: { state: TutorState; prediction: Pred
   );
 }
 
-function InterventionCard({ state, intervention }: { state: TutorState; intervention: InterventionView }) {
+function InterventionCard({
+  state,
+  intervention,
+  voice,
+  agentConnected,
+}: {
+  state: TutorState;
+  intervention: InterventionView;
+  voice: TutorVoice;
+  agentConnected: boolean;
+}) {
   const model = interventionCard(state, intervention);
+  const speech = interventionSpeechLine(model.speech, intervention, {
+    agentConnected,
+    supported: voice.supported,
+    enabled: voice.enabled,
+    status: voice.status(interventionKey(intervention.questionId)),
+  });
   return (
     <section
       role="alert"
@@ -137,14 +200,17 @@ function InterventionCard({ state, intervention }: { state: TutorState; interven
       data-testid="intervention-card"
       className="grid gap-3 rounded-xl border border-red-200 bg-red-50/70 p-3"
     >
-      <h2 id="intervention-title" className="flex items-start gap-2 text-sm font-semibold text-red-900">
-        <ShieldAlert aria-hidden className="mt-0.5 size-4 shrink-0" />
-        {model.headline}
-      </h2>
-      <p className="flex items-start gap-2 text-[12px] text-red-900/80">
+      <div className="flex items-start gap-2">
+        <h2 id="intervention-title" className="flex flex-1 items-start gap-2 text-sm font-semibold text-red-900">
+          <ShieldAlert aria-hidden className="mt-0.5 size-4 shrink-0" />
+          {model.headline}
+        </h2>
+        {!agentConnected && <VoiceToggle voice={voice} className="-mt-0.5 text-red-900/80 hover:text-red-900" />}
+      </div>
+      <p className="flex items-start gap-2 text-[12px] text-red-900/80" data-testid="intervention-speech">
         <Volume2 aria-hidden className="mt-0.5 size-3.5 shrink-0" />
         <span>
-          {model.speech}: <span className="italic">{model.spoken}</span>
+          {speech}: <span className="italic">{model.spoken}</span>
         </span>
       </p>
       {model.rules.map((rule) => (
@@ -159,7 +225,9 @@ function InterventionCard({ state, intervention }: { state: TutorState; interven
  * The novice's review column for one case: at a decision node they have not mastered, the review
  * panel is replaced by the prediction prompt until they predict; then the reveal card (the expert's
  * rule, exact words and moment) sits above the review panel, and a stop-rule warning appears as soon
- * as a violating outcome is selected — before Save.
+ * as a violating outcome is selected — before Save. The browser voice reads the reveal and the
+ * warning aloud unless the tutor agent is connected (it speaks interventions itself, and the browser
+ * never talks over it).
  */
 export function NoviceReview({
   tutor,
@@ -167,6 +235,7 @@ export function NoviceReview({
   outcome,
   riskRating,
   locked,
+  agentConnected = false,
   children,
 }: {
   tutor: Tutor;
@@ -175,12 +244,37 @@ export function NoviceReview({
   outcome: ActionId | undefined;
   riskRating: RiskRating;
   locked: boolean;
+  /** The ElevenLabs tutor agent is connected: it speaks the interventions, so the browser voice stays silent. */
+  agentConnected?: boolean;
   /** The review panel. */
   children: ReactNode;
 }) {
   const [predict, dispatch] = useReducer(predictReducer, INITIAL_PREDICT_STATE);
   const view = tutor.state?.cases.find((c) => c.caseId === kycCase.id);
   useEffect(() => dispatch({ type: "view", view }), [view]);
+
+  // Spoken coaching. The hold comes first so a connected agent silences the voice before anything below speaks.
+  const voice = useTutorVoice();
+  useHoldTutorVoice(agentConnected);
+  const { speakOnce, cancel } = voice;
+  // This column belongs to one case: leaving it (another case opened) cuts off what is being said.
+  useEffect(() => cancel, [cancel]);
+  const state = tutor.state;
+  const reviewing = state !== undefined && predict.phase !== "loading" && (decisionUnlocked(predict) || predict.phase !== "ask");
+  const revealed = reviewing && predict.phase === "revealed" ? predict.prediction : undefined;
+  const revealId = revealed?.entryId;
+  const revealText = state && revealed ? revealSpeech(revealCard(state, revealed)) : undefined;
+  useEffect(() => {
+    if (revealId !== undefined && revealText !== undefined) speakOnce(revealKey(revealId), revealText);
+  }, [revealId, revealText, speakOnce]);
+  const intervention = reviewing ? activeIntervention(view, outcome) : undefined;
+  const warningId = intervention?.questionId;
+  const warningText = intervention ? interventionSpeech(intervention) : undefined;
+  const agentSpokeIt = intervention?.speech === "spoken";
+  useEffect(() => {
+    if (warningId === undefined || warningText === undefined || agentConnected || agentSpokeIt) return;
+    speakOnce(interventionKey(warningId), warningText);
+  }, [warningId, warningText, agentConnected, agentSpokeIt, speakOnce]);
 
   const submit = () => {
     if (predict.phase !== "ask" || predict.choice === undefined || predict.submitting) return;
@@ -191,7 +285,6 @@ export function NoviceReview({
     );
   };
 
-  const state = tutor.state;
   // Without the tutor's view (loading, or unavailable: the side panel says why) the review panel works as usual.
   if (state === undefined || predict.phase === "loading") return children;
   if (!decisionUnlocked(predict) && predict.phase === "ask")
@@ -206,16 +299,15 @@ export function NoviceReview({
         onSubmit={submit}
       />
     );
-  const intervention = activeIntervention(view, outcome);
   return (
     <div className="grid gap-2">
-      {predict.phase === "revealed" && <RevealCard state={state} prediction={predict.prediction} />}
-      {predict.phase === "skip" && view?.prompt.ask === false && (
+      {predict.phase === "revealed" && <RevealCard state={state} prediction={predict.prediction} voice={voice} />}
+      {predict.phase === "skip" && view?.prompt.ask === false && state.rules.length > 0 && (
         <p className="px-1 text-[11px] text-muted-foreground" data-testid="no-prediction-reason">
           Tutor: {predict.reason}
         </p>
       )}
-      {intervention && <InterventionCard state={state} intervention={intervention} />}
+      {intervention && <InterventionCard state={state} intervention={intervention} voice={voice} agentConnected={agentConnected} />}
       {children}
     </div>
   );

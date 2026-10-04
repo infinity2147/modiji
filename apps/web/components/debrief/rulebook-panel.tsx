@@ -85,6 +85,7 @@ function RuleRow({ view, changed, teachBackId, act }: { view: RuleView; changed:
   const comparisons = numericComparisons(rule.predicate);
   const [edits, setEdits] = useState(() => comparisons.map((c) => ({ op: c.op, value: c.value })));
   const [extra, setExtra] = useState<Predicate | null>(null);
+  const [deleting, setDeleting] = useState(false);
   return (
     <motion.li layout className={`rounded-lg border p-3 ${changed ? "border-amber-400" : ""}`} data-testid="rule" data-rule-id={rule.id}>
       <div className="flex flex-wrap items-center gap-2">
@@ -103,10 +104,33 @@ function RuleRow({ view, changed, teachBackId, act }: { view: RuleView; changed:
           “{quote.exactQuote}” <span className="not-italic">({quote.provenance === "human_voice" ? "spoken" : "typed"})</span>
         </blockquote>
       )}
-      {!editing && (
-        <Button type="button" variant="outline" size="xs" className="mt-2" onClick={() => setEditing(true)}>
-          Correct this rule
-        </Button>
+      {!editing && !deleting && (
+        <div className="mt-2 flex flex-wrap gap-2">
+          <Button type="button" variant="outline" size="xs" onClick={() => setEditing(true)}>
+            Correct this rule
+          </Button>
+          <Button type="button" variant="destructive" size="xs" onClick={() => setDeleting(true)}>
+            Delete rule
+          </Button>
+        </div>
+      )}
+      {deleting && (
+        <div className="mt-2 space-y-2 rounded-md border border-destructive/40 bg-destructive/5 p-2" role="group" aria-label={`Delete rule ${rule.id}`}>
+          <p className="text-sm">
+            Delete this rule from the confirmed rulebook? Say why in your own words: your reason is kept in the audit trail.
+          </p>
+          <QuoteForm
+            submitLabel="Delete rule"
+            placeholder="e.g. This rule is wrong — we never auto-approve on that basis."
+            onSubmit={async (q) => {
+              await act({ action: "retire_rule", ruleId: rule.id, quote: q });
+              setDeleting(false);
+            }}
+          />
+          <Button type="button" variant="ghost" size="xs" onClick={() => setDeleting(false)}>
+            Cancel
+          </Button>
+        </div>
       )}
       {editing && (
         <div className="mt-2 rounded-md bg-muted/50 p-2">

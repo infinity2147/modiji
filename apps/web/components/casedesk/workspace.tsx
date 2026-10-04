@@ -94,6 +94,7 @@ function NoviceReviewSlot({
   kycCase,
   draft,
   locked,
+  agentConnected,
   children,
 }: {
   novice: boolean;
@@ -101,11 +102,13 @@ function NoviceReviewSlot({
   kycCase: KycCase;
   draft: Draft;
   locked: boolean;
+  /** The tutor voice agent is connected (it speaks interventions; the browser voice stays silent). */
+  agentConnected: boolean;
   children: ReactNode;
 }) {
   if (!novice) return children;
   return (
-    <NoviceReview key={kycCase.id} tutor={tutor} kycCase={kycCase} outcome={draft.outcome} riskRating={draft.riskRating} locked={locked}>
+    <NoviceReview key={kycCase.id} tutor={tutor} kycCase={kycCase} outcome={draft.outcome} riskRating={draft.riskRating} locked={locked} agentConnected={agentConnected}>
       {children}
     </NoviceReview>
   );
@@ -269,7 +272,7 @@ function WorkspaceBody({ session, role, diagnostics }: { session: SessionRef; ro
             <VoicePanel loop={loop} />
           )}
           {selected && (
-            <NoviceReviewSlot novice={novice} tutor={tutor} kycCase={selected} draft={ws.draftFor(selected)} locked={stopped || offRecord}>
+            <NoviceReviewSlot novice={novice} tutor={tutor} kycCase={selected} draft={ws.draftFor(selected)} locked={stopped || offRecord} agentConnected={loop.voice.state === "connected"}>
               <ReviewPanel
                 kycCase={selected}
                 draft={ws.draftFor(selected)}

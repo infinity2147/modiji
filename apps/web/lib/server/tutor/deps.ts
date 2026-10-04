@@ -6,20 +6,25 @@
 import "server-only";
 import type { ConfirmedRule, DomainConfig, Rulebook, Witness } from "@vashistha/core";
 import type { Ledger } from "@vashistha/core/server";
+import type { ContrastWitness, PracticeWitness } from "@vashistha/solver";
 import type { AuthorizationStore } from "../authorizations";
 import type { CaseDeskStore } from "../casedesk/session";
 import { getRuntime } from "../runtime";
 
 export type BoundaryWitness = Extract<Witness, { kind: "boundary" }>;
+export type { ContrastWitness, PracticeWitness };
 
-/** `@vashistha/solver` `practiceCases`: boundary cases of `ruleIds` (weakest first), at most `count`. */
+/**
+ * `@vashistha/solver` `practiceCases`: per rule of `ruleIds` (weakest first) its boundary cases, then its
+ * contrast cases (a condition pivotal, the rule firing or just missing), round-robin, at most `count`.
+ */
 export type PracticeSolver = (query: {
   domain: DomainConfig;
   rules: readonly ConfirmedRule[];
   ruleIds: readonly string[];
   count: number;
   schemaVersion: number;
-}) => Promise<BoundaryWitness[]>;
+}) => Promise<PracticeWitness[]>;
 
 export type TutorDeps = {
   ledger: Ledger;

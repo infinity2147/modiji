@@ -216,6 +216,11 @@ export const ExpertActionRequestSchema = z.discriminatedUnion("action", [
     momentEntryId: IdSchema.optional(),
     quote: ExpertQuoteSchema,
   }),
+  /**
+   * The expert deletes a live confirmed rule, in their own words (the audit trail): recorded as
+   * `rule.retired`. Rules of this expert that override it drop the dangling id in a `rule.revised`.
+   */
+  z.strictObject({ action: z.literal("retire_rule"), ruleId: IdSchema, quote: ExpertQuoteSchema }),
 ]);
 export type ExpertActionRequest = z.infer<typeof ExpertActionRequestSchema>;
 
