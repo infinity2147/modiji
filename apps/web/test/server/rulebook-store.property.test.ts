@@ -219,7 +219,9 @@ describe("incremental rulebook store", () => {
       }),
       { seed: 20261004, numRuns: 1000 },
     );
-  });
+    // 1,000 seeded runs fit in the default 5 s only on an idle machine; the number of runs is the proof, so the
+    // timeout is what gives under load.
+  }, 60_000);
 
   it("returns the same object while no row it reads was appended, and never changes a value it returned", () => {
     const opened = openDatabase({ memory: true });
