@@ -44,7 +44,9 @@ test("a trainee sees one next step, locked expert tools with the reason, and sta
   await expect(page.getByRole("region", { name: "Speech gate" })).toHaveCount(0);
   await expect(page.getByRole("list", { name: "Compliance" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Enter a judge case" })).toHaveCount(0);
-  await expect(page.getByText("Voice coach")).toBeVisible();
+  // With nothing to teach there is nothing to switch on: no pop-up asking for microphone or screen, no voice bar.
+  await expect(page.getByTestId("coach-dialog")).toHaveCount(0);
+  await expect(page.getByTestId("coach-bar")).toHaveCount(0);
   await page.screenshot({ path: "test-results/trainee-workspace.png", fullPage: true });
 });
 

@@ -27,6 +27,8 @@ export type TutorDeps = {
   /** The expert's confirmed rulebook in force (all expert sessions). The tutor never reads anything else to judge. */
   rulebook: () => Pick<Rulebook, "rules" | "revision" | "history">;
   authorizations: Pick<AuthorizationStore, "getContextVersion">;
+  /** The display name of an account (for the coach's spoken welcome); absent in tests that do not need it. */
+  displayName?: (userId: string) => string | undefined;
   practice: PracticeSolver;
   now: () => number;
   log: Pick<Console, "info" | "warn" | "error">;
@@ -40,6 +42,7 @@ export function tutorDeps(): TutorDeps {
     casedesk: runtime.casedesk,
     rulebook: runtime.rulebookState,
     authorizations: runtime.authorizations,
+    displayName: (userId) => runtime.accounts.byId(userId)?.displayName,
     practice: runtime.tutor.practice,
     now: Date.now,
     log: console,

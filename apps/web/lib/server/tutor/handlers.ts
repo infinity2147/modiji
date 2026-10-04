@@ -7,6 +7,8 @@ import "server-only";
 import { parseLedgerPayload, type LedgerEntry } from "@vashistha/core";
 import { ReviewEditsSchema as ReviewEditsContract } from "../../contracts/casedesk";
 import {
+  BriefingRequestSchema,
+  type BriefingResponseSchema,
   JudgeCaseRequestSchema,
   MASTERY_LABEL,
   PredictionRequestSchema,
@@ -27,6 +29,7 @@ import { requireOnRecord, type LoadedSession, type TutorHooks } from "../casedes
 import { entry } from "../interview/ledger";
 import type { TutorDeps } from "./deps";
 import { commitOutcomes, predictionOutcomes, recordOutcomes } from "./mastery";
+import { queueBriefing, spokenName } from "./briefing";
 import { dropStaleInterventions, interventionView, monitorSelection } from "./monitor";
 import { addJudgeCase, generatePractice } from "./practice";
 import { casePrompt, expectedOutcome } from "./predict";
@@ -239,4 +242,22 @@ function monitorFieldChange(deps: TutorDeps, loaded: LoadedSession, event: Ledge
   if (!edits.success) return;
   const kycCase = requireSessionCase(deps, loaded, caseId);
   monitorSelection(deps, loaded, { kycCase, action: intent.payload.proposedAction, edits: edits.data, trigger: event });
+}
+
+/** POST /api/sessions/:sessionId/tutor/briefing — queues the coach's spoken welcome, once per session. */
+export function handleBriefing(request: Request, sessionId: string, deps: TutorDeps): Promise<Response> {
+  return respond(deps.log, async () => {
+    const { caseId } = await readJson(request, BriefingRequestSchema);
+    const loaded = loadNoviceSession(deps, sessionId);
+    requireOnRecord(loaded.session);
+    if (caseId !== undefined) requireSessionCase(deps, loaded, caseId);
+    const owner = loaded.info.owner;
+    const result = queueBriefing(deps, loaded, {
+      name: spokenName(owner === undefined ? undefined : deps.displayName?.(owner.userId)),
+      rules: tutorState(deps, loaded).rules,
+      caseId,
+    });
+    const body: z.infer<typeof BriefingResponseSchema> = result;
+    return json(body);
+  });
 }

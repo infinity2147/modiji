@@ -157,3 +157,13 @@ export type JudgeFeatures = z.infer<typeof JudgeFeaturesSchema>;
 /** POST /api/sessions/:sessionId/tutor/cases — a judge enters an unseen case of their own. */
 export const JudgeCaseRequestSchema = z.strictObject({ features: JudgeFeaturesSchema });
 export const JudgeCaseResponseSchema = z.strictObject({ case: KycCaseSchema, state: TutorStateSchema });
+
+/**
+ * POST /api/sessions/:sessionId/tutor/briefing — the trainee turned on the voice coach: queue its spoken welcome
+ * (once per session). `queued: false` says why nothing was queued: no confirmed rules to teach, or already given.
+ */
+export const BriefingRequestSchema = z.strictObject({ caseId: z.string().min(1).optional() });
+export const BriefingResponseSchema = z.discriminatedUnion("queued", [
+  z.strictObject({ queued: z.literal(true), text: z.string() }),
+  z.strictObject({ queued: z.literal(false), reason: z.enum(["no_rules", "already_given"]) }),
+]);

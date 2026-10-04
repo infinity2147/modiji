@@ -16,7 +16,7 @@ const readOnly = (): Promise<never> => Promise.reject(new Error("Verified replay
 
 /** The tutor as the novice UI consumes it, fed by the replay's derived tutor view; every action is refused. */
 function replayTutor(state: TutorState | null): Tutor {
-  return { state: state ?? undefined, error: undefined, refresh: noop, intent: noop, predict: readOnly, practice: readOnly, judgeCase: readOnly };
+  return { state: state ?? undefined, error: undefined, refresh: noop, intent: noop, predict: readOnly, practice: readOnly, judgeCase: readOnly, briefing: readOnly };
 }
 
 /**
